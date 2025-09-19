@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import './App.css'
 import { recipes } from './data/recipes'
+import { ingredients } from './data/ingredients'
 import FilterPanel from './components/FilterPanel'
 import MealCard from './components/MealCard'
 import PantryManager from './components/PantryManager'
+import IngredientDirectory from './components/IngredientDirectory'
 
 const INITIAL_FILTERS = {
   search: '',
@@ -18,8 +20,8 @@ const normalizeText = (text) => text.toLowerCase()
 
 const canCookWithPantry = (recipe, pantryItems) => {
   if (!pantryItems.length) return false
-  const ingredients = recipe.ingredients.map((ingredient) => normalizeText(ingredient.item))
-  return ingredients.every((ingredient) =>
+  const ingredientsList = recipe.ingredients.map((ingredient) => normalizeText(ingredient.item))
+  return ingredientsList.every((ingredient) =>
     pantryItems.some((pantryItem) => ingredient.includes(pantryItem) || pantryItem.includes(ingredient)),
   )
 }
@@ -30,6 +32,7 @@ function App() {
   const [notes, setNotes] = useState({})
   const [pantryItems, setPantryItems] = useState([])
   const [showCookableOnly, setShowCookableOnly] = useState(false)
+  const [activeView, setActiveView] = useState('meals')
 
   const tagOptions = useMemo(() => {
     const set = new Set()
@@ -51,9 +54,15 @@ function App() {
   }, [])
 
   const ingredientOptions = useMemo(() => {
-    const set = new Set()
-    recipes.forEach((recipe) => recipe.ingredients.forEach((ingredient) => set.add(ingredient.item.toLowerCase())))
-    return Array.from(set).sort()
+    const tokens = new Set()
+    recipes.forEach((recipe) => {
+      recipe.ingredients.forEach((ingredient) => tokens.add(ingredient.item.toLowerCase()))
+    })
+    ingredients.forEach((ingredient) => {
+      tokens.add(ingredient.name.toLowerCase())
+      tokens.add(ingredient.slug)
+    })
+    return Array.from(tokens).sort()
   }, [])
 
   const pantryTokens = useMemo(() => pantryItems.map((item) => item.toLowerCase()), [pantryItems])
@@ -139,50 +148,72 @@ function App() {
           <h1>Blissful Reverie Meal Planner</h1>
           <p>Build weekly menus, adapt serving sizes, and filter recipes around your lifestyle.</p>
         </div>
+        <div className="view-toggle">
+          <button
+            type="button"
+            className={`view-toggle__button${activeView === 'meals' ? ' view-toggle__button--active' : ''}`}
+            onClick={() => setActiveView('meals')}
+          >
+            Meal Library
+          </button>
+          <button
+            type="button"
+            className={`view-toggle__button${activeView === 'ingredients' ? ' view-toggle__button--active' : ''}`}
+            onClick={() => setActiveView('ingredients')}
+          >
+            Ingredient Directory
+          </button>
+        </div>
       </header>
-      <main className="layout">
-        <FilterPanel
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          tagOptions={tagOptions}
-          allergyOptions={allergyOptions}
-          equipmentOptions={equipmentOptions}
-          ingredientOptions={ingredientOptions}
-          onReset={resetFilters}
-        />
-        <section className="content">
-          <div className="content-header">
-            <h2>Meal Library</h2>
-            <p>{filteredRecipes.length} meals match your filters.</p>
-          </div>
-          <div className="meal-grid">
-            {filteredRecipes.map((recipe) => (
-              <MealCard
-                key={recipe.id}
-                recipe={recipe}
-                currentServings={servingOverrides[recipe.id] ?? recipe.baseServings}
-                onServingChange={(value) => handleServingChange(recipe.id, value)}
-                note={notes[recipe.id]}
-                onNoteChange={(value) => handleNoteChange(recipe.id, value)}
-              />
-            ))}
-            {!filteredRecipes.length && (
-              <div className="empty-state">
-                <h3>No meals found</h3>
-                <p>Try removing a filter or adding more pantry items to expand your options.</p>
-              </div>
-            )}
-          </div>
-        </section>
-        <PantryManager
-          pantryItems={pantryItems}
-          onAddItem={handlePantryAdd}
-          onRemoveItem={handlePantryRemove}
-          cookableRecipes={cookableRecipes}
-          showCookableOnly={showCookableOnly}
-          onToggleCookable={() => setShowCookableOnly((prev) => !prev)}
-        />
-      </main>
+      {activeView === 'meals' ? (
+        <main className="layout">
+          <FilterPanel
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            tagOptions={tagOptions}
+            allergyOptions={allergyOptions}
+            equipmentOptions={equipmentOptions}
+            ingredientOptions={ingredientOptions}
+            onReset={resetFilters}
+          />
+          <section className="content">
+            <div className="content-header">
+              <h2>Meal Library</h2>
+              <p>{filteredRecipes.length} meals match your filters.</p>
+            </div>
+            <div className="meal-grid">
+              {filteredRecipes.map((recipe) => (
+                <MealCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  currentServings={servingOverrides[recipe.id] ?? recipe.baseServings}
+                  onServingChange={(value) => handleServingChange(recipe.id, value)}
+                  note={notes[recipe.id]}
+                  onNoteChange={(value) => handleNoteChange(recipe.id, value)}
+                />
+              ))}
+              {!filteredRecipes.length && (
+                <div className="empty-state">
+                  <h3>No meals found</h3>
+                  <p>Try removing a filter or adding more pantry items to expand your options.</p>
+                </div>
+              )}
+            </div>
+          </section>
+          <PantryManager
+            pantryItems={pantryItems}
+            onAddItem={handlePantryAdd}
+            onRemoveItem={handlePantryRemove}
+            cookableRecipes={cookableRecipes}
+            showCookableOnly={showCookableOnly}
+            onToggleCookable={() => setShowCookableOnly((prev) => !prev)}
+          />
+        </main>
+      ) : (
+        <main className="ingredients-layout">
+          <IngredientDirectory items={ingredients} />
+        </main>
+      )}
     </div>
   )
 }
