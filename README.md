@@ -12,6 +12,7 @@ already have on hand.
 - **Dynamic filters** for full-text search, tags, allergens, required equipment, and ingredient include/exclude rules.
 - **Pantry assistant** to maintain a virtual pantry, surface cookable meals, and optionally limit the recipe grid to only what you can
   make right now.
+- **Ingredient atlas** for browsing canonical pantry items with allergen tags, categories, and dietary filters.
 - **Personal notes** saved on every card to capture timing adjustments, guest feedback, or plating ideas.
 
 ## Getting started
@@ -40,10 +41,18 @@ src/
   App.css          Custom styling for the dashboard experience
 ```
 
+## Ingredient dataset
+
+- Canonical ingredient metadata lives in `src/data/ingredients.js`. Each entry stays on a single line with `slug`, `name`, `category`, and `tags` fields.
+- Categories should come from the shared set used throughout the planner (Pasta, Dairy, Meat, Seafood, Herb, Spice, Vegetable, Fruit, Nut/Seed, Grain, Legume, Oil/Fat, Sweetener, Baking, Condiment/Sauce, Beverage).
+- Tags capture allergen and dietary hints (e.g., `Gluten-Free`, `Contains Nuts`, `Vegan`). Add new tags sparingly so filters remain focused.
+- Run `npm run validate:data` after editing to confirm slugs are unique, tags are valid, and categories match the approved list.
+
 ## Extending the planner
 
 - Add new recipes by updating `src/data/recipes.js`. Each recipe supports a base serving size that is used to scale ingredients and
   nutrition totals on the fly.
+- Grow the ingredient directory by editing `src/data/ingredients.js`. Keep entries on a single line, reuse existing tags when possible, and validate with `npm run validate:data`.
 - For complex filtering or additional metadata, augment the recipe schema and enhance `App.jsx` logic.
 - The pantry matching helper (`canCookWithPantry`) currently performs simple substring checks. It can be swapped with a more robust
   ingredient normaliser if desired.
