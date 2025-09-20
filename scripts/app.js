@@ -14,32 +14,56 @@
       { id: 'serene', label: 'Serene', preview: '#5160d9' },
       { id: 'sunrise', label: 'Sunrise', preview: '#f97316' },
       { id: 'meadow', label: 'Meadow', preview: '#2f855a' },
+      { id: 'mist', label: 'Misty Morning', preview: '#38bdf8' },
+      { id: 'blossom', label: 'Blossom', preview: '#ec4899' },
+      { id: 'citrine', label: 'Citrine Glow', preview: '#facc15' },
     ],
     dark: [
       { id: 'midnight', label: 'Midnight', preview: '#2563eb' },
       { id: 'nebula', label: 'Nebula', preview: '#a855f7' },
       { id: 'forest', label: 'Forest', preview: '#34d399' },
+      { id: 'ember', label: 'Ember', preview: '#f97316' },
+      { id: 'abyss', label: 'Abyss', preview: '#14b8a6' },
+      { id: 'velvet', label: 'Velvet Night', preview: '#f472b6' },
+    ],
+    sepia: [
+      { id: 'classic', label: 'Classic Sepia', preview: '#b7791f' },
+      { id: 'copper', label: 'Copper Glow', preview: '#c26a3d' },
+      { id: 'umber', label: 'Deep Umber', preview: '#8a4b2a' },
     ],
   };
 
   const DEFAULT_THEME_SELECTIONS = {
     light: 'serene',
     dark: 'midnight',
+    sepia: 'classic',
   };
 
+  const DEFAULT_MODE = 'light';
+  const AVAILABLE_MODES = Object.keys(THEME_OPTIONS);
+
+  const resolveFallbackMode = () =>
+    AVAILABLE_MODES.includes(DEFAULT_MODE) ? DEFAULT_MODE : AVAILABLE_MODES[0];
+
   const loadThemePreferences = () => {
-    const fallback = { mode: 'light', selections: { ...DEFAULT_THEME_SELECTIONS } };
+    const fallbackMode = resolveFallbackMode();
+    const fallback = { mode: fallbackMode, selections: { ...DEFAULT_THEME_SELECTIONS } };
     try {
       const stored = JSON.parse(localStorage.getItem(THEME_STORAGE_KEY));
       if (!stored || typeof stored !== 'object') {
         return fallback;
       }
-      const mode = stored.mode === 'dark' ? 'dark' : 'light';
+      const mode = AVAILABLE_MODES.includes(stored.mode) ? stored.mode : fallbackMode;
       const selections = { ...DEFAULT_THEME_SELECTIONS, ...(stored.selections || {}) };
-      ['light', 'dark'].forEach((key) => {
-        if (!Array.isArray(THEME_OPTIONS[key])) return;
-        if (!THEME_OPTIONS[key].some((option) => option.id === selections[key])) {
-          selections[key] = DEFAULT_THEME_SELECTIONS[key];
+      AVAILABLE_MODES.forEach((key) => {
+        const options = Array.isArray(THEME_OPTIONS[key]) ? THEME_OPTIONS[key] : [];
+        if (!options.length) return;
+        if (!options.some((option) => option.id === selections[key])) {
+          const fallbackSelection =
+            DEFAULT_THEME_SELECTIONS[key] || (options[0] ? options[0].id : undefined);
+          if (fallbackSelection) {
+            selections[key] = fallbackSelection;
+          }
         }
       });
       return { mode, selections };
@@ -149,7 +173,7 @@
   const applyColorTheme = () => {
     const mode = state.themeMode;
     const options = THEME_OPTIONS[mode] || [];
-    const fallback = DEFAULT_THEME_SELECTIONS[mode];
+    const fallback = DEFAULT_THEME_SELECTIONS[mode] || (options[0] ? options[0].id : undefined);
     const currentSelection = state.themeSelections[mode];
     const activeTheme = options.some((option) => option.id === currentSelection)
       ? currentSelection
@@ -158,7 +182,9 @@
       state.themeSelections[mode] = activeTheme;
     }
     document.documentElement.dataset.mode = mode;
-    document.documentElement.dataset.theme = activeTheme;
+    if (activeTheme) {
+      document.documentElement.dataset.theme = activeTheme;
+    }
     try {
       localStorage.setItem(
         THEME_STORAGE_KEY,
@@ -210,10 +236,15 @@
   };
 
   const setThemeMode = (mode) => {
-    if (!THEME_OPTIONS[mode] || state.themeMode === mode) return;
+    const options = Array.isArray(THEME_OPTIONS[mode]) ? THEME_OPTIONS[mode] : [];
+    if (!options.length || state.themeMode === mode) return;
     state.themeMode = mode;
-    if (!THEME_OPTIONS[mode].some((option) => option.id === state.themeSelections[mode])) {
-      state.themeSelections[mode] = DEFAULT_THEME_SELECTIONS[mode];
+    if (!options.some((option) => option.id === state.themeSelections[mode])) {
+      const fallbackSelection =
+        DEFAULT_THEME_SELECTIONS[mode] || (options[0] ? options[0].id : undefined);
+      if (fallbackSelection) {
+        state.themeSelections[mode] = fallbackSelection;
+      }
     }
     applyColorTheme();
     updateModeButtons();
