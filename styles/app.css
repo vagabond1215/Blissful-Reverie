@@ -3,10 +3,63 @@
 }
 
 :root {
+  --color-background: #f6f7fb;
+  --body-gradient-start: #ffffff;
+  --body-gradient-mid: #eef1fb;
+  --body-gradient-end: #dfe7ff;
+
+  --color-text-primary: #1d2433;
+  --color-text-strong: #14213d;
+  --color-text-secondary: #536087;
+  --color-text-tertiary: #56617f;
+  --color-text-muted: #7a88a8;
+  --color-text-badge: #39486f;
+  --color-text-soft: #5a678a;
+  --color-text-instruction: #3f4d6b;
+  --color-text-inline: #435274;
+  --color-tag-text: #3730a3;
+  --color-text-inverse: #ffffff;
+  --color-text-emphasis: #21304f;
+
+  --color-accent: #5160d9;
+  --color-accent-strong: #8c79ff;
+  --color-accent-soft: rgba(81, 96, 217, 0.12);
+  --color-accent-softer: rgba(81, 96, 217, 0.08);
+  --color-accent-outline: rgba(81, 96, 217, 0.1);
+  --color-accent-border: #c7d2fe;
+  --color-accent-shadow: rgba(81, 96, 217, 0.9);
+  --color-accent-shadow-strong: rgba(81, 96, 217, 0.85);
+  --color-accent-contrast: #ffffff;
+
+  --gradient-accent: linear-gradient(135deg, var(--color-accent), var(--color-accent-strong));
+
+  --color-border: #d8def5;
+  --color-border-strong: #e2e8f0;
+  --color-border-muted: #edf0fa;
+  --color-code-background: #f1f5f9;
+  --color-inline-tag-background: #eef2ff;
+  --color-inline-tag-text: #3730a3;
+
+  --color-neutral-soft: rgba(20, 33, 61, 0.06);
+  --color-surface: #ffffff;
+  --color-surface-soft: rgba(20, 33, 61, 0.03);
+  --color-surface-highlight: rgba(81, 96, 217, 0.08);
+  --color-header-background: rgba(255, 255, 255, 0.85);
+
+  --color-header-shadow: rgba(20, 33, 61, 0.45);
+  --color-card-shadow: rgba(20, 33, 61, 0.35);
+  --color-card-shadow-muted: rgba(20, 33, 61, 0.18);
+  --color-card-shadow-soft: rgba(81, 96, 217, 0.35);
+
+  --color-danger: #d7263d;
+  --color-danger-soft: rgba(245, 83, 123, 0.1);
+
+  --color-focus-ring: rgba(81, 96, 217, 0.2);
+
   font-family: 'Inter', 'Segoe UI', sans-serif;
   line-height: 1.6;
-  color: #1d2433;
-  background-color: #f6f7fb;
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -25,7 +78,13 @@ a:hover {
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(circle at top, #ffffff 0%, #eef1fb 55%, #dfe7ff 100%);
+  background: radial-gradient(
+    circle at top,
+    var(--body-gradient-start) 0%,
+    var(--body-gradient-mid) 55%,
+    var(--body-gradient-end) 100%
+  );
+  background-color: var(--color-background);
 }
 
 input,
@@ -38,14 +97,14 @@ select {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  color: #14213d;
+  color: var(--color-text-strong);
 }
 
 .app-header {
   padding: 2.5rem 3rem 2rem;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--color-header-background);
   backdrop-filter: blur(10px);
-  box-shadow: 0 20px 45px -30px rgba(20, 33, 61, 0.45);
+  box-shadow: 0 20px 45px -30px var(--color-header-shadow);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -63,8 +122,101 @@ select {
 
 .title-group p {
   margin: 0.35rem 0 0;
-  color: #536087;
+  color: var(--color-text-secondary);
   max-width: 720px;
+}
+
+.theme-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.theme-toolbar__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.theme-toolbar__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.theme-toolbar__options {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mode-toggle__button {
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  padding: 0.4rem 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.mode-toggle__button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px -18px var(--color-card-shadow);
+}
+
+.mode-toggle__button--active {
+  background: var(--gradient-accent);
+  color: var(--color-accent-contrast);
+  border-color: transparent;
+  box-shadow: 0 18px 32px -20px var(--color-accent-shadow-strong);
+}
+
+.theme-option {
+  position: relative;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  padding: 0.45rem 0.85rem 0.45rem 2.3rem;
+  min-width: 140px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, color 0.2s ease;
+}
+
+.theme-option::before {
+  content: '';
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--theme-preview-color, var(--color-accent));
+  box-shadow: 0 0 0 2px var(--color-surface);
+}
+
+.theme-option:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-accent);
+  box-shadow: 0 12px 24px -18px var(--color-card-shadow);
+}
+
+.theme-option--active {
+  border-color: var(--color-accent);
+  color: var(--color-text-emphasis);
+  box-shadow: 0 18px 32px -20px var(--color-card-shadow-soft);
+}
+
+.theme-option--active::before {
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-accent);
 }
 
 .layout {
@@ -78,9 +230,9 @@ select {
 .filter-panel,
 .pantry-panel,
 .meal-card {
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 18px;
-  box-shadow: 0 22px 45px -30px rgba(20, 33, 61, 0.35);
+  box-shadow: 0 22px 45px -30px var(--color-card-shadow);
 }
 
 .filter-panel {
@@ -105,16 +257,16 @@ select {
 
 .reset-button {
   background: none;
-  border: 1px solid #d8def5;
+  border: 1px solid var(--color-border);
   border-radius: 999px;
   padding: 0.35rem 0.85rem;
-  color: #5160d9;
+  color: var(--color-accent);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .reset-button:hover {
-  background: rgba(81, 96, 217, 0.1);
+  background: var(--color-accent-outline);
 }
 
 .input-group {
@@ -126,7 +278,7 @@ select {
 .input-group input,
 .ingredient-input input,
 .pantry-form input {
-  border: 1px solid #d8def5;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 0.6rem 0.75rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -138,14 +290,14 @@ select {
 .serving-controls input:focus,
 textarea:focus {
   outline: none;
-  border-color: #5160d9;
-  box-shadow: 0 0 0 3px rgba(81, 96, 217, 0.2);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .filter-section h3 {
   margin: 0 0 0.45rem;
   font-size: 1rem;
-  color: #39486f;
+  color: var(--color-text-badge);
 }
 
 .checkbox-grid {
@@ -159,11 +311,11 @@ textarea:focus {
   gap: 0.4rem;
   align-items: center;
   font-size: 0.95rem;
-  color: #21304f;
+  color: var(--color-text-emphasis);
 }
 
 .checkbox-option input {
-  accent-color: #5160d9;
+  accent-color: var(--color-accent);
 }
 
 .ingredient-input {
@@ -177,8 +329,8 @@ textarea:focus {
   border: none;
   border-radius: 12px;
   padding: 0.55rem 1.1rem;
-  background: linear-gradient(135deg, #5160d9, #8c79ff);
-  color: #ffffff;
+  background: var(--gradient-accent);
+  color: var(--color-accent-contrast);
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -188,7 +340,7 @@ textarea:focus {
 .pantry-form button:hover,
 .meal-card__footer button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 25px -15px rgba(81, 96, 217, 0.9);
+  box-shadow: 0 12px 25px -15px var(--color-accent-shadow);
 }
 
 .chip-row {
@@ -201,14 +353,14 @@ textarea:focus {
   border: none;
   border-radius: 999px;
   padding: 0.35rem 0.8rem;
-  background: rgba(81, 96, 217, 0.12);
-  color: #5160d9;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
   cursor: pointer;
 }
 
 .chip-danger {
-  background: rgba(245, 83, 123, 0.1);
-  color: #d7263d;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
 }
 
 .content {
@@ -224,7 +376,7 @@ textarea:focus {
 
 .content-header p {
   margin: 0;
-  color: #56617f;
+  color: var(--color-text-tertiary);
 }
 
 .meal-grid {
@@ -253,7 +405,7 @@ textarea:focus {
 
 .meal-card__description {
   margin: 0.3rem 0 0;
-  color: #5a678a;
+  color: var(--color-text-muted);
 }
 
 .tag-list {
@@ -268,14 +420,14 @@ textarea:focus {
   align-items: center;
   padding: 0.2rem 0.65rem;
   border-radius: 999px;
-  background: rgba(81, 96, 217, 0.12);
-  color: #39486f;
+  background: var(--color-accent-soft);
+  color: var(--color-text-badge);
   font-size: 0.82rem;
 }
 
 .badge-soft {
-  background: rgba(20, 33, 61, 0.06);
-  color: #435274;
+  background: var(--color-neutral-soft);
+  color: var(--color-text-inline);
 }
 
 .serving-controls {
@@ -287,12 +439,12 @@ textarea:focus {
 
 .serving-controls span {
   font-size: 0.85rem;
-  color: #5a678a;
+  color: var(--color-text-muted);
 }
 
 .serving-controls input {
   width: 100%;
-  border: 1px solid #d8def5;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 0.45rem 0.5rem;
   text-align: center;
@@ -301,13 +453,13 @@ textarea:focus {
 .base-serving {
   margin: 0;
   font-size: 0.8rem;
-  color: #7a88a8;
+  color: var(--color-text-soft);
 }
 
 .meal-card__section h4 {
   margin: 0 0 0.4rem;
   font-size: 1rem;
-  color: #21304f;
+  color: var(--color-text-emphasis);
 }
 
 .ingredient-list {
@@ -328,7 +480,7 @@ textarea:focus {
 .ingredient-quantity {
   min-width: 90px;
   font-weight: 600;
-  color: #5160d9;
+  color: var(--color-accent);
 }
 
 .instruction-list {
@@ -337,7 +489,7 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  color: #3f4d6b;
+  color: var(--color-text-instruction);
 }
 
 .meal-card__details {
@@ -356,7 +508,7 @@ textarea:focus {
 }
 
 .nutrition {
-  border-top: 1px solid #edf0fa;
+  border-top: 1px solid var(--color-border-muted);
   padding-top: 1rem;
 }
 
@@ -369,18 +521,18 @@ textarea:focus {
 .nutrition-label {
   text-transform: capitalize;
   font-weight: 600;
-  color: #39486f;
+  color: var(--color-text-badge);
 }
 
 .nutrition-value {
   display: block;
-  color: #5160d9;
+  color: var(--color-accent);
   font-weight: 600;
 }
 
 .nutrition-total {
   font-size: 0.8rem;
-  color: #7a88a8;
+  color: var(--color-text-soft);
 }
 
 .meal-card__footer {
@@ -391,7 +543,7 @@ textarea:focus {
 
 .meal-card__footer textarea {
   min-height: 90px;
-  border: 1px solid #d8def5;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 0.75rem;
   resize: vertical;
@@ -429,22 +581,22 @@ textarea:focus {
   justify-content: space-between;
   align-items: center;
   padding: 0.4rem 0.55rem;
-  background: rgba(81, 96, 217, 0.08);
+  background: var(--color-accent-softer);
   border-radius: 10px;
-  color: #39486f;
+  color: var(--color-text-badge);
 }
 
 .pantry-list button {
   background: none;
   border: none;
-  color: #d7263d;
+  color: var(--color-danger);
   cursor: pointer;
   font-weight: 600;
 }
 
 .cookable-toggle {
   padding: 0.6rem 0.75rem;
-  background: rgba(81, 96, 217, 0.08);
+  background: var(--color-accent-softer);
   border-radius: 12px;
 }
 
@@ -469,13 +621,13 @@ textarea:focus {
 
 .empty,
 .empty-state {
-  color: #7a88a8;
+  color: var(--color-text-soft);
   font-style: italic;
 }
 
 .empty-state {
   padding: 2.5rem 1.5rem;
-  background: rgba(81, 96, 217, 0.08);
+  background: var(--color-accent-softer);
   border-radius: 18px;
   text-align: center;
 }
@@ -515,6 +667,12 @@ textarea:focus {
   .layout {
     padding: 1.5rem;
   }
+
+  .theme-toolbar__group,
+  .theme-toolbar__options--themes,
+  .theme-option {
+    width: 100%;
+  }
 }
 .view-toggle {
   display: flex;
@@ -523,11 +681,11 @@ textarea:focus {
 }
 
 .view-toggle__button {
-  border: 1px solid #d8def5;
+  border: 1px solid var(--color-border);
   border-radius: 999px;
   padding: 0.55rem 1.3rem;
-  background: rgba(81, 96, 217, 0.12);
-  color: #5160d9;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
@@ -535,17 +693,17 @@ textarea:focus {
 
 .view-toggle__button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 25px -18px rgba(81, 96, 217, 0.9);
+  box-shadow: 0 12px 25px -18px var(--color-accent-shadow);
 }
 
 .view-toggle__button--active {
-  background: linear-gradient(135deg, #5160d9, #8c79ff);
-  color: #ffffff;
+  background: var(--gradient-accent);
+  color: var(--color-accent-contrast);
   border-color: transparent;
 }
 
 .view-toggle__button--active:hover {
-  box-shadow: 0 18px 35px -20px rgba(81, 96, 217, 0.85);
+  box-shadow: 0 18px 35px -20px var(--color-accent-shadow-strong);
 }
 
 .ingredients-layout {
@@ -577,7 +735,7 @@ textarea:focus {
 
 .ingredient-directory__header p {
   margin: 0.4rem 0 0;
-  color: #56617f;
+  color: var(--color-text-tertiary);
   max-width: 640px;
 }
 
@@ -586,7 +744,7 @@ textarea:focus {
   flex-direction: column;
   align-items: flex-end;
   gap: 0.2rem;
-  background: rgba(81, 96, 217, 0.08);
+  background: var(--color-accent-softer);
   padding: 0.8rem 1rem;
   border-radius: 16px;
 }
@@ -594,14 +752,14 @@ textarea:focus {
 .ingredient-directory__summary span {
   font-size: 2rem;
   font-weight: 700;
-  color: #5160d9;
+  color: var(--color-accent);
   line-height: 1;
 }
 
 .ingredient-directory__summary p {
   margin: 0;
   font-size: 0.85rem;
-  color: #39486f;
+  color: var(--color-text-badge);
 }
 
 .ingredient-directory__controls {
@@ -619,10 +777,10 @@ textarea:focus {
 
 .ingredient-directory__control select,
 .ingredient-directory__control input {
-  border: 1px solid #d8def5;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 0.6rem 0.75rem;
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .ingredient-directory__control--search {
@@ -634,14 +792,14 @@ textarea:focus {
   align-items: center;
   gap: 0.5rem;
   padding: 0.65rem 0.85rem;
-  border: 1px solid #d8def5;
+  border: 1px solid var(--color-border);
   border-radius: 14px;
-  background: rgba(20, 33, 61, 0.03);
-  color: #39486f;
+  background: var(--color-surface-soft);
+  color: var(--color-text-badge);
 }
 
 .ingredient-directory__toggle input {
-  accent-color: #5160d9;
+  accent-color: var(--color-accent);
 }
 
 .ingredient-grid {
@@ -651,21 +809,21 @@ textarea:focus {
 }
 
 .ingredient-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
   border-radius: 16px;
   padding: 1.1rem 1.2rem;
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  box-shadow: 0 22px 45px -30px rgba(20, 33, 61, 0.18);
+  box-shadow: 0 22px 45px -30px var(--color-card-shadow-muted);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .ingredient-card:hover {
   transform: translateY(-2px);
-  border-color: #c7d2fe;
-  box-shadow: 0 26px 45px -24px rgba(81, 96, 217, 0.35);
+  border-color: var(--color-accent-border);
+  box-shadow: 0 26px 45px -24px var(--color-card-shadow-soft);
 }
 
 .ingredient-card__header {
@@ -681,8 +839,8 @@ textarea:focus {
 }
 
 .ingredient-card__header code {
-  background: #f1f5f9;
-  color: #536087;
+  background: var(--color-code-background);
+  color: var(--color-text-secondary);
   padding: 0.25rem 0.6rem;
   border-radius: 8px;
   font-size: 0.8rem;
@@ -704,21 +862,21 @@ textarea:focus {
   align-items: center;
   padding: 0.25rem 0.65rem;
   border-radius: 999px;
-  background: #eef2ff;
-  border: 1px solid #c7d2fe;
-  color: #3730a3;
+  background: var(--color-inline-tag-background);
+  border: 1px solid var(--color-accent-border);
+  color: var(--color-tag-text);
   font-size: 0.78rem;
   font-weight: 600;
 }
 
 .ingredient-directory__empty {
   grid-column: 1 / -1;
-  background: #ffffff;
-  border: 1px dashed #d8def5;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
   border-radius: 16px;
   padding: 2rem;
   text-align: center;
-  color: #536087;
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 768px) {
@@ -729,4 +887,196 @@ textarea:focus {
   .ingredients-layout {
     padding: 1.5rem;
   }
+}
+
+:root[data-mode='light'][data-theme='sunrise'] {
+  --color-background: #fff4ed;
+  --body-gradient-start: #fff9f4;
+  --body-gradient-mid: #ffe2d0;
+  --body-gradient-end: #ffcba4;
+
+  --color-header-background: rgba(255, 244, 236, 0.88);
+
+  --color-accent: #f97316;
+  --color-accent-strong: #f43f5e;
+  --color-accent-soft: rgba(249, 115, 22, 0.16);
+  --color-accent-softer: rgba(249, 115, 22, 0.12);
+  --color-accent-outline: rgba(249, 115, 22, 0.2);
+  --color-accent-border: #fdba74;
+  --color-accent-shadow: rgba(249, 115, 22, 0.38);
+  --color-accent-shadow-strong: rgba(244, 63, 94, 0.42);
+
+  --color-inline-tag-background: rgba(254, 215, 170, 0.35);
+  --color-inline-tag-text: #9a3412;
+
+  --color-neutral-soft: rgba(120, 53, 15, 0.08);
+  --color-surface-soft: rgba(249, 115, 22, 0.06);
+  --color-surface-highlight: rgba(249, 115, 22, 0.12);
+
+  --color-border: #fbd5bd;
+  --color-border-strong: #f8c4a5;
+  --color-border-muted: #fde3d1;
+  --color-code-background: #fff4ec;
+
+  --color-card-shadow: rgba(191, 90, 29, 0.26);
+  --color-card-shadow-muted: rgba(249, 115, 22, 0.18);
+  --color-card-shadow-soft: rgba(249, 115, 22, 0.28);
+
+  --color-focus-ring: rgba(249, 115, 22, 0.22);
+}
+
+:root[data-mode='light'][data-theme='meadow'] {
+  --color-background: #effdf3;
+  --body-gradient-start: #ffffff;
+  --body-gradient-mid: #dcfce7;
+  --body-gradient-end: #bbf7d0;
+
+  --color-header-background: rgba(239, 253, 243, 0.9);
+
+  --color-accent: #2f855a;
+  --color-accent-strong: #38a169;
+  --color-accent-soft: rgba(47, 133, 90, 0.16);
+  --color-accent-softer: rgba(47, 133, 90, 0.12);
+  --color-accent-outline: rgba(47, 133, 90, 0.18);
+  --color-accent-border: #9ae6b4;
+  --color-accent-shadow: rgba(47, 133, 90, 0.38);
+  --color-accent-shadow-strong: rgba(56, 189, 148, 0.42);
+
+  --color-inline-tag-background: rgba(134, 239, 172, 0.32);
+  --color-inline-tag-text: #065f46;
+
+  --color-neutral-soft: rgba(15, 118, 110, 0.08);
+  --color-surface-soft: rgba(15, 118, 110, 0.06);
+  --color-surface-highlight: rgba(34, 197, 94, 0.14);
+
+  --color-border: #bde7c8;
+  --color-border-strong: #a3d9b6;
+  --color-border-muted: #d5f0dc;
+  --color-code-background: #ebfff1;
+
+  --color-card-shadow: rgba(15, 118, 110, 0.26);
+  --color-card-shadow-muted: rgba(47, 133, 90, 0.18);
+  --color-card-shadow-soft: rgba(52, 211, 153, 0.3);
+
+  --color-focus-ring: rgba(56, 161, 105, 0.22);
+}
+
+:root[data-mode='dark'] {
+  --color-background: #020617;
+  --body-gradient-start: #0b1733;
+  --body-gradient-mid: #061228;
+  --body-gradient-end: #010816;
+
+  --color-text-primary: #e2e8f0;
+  --color-text-strong: #f8fafc;
+  --color-text-secondary: #cbd5f5;
+  --color-text-tertiary: #a5b4fc;
+  --color-text-muted: #94a3b8;
+  --color-text-badge: #dbeafe;
+  --color-text-soft: #94a3b8;
+  --color-text-instruction: #cbd5f5;
+  --color-text-inline: #dbeafe;
+  --color-tag-text: #e0e7ff;
+
+  --color-surface: #111827;
+  --color-surface-soft: rgba(15, 23, 42, 0.7);
+  --color-surface-highlight: rgba(59, 130, 246, 0.18);
+  --color-header-background: rgba(15, 23, 42, 0.92);
+  --color-header-shadow: rgba(2, 6, 23, 0.72);
+
+  --color-border: rgba(148, 163, 184, 0.32);
+  --color-border-strong: rgba(148, 163, 184, 0.45);
+  --color-border-muted: rgba(148, 163, 184, 0.25);
+  --color-code-background: rgba(30, 41, 59, 0.8);
+  --color-inline-tag-background: rgba(59, 130, 246, 0.25);
+  --color-inline-tag-text: #dbeafe;
+  --color-neutral-soft: rgba(148, 163, 184, 0.2);
+
+  --color-card-shadow: rgba(2, 6, 23, 0.7);
+  --color-card-shadow-muted: rgba(2, 6, 23, 0.5);
+  --color-card-shadow-soft: rgba(59, 130, 246, 0.32);
+
+  --color-danger: #f87171;
+  --color-danger-soft: rgba(248, 113, 113, 0.22);
+
+  --color-focus-ring: rgba(96, 165, 250, 0.4);
+
+  --color-accent: #2563eb;
+  --color-accent-strong: #60a5fa;
+  --color-accent-soft: rgba(37, 99, 235, 0.22);
+  --color-accent-softer: rgba(59, 130, 246, 0.16);
+  --color-accent-outline: rgba(96, 165, 250, 0.35);
+  --color-accent-border: rgba(96, 165, 250, 0.55);
+  --color-accent-shadow: rgba(37, 99, 235, 0.45);
+  --color-accent-shadow-strong: rgba(59, 130, 246, 0.5);
+}
+
+:root[data-mode='dark'][data-theme='nebula'] {
+  --color-background: #0c0a1a;
+  --body-gradient-start: #1a0f3f;
+  --body-gradient-mid: #120a2d;
+  --body-gradient-end: #050311;
+
+  --color-surface: #1f1936;
+  --color-header-background: rgba(31, 25, 54, 0.92);
+  --color-header-shadow: rgba(9, 6, 25, 0.72);
+
+  --color-accent: #a855f7;
+  --color-accent-strong: #6366f1;
+  --color-accent-soft: rgba(168, 85, 247, 0.25);
+  --color-accent-softer: rgba(99, 102, 241, 0.18);
+  --color-accent-outline: rgba(129, 140, 248, 0.35);
+  --color-accent-border: rgba(196, 181, 253, 0.6);
+  --color-accent-shadow: rgba(129, 140, 248, 0.45);
+  --color-accent-shadow-strong: rgba(168, 85, 247, 0.5);
+
+  --color-inline-tag-background: rgba(168, 85, 247, 0.3);
+  --color-inline-tag-text: #ede9fe;
+  --color-surface-highlight: rgba(139, 92, 246, 0.22);
+
+  --color-border: rgba(196, 181, 253, 0.32);
+  --color-border-strong: rgba(196, 181, 253, 0.45);
+  --color-border-muted: rgba(196, 181, 253, 0.28);
+  --color-neutral-soft: rgba(196, 181, 253, 0.18);
+  --color-card-shadow: rgba(9, 6, 25, 0.68);
+  --color-card-shadow-muted: rgba(9, 6, 25, 0.48);
+  --color-card-shadow-soft: rgba(168, 85, 247, 0.32);
+
+  --color-focus-ring: rgba(168, 85, 247, 0.36);
+  --color-code-background: rgba(44, 28, 72, 0.8);
+}
+
+:root[data-mode='dark'][data-theme='forest'] {
+  --color-background: #021512;
+  --body-gradient-start: #05201b;
+  --body-gradient-mid: #0b2b24;
+  --body-gradient-end: #010f0c;
+
+  --color-surface: #0f1f1a;
+  --color-header-background: rgba(15, 31, 26, 0.92);
+  --color-header-shadow: rgba(1, 15, 12, 0.7);
+
+  --color-accent: #34d399;
+  --color-accent-strong: #10b981;
+  --color-accent-soft: rgba(52, 211, 153, 0.25);
+  --color-accent-softer: rgba(16, 185, 129, 0.2);
+  --color-accent-outline: rgba(52, 211, 153, 0.32);
+  --color-accent-border: rgba(110, 231, 183, 0.55);
+  --color-accent-shadow: rgba(16, 185, 129, 0.45);
+  --color-accent-shadow-strong: rgba(45, 212, 191, 0.5);
+
+  --color-inline-tag-background: rgba(45, 212, 191, 0.3);
+  --color-inline-tag-text: #ccfbf1;
+  --color-surface-highlight: rgba(45, 212, 191, 0.22);
+
+  --color-border: rgba(110, 231, 183, 0.28);
+  --color-border-strong: rgba(110, 231, 183, 0.4);
+  --color-border-muted: rgba(110, 231, 183, 0.22);
+  --color-neutral-soft: rgba(15, 118, 110, 0.18);
+  --color-card-shadow: rgba(1, 15, 12, 0.68);
+  --color-card-shadow-muted: rgba(1, 15, 12, 0.48);
+  --color-card-shadow-soft: rgba(45, 212, 191, 0.32);
+
+  --color-focus-ring: rgba(45, 212, 191, 0.36);
+  --color-code-background: rgba(15, 52, 40, 0.75);
 }
