@@ -53,6 +53,7 @@
 
   const getDefaultFilters = () => ({
     search: '',
+    protein: [],
     tags: [],
     allergies: [],
     equipment: [],
@@ -78,24 +79,30 @@
     themeSelections: { ...themePreferences.selections },
   };
 
-  const tagOptions = Array.from(
+  const equipmentOptions = Array.from(
     new Set(
-      recipes.flatMap((recipe) => Array.isArray(recipe.tags) ? recipe.tags : []),
+      recipes.flatMap((recipe) => Array.isArray(recipe.equipment) ? recipe.equipment : []),
     ),
   ).sort((a, b) => a.localeCompare(b));
+
+  const rawTagOptions = Array.from(
+    new Set(
+      recipes.flatMap((recipe) => (Array.isArray(recipe.tags) ? recipe.tags : [])),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
+
+  const PROTEIN_TAGS = new Set(['Beef', 'Chicken', 'Pork', 'Turkey']);
+  const proteinOptions = rawTagOptions.filter((tag) => PROTEIN_TAGS.has(tag));
+  const excludedTags = new Set(proteinOptions);
+  equipmentOptions.forEach((item) => excludedTags.add(item));
+  const tagOptions = rawTagOptions.filter((tag) => !excludedTags.has(tag));
 
   const allergyDefaults = ['dairy', 'gluten', 'eggs', 'nuts', 'soy', 'fish', 'shellfish'];
   const allergyOptions = Array.from(
     new Set([
       ...allergyDefaults,
-      ...recipes.flatMap((recipe) => Array.isArray(recipe.allergens) ? recipe.allergens : []),
+      ...recipes.flatMap((recipe) => (Array.isArray(recipe.allergens) ? recipe.allergens : [])),
     ]),
-  ).sort((a, b) => a.localeCompare(b));
-
-  const equipmentOptions = Array.from(
-    new Set(
-      recipes.flatMap((recipe) => Array.isArray(recipe.equipment) ? recipe.equipment : []),
-    ),
   ).sort((a, b) => a.localeCompare(b));
 
   const ingredientTokens = new Set();
@@ -131,6 +138,7 @@
   });
 
   const checkboxRegistry = {
+    protein: new Map(),
     tags: new Map(),
     allergies: new Map(),
     equipment: new Map(),
@@ -242,6 +250,7 @@
     elements.mealCount = document.getElementById('meal-count');
     elements.filterSearch = document.getElementById('filter-search');
     elements.resetButton = document.getElementById('reset-filters');
+    elements.proteinOptions = document.getElementById('protein-options');
     elements.tagOptions = document.getElementById('tag-options');
     elements.allergyOptions = document.getElementById('allergy-options');
     elements.equipmentOptions = document.getElementById('equipment-options');
@@ -303,6 +312,7 @@
   };
 
   const populateFilterOptions = () => {
+    populateCheckboxGroup(elements.proteinOptions, proteinOptions, 'protein');
     populateCheckboxGroup(elements.tagOptions, tagOptions, 'tags');
     populateCheckboxGroup(elements.allergyOptions, allergyOptions, 'allergies', 'badge badge-soft');
     populateCheckboxGroup(elements.equipmentOptions, equipmentOptions, 'equipment');
@@ -342,7 +352,7 @@
 
   const syncFilterControls = () => {
     elements.filterSearch.value = state.filters.search;
-    ['tags', 'allergies', 'equipment'].forEach((field) => {
+    ['protein', 'tags', 'allergies', 'equipment'].forEach((field) => {
       const map = checkboxRegistry[field];
       map.forEach((input, option) => {
         input.checked = state.filters[field].includes(option);
@@ -386,6 +396,12 @@
   const matchesFilters = (recipe, derived) => {
     const haystack = `${recipe.name} ${recipe.description} ${(recipe.tags || []).join(' ')} ${recipe.category}`.toLowerCase();
     if (state.filters.search && !haystack.includes(state.filters.search.toLowerCase())) {
+      return false;
+    }
+    if (
+      state.filters.protein.length &&
+      !state.filters.protein.some((protein) => (recipe.tags || []).includes(protein))
+    ) {
       return false;
     }
     if (state.filters.tags.length && !state.filters.tags.every((tag) => (recipe.tags || []).includes(tag))) {

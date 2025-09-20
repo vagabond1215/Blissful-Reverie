@@ -55,36 +55,52 @@
             <span>Search</span>
             <input type="search" id="filter-search" placeholder="Search by name, description, or tag" />
           </label>
-          <section class="filter-section">
-            <h3>Tags</h3>
-            <div class="checkbox-grid" id="tag-options"></div>
-          </section>
-          <section class="filter-section">
-            <h3>Allergies to Avoid</h3>
-            <div class="checkbox-grid" id="allergy-options"></div>
-          </section>
-          <section class="filter-section">
-            <h3>Equipment</h3>
-            <div class="checkbox-grid" id="equipment-options"></div>
-          </section>
-          <section class="filter-section">
-            <h3>Ingredients to Include</h3>
-            <div class="ingredient-input">
-              <input list="include-ingredients" id="include-input" placeholder="Add ingredient keyword" />
-              <button type="button" id="include-add">Add</button>
-              <datalist id="include-ingredients"></datalist>
+          <details class="filter-section" open>
+            <summary>Protein</summary>
+            <div class="filter-section__content">
+              <div class="checkbox-grid" id="protein-options"></div>
             </div>
-            <div class="chip-row" id="include-chips"></div>
-          </section>
-          <section class="filter-section">
-            <h3>Ingredients to Exclude</h3>
-            <div class="ingredient-input">
-              <input list="exclude-ingredients" id="exclude-input" placeholder="Add ingredient keyword" />
-              <button type="button" id="exclude-add">Add</button>
-              <datalist id="exclude-ingredients"></datalist>
+          </details>
+          <details class="filter-section" open>
+            <summary>Tags</summary>
+            <div class="filter-section__content">
+              <div class="checkbox-grid" id="tag-options"></div>
             </div>
-            <div class="chip-row" id="exclude-chips"></div>
-          </section>
+          </details>
+          <details class="filter-section" open>
+            <summary>Allergies to Avoid</summary>
+            <div class="filter-section__content">
+              <div class="checkbox-grid" id="allergy-options"></div>
+            </div>
+          </details>
+          <details class="filter-section" open>
+            <summary>Equipment</summary>
+            <div class="filter-section__content">
+              <div class="checkbox-grid" id="equipment-options"></div>
+            </div>
+          </details>
+          <details class="filter-section" open>
+            <summary>Ingredients to Include</summary>
+            <div class="filter-section__content">
+              <div class="ingredient-input">
+                <input list="include-ingredients" id="include-input" placeholder="Add ingredient keyword" />
+                <button type="button" id="include-add">Add</button>
+                <datalist id="include-ingredients"></datalist>
+              </div>
+              <div class="chip-row" id="include-chips"></div>
+            </div>
+          </details>
+          <details class="filter-section" open>
+            <summary>Ingredients to Exclude</summary>
+            <div class="filter-section__content">
+              <div class="ingredient-input">
+                <input list="exclude-ingredients" id="exclude-input" placeholder="Add ingredient keyword" />
+                <button type="button" id="exclude-add">Add</button>
+                <datalist id="exclude-ingredients"></datalist>
+              </div>
+              <div class="chip-row" id="exclude-chips"></div>
+            </div>
+          </details>
         </aside>
         <section class="content">
           <div class="content-header">
