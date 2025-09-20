@@ -374,8 +374,6 @@ select {
   flex-direction: column;
   gap: 1.4rem;
   padding: 1.5rem;
-  max-height: calc(100vh - 6rem);
-  overflow-y: auto;
 }
 
 .panel-header {
@@ -410,7 +408,6 @@ select {
 }
 
 .input-group input,
-.ingredient-input input,
 .pantry-form input {
   border: 1px solid var(--color-border);
   border-radius: 12px;
@@ -419,7 +416,6 @@ select {
 }
 
 .input-group input:focus,
-.ingredient-input input:focus,
 .pantry-form input:focus,
 .serving-controls input:focus,
 textarea:focus {
@@ -507,12 +503,6 @@ textarea:focus {
   accent-color: var(--color-accent);
 }
 
-.ingredient-input {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.ingredient-input button,
 .pantry-form button,
 .meal-card__footer button {
   border: none;
@@ -525,31 +515,10 @@ textarea:focus {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.ingredient-input button:hover,
 .pantry-form button:hover,
 .meal-card__footer button:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 25px -15px var(--color-accent-shadow);
-}
-
-.chip-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.chip {
-  border: none;
-  border-radius: 999px;
-  padding: 0.35rem 0.8rem;
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
-  cursor: pointer;
-}
-
-.chip-danger {
-  background: var(--color-danger-soft);
-  color: var(--color-danger);
 }
 
 .content {

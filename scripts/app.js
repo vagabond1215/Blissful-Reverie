@@ -81,8 +81,6 @@
     tags: [],
     allergies: [],
     equipment: [],
-    includeIngredients: [],
-    excludeIngredients: [],
   });
 
   const state = {
@@ -128,21 +126,6 @@
       ...recipes.flatMap((recipe) => (Array.isArray(recipe.allergens) ? recipe.allergens : [])),
     ]),
   ).sort((a, b) => a.localeCompare(b));
-
-  const ingredientTokens = new Set();
-  recipes.forEach((recipe) => {
-    recipe.ingredients.forEach((ingredient) => {
-      if (ingredient && ingredient.item) {
-        ingredientTokens.add(ingredient.item.toLowerCase());
-      }
-    });
-  });
-  ingredients.forEach((ingredient) => {
-    ingredientTokens.add(ingredient.name.toLowerCase());
-    ingredientTokens.add(String(ingredient.slug).toLowerCase());
-  });
-  const ingredientOptions = Array.from(ingredientTokens).sort();
-  const ingredientSuggestions = ingredientOptions.slice(0, 200);
 
   const categoryOrder = (() => {
     const seen = new Set();
@@ -285,14 +268,6 @@
     elements.tagOptions = document.getElementById('tag-options');
     elements.allergyOptions = document.getElementById('allergy-options');
     elements.equipmentOptions = document.getElementById('equipment-options');
-    elements.includeInput = document.getElementById('include-input');
-    elements.includeAddButton = document.getElementById('include-add');
-    elements.includeDatalist = document.getElementById('include-ingredients');
-    elements.includeChips = document.getElementById('include-chips');
-    elements.excludeInput = document.getElementById('exclude-input');
-    elements.excludeAddButton = document.getElementById('exclude-add');
-    elements.excludeDatalist = document.getElementById('exclude-ingredients');
-    elements.excludeChips = document.getElementById('exclude-chips');
     elements.pantryForm = document.getElementById('pantry-form');
     elements.pantryInput = document.getElementById('pantry-input');
     elements.pantryList = document.getElementById('pantry-list');
@@ -347,16 +322,6 @@
     populateCheckboxGroup(elements.tagOptions, tagOptions, 'tags');
     populateCheckboxGroup(elements.allergyOptions, allergyOptions, 'allergies', 'badge badge-soft');
     populateCheckboxGroup(elements.equipmentOptions, equipmentOptions, 'equipment');
-    const populateDatalist = (element) => {
-      element.innerHTML = '';
-      ingredientSuggestions.forEach((option) => {
-        const opt = document.createElement('option');
-        opt.value = option;
-        element.appendChild(opt);
-      });
-    };
-    populateDatalist(elements.includeDatalist);
-    populateDatalist(elements.excludeDatalist);
   };
 
   const populateIngredientControls = () => {
@@ -369,18 +334,6 @@
     });
   };
 
-  const addIngredientFilter = (type) => {
-    const input = type === 'include' ? elements.includeInput : elements.excludeInput;
-    const field = type === 'include' ? 'includeIngredients' : 'excludeIngredients';
-    const value = normalizeText(input.value.trim());
-    if (!value) return;
-    if (!state.filters[field].includes(value)) {
-      state.filters[field] = [...state.filters[field], value];
-      renderApp();
-    }
-    input.value = '';
-  };
-
   const syncFilterControls = () => {
     elements.filterSearch.value = state.filters.search;
     ['protein', 'tags', 'allergies', 'equipment'].forEach((field) => {
@@ -389,30 +342,7 @@
         input.checked = state.filters[field].includes(option);
       });
     });
-    renderIngredientFilterChips('include');
-    renderIngredientFilterChips('exclude');
     elements.showCookable.checked = state.showCookableOnly;
-  };
-
-  const renderIngredientFilterChips = (type) => {
-    const container = type === 'include' ? elements.includeChips : elements.excludeChips;
-    const field = type === 'include' ? 'includeIngredients' : 'excludeIngredients';
-    container.innerHTML = '';
-    state.filters[field].forEach((item) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = type === 'include' ? 'chip' : 'chip chip-danger';
-      button.textContent = item;
-      const close = document.createElement('span');
-      close.setAttribute('aria-hidden', 'true');
-      close.textContent = ' ×';
-      button.appendChild(close);
-      button.addEventListener('click', () => {
-        state.filters[field] = state.filters[field].filter((entry) => entry !== item);
-        renderApp();
-      });
-      container.appendChild(button);
-    });
   };
 
   const computeDerivedState = () => {
@@ -447,19 +377,6 @@
     if (
       state.filters.equipment.length &&
       !state.filters.equipment.every((item) => (recipe.equipment || []).includes(item))
-    ) {
-      return false;
-    }
-    const ingredientNames = recipe.ingredients.map((ingredient) => ingredient.item.toLowerCase());
-    if (
-      state.filters.includeIngredients.length &&
-      !state.filters.includeIngredients.every((needle) => ingredientNames.some((name) => name.includes(needle)))
-    ) {
-      return false;
-    }
-    if (
-      state.filters.excludeIngredients.length &&
-      ingredientNames.some((name) => state.filters.excludeIngredients.some((ex) => name.includes(ex)))
     ) {
       return false;
     }
@@ -855,22 +772,6 @@
     elements.resetButton.addEventListener('click', () => {
       state.filters = getDefaultFilters();
       renderApp();
-    });
-
-    elements.includeAddButton.addEventListener('click', () => addIngredientFilter('include'));
-    elements.excludeAddButton.addEventListener('click', () => addIngredientFilter('exclude'));
-
-    elements.includeInput.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        addIngredientFilter('include');
-      }
-    });
-    elements.excludeInput.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        addIngredientFilter('exclude');
-      }
     });
 
     elements.pantryForm.addEventListener('submit', handlePantrySubmit);
