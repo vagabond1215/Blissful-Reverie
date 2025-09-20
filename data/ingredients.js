@@ -1,6 +1,6 @@
 // Ingredient dataset is kept in single-line entries grouped by category for easier maintenance.
 // Each ingredient includes a slug, display name, category, and descriptive tags for quick filtering.
-export const ingredients = [
+window.BLISSFUL_INGREDIENTS = [
   // Pasta (generally contains gluten unless specified)
   { slug: 'pasta-spaghetti', name: 'Spaghetti', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
   { slug: 'pasta-penne', name: 'Penne', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
@@ -171,4 +171,4 @@ export const ingredients = [
   { slug: 'bev-red-wine', name: 'Red Wine', category: 'Beverage', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'bev-white-wine', name: 'White Wine', category: 'Beverage', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'bev-beer', name: 'Beer (Standard)', category: 'Beverage', tags: ['Contains Gluten', 'Vegetarian', 'Vegan'] },
-]
+];
