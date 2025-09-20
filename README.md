@@ -1,60 +1,42 @@
 # Blissful Reverie Meal Planner
 
-Blissful Reverie is a web-based meal planning workspace focused on ingredient discovery and pantry-driven cooking. The interface
-provides rich recipe cards, flexible filtering, and a smart pantry list that highlights every meal you can cook with the items you
-already have on hand.
+Blissful Reverie is a self-contained web-based meal planning workspace focused on ingredient discovery and pantry-driven cooking. Open `index.html` in any modern browser to explore recipes without installing dependencies or running a local server.
 
 ## Features
 
 - **Card-based recipes** with adjustable serving sizes, detailed ingredients, instructions, nutrition, equipment, and allergen notes.
-- **Extensive library** of 72 savoury meals (12 each for chicken, turkey, beef, and pork) plus 24 desserts spanning common tags such
-  as breakfast, lunch, dinner, pasta, soup, sandwich, low-sodium, dairy, no-dairy, and gluten free.
+- **Extensive library** of 72 savoury meals (12 each for chicken, turkey, beef, and pork) plus 24 desserts spanning common tags such as breakfast, lunch, dinner, pasta, soup, sandwich, low-sodium, dairy, no-dairy, and gluten free.
 - **Dynamic filters** for full-text search, tags, allergens, required equipment, and ingredient include/exclude rules.
-- **Pantry assistant** to maintain a virtual pantry, surface cookable meals, and optionally limit the recipe grid to only what you can
-  make right now.
+- **Pantry assistant** to maintain a virtual pantry, surface cookable meals, and optionally limit the recipe grid to only what you can make right now.
 - **Ingredient atlas** for browsing canonical pantry items with allergen tags, categories, and dietary filters.
 - **Personal notes** saved on every card to capture timing adjustments, guest feedback, or plating ideas.
 
-## Getting started
+## Using the planner
 
-```bash
-npm install
-npm run dev
-```
-
-The development server runs on [http://localhost:5173](http://localhost:5173) with hot reload.
-
-To create a production build:
-
-```bash
-npm run build
-npm run preview
-```
+1. Download or clone this repository.
+2. Double-click `index.html` (or open it with any modern browser such as Chrome, Edge, Firefox, or Safari).
+3. Start browsing recipes, add pantry items, and filter the library—everything runs entirely in the browser.
 
 ## Project structure
 
 ```
-src/
-  components/      Reusable UI components for filters, cards, and pantry manager
-  data/            Full recipe catalogue with nutritional, equipment, and tagging metadata
-  App.jsx          Main application shell that orchestrates filters, pantry, and layouts
-  App.css          Custom styling for the dashboard experience
+index.html          Main application shell that loads the static experience
+styles/app.css      Global styling for the dashboard and directory
+scripts/app.js      Vanilla JavaScript powering interactivity and state management
+data/ingredients.js Ingredient directory data exposed as a browser global
+data/recipes.js     Full recipe catalogue with metadata and nutrition
 ```
 
-## Ingredient dataset
+## Dataset guidelines
 
-- Canonical ingredient metadata lives in `src/data/ingredients.js`. Each entry stays on a single line with `slug`, `name`, `category`, and `tags` fields.
+- Ingredient metadata lives in `data/ingredients.js`. Each entry stays on a single line with `slug`, `name`, `category`, and `tags` fields.
 - Categories should come from the shared set used throughout the planner (Pasta, Dairy, Meat, Seafood, Herb, Spice, Vegetable, Fruit, Nut/Seed, Grain, Legume, Oil/Fat, Sweetener, Baking, Condiment/Sauce, Beverage).
 - Tags capture allergen and dietary hints (e.g., `Gluten-Free`, `Contains Nuts`, `Vegan`). Add new tags sparingly so filters remain focused.
-- Run `npm run validate:data` after editing to confirm slugs are unique, tags are valid, and categories match the approved list.
 
-## Extending the planner
+### Extending the planner
 
-- Add new recipes by updating `src/data/recipes.js`. Each recipe supports a base serving size that is used to scale ingredients and
-  nutrition totals on the fly.
-- Grow the ingredient directory by editing `src/data/ingredients.js`. Keep entries on a single line, reuse existing tags when possible, and validate with `npm run validate:data`.
-- For complex filtering or additional metadata, augment the recipe schema and enhance `App.jsx` logic.
-- The pantry matching helper (`canCookWithPantry`) currently performs simple substring checks. It can be swapped with a more robust
-  ingredient normaliser if desired.
+- Add new recipes by updating `data/recipes.js`. Each recipe supports a base serving size that is used to scale ingredients and nutrition totals on the fly.
+- Grow the ingredient directory by editing `data/ingredients.js`. Keep entries on a single line and reuse existing tags when possible.
+- For complex filtering or additional metadata, enhance the logic in `scripts/app.js`.
 
 Enjoy planning blissful meals!

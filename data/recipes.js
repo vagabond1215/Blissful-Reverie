@@ -1,4 +1,4 @@
-export const recipes = [
+window.BLISSFUL_RECIPES = [
   // Chicken
   {
     id: 'lemon-herb-roast-chicken',
@@ -2554,4 +2554,4 @@ export const recipes = [
     },
     allergens: ['dairy'],
   },
-]
+];

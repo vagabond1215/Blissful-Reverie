@@ -5,9 +5,129 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Blissful Reverie Meal Planner</title>
+    <link rel="stylesheet" href="styles/app.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="./src/main.jsx"></script>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="title-group">
+          <h1>Blissful Reverie Meal Planner</h1>
+          <p>Build weekly menus, adapt serving sizes, and filter recipes around your lifestyle.</p>
+        </div>
+        <div class="view-toggle">
+          <button type="button" class="view-toggle__button view-toggle__button--active" data-view-target="meals">
+            Meal Library
+          </button>
+          <button type="button" class="view-toggle__button" data-view-target="ingredients">
+            Ingredient Directory
+          </button>
+        </div>
+      </header>
+      <main class="layout" id="meal-view">
+        <aside class="filter-panel" id="filter-panel">
+          <div class="panel-header">
+            <h2>Filter Meals</h2>
+            <button type="button" class="reset-button" id="reset-filters">Reset</button>
+          </div>
+          <label class="input-group">
+            <span>Search</span>
+            <input type="search" id="filter-search" placeholder="Search by name, description, or tag" />
+          </label>
+          <section class="filter-section">
+            <h3>Tags</h3>
+            <div class="checkbox-grid" id="tag-options"></div>
+          </section>
+          <section class="filter-section">
+            <h3>Allergies to Avoid</h3>
+            <div class="checkbox-grid" id="allergy-options"></div>
+          </section>
+          <section class="filter-section">
+            <h3>Equipment</h3>
+            <div class="checkbox-grid" id="equipment-options"></div>
+          </section>
+          <section class="filter-section">
+            <h3>Ingredients to Include</h3>
+            <div class="ingredient-input">
+              <input list="include-ingredients" id="include-input" placeholder="Add ingredient keyword" />
+              <button type="button" id="include-add">Add</button>
+              <datalist id="include-ingredients"></datalist>
+            </div>
+            <div class="chip-row" id="include-chips"></div>
+          </section>
+          <section class="filter-section">
+            <h3>Ingredients to Exclude</h3>
+            <div class="ingredient-input">
+              <input list="exclude-ingredients" id="exclude-input" placeholder="Add ingredient keyword" />
+              <button type="button" id="exclude-add">Add</button>
+              <datalist id="exclude-ingredients"></datalist>
+            </div>
+            <div class="chip-row" id="exclude-chips"></div>
+          </section>
+        </aside>
+        <section class="content">
+          <div class="content-header">
+            <h2>Meal Library</h2>
+            <p id="meal-count">0 meals match your filters.</p>
+          </div>
+          <div class="meal-grid" id="meal-grid"></div>
+        </section>
+        <aside class="pantry-panel">
+          <h2>Your Pantry</h2>
+          <form class="pantry-form" id="pantry-form">
+            <input id="pantry-input" placeholder="Add an ingredient (e.g., chicken, cumin)" />
+            <button type="submit">Add Item</button>
+          </form>
+          <ul class="pantry-list" id="pantry-list"></ul>
+          <div class="cookable-toggle">
+            <label>
+              <input type="checkbox" id="show-cookable" />
+              Show only cookable meals
+            </label>
+          </div>
+          <section class="cookable-list">
+            <h3>
+              Meals you can make (<span id="cookable-count">0</span>)
+            </h3>
+            <div id="cookable-results"></div>
+          </section>
+        </aside>
+      </main>
+      <main class="ingredients-layout" id="ingredient-view" hidden>
+        <section class="ingredient-directory">
+          <header class="ingredient-directory__header">
+            <div>
+              <h2>Ingredient Directory</h2>
+              <p>Browse pantry staples, herbs, produce, and more with quick allergen-friendly filters.</p>
+            </div>
+            <div class="ingredient-directory__summary">
+              <span id="ingredient-count">0</span>
+              <p>ingredients match your filters</p>
+            </div>
+          </header>
+          <div class="ingredient-directory__controls">
+            <label class="ingredient-directory__control">
+              <span>Category</span>
+              <select id="ingredient-category"></select>
+            </label>
+            <label class="ingredient-directory__control ingredient-directory__control--search">
+              <span>Search</span>
+              <input type="search" id="ingredient-search" placeholder="Search name, slug, or tag" />
+            </label>
+            <label class="ingredient-directory__toggle">
+              <input type="checkbox" id="ingredient-gluten-free" />
+              <span>Gluten-Free only</span>
+            </label>
+            <label class="ingredient-directory__toggle">
+              <input type="checkbox" id="ingredient-vegan" />
+              <span>Vegan only</span>
+            </label>
+          </div>
+          <div class="ingredient-grid" id="ingredient-grid"></div>
+        </section>
+      </main>
+    </div>
+    <script src="data/ingredients.js"></script>
+    <script src="data/recipes.js"></script>
+    <script src="scripts/app.js"></script>
   </body>
 </html>
