@@ -75,7 +75,7 @@
 
   const themePreferences = loadThemePreferences();
 
-  const getDefaultFilters = () => ({
+  const getDefaultMealFilters = () => ({
     search: '',
     protein: [],
     tags: [],
@@ -83,20 +83,21 @@
     equipment: [],
   });
 
+  const getDefaultPantryFilters = () => ({
+    search: '',
+    categories: [],
+    tags: [],
+    allergens: [],
+  });
+
   const state = {
     activeView: 'meals',
-    filters: getDefaultFilters(),
+    mealFilters: getDefaultMealFilters(),
+    pantryFilters: getDefaultPantryFilters(),
     servingOverrides: {},
     notes: {},
     openNotes: {},
-    pantryItems: [],
-    showCookableOnly: false,
-    ingredientDirectory: {
-      category: 'All',
-      search: '',
-      glutenFreeOnly: false,
-      veganOnly: false,
-    },
+    pantryInventory: {},
     themeMode: themePreferences.mode,
     themeSelections: { ...themePreferences.selections },
   };
@@ -144,14 +145,58 @@
     categoryRanks.set(category, index);
   });
 
+  const ingredientCategoryOptions = categoryOrder.slice(1);
+  const ingredientTagSet = new Set(
+    ingredients.flatMap((ingredient) =>
+      Array.isArray(ingredient.tags) ? ingredient.tags.map((tag) => String(tag)) : [],
+    ),
+  );
+  const ingredientTagsSorted = Array.from(ingredientTagSet).sort((a, b) => a.localeCompare(b));
+  const allergenTagPattern = /(contains|free)/i;
+  const pantryAllergenOptions = ingredientTagsSorted.filter((tag) => allergenTagPattern.test(tag));
+  const pantryTagOptions = ingredientTagsSorted.filter((tag) => !allergenTagPattern.test(tag));
+
+  const PANTRY_UNITS = [
+    'each',
+    'oz',
+    'gram',
+    'kilogram',
+    'pound',
+    'tsp',
+    'tbsp',
+    'cup',
+    'quart',
+    'liter',
+    'ml',
+    'jar',
+    'box',
+    'bag',
+    'can',
+    'bottle',
+    'pack',
+  ];
+
+  const DEFAULT_PANTRY_UNIT = 'each';
+
   const checkboxRegistry = {
-    protein: new Map(),
-    tags: new Map(),
-    allergies: new Map(),
-    equipment: new Map(),
+    meals: {
+      protein: new Map(),
+      tags: new Map(),
+      allergies: new Map(),
+      equipment: new Map(),
+    },
+    pantry: {
+      categories: new Map(),
+      tags: new Map(),
+      allergens: new Map(),
+    },
   };
 
   const elements = {};
+  let configuredFilterView = null;
+
+  const getActiveFilters = () =>
+    state.activeView === 'meals' ? state.mealFilters : state.pantryFilters;
 
   const applyColorTheme = () => {
     const mode = state.themeMode;
@@ -242,67 +287,86 @@
 
   const normalizeText = (value) => String(value || '').toLowerCase();
 
-  const canCookWithPantry = (recipe, pantryTokens) => {
-    if (!pantryTokens.length) return false;
-    const ingredientsList = recipe.ingredients.map((ingredient) => normalizeText(ingredient.item));
-    return ingredientsList.every((ingredient) =>
-      pantryTokens.some((pantryItem) => ingredient.includes(pantryItem) || pantryItem.includes(ingredient)),
-    );
-  };
-
   const formatQuantity = (quantity) => {
     if (quantity === null || quantity === undefined) return '';
     const rounded = Math.round(quantity * 100) / 100;
     return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
   };
 
+  const getPantryEntry = (slug) => state.pantryInventory[slug] || { quantity: '', unit: DEFAULT_PANTRY_UNIT };
+
+  const updatePantryEntry = (slug, patch) => {
+    const existing = getPantryEntry(slug);
+    const next = { ...existing, ...patch };
+    const quantityValue = typeof next.quantity === 'string' ? next.quantity.trim() : next.quantity;
+    const unitValue = typeof next.unit === 'string' ? next.unit.trim() : next.unit;
+    const isQuantityEmpty = quantityValue === '' || quantityValue === null || quantityValue === undefined;
+    const normalizedUnit = unitValue || DEFAULT_PANTRY_UNIT;
+    if (isQuantityEmpty && normalizedUnit === DEFAULT_PANTRY_UNIT) {
+      delete state.pantryInventory[slug];
+    } else {
+      state.pantryInventory[slug] = {
+        quantity: isQuantityEmpty ? '' : quantityValue,
+        unit: normalizedUnit,
+      };
+    }
+  };
+
   const cacheElements = () => {
     elements.viewToggleButtons = Array.from(document.querySelectorAll('[data-view-target]'));
     elements.mealView = document.getElementById('meal-view');
-    elements.ingredientView = document.getElementById('ingredient-view');
+    elements.pantryView = document.getElementById('pantry-view');
     elements.mealGrid = document.getElementById('meal-grid');
     elements.mealCount = document.getElementById('meal-count');
+    elements.pantryGrid = document.getElementById('pantry-grid');
+    elements.pantryCount = document.getElementById('pantry-count');
+    elements.filterPanelTitle = document.getElementById('filter-panel-title');
+    elements.filterSearchLabel = document.getElementById('filter-search-label');
     elements.filterSearch = document.getElementById('filter-search');
     elements.resetButton = document.getElementById('reset-filters');
+    elements.proteinSection = document.getElementById('protein-section');
+    elements.tagSection = document.getElementById('tag-section');
+    elements.allergySection = document.getElementById('allergy-section');
+    elements.equipmentSection = document.getElementById('equipment-section');
+    elements.proteinSummary = document.getElementById('protein-summary');
+    elements.tagSummary = document.getElementById('tag-summary');
+    elements.allergySummary = document.getElementById('allergy-summary');
+    elements.equipmentSummary = document.getElementById('equipment-summary');
     elements.proteinOptions = document.getElementById('protein-options');
     elements.tagOptions = document.getElementById('tag-options');
     elements.allergyOptions = document.getElementById('allergy-options');
     elements.equipmentOptions = document.getElementById('equipment-options');
-    elements.pantryForm = document.getElementById('pantry-form');
-    elements.pantryInput = document.getElementById('pantry-input');
-    elements.pantryList = document.getElementById('pantry-list');
-    elements.showCookable = document.getElementById('show-cookable');
-    elements.cookableCount = document.getElementById('cookable-count');
-    elements.cookableResults = document.getElementById('cookable-results');
-    elements.ingredientCategory = document.getElementById('ingredient-category');
-    elements.ingredientSearch = document.getElementById('ingredient-search');
-    elements.ingredientGlutenFree = document.getElementById('ingredient-gluten-free');
-    elements.ingredientVegan = document.getElementById('ingredient-vegan');
-    elements.ingredientCount = document.getElementById('ingredient-count');
-    elements.ingredientGrid = document.getElementById('ingredient-grid');
     elements.themeOptions = document.getElementById('theme-options');
     elements.modeToggleButtons = Array.from(
       document.querySelectorAll('#mode-toggle .mode-toggle__button'),
     );
   };
 
-  const populateCheckboxGroup = (container, options, field, spanClassName) => {
+  const populateCheckboxGroup = (view, container, options, field, spanClassName) => {
+    if (!container) return;
+    const registry = checkboxRegistry[view]?.[field];
+    if (!registry) return;
+    const filters = view === 'meals' ? state.mealFilters : state.pantryFilters;
+    if (!Array.isArray(filters[field])) {
+      filters[field] = [];
+    }
     container.innerHTML = '';
-    checkboxRegistry[field].clear();
+    registry.clear();
     options.forEach((option) => {
       const label = document.createElement('label');
       label.className = 'checkbox-option';
       const input = document.createElement('input');
       input.type = 'checkbox';
       input.value = option;
+      input.checked = filters[field].includes(option);
       input.addEventListener('change', () => {
-        const current = new Set(state.filters[field]);
+        const current = new Set(filters[field]);
         if (input.checked) {
           current.add(option);
         } else {
           current.delete(option);
         }
-        state.filters[field] = Array.from(current);
+        filters[field] = Array.from(current);
         renderApp();
       });
       label.appendChild(input);
@@ -313,74 +377,100 @@
       span.textContent = option;
       label.appendChild(span);
       container.appendChild(label);
-      checkboxRegistry[field].set(option, input);
+      registry.set(option, input);
     });
   };
 
-  const populateFilterOptions = () => {
-    populateCheckboxGroup(elements.proteinOptions, proteinOptions, 'protein');
-    populateCheckboxGroup(elements.tagOptions, tagOptions, 'tags');
-    populateCheckboxGroup(elements.allergyOptions, allergyOptions, 'allergies', 'badge badge-soft');
-    populateCheckboxGroup(elements.equipmentOptions, equipmentOptions, 'equipment');
-  };
+  const configureFilterPanel = () => {
+    const view = state.activeView;
+    if (configuredFilterView === view) {
+      syncFilterControls();
+      return;
+    }
+    configuredFilterView = view;
+    const isMealsView = view === 'meals';
+    if (elements.filterPanelTitle) {
+      elements.filterPanelTitle.textContent = isMealsView ? 'Filter Meals' : 'Filter Pantry';
+    }
+    if (elements.filterSearchLabel) {
+      elements.filterSearchLabel.textContent = isMealsView ? 'Search Meals' : 'Search Pantry';
+    }
+    if (elements.filterSearch) {
+      elements.filterSearch.placeholder = isMealsView
+        ? 'Search by name, description, or tag'
+        : 'Search by ingredient name, slug, or tag';
+    }
 
-  const populateIngredientControls = () => {
-    elements.ingredientCategory.innerHTML = '';
-    categoryOrder.forEach((option) => {
-      const opt = document.createElement('option');
-      opt.value = option;
-      opt.textContent = option;
-      elements.ingredientCategory.appendChild(opt);
-    });
+    if (elements.proteinSummary) {
+      elements.proteinSummary.textContent = isMealsView ? 'Protein' : 'Categories';
+    }
+    if (elements.tagSummary) {
+      elements.tagSummary.textContent = 'Tags';
+    }
+    if (elements.allergySummary) {
+      elements.allergySummary.textContent = isMealsView ? 'Allergies to Avoid' : 'Allergen Tags';
+    }
+    if (elements.equipmentSummary) {
+      elements.equipmentSummary.textContent = isMealsView ? 'Equipment' : '';
+    }
+
+    if (elements.equipmentSection) {
+      elements.equipmentSection.hidden = !isMealsView;
+    }
+
+    if (isMealsView) {
+      populateCheckboxGroup('meals', elements.proteinOptions, proteinOptions, 'protein');
+      populateCheckboxGroup('meals', elements.tagOptions, tagOptions, 'tags');
+      populateCheckboxGroup('meals', elements.allergyOptions, allergyOptions, 'allergies', 'badge badge-soft');
+      populateCheckboxGroup('meals', elements.equipmentOptions, equipmentOptions, 'equipment');
+    } else {
+      populateCheckboxGroup('pantry', elements.proteinOptions, ingredientCategoryOptions, 'categories');
+      populateCheckboxGroup('pantry', elements.tagOptions, pantryTagOptions, 'tags');
+      populateCheckboxGroup(
+        'pantry',
+        elements.allergyOptions,
+        pantryAllergenOptions,
+        'allergens',
+        'badge badge-soft',
+      );
+      if (elements.equipmentOptions) {
+        elements.equipmentOptions.innerHTML = '';
+      }
+    }
+
+    syncFilterControls();
   };
 
   const syncFilterControls = () => {
-    elements.filterSearch.value = state.filters.search;
-    ['protein', 'tags', 'allergies', 'equipment'].forEach((field) => {
-      const map = checkboxRegistry[field];
+    if (!elements.filterSearch) return;
+    const filters = getActiveFilters();
+    elements.filterSearch.value = filters.search || '';
+    const registry = checkboxRegistry[state.activeView];
+    if (!registry) return;
+    Object.entries(registry).forEach(([field, map]) => {
+      const selected = Array.isArray(filters[field]) ? filters[field] : [];
       map.forEach((input, option) => {
-        input.checked = state.filters[field].includes(option);
+        input.checked = selected.includes(option);
       });
     });
-    elements.showCookable.checked = state.showCookableOnly;
   };
 
-  const computeDerivedState = () => {
-    const pantryTokens = state.pantryItems.map((item) => normalizeText(item));
-    const cookableRecipes = pantryTokens.length
-      ? recipes.filter((recipe) => canCookWithPantry(recipe, pantryTokens))
-      : [];
-    const cookableIds = new Set(cookableRecipes.map((recipe) => recipe.id));
-    return { pantryTokens, cookableRecipes, cookableIds };
-  };
-
-  const matchesFilters = (recipe, derived) => {
+  const matchesMealFilters = (recipe) => {
+    const filters = state.mealFilters;
     const haystack = `${recipe.name} ${recipe.description} ${(recipe.tags || []).join(' ')} ${recipe.category}`.toLowerCase();
-    if (state.filters.search && !haystack.includes(state.filters.search.toLowerCase())) {
+    if (filters.search && !haystack.includes(filters.search.toLowerCase())) {
       return false;
     }
-    if (
-      state.filters.protein.length &&
-      !state.filters.protein.some((protein) => (recipe.tags || []).includes(protein))
-    ) {
+    if (filters.protein.length && !filters.protein.some((protein) => (recipe.tags || []).includes(protein))) {
       return false;
     }
-    if (state.filters.tags.length && !state.filters.tags.every((tag) => (recipe.tags || []).includes(tag))) {
+    if (filters.tags.length && !filters.tags.every((tag) => (recipe.tags || []).includes(tag))) {
       return false;
     }
-    if (
-      state.filters.allergies.length &&
-      (recipe.allergens || []).some((allergen) => state.filters.allergies.includes(allergen))
-    ) {
+    if (filters.allergies.length && (recipe.allergens || []).some((allergen) => filters.allergies.includes(allergen))) {
       return false;
     }
-    if (
-      state.filters.equipment.length &&
-      !state.filters.equipment.every((item) => (recipe.equipment || []).includes(item))
-    ) {
-      return false;
-    }
-    if (state.showCookableOnly && derived.pantryTokens.length && !derived.cookableIds.has(recipe.id)) {
+    if (filters.equipment.length && !filters.equipment.every((item) => (recipe.equipment || []).includes(item))) {
       return false;
     }
     return true;
@@ -586,8 +676,92 @@
     return card;
   };
 
-  const renderMeals = (derived) => {
-    const filteredRecipes = recipes.filter((recipe) => matchesFilters(recipe, derived));
+  const createPantryCard = (ingredient) => {
+    const card = document.createElement('article');
+    card.className = 'pantry-card';
+
+    const entry = getPantryEntry(ingredient.slug);
+
+    const header = document.createElement('header');
+    header.className = 'pantry-card__header';
+
+    const info = document.createElement('div');
+    const title = document.createElement('h3');
+    title.textContent = ingredient.name;
+    info.appendChild(title);
+    const code = document.createElement('code');
+    code.textContent = ingredient.slug;
+    info.appendChild(code);
+    header.appendChild(info);
+
+    const badge = document.createElement('span');
+    badge.className = 'badge badge-soft';
+    badge.textContent = ingredient.category;
+    header.appendChild(badge);
+    card.appendChild(header);
+
+    if (Array.isArray(ingredient.tags) && ingredient.tags.length) {
+      const tags = document.createElement('div');
+      tags.className = 'pantry-card__tags';
+      ingredient.tags.forEach((tag) => {
+        const span = document.createElement('span');
+        span.textContent = tag;
+        tags.appendChild(span);
+      });
+      card.appendChild(tags);
+    }
+
+    const controls = document.createElement('div');
+    controls.className = 'pantry-card__controls';
+
+    const quantityControl = document.createElement('label');
+    quantityControl.className = 'pantry-card__control';
+    const quantityLabel = document.createElement('span');
+    quantityLabel.textContent = 'Quantity';
+    const quantityInput = document.createElement('input');
+    quantityInput.type = 'number';
+    quantityInput.min = '0';
+    quantityInput.step = '0.25';
+    quantityInput.inputMode = 'decimal';
+    if (entry.quantity !== undefined && entry.quantity !== '') {
+      quantityInput.value = entry.quantity;
+    } else {
+      quantityInput.value = '';
+    }
+    quantityInput.placeholder = '0';
+    quantityInput.addEventListener('input', (event) => {
+      updatePantryEntry(ingredient.slug, { quantity: event.target.value });
+    });
+    quantityControl.appendChild(quantityLabel);
+    quantityControl.appendChild(quantityInput);
+    controls.appendChild(quantityControl);
+
+    const unitControl = document.createElement('label');
+    unitControl.className = 'pantry-card__control';
+    const unitLabel = document.createElement('span');
+    unitLabel.textContent = 'Unit';
+    const unitInput = document.createElement('input');
+    unitInput.type = 'text';
+    unitInput.setAttribute('list', 'pantry-unit-options');
+    unitInput.placeholder = DEFAULT_PANTRY_UNIT;
+    const normalizedUnit = entry.unit || DEFAULT_PANTRY_UNIT;
+    unitInput.value = normalizedUnit === DEFAULT_PANTRY_UNIT ? '' : normalizedUnit;
+    const handleUnitChange = (event) => {
+      updatePantryEntry(ingredient.slug, { unit: event.target.value });
+    };
+    unitInput.addEventListener('input', handleUnitChange);
+    unitInput.addEventListener('change', handleUnitChange);
+    unitControl.appendChild(unitLabel);
+    unitControl.appendChild(unitInput);
+    controls.appendChild(unitControl);
+
+    card.appendChild(controls);
+
+    return card;
+  };
+
+  const renderMeals = () => {
+    const filteredRecipes = recipes.filter((recipe) => matchesMealFilters(recipe));
     elements.mealCount.textContent = `${filteredRecipes.length} ${filteredRecipes.length === 1 ? 'meal matches' : 'meals match'} your filters.`;
     elements.mealGrid.innerHTML = '';
     if (filteredRecipes.length) {
@@ -607,62 +781,15 @@
     }
   };
 
-  const renderPantry = (derived) => {
-    elements.pantryList.innerHTML = '';
-    if (state.pantryItems.length) {
-      state.pantryItems.forEach((item) => {
-        const li = document.createElement('li');
-        const span = document.createElement('span');
-        span.textContent = item;
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.textContent = 'Remove';
-        button.addEventListener('click', () => {
-          state.pantryItems = state.pantryItems.filter((entry) => entry !== item);
-          renderApp();
-        });
-        li.appendChild(span);
-        li.appendChild(button);
-        elements.pantryList.appendChild(li);
-      });
-    } else {
-      const li = document.createElement('li');
-      li.className = 'empty';
-      li.textContent = 'No pantry items yet.';
-      elements.pantryList.appendChild(li);
-    }
-
-    elements.cookableCount.textContent = derived.cookableRecipes.length;
-    elements.cookableResults.innerHTML = '';
-    if (derived.cookableRecipes.length) {
-      const list = document.createElement('ul');
-      derived.cookableRecipes.forEach((recipe) => {
-        const li = document.createElement('li');
-        li.textContent = recipe.name;
-        list.appendChild(li);
-      });
-      elements.cookableResults.appendChild(list);
-    } else {
-      const empty = document.createElement('p');
-      empty.className = 'empty';
-      empty.textContent = 'Add more items to unlock recipes.';
-      elements.cookableResults.appendChild(empty);
-    }
-  };
-
-  const renderIngredientDirectory = () => {
-    const { category, search, glutenFreeOnly, veganOnly } = state.ingredientDirectory;
-    elements.ingredientCategory.value = category;
-    elements.ingredientSearch.value = search;
-    elements.ingredientGlutenFree.checked = glutenFreeOnly;
-    elements.ingredientVegan.checked = veganOnly;
-
+  const renderPantry = () => {
+    if (!elements.pantryGrid || !elements.pantryCount) return;
+    const { search, categories, tags, allergens } = state.pantryFilters;
     const query = search.trim().toLowerCase();
     const filteredItems = ingredients
       .filter((ingredient) => {
-        if (category !== 'All' && ingredient.category !== category) return false;
-        if (glutenFreeOnly && !ingredient.tags.includes('Gluten-Free')) return false;
-        if (veganOnly && !ingredient.tags.includes('Vegan')) return false;
+        if (categories.length && !categories.includes(ingredient.category)) return false;
+        if (tags.length && !tags.every((tag) => ingredient.tags.includes(tag))) return false;
+        if (allergens.length && !allergens.every((tag) => ingredient.tags.includes(tag))) return false;
         if (!query) return true;
         const haystack = `${ingredient.name} ${ingredient.slug} ${ingredient.tags.join(' ')}`.toLowerCase();
         return haystack.includes(query);
@@ -674,50 +801,24 @@
         return a.name.localeCompare(b.name);
       });
 
-    elements.ingredientCount.textContent = filteredItems.length;
-    elements.ingredientGrid.innerHTML = '';
-    if (filteredItems.length) {
-      filteredItems.forEach((ingredient) => {
-        const card = document.createElement('article');
-        card.className = 'ingredient-card';
-        const header = document.createElement('header');
-        header.className = 'ingredient-card__header';
-        const title = document.createElement('h3');
-        title.textContent = ingredient.name;
-        const code = document.createElement('code');
-        code.textContent = ingredient.slug;
-        header.appendChild(title);
-        header.appendChild(code);
-        card.appendChild(header);
-        const meta = document.createElement('div');
-        meta.className = 'ingredient-card__meta';
-        const badge = document.createElement('span');
-        badge.className = 'badge badge-soft';
-        badge.textContent = ingredient.category;
-        meta.appendChild(badge);
-        card.appendChild(meta);
-        const tags = document.createElement('div');
-        tags.className = 'ingredient-card__tags';
-        ingredient.tags.forEach((tag) => {
-          const span = document.createElement('span');
-          span.className = 'ingredient-tag';
-          span.textContent = tag;
-          tags.appendChild(span);
-        });
-        card.appendChild(tags);
-        elements.ingredientGrid.appendChild(card);
-      });
-    } else {
+    elements.pantryCount.textContent = filteredItems.length;
+    elements.pantryGrid.innerHTML = '';
+    if (!filteredItems.length) {
       const empty = document.createElement('div');
-      empty.className = 'ingredient-directory__empty';
+      empty.className = 'empty-state';
       const heading = document.createElement('h3');
-      heading.textContent = 'No ingredients found';
+      heading.textContent = 'No pantry items found';
       const paragraph = document.createElement('p');
-      paragraph.textContent = 'Try clearing a filter or searching for a different keyword.';
+      paragraph.textContent = 'Try adjusting your filters or search to find more ingredients.';
       empty.appendChild(heading);
       empty.appendChild(paragraph);
-      elements.ingredientGrid.appendChild(empty);
+      elements.pantryGrid.appendChild(empty);
+      return;
     }
+
+    filteredItems.forEach((ingredient) => {
+      elements.pantryGrid.appendChild(createPantryCard(ingredient));
+    });
   };
 
   const updateView = () => {
@@ -729,28 +830,22 @@
         button.classList.remove('view-toggle__button--active');
       }
     });
-    elements.mealView.hidden = state.activeView !== 'meals';
-    elements.ingredientView.hidden = state.activeView !== 'ingredients';
+    if (elements.mealView) {
+      elements.mealView.hidden = state.activeView !== 'meals';
+    }
+    if (elements.pantryView) {
+      elements.pantryView.hidden = state.activeView !== 'pantry';
+    }
   };
 
   const renderApp = () => {
-    syncFilterControls();
-    const derived = computeDerivedState();
-    renderMeals(derived);
-    renderPantry(derived);
-    renderIngredientDirectory();
-    updateView();
-  };
-
-  const handlePantrySubmit = (event) => {
-    event.preventDefault();
-    const value = normalizeText(elements.pantryInput.value.trim());
-    if (!value) return;
-    if (!state.pantryItems.includes(value)) {
-      state.pantryItems = [...state.pantryItems, value];
-      renderApp();
+    configureFilterPanel();
+    if (state.activeView === 'meals') {
+      renderMeals();
+    } else {
+      renderPantry();
     }
-    elements.pantryInput.value = '';
+    updateView();
   };
 
   const bindEvents = () => {
@@ -759,44 +854,30 @@
         const target = button.dataset.viewTarget;
         if (target && target !== state.activeView) {
           state.activeView = target;
-          updateView();
+          configuredFilterView = null;
+          renderApp();
         }
       });
     });
 
-    elements.filterSearch.addEventListener('input', (event) => {
-      state.filters.search = event.target.value;
-      renderApp();
-    });
+    if (elements.filterSearch) {
+      elements.filterSearch.addEventListener('input', (event) => {
+        const filters = getActiveFilters();
+        filters.search = event.target.value;
+        renderApp();
+      });
+    }
 
-    elements.resetButton.addEventListener('click', () => {
-      state.filters = getDefaultFilters();
-      renderApp();
-    });
-
-    elements.pantryForm.addEventListener('submit', handlePantrySubmit);
-
-    elements.showCookable.addEventListener('change', (event) => {
-      state.showCookableOnly = event.target.checked;
-      renderApp();
-    });
-
-    elements.ingredientCategory.addEventListener('change', (event) => {
-      state.ingredientDirectory.category = event.target.value;
-      renderIngredientDirectory();
-    });
-    elements.ingredientSearch.addEventListener('input', (event) => {
-      state.ingredientDirectory.search = event.target.value;
-      renderIngredientDirectory();
-    });
-    elements.ingredientGlutenFree.addEventListener('change', (event) => {
-      state.ingredientDirectory.glutenFreeOnly = event.target.checked;
-      renderIngredientDirectory();
-    });
-    elements.ingredientVegan.addEventListener('change', (event) => {
-      state.ingredientDirectory.veganOnly = event.target.checked;
-      renderIngredientDirectory();
-    });
+    if (elements.resetButton) {
+      elements.resetButton.addEventListener('click', () => {
+        if (state.activeView === 'meals') {
+          state.mealFilters = getDefaultMealFilters();
+        } else {
+          state.pantryFilters = getDefaultPantryFilters();
+        }
+        renderApp();
+      });
+    }
 
     if (Array.isArray(elements.modeToggleButtons)) {
       elements.modeToggleButtons.forEach((button) => {
@@ -812,8 +893,6 @@
 
   const init = () => {
     cacheElements();
-    populateFilterOptions();
-    populateIngredientControls();
     bindEvents();
     initThemeControls();
     renderApp();
