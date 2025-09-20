@@ -29,8 +29,8 @@
                 >
                   Meal Library
                 </button>
-                <button type="button" class="view-toggle__button" data-view-target="ingredients">
-                  Ingredient Directory
+                <button type="button" class="view-toggle__button" data-view-target="pantry">
+                  Pantry
                 </button>
               </div>
               <details class="settings-panel" id="settings-panel">
@@ -70,102 +70,86 @@
           </div>
         </div>
       </header>
-      <main class="layout" id="meal-view">
+      <main class="layout" id="app-layout">
         <aside class="filter-panel" id="filter-panel">
           <div class="panel-header">
-            <h2>Filter Meals</h2>
+            <h2 id="filter-panel-title">Filter Meals</h2>
             <button type="button" class="reset-button" id="reset-filters">Reset</button>
           </div>
           <label class="input-group">
-            <span>Search</span>
-            <input type="search" id="filter-search" placeholder="Search by name, description, or tag" />
+            <span id="filter-search-label">Search</span>
+            <input
+              type="search"
+              id="filter-search"
+              placeholder="Search by name, description, or tag"
+              aria-describedby="filter-search-label"
+            />
           </label>
-          <details class="filter-section" open>
-            <summary>Protein</summary>
+          <details class="filter-section" open id="protein-section">
+            <summary id="protein-summary">Protein</summary>
             <div class="filter-section__content">
               <div class="checkbox-grid" id="protein-options"></div>
             </div>
           </details>
-          <details class="filter-section" open>
-            <summary>Tags</summary>
+          <details class="filter-section" open id="tag-section">
+            <summary id="tag-summary">Tags</summary>
             <div class="filter-section__content">
               <div class="checkbox-grid" id="tag-options"></div>
             </div>
           </details>
-          <details class="filter-section" open>
-            <summary>Allergies to Avoid</summary>
+          <details class="filter-section" open id="allergy-section">
+            <summary id="allergy-summary">Allergies to Avoid</summary>
             <div class="filter-section__content">
               <div class="checkbox-grid" id="allergy-options"></div>
             </div>
           </details>
-          <details class="filter-section" open>
-            <summary>Equipment</summary>
+          <details class="filter-section" open id="equipment-section">
+            <summary id="equipment-summary">Equipment</summary>
             <div class="filter-section__content">
               <div class="checkbox-grid" id="equipment-options"></div>
             </div>
           </details>
         </aside>
-        <section class="content">
+        <section class="content" id="meal-view">
           <div class="content-header">
             <h2>Meal Library</h2>
             <p id="meal-count">0 meals match your filters.</p>
           </div>
           <div class="meal-grid" id="meal-grid"></div>
         </section>
-        <aside class="pantry-panel">
-          <h2>Your Pantry</h2>
-          <form class="pantry-form" id="pantry-form">
-            <input id="pantry-input" placeholder="Add an ingredient (e.g., chicken, cumin)" />
-            <button type="submit">Add Item</button>
-          </form>
-          <ul class="pantry-list" id="pantry-list"></ul>
-          <div class="cookable-toggle">
-            <label>
-              <input type="checkbox" id="show-cookable" />
-              Show only cookable meals
-            </label>
-          </div>
-          <section class="cookable-list">
-            <h3>
-              Meals you can make (<span id="cookable-count">0</span>)
-            </h3>
-            <div id="cookable-results"></div>
-          </section>
-        </aside>
-      </main>
-      <main class="ingredients-layout" id="ingredient-view" hidden>
-        <section class="ingredient-directory">
-          <header class="ingredient-directory__header">
+        <section class="pantry-view" id="pantry-view" hidden>
+          <header class="pantry-view__header">
             <div>
-              <h2>Ingredient Directory</h2>
-              <p>Browse pantry staples, herbs, produce, and more with quick allergen-friendly filters.</p>
+              <h2>Pantry</h2>
+              <p>Adjust quantities for every ingredient you keep on hand.</p>
             </div>
-            <div class="ingredient-directory__summary">
-              <span id="ingredient-count">0</span>
-              <p>ingredients match your filters</p>
+            <div class="pantry-view__summary">
+              <span id="pantry-count">0</span>
+              <p>items match your filters</p>
             </div>
           </header>
-          <div class="ingredient-directory__controls">
-            <label class="ingredient-directory__control">
-              <span>Category</span>
-              <select id="ingredient-category"></select>
-            </label>
-            <label class="ingredient-directory__control ingredient-directory__control--search">
-              <span>Search</span>
-              <input type="search" id="ingredient-search" placeholder="Search name, slug, or tag" />
-            </label>
-            <label class="ingredient-directory__toggle">
-              <input type="checkbox" id="ingredient-gluten-free" />
-              <span>Gluten-Free only</span>
-            </label>
-            <label class="ingredient-directory__toggle">
-              <input type="checkbox" id="ingredient-vegan" />
-              <span>Vegan only</span>
-            </label>
-          </div>
-          <div class="ingredient-grid" id="ingredient-grid"></div>
+          <div class="pantry-grid" id="pantry-grid"></div>
         </section>
       </main>
+      <datalist id="pantry-unit-options">
+        <option value="each"></option>
+        <option value="oz"></option>
+        <option value="gram"></option>
+        <option value="kilogram"></option>
+        <option value="pound"></option>
+        <option value="tsp"></option>
+        <option value="tbsp"></option>
+        <option value="cup"></option>
+        <option value="quart"></option>
+        <option value="liter"></option>
+        <option value="ml"></option>
+        <option value="jar"></option>
+        <option value="box"></option>
+        <option value="bag"></option>
+        <option value="can"></option>
+        <option value="bottle"></option>
+        <option value="pack"></option>
+      </datalist>
     </div>
     <script src="data/ingredients.js"></script>
     <script src="data/recipes.js"></script>
