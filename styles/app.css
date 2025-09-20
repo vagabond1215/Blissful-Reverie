@@ -451,7 +451,7 @@ textarea:focus {
   gap: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text-badge);
+  color: var(--color-text-strong);
 }
 
 .filter-section summary::-webkit-details-marker {
@@ -462,8 +462,8 @@ textarea:focus {
   content: '';
   width: 0.7rem;
   height: 0.7rem;
-  border-right: 2px solid var(--color-text-muted);
-  border-bottom: 2px solid var(--color-text-muted);
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
   transform: rotate(45deg);
   transition: transform 0.2s ease;
 }
