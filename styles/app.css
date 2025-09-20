@@ -1243,9 +1243,10 @@ textarea:focus {
   --color-text-instruction: #d5defa;
   --color-text-inline: #e2ecff;
   --color-tag-text: #e0e7ff;
+  --color-text-emphasis: #f4f7ff;
 
   --color-surface: #0f172a;
-  --color-surface-soft: rgba(15, 23, 42, 0.85);
+  --color-surface-soft: rgba(47, 109, 240, 0.18);
   --color-surface-highlight: rgba(96, 165, 250, 0.24);
   --color-header-background: rgba(15, 23, 42, 0.94);
   --color-header-shadow: rgba(2, 6, 23, 0.78);
@@ -1284,6 +1285,7 @@ textarea:focus {
   --body-gradient-end: #050311;
 
   --color-surface: #1f1936;
+  --color-surface-soft: rgba(168, 85, 247, 0.2);
   --color-header-background: rgba(31, 25, 54, 0.95);
   --color-header-shadow: rgba(9, 6, 25, 0.72);
 
@@ -1298,6 +1300,8 @@ textarea:focus {
 
   --color-inline-tag-background: rgba(168, 85, 247, 0.36);
   --color-inline-tag-text: #f4f3ff;
+  --color-tag-text: #f4f3ff;
+  --color-text-emphasis: #f5f3ff;
   --color-surface-highlight: rgba(139, 92, 246, 0.28);
 
   --color-border: rgba(196, 181, 253, 0.5);
@@ -1319,6 +1323,7 @@ textarea:focus {
   --body-gradient-end: #010f0c;
 
   --color-surface: #0f1f1a;
+  --color-surface-soft: rgba(45, 212, 191, 0.2);
   --color-header-background: rgba(15, 31, 26, 0.95);
   --color-header-shadow: rgba(1, 15, 12, 0.7);
 
@@ -1333,6 +1338,8 @@ textarea:focus {
 
   --color-inline-tag-background: rgba(45, 212, 191, 0.36);
   --color-inline-tag-text: #e0fdf6;
+  --color-tag-text: #e0fdf6;
+  --color-text-emphasis: #dcfce7;
   --color-surface-highlight: rgba(45, 212, 191, 0.28);
 
   --color-border: rgba(134, 239, 172, 0.45);
@@ -1354,6 +1361,7 @@ textarea:focus {
   --body-gradient-end: #080402;
 
   --color-surface: #1e130a;
+  --color-surface-soft: rgba(249, 115, 22, 0.22);
   --color-header-background: rgba(30, 19, 10, 0.95);
   --color-header-shadow: rgba(8, 4, 2, 0.76);
 
@@ -1368,6 +1376,8 @@ textarea:focus {
 
   --color-inline-tag-background: rgba(249, 115, 22, 0.32);
   --color-inline-tag-text: #ffedd5;
+  --color-tag-text: #ffedd5;
+  --color-text-emphasis: #ffe7d6;
   --color-surface-highlight: rgba(251, 146, 60, 0.36);
 
   --color-border: rgba(251, 146, 60, 0.4);
@@ -1389,6 +1399,7 @@ textarea:focus {
   --body-gradient-end: #01070b;
 
   --color-surface: #0b1f24;
+  --color-surface-soft: rgba(14, 165, 233, 0.22);
   --color-header-background: rgba(11, 31, 36, 0.95);
   --color-header-shadow: rgba(1, 7, 11, 0.72);
 
@@ -1403,6 +1414,8 @@ textarea:focus {
 
   --color-inline-tag-background: rgba(13, 148, 136, 0.32);
   --color-inline-tag-text: #d5fef9;
+  --color-tag-text: #d5fef9;
+  --color-text-emphasis: #d6f7ff;
   --color-surface-highlight: rgba(14, 165, 233, 0.3);
 
   --color-border: rgba(14, 165, 233, 0.38);
@@ -1424,6 +1437,7 @@ textarea:focus {
   --body-gradient-end: #08010a;
 
   --color-surface: #240b20;
+  --color-surface-soft: rgba(236, 72, 153, 0.22);
   --color-header-background: rgba(36, 11, 32, 0.95);
   --color-header-shadow: rgba(8, 1, 10, 0.74);
 
@@ -1438,6 +1452,8 @@ textarea:focus {
 
   --color-inline-tag-background: rgba(236, 72, 153, 0.34);
   --color-inline-tag-text: #fde8f3;
+  --color-tag-text: #fde8f3;
+  --color-text-emphasis: #fde6f2;
   --color-surface-highlight: rgba(236, 72, 153, 0.34);
 
   --color-border: rgba(236, 72, 153, 0.38);
