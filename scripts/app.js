@@ -8,6 +8,49 @@
     return;
   }
 
+  const THEME_STORAGE_KEY = 'blissful-theme';
+  const THEME_OPTIONS = {
+    light: [
+      { id: 'serene', label: 'Serene', preview: '#5160d9' },
+      { id: 'sunrise', label: 'Sunrise', preview: '#f97316' },
+      { id: 'meadow', label: 'Meadow', preview: '#2f855a' },
+    ],
+    dark: [
+      { id: 'midnight', label: 'Midnight', preview: '#2563eb' },
+      { id: 'nebula', label: 'Nebula', preview: '#a855f7' },
+      { id: 'forest', label: 'Forest', preview: '#34d399' },
+    ],
+  };
+
+  const DEFAULT_THEME_SELECTIONS = {
+    light: 'serene',
+    dark: 'midnight',
+  };
+
+  const loadThemePreferences = () => {
+    const fallback = { mode: 'light', selections: { ...DEFAULT_THEME_SELECTIONS } };
+    try {
+      const stored = JSON.parse(localStorage.getItem(THEME_STORAGE_KEY));
+      if (!stored || typeof stored !== 'object') {
+        return fallback;
+      }
+      const mode = stored.mode === 'dark' ? 'dark' : 'light';
+      const selections = { ...DEFAULT_THEME_SELECTIONS, ...(stored.selections || {}) };
+      ['light', 'dark'].forEach((key) => {
+        if (!Array.isArray(THEME_OPTIONS[key])) return;
+        if (!THEME_OPTIONS[key].some((option) => option.id === selections[key])) {
+          selections[key] = DEFAULT_THEME_SELECTIONS[key];
+        }
+      });
+      return { mode, selections };
+    } catch (error) {
+      console.warn('Unable to read saved theme preferences.', error);
+      return fallback;
+    }
+  };
+
+  const themePreferences = loadThemePreferences();
+
   const getDefaultFilters = () => ({
     search: '',
     tags: [],
@@ -31,6 +74,8 @@
       glutenFreeOnly: false,
       veganOnly: false,
     },
+    themeMode: themePreferences.mode,
+    themeSelections: { ...themePreferences.selections },
   };
 
   const tagOptions = Array.from(
@@ -93,6 +138,86 @@
 
   const elements = {};
 
+  const applyColorTheme = () => {
+    const mode = state.themeMode;
+    const options = THEME_OPTIONS[mode] || [];
+    const fallback = DEFAULT_THEME_SELECTIONS[mode];
+    const currentSelection = state.themeSelections[mode];
+    const activeTheme = options.some((option) => option.id === currentSelection)
+      ? currentSelection
+      : fallback;
+    if (activeTheme !== currentSelection) {
+      state.themeSelections[mode] = activeTheme;
+    }
+    document.documentElement.dataset.mode = mode;
+    document.documentElement.dataset.theme = activeTheme;
+    try {
+      localStorage.setItem(
+        THEME_STORAGE_KEY,
+        JSON.stringify({ mode, selections: { ...state.themeSelections } }),
+      );
+    } catch (error) {
+      console.warn('Unable to persist theme preferences.', error);
+    }
+  };
+
+  const updateModeButtons = () => {
+    if (!Array.isArray(elements.modeToggleButtons)) return;
+    elements.modeToggleButtons.forEach((button) => {
+      const mode = button.dataset.mode;
+      const isActive = mode === state.themeMode;
+      button.classList.toggle('mode-toggle__button--active', isActive);
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  };
+
+  const renderThemeOptions = () => {
+    if (!elements.themeOptions) return;
+    const currentMode = state.themeMode;
+    const options = THEME_OPTIONS[currentMode] || [];
+    const activeTheme = state.themeSelections[currentMode];
+    elements.themeOptions.innerHTML = '';
+    options.forEach((option) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'theme-option';
+      button.style.setProperty('--theme-preview-color', option.preview);
+      const isActive = option.id === activeTheme;
+      if (isActive) {
+        button.classList.add('theme-option--active');
+        button.setAttribute('aria-pressed', 'true');
+      } else {
+        button.setAttribute('aria-pressed', 'false');
+      }
+      button.dataset.themeOption = option.id;
+      button.textContent = option.label;
+      button.addEventListener('click', () => {
+        if (state.themeSelections[currentMode] === option.id) return;
+        state.themeSelections[currentMode] = option.id;
+        applyColorTheme();
+        renderThemeOptions();
+      });
+      elements.themeOptions.appendChild(button);
+    });
+  };
+
+  const setThemeMode = (mode) => {
+    if (!THEME_OPTIONS[mode] || state.themeMode === mode) return;
+    state.themeMode = mode;
+    if (!THEME_OPTIONS[mode].some((option) => option.id === state.themeSelections[mode])) {
+      state.themeSelections[mode] = DEFAULT_THEME_SELECTIONS[mode];
+    }
+    applyColorTheme();
+    updateModeButtons();
+    renderThemeOptions();
+  };
+
+  const initThemeControls = () => {
+    applyColorTheme();
+    updateModeButtons();
+    renderThemeOptions();
+  };
+
   const normalizeText = (value) => String(value || '').toLowerCase();
 
   const canCookWithPantry = (recipe, pantryTokens) => {
@@ -140,6 +265,10 @@
     elements.ingredientVegan = document.getElementById('ingredient-vegan');
     elements.ingredientCount = document.getElementById('ingredient-count');
     elements.ingredientGrid = document.getElementById('ingredient-grid');
+    elements.themeOptions = document.getElementById('theme-options');
+    elements.modeToggleButtons = Array.from(
+      document.querySelectorAll('#mode-toggle .mode-toggle__button'),
+    );
   };
 
   const populateCheckboxGroup = (container, options, field, spanClassName) => {
@@ -720,6 +849,17 @@
       state.ingredientDirectory.veganOnly = event.target.checked;
       renderIngredientDirectory();
     });
+
+    if (Array.isArray(elements.modeToggleButtons)) {
+      elements.modeToggleButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const mode = button.dataset.mode;
+          if (mode) {
+            setThemeMode(mode);
+          }
+        });
+      });
+    }
   };
 
   const init = () => {
@@ -727,6 +867,7 @@
     populateFilterOptions();
     populateIngredientControls();
     bindEvents();
+    initThemeControls();
     renderApp();
   };
 

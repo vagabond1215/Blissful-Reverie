@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-mode="light" data-theme="serene">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
@@ -21,6 +21,28 @@
           <button type="button" class="view-toggle__button" data-view-target="ingredients">
             Ingredient Directory
           </button>
+        </div>
+        <div class="theme-toolbar" id="theme-toolbar">
+          <div class="theme-toolbar__group">
+            <span class="theme-toolbar__label">Mode</span>
+            <div class="theme-toolbar__options" id="mode-toggle">
+              <button
+                type="button"
+                class="mode-toggle__button mode-toggle__button--active"
+                data-mode="light"
+                aria-pressed="true"
+              >
+                Light
+              </button>
+              <button type="button" class="mode-toggle__button" data-mode="dark" aria-pressed="false">
+                Dark
+              </button>
+            </div>
+          </div>
+          <div class="theme-toolbar__group">
+            <span class="theme-toolbar__label">Palette</span>
+            <div class="theme-toolbar__options theme-toolbar__options--themes" id="theme-options"></div>
+          </div>
         </div>
       </header>
       <main class="layout" id="meal-view">
