@@ -41,6 +41,9 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'seafood-salmon', name: 'Salmon', category: 'Seafood', tags: ['Pescatarian', 'Gluten-Free'] },
   { slug: 'seafood-tuna', name: 'Tuna', category: 'Seafood', tags: ['Pescatarian', 'Gluten-Free'] },
   { slug: 'seafood-shrimp', name: 'Shrimp', category: 'Seafood', tags: ['Pescatarian', 'Gluten-Free', 'Shellfish'] },
+  { slug: 'seafood-cod', name: 'Cod Fillets', category: 'Seafood', tags: ['Pescatarian', 'Gluten-Free'] },
+  { slug: 'seafood-scallops', name: 'Sea Scallops', category: 'Seafood', tags: ['Pescatarian', 'Gluten-Free', 'Shellfish'] },
+  { slug: 'seafood-mussels', name: 'Mussels', category: 'Seafood', tags: ['Pescatarian', 'Gluten-Free', 'Shellfish'] },
 
   // Herbs
   { slug: 'herb-basil', name: 'Basil', category: 'Herb', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
@@ -129,6 +132,9 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'legume-kidney-beans', name: 'Kidney Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'legume-lentil-brown', name: 'Lentils (Brown)', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'legume-peanut', name: 'Peanuts (Legume)', category: 'Legume', tags: ['Contains Nuts', 'Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'legume-pinto-beans', name: 'Pinto Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'legume-navy-beans', name: 'Navy Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'legume-split-peas', name: 'Split Peas', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
 
   // Oils & Fats
   { slug: 'oil-avocado', name: 'Avocado Oil', category: 'Oil/Fat', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
@@ -137,12 +143,18 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'oil-olive-extra-virgin', name: 'Olive Oil (Extra Virgin)', category: 'Oil/Fat', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'oil-sesame', name: 'Sesame Oil', category: 'Oil/Fat', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Sesame'] },
   { slug: 'fat-lard', name: 'Lard', category: 'Oil/Fat', tags: ['Gluten-Free', 'Paleo'] },
+  { slug: 'oil-grapeseed', name: 'Grapeseed Oil', category: 'Oil/Fat', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'oil-peanut', name: 'Peanut Oil', category: 'Oil/Fat', tags: ['Contains Nuts', 'Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'oil-clarified-butter', name: 'Clarified Butter', category: 'Oil/Fat', tags: ['Contains Dairy', 'Vegetarian'] },
 
   // Sweeteners
   { slug: 'sweetener-brown-sugar', name: 'Brown Sugar', category: 'Sweetener', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'sweetener-honey', name: 'Honey', category: 'Sweetener', tags: ['Gluten-Free', 'Vegetarian'] }, // not vegan
   { slug: 'sweetener-maple-syrup', name: 'Maple Syrup', category: 'Sweetener', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'sweetener-white-sugar', name: 'White Sugar', category: 'Sweetener', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'sweetener-agave-nectar', name: 'Agave Nectar', category: 'Sweetener', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'sweetener-coconut-sugar', name: 'Coconut Sugar', category: 'Sweetener', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'sweetener-date-syrup', name: 'Date Syrup', category: 'Sweetener', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
 
   // Baking
   { slug: 'baking-baking-powder', name: 'Baking Powder', category: 'Baking', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan'] }, // *many are GF; check brand
@@ -171,4 +183,7 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'bev-red-wine', name: 'Red Wine', category: 'Beverage', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'bev-white-wine', name: 'White Wine', category: 'Beverage', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'bev-beer', name: 'Beer (Standard)', category: 'Beverage', tags: ['Contains Gluten', 'Vegetarian', 'Vegan'] },
+  { slug: 'bev-beef-stock', name: 'Beef Stock', category: 'Beverage', tags: ['Gluten-Free*'] },
+  { slug: 'bev-coconut-water', name: 'Coconut Water', category: 'Beverage', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'bev-sparkling-water', name: 'Sparkling Water', category: 'Beverage', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
 ];
