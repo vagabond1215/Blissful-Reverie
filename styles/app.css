@@ -33,6 +33,24 @@
 
   --gradient-accent: linear-gradient(135deg, var(--color-accent), var(--color-accent-strong));
 
+  --color-accent-secondary: #f59e0b;
+  --color-accent-secondary-strong: #d97706;
+  --color-accent-secondary-soft: rgba(245, 158, 11, 0.18);
+  --color-accent-secondary-outline: rgba(245, 158, 11, 0.32);
+  --color-accent-secondary-contrast: #2b1a0f;
+  --color-accent-secondary-shadow: rgba(245, 158, 11, 0.35);
+  --gradient-accent-secondary: linear-gradient(
+    135deg,
+    var(--color-accent-secondary),
+    var(--color-accent-secondary-strong)
+  );
+
+  --color-neutral-50: #f6f8ff;
+  --color-neutral-100: #e5eafe;
+  --color-neutral-200: #d2dcfb;
+  --color-neutral-400: #a6b5ec;
+  --color-neutral-600: #5d6ca6;
+
   --color-border: #b8c4e3;
   --color-border-strong: #9caad3;
   --color-border-muted: #d3daf1;
@@ -389,7 +407,12 @@ select {
 .filter-panel,
 .meal-card,
 .pantry-view {
-  background: var(--color-surface);
+  background: linear-gradient(
+    180deg,
+    var(--color-neutral-50, var(--color-surface)),
+    var(--color-surface)
+  );
+  border: 1px solid var(--color-neutral-100, var(--color-border-muted));
   border-radius: 18px;
   box-shadow: 0 22px 45px -30px var(--color-card-shadow);
 }
@@ -410,20 +433,27 @@ select {
 .panel-header h2 {
   margin: 0;
   font-size: 1.35rem;
+  position: relative;
+  padding-bottom: 0.35rem;
+  color: var(--color-text-emphasis);
 }
 
 .reset-button {
-  background: none;
-  border: 1px solid var(--color-border);
+  background: var(--color-neutral-50, transparent);
+  border: 1px solid var(--color-accent-secondary);
   border-radius: 999px;
   padding: 0.35rem 0.85rem;
-  color: var(--color-accent);
+  color: var(--color-accent-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .reset-button:hover {
-  background: var(--color-accent-outline);
+  background: var(--color-accent-secondary-soft, var(--color-accent-outline));
+  color: var(--color-accent-secondary-contrast, var(--color-text-strong));
+  border-color: transparent;
+  box-shadow: 0 12px 25px -18px
+    var(--color-accent-secondary-shadow, var(--color-card-shadow-soft));
 }
 
 .input-group {
@@ -433,10 +463,12 @@ select {
 }
 
 .input-group input {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-neutral-200, var(--color-border));
   border-radius: 12px;
   padding: 0.6rem 0.75rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: var(--color-neutral-50, #ffffff);
+  color: var(--color-text-strong);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .input-group input:focus,
@@ -448,16 +480,25 @@ textarea:focus {
 }
 
 .filter-section {
-  border: 1px solid var(--color-border-muted);
+  border: 1px solid var(--color-neutral-200, var(--color-border-muted));
   border-radius: 16px;
   padding: 0.85rem 1rem;
-  background: var(--color-surface-soft);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: linear-gradient(
+    135deg,
+    var(--color-neutral-50, var(--color-surface-soft)),
+    var(--color-surface-soft)
+  );
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .filter-section[open] {
-  border-color: var(--color-border);
+  border-color: var(--color-neutral-400, var(--color-border));
   box-shadow: 0 12px 30px -28px var(--color-card-shadow-soft);
+  background: linear-gradient(
+    135deg,
+    var(--color-neutral-50, var(--color-surface-soft)),
+    var(--color-surface-soft)
+  );
 }
 
 .filter-section summary {
@@ -470,7 +511,7 @@ textarea:focus {
   gap: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text-strong);
+  color: var(--color-accent-secondary, var(--color-text-strong));
 }
 
 .filter-section summary::-webkit-details-marker {
@@ -574,6 +615,22 @@ textarea:focus {
 .content-header h2 {
   margin: 0;
   font-size: 1.6rem;
+  position: relative;
+  padding-bottom: 0.35rem;
+  color: var(--color-text-emphasis);
+}
+
+.panel-header h2::after,
+.content-header h2::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 3rem;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--gradient-accent-secondary, var(--gradient-accent));
+  opacity: 0.85;
 }
 
 .content-header p {
@@ -622,14 +679,21 @@ textarea:focus {
   align-items: center;
   padding: 0.2rem 0.65rem;
   border-radius: 999px;
-  background: var(--color-accent-soft);
-  color: var(--color-text-badge);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-secondary-soft, var(--color-accent-soft)),
+    var(--color-accent-soft)
+  );
+  color: var(--color-accent-secondary-contrast, var(--color-text-badge));
+  border: 1px solid var(--color-accent-secondary-outline, transparent);
+  box-shadow: 0 8px 18px -14px
+    var(--color-accent-secondary-shadow, transparent);
   font-size: 0.82rem;
 }
 
 .badge-soft {
-  background: var(--color-neutral-soft);
-  color: var(--color-text-inline);
+  background: var(--color-neutral-100, var(--color-neutral-soft));
+  color: var(--color-neutral-600, var(--color-text-inline));
 }
 
 .serving-controls {
@@ -646,10 +710,12 @@ textarea:focus {
 
 .serving-controls input {
   width: 100%;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-neutral-200, var(--color-border));
   border-radius: 12px;
   padding: 0.45rem 0.5rem;
   text-align: center;
+  background: var(--color-neutral-50, #ffffff);
+  color: var(--color-text-strong);
 }
 
 .base-serving {
@@ -745,10 +811,12 @@ textarea:focus {
 
 .meal-card__footer textarea {
   min-height: 90px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-neutral-200, var(--color-border));
   border-radius: 12px;
   padding: 0.75rem;
   resize: vertical;
+  background: var(--color-neutral-50, #ffffff);
+  color: var(--color-text-strong);
 }
 
 .pantry-view {
@@ -979,19 +1047,34 @@ textarea:focus {
 }
 
 .view-toggle__button {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-accent-secondary-outline, var(--color-border));
   border-radius: 999px;
   padding: 0.55rem 1.3rem;
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
+  background: linear-gradient(
+    135deg,
+    var(--color-neutral-50, var(--color-surface-soft)),
+    var(--color-neutral-100, var(--color-surface-soft))
+  );
+  color: var(--color-accent-secondary, var(--color-accent));
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .view-toggle__button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 25px -18px var(--color-accent-shadow);
+  box-shadow: 0 12px 25px -18px
+    var(--color-accent-secondary-shadow, var(--color-accent-shadow));
+  background: linear-gradient(
+    135deg,
+    var(--color-neutral-100, var(--color-surface-soft)),
+    var(--color-accent-secondary-soft, var(--color-accent-soft))
+  );
 }
 
 .view-toggle__button--active {
@@ -1020,6 +1103,19 @@ textarea:focus {
   --color-accent-border: #fca15d;
   --color-accent-shadow: rgba(249, 115, 22, 0.48);
   --color-accent-shadow-strong: rgba(244, 63, 94, 0.52);
+
+  --color-accent-secondary: #0ea5e9;
+  --color-accent-secondary-strong: #0284c7;
+  --color-accent-secondary-soft: rgba(14, 165, 233, 0.22);
+  --color-accent-secondary-outline: rgba(14, 165, 233, 0.32);
+  --color-accent-secondary-contrast: #012a3a;
+  --color-accent-secondary-shadow: rgba(14, 165, 233, 0.3);
+
+  --color-neutral-50: #fff6ef;
+  --color-neutral-100: #ffe4d6;
+  --color-neutral-200: #fdd2be;
+  --color-neutral-400: #f4b391;
+  --color-neutral-600: #c26a3d;
 
   --color-inline-tag-background: rgba(254, 215, 170, 0.42);
   --color-inline-tag-text: #7c2d12;
@@ -1057,6 +1153,19 @@ textarea:focus {
   --color-accent-shadow: rgba(47, 133, 90, 0.45);
   --color-accent-shadow-strong: rgba(56, 189, 148, 0.48);
 
+  --color-accent-secondary: #6366f1;
+  --color-accent-secondary-strong: #4f46e5;
+  --color-accent-secondary-soft: rgba(99, 102, 241, 0.22);
+  --color-accent-secondary-outline: rgba(99, 102, 241, 0.32);
+  --color-accent-secondary-contrast: #f5f3ff;
+  --color-accent-secondary-shadow: rgba(99, 102, 241, 0.34);
+
+  --color-neutral-50: #f1fcf3;
+  --color-neutral-100: #dff7e6;
+  --color-neutral-200: #c9eed6;
+  --color-neutral-400: #9ddbb1;
+  --color-neutral-600: #3f8a6b;
+
   --color-inline-tag-background: rgba(134, 239, 172, 0.38);
   --color-inline-tag-text: #064e3b;
 
@@ -1092,6 +1201,19 @@ textarea:focus {
   --color-accent-border: #8ecdf5;
   --color-accent-shadow: rgba(56, 189, 248, 0.36);
   --color-accent-shadow-strong: rgba(14, 165, 233, 0.44);
+
+  --color-accent-secondary: #a855f7;
+  --color-accent-secondary-strong: #7c3aed;
+  --color-accent-secondary-soft: rgba(168, 85, 247, 0.24);
+  --color-accent-secondary-outline: rgba(168, 85, 247, 0.34);
+  --color-accent-secondary-contrast: #f9f5ff;
+  --color-accent-secondary-shadow: rgba(168, 85, 247, 0.3);
+
+  --color-neutral-50: #f3f8ff;
+  --color-neutral-100: #e3f1ff;
+  --color-neutral-200: #d1e6fb;
+  --color-neutral-400: #a8c5e6;
+  --color-neutral-600: #4d7098;
 
   --color-inline-tag-background: rgba(59, 130, 246, 0.26);
   --color-inline-tag-text: #0b3d5c;
@@ -1129,6 +1251,19 @@ textarea:focus {
   --color-accent-shadow: rgba(190, 24, 93, 0.36);
   --color-accent-shadow-strong: rgba(236, 72, 153, 0.4);
 
+  --color-accent-secondary: #22d3ee;
+  --color-accent-secondary-strong: #0ea5e9;
+  --color-accent-secondary-soft: rgba(34, 211, 238, 0.24);
+  --color-accent-secondary-outline: rgba(34, 211, 238, 0.32);
+  --color-accent-secondary-contrast: #062c35;
+  --color-accent-secondary-shadow: rgba(34, 211, 238, 0.32);
+
+  --color-neutral-50: #fff6fb;
+  --color-neutral-100: #ffe3f2;
+  --color-neutral-200: #fbd1e7;
+  --color-neutral-400: #f3a6cb;
+  --color-neutral-600: #b75283;
+
   --color-inline-tag-background: rgba(244, 114, 182, 0.32);
   --color-inline-tag-text: #831843;
 
@@ -1164,6 +1299,19 @@ textarea:focus {
   --color-accent-border: #f5c54d;
   --color-accent-shadow: rgba(234, 179, 8, 0.34);
   --color-accent-shadow-strong: rgba(250, 204, 21, 0.4);
+
+  --color-accent-secondary: #3b82f6;
+  --color-accent-secondary-strong: #2563eb;
+  --color-accent-secondary-soft: rgba(59, 130, 246, 0.24);
+  --color-accent-secondary-outline: rgba(59, 130, 246, 0.32);
+  --color-accent-secondary-contrast: #0b1f3a;
+  --color-accent-secondary-shadow: rgba(37, 99, 235, 0.35);
+
+  --color-neutral-50: #fff9e6;
+  --color-neutral-100: #fff1cc;
+  --color-neutral-200: #fde7af;
+  --color-neutral-400: #f0c86b;
+  --color-neutral-600: #b68a2c;
 
   --color-inline-tag-background: rgba(250, 204, 21, 0.32);
   --color-inline-tag-text: #7c2d12;
@@ -1233,6 +1381,19 @@ textarea:focus {
   --color-accent-border: rgba(125, 181, 255, 0.65);
   --color-accent-shadow: rgba(47, 109, 240, 0.55);
   --color-accent-shadow-strong: rgba(59, 130, 246, 0.58);
+
+  --color-accent-secondary: #f472b6;
+  --color-accent-secondary-strong: #db2777;
+  --color-accent-secondary-soft: rgba(244, 114, 182, 0.24);
+  --color-accent-secondary-outline: rgba(244, 114, 182, 0.34);
+  --color-accent-secondary-contrast: #fdf2f8;
+  --color-accent-secondary-shadow: rgba(244, 114, 182, 0.45);
+
+  --color-neutral-50: rgba(148, 163, 184, 0.1);
+  --color-neutral-100: rgba(148, 163, 184, 0.16);
+  --color-neutral-200: rgba(148, 163, 184, 0.24);
+  --color-neutral-400: rgba(96, 165, 250, 0.28);
+  --color-neutral-600: rgba(96, 165, 250, 0.42);
 }
 
 :root[data-mode='dark'][data-theme='nebula'] {
@@ -1254,6 +1415,19 @@ textarea:focus {
   --color-accent-border: rgba(209, 196, 255, 0.7);
   --color-accent-shadow: rgba(129, 140, 248, 0.52);
   --color-accent-shadow-strong: rgba(168, 85, 247, 0.58);
+
+  --color-accent-secondary: #22d3ee;
+  --color-accent-secondary-strong: #0ea5e9;
+  --color-accent-secondary-soft: rgba(34, 211, 238, 0.34);
+  --color-accent-secondary-outline: rgba(34, 211, 238, 0.48);
+  --color-accent-secondary-contrast: #022c3a;
+  --color-accent-secondary-shadow: rgba(34, 211, 238, 0.36);
+
+  --color-neutral-50: rgba(196, 181, 253, 0.12);
+  --color-neutral-100: rgba(196, 181, 253, 0.18);
+  --color-neutral-200: rgba(167, 139, 250, 0.24);
+  --color-neutral-400: rgba(129, 140, 248, 0.32);
+  --color-neutral-600: rgba(99, 102, 241, 0.45);
 
   --color-inline-tag-background: rgba(168, 85, 247, 0.36);
   --color-inline-tag-text: #f4f3ff;
@@ -1293,6 +1467,19 @@ textarea:focus {
   --color-accent-shadow: rgba(16, 185, 129, 0.55);
   --color-accent-shadow-strong: rgba(45, 212, 191, 0.6);
 
+  --color-accent-secondary: #fbbf24;
+  --color-accent-secondary-strong: #f59e0b;
+  --color-accent-secondary-soft: rgba(251, 191, 36, 0.32);
+  --color-accent-secondary-outline: rgba(251, 191, 36, 0.46);
+  --color-accent-secondary-contrast: #2b1900;
+  --color-accent-secondary-shadow: rgba(251, 191, 36, 0.38);
+
+  --color-neutral-50: rgba(45, 212, 191, 0.12);
+  --color-neutral-100: rgba(45, 212, 191, 0.18);
+  --color-neutral-200: rgba(20, 184, 166, 0.22);
+  --color-neutral-400: rgba(20, 156, 148, 0.3);
+  --color-neutral-600: rgba(13, 148, 136, 0.42);
+
   --color-inline-tag-background: rgba(45, 212, 191, 0.36);
   --color-inline-tag-text: #e0fdf6;
   --color-tag-text: #e0fdf6;
@@ -1330,6 +1517,19 @@ textarea:focus {
   --color-accent-border: rgba(251, 146, 60, 0.68);
   --color-accent-shadow: rgba(249, 115, 22, 0.58);
   --color-accent-shadow-strong: rgba(249, 115, 22, 0.64);
+
+  --color-accent-secondary: #2563eb;
+  --color-accent-secondary-strong: #1d4ed8;
+  --color-accent-secondary-soft: rgba(37, 99, 235, 0.32);
+  --color-accent-secondary-outline: rgba(37, 99, 235, 0.48);
+  --color-accent-secondary-contrast: #e2ecff;
+  --color-accent-secondary-shadow: rgba(37, 99, 235, 0.38);
+
+  --color-neutral-50: rgba(248, 113, 113, 0.14);
+  --color-neutral-100: rgba(251, 146, 60, 0.18);
+  --color-neutral-200: rgba(249, 115, 22, 0.22);
+  --color-neutral-400: rgba(217, 119, 6, 0.32);
+  --color-neutral-600: rgba(180, 83, 9, 0.45);
 
   --color-inline-tag-background: rgba(249, 115, 22, 0.32);
   --color-inline-tag-text: #ffedd5;
@@ -1369,6 +1569,19 @@ textarea:focus {
   --color-accent-shadow: rgba(14, 116, 144, 0.58);
   --color-accent-shadow-strong: rgba(56, 189, 248, 0.58);
 
+  --color-accent-secondary: #8b5cf6;
+  --color-accent-secondary-strong: #7c3aed;
+  --color-accent-secondary-soft: rgba(139, 92, 246, 0.3);
+  --color-accent-secondary-outline: rgba(139, 92, 246, 0.44);
+  --color-accent-secondary-contrast: #f5f3ff;
+  --color-accent-secondary-shadow: rgba(139, 92, 246, 0.36);
+
+  --color-neutral-50: rgba(13, 148, 136, 0.14);
+  --color-neutral-100: rgba(14, 165, 233, 0.18);
+  --color-neutral-200: rgba(13, 148, 136, 0.22);
+  --color-neutral-400: rgba(14, 165, 233, 0.3);
+  --color-neutral-600: rgba(12, 105, 128, 0.45);
+
   --color-inline-tag-background: rgba(13, 148, 136, 0.32);
   --color-inline-tag-text: #d5fef9;
   --color-tag-text: #d5fef9;
@@ -1406,6 +1619,19 @@ textarea:focus {
   --color-accent-border: rgba(244, 114, 182, 0.6);
   --color-accent-shadow: rgba(131, 24, 67, 0.54);
   --color-accent-shadow-strong: rgba(236, 72, 153, 0.56);
+
+  --color-accent-secondary: #14b8a6;
+  --color-accent-secondary-strong: #0d9488;
+  --color-accent-secondary-soft: rgba(20, 184, 166, 0.3);
+  --color-accent-secondary-outline: rgba(20, 184, 166, 0.46);
+  --color-accent-secondary-contrast: #012725;
+  --color-accent-secondary-shadow: rgba(20, 184, 166, 0.36);
+
+  --color-neutral-50: rgba(236, 72, 153, 0.16);
+  --color-neutral-100: rgba(236, 72, 153, 0.22);
+  --color-neutral-200: rgba(219, 39, 119, 0.28);
+  --color-neutral-400: rgba(190, 24, 93, 0.36);
+  --color-neutral-600: rgba(190, 24, 93, 0.48);
 
   --color-inline-tag-background: rgba(236, 72, 153, 0.34);
   --color-inline-tag-text: #fde8f3;
@@ -1457,6 +1683,19 @@ textarea:focus {
   --color-card-shadow-muted: rgba(68, 49, 37, 0.18);
   --color-card-shadow-soft: rgba(193, 140, 98, 0.3);
 
+  --color-accent-secondary: #2f855a;
+  --color-accent-secondary-strong: #276749;
+  --color-accent-secondary-soft: rgba(47, 133, 90, 0.2);
+  --color-accent-secondary-outline: rgba(47, 133, 90, 0.3);
+  --color-accent-secondary-contrast: #08281a;
+  --color-accent-secondary-shadow: rgba(47, 133, 90, 0.28);
+
+  --color-neutral-50: #f9f2e8;
+  --color-neutral-100: #ecdcc6;
+  --color-neutral-200: #dfc7a9;
+  --color-neutral-400: #c7a075;
+  --color-neutral-600: #8d6437;
+
   --color-danger: #b8432e;
   --color-danger-soft: rgba(184, 67, 46, 0.26);
 
@@ -1479,6 +1718,19 @@ textarea:focus {
   --color-accent-border: rgba(226, 177, 94, 0.65);
   --color-accent-shadow: rgba(183, 121, 31, 0.44);
   --color-accent-shadow-strong: rgba(183, 121, 31, 0.5);
+
+  --color-accent-secondary: #2f855a;
+  --color-accent-secondary-strong: #276749;
+  --color-accent-secondary-soft: rgba(47, 133, 90, 0.18);
+  --color-accent-secondary-outline: rgba(47, 133, 90, 0.28);
+  --color-accent-secondary-contrast: #07281a;
+  --color-accent-secondary-shadow: rgba(47, 133, 90, 0.3);
+
+  --color-neutral-50: #f8f0e2;
+  --color-neutral-100: #eedcc1;
+  --color-neutral-200: #e0c69f;
+  --color-neutral-400: #d0a877;
+  --color-neutral-600: #8a6230;
 
   --color-inline-tag-background: rgba(226, 177, 94, 0.3);
   --color-inline-tag-text: #503213;
@@ -1515,6 +1767,19 @@ textarea:focus {
   --color-accent-shadow: rgba(168, 78, 44, 0.52);
   --color-accent-shadow-strong: rgba(226, 129, 74, 0.52);
 
+  --color-accent-secondary: #0f766e;
+  --color-accent-secondary-strong: #0b5c58;
+  --color-accent-secondary-soft: rgba(15, 118, 110, 0.22);
+  --color-accent-secondary-outline: rgba(15, 118, 110, 0.32);
+  --color-accent-secondary-contrast: #f0fffb;
+  --color-accent-secondary-shadow: rgba(15, 118, 110, 0.3);
+
+  --color-neutral-50: #f7eae0;
+  --color-neutral-100: #ebd5c5;
+  --color-neutral-200: #ddbfa9;
+  --color-neutral-400: #c79b7c;
+  --color-neutral-600: #8f5a3d;
+
   --color-inline-tag-background: rgba(234, 173, 137, 0.3);
   --color-inline-tag-text: #5c2d18;
 
@@ -1549,6 +1814,19 @@ textarea:focus {
   --color-accent-border: rgba(204, 154, 120, 0.6);
   --color-accent-shadow: rgba(92, 47, 26, 0.5);
   --color-accent-shadow-strong: rgba(181, 106, 58, 0.52);
+
+  --color-accent-secondary: #3b82f6;
+  --color-accent-secondary-strong: #1d4ed8;
+  --color-accent-secondary-soft: rgba(59, 130, 246, 0.26);
+  --color-accent-secondary-outline: rgba(59, 130, 246, 0.34);
+  --color-accent-secondary-contrast: #0b1f3a;
+  --color-accent-secondary-shadow: rgba(59, 130, 246, 0.3);
+
+  --color-neutral-50: #f1e4d4;
+  --color-neutral-100: #e3ccb4;
+  --color-neutral-200: #d2b494;
+  --color-neutral-400: #b88c67;
+  --color-neutral-600: #7b5233;
 
   --color-inline-tag-background: rgba(204, 154, 120, 0.34);
   --color-inline-tag-text: #3e1f0d;
