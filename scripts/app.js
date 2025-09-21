@@ -889,10 +889,57 @@
     const details = document.createElement('div');
     details.className = 'pantry-card__details';
 
+    const header = document.createElement('div');
+    header.className = 'pantry-card__header';
+
     const title = document.createElement('h3');
     title.className = 'pantry-card__name';
     title.textContent = ingredient.name;
-    details.appendChild(title);
+    header.appendChild(title);
+
+    const inlineControls = document.createElement('div');
+    inlineControls.className = 'pantry-card__inline-controls';
+
+    const quantityInput = document.createElement('input');
+    quantityInput.className = 'pantry-card__inline-input pantry-card__inline-input--quantity';
+    quantityInput.type = 'number';
+    quantityInput.min = '0';
+    quantityInput.step = '0.25';
+    quantityInput.inputMode = 'decimal';
+    quantityInput.autocomplete = 'off';
+    quantityInput.setAttribute('aria-label', `Quantity for ${ingredient.name}`);
+    quantityInput.title = `Quantity for ${ingredient.name}`;
+    if (entry.quantity !== undefined && entry.quantity !== '') {
+      quantityInput.value = entry.quantity;
+    } else {
+      quantityInput.value = '';
+    }
+    quantityInput.placeholder = '0';
+    quantityInput.addEventListener('input', (event) => {
+      updatePantryEntry(ingredient.slug, { quantity: event.target.value });
+    });
+    inlineControls.appendChild(quantityInput);
+
+    const unitInput = document.createElement('input');
+    unitInput.className = 'pantry-card__inline-input pantry-card__inline-input--unit';
+    unitInput.type = 'text';
+    unitInput.setAttribute('list', 'pantry-unit-options');
+    unitInput.placeholder = DEFAULT_PANTRY_UNIT;
+    const normalizedUnit = entry.unit || DEFAULT_PANTRY_UNIT;
+    unitInput.value = normalizedUnit === DEFAULT_PANTRY_UNIT ? '' : normalizedUnit;
+    unitInput.autocomplete = 'off';
+    unitInput.spellcheck = false;
+    unitInput.setAttribute('aria-label', `Unit for ${ingredient.name}`);
+    unitInput.title = `Unit for ${ingredient.name}`;
+    const handleUnitChange = (event) => {
+      updatePantryEntry(ingredient.slug, { unit: event.target.value });
+    };
+    unitInput.addEventListener('input', handleUnitChange);
+    unitInput.addEventListener('change', handleUnitChange);
+    inlineControls.appendChild(unitInput);
+
+    header.appendChild(inlineControls);
+    details.appendChild(header);
 
     if (Array.isArray(ingredient.tags) && ingredient.tags.length) {
       const tags = document.createElement('div');
@@ -906,52 +953,6 @@
     }
 
     card.appendChild(details);
-
-    const controls = document.createElement('div');
-    controls.className = 'pantry-card__controls';
-
-    const quantityControl = document.createElement('label');
-    quantityControl.className = 'pantry-card__control';
-    const quantityLabel = document.createElement('span');
-    quantityLabel.textContent = 'Quantity';
-    const quantityInput = document.createElement('input');
-    quantityInput.type = 'number';
-    quantityInput.min = '0';
-    quantityInput.step = '0.25';
-    quantityInput.inputMode = 'decimal';
-    if (entry.quantity !== undefined && entry.quantity !== '') {
-      quantityInput.value = entry.quantity;
-    } else {
-      quantityInput.value = '';
-    }
-    quantityInput.placeholder = '0';
-    quantityInput.addEventListener('input', (event) => {
-      updatePantryEntry(ingredient.slug, { quantity: event.target.value });
-    });
-    quantityControl.appendChild(quantityLabel);
-    quantityControl.appendChild(quantityInput);
-    controls.appendChild(quantityControl);
-
-    const unitControl = document.createElement('label');
-    unitControl.className = 'pantry-card__control';
-    const unitLabel = document.createElement('span');
-    unitLabel.textContent = 'Unit';
-    const unitInput = document.createElement('input');
-    unitInput.type = 'text';
-    unitInput.setAttribute('list', 'pantry-unit-options');
-    unitInput.placeholder = DEFAULT_PANTRY_UNIT;
-    const normalizedUnit = entry.unit || DEFAULT_PANTRY_UNIT;
-    unitInput.value = normalizedUnit === DEFAULT_PANTRY_UNIT ? '' : normalizedUnit;
-    const handleUnitChange = (event) => {
-      updatePantryEntry(ingredient.slug, { unit: event.target.value });
-    };
-    unitInput.addEventListener('input', handleUnitChange);
-    unitInput.addEventListener('change', handleUnitChange);
-    unitControl.appendChild(unitLabel);
-    unitControl.appendChild(unitInput);
-    controls.appendChild(unitControl);
-
-    card.appendChild(controls);
 
     return card;
   };
