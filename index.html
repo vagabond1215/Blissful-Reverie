@@ -13,51 +13,87 @@
         <div class="header-grid">
           <div class="header-grid__secondary">
             <div class="menu-column">
-              <div class="view-toggle">
-                <button
-                  type="button"
-                  class="view-toggle__button view-toggle__button--active"
-                  data-view-target="meals"
-                >
-                  Meal Library
-                </button>
-                <button type="button" class="view-toggle__button" data-view-target="pantry">
-                  Pantry
-                </button>
-              </div>
-              <details class="settings-panel" id="settings-panel">
-                <summary class="settings-panel__summary">
-                  <span class="settings-panel__label">Display Settings</span>
-                  <span class="settings-panel__chevron" aria-hidden="true"></span>
-                </summary>
-                <div class="settings-panel__content">
-                  <div class="theme-toolbar" id="theme-toolbar">
-                    <div class="theme-toolbar__group">
-                      <span class="theme-toolbar__label">Mode</span>
-                      <div class="theme-toolbar__options" id="mode-toggle">
-                        <button
-                          type="button"
-                          class="mode-toggle__button mode-toggle__button--active"
-                          data-mode="light"
-                          aria-pressed="true"
-                        >
-                          Light
-                        </button>
-                        <button type="button" class="mode-toggle__button" data-mode="dark" aria-pressed="false">
-                          Dark
-                        </button>
-                        <button type="button" class="mode-toggle__button" data-mode="sepia" aria-pressed="false">
-                          Sepia
-                        </button>
+              <div class="menu-column__row">
+                <div class="view-toggle">
+                  <button
+                    type="button"
+                    class="view-toggle__button view-toggle__button--active"
+                    data-view-target="meals"
+                  >
+                    Recipes
+                  </button>
+                  <button type="button" class="view-toggle__button" data-view-target="pantry">
+                    Pantry
+                  </button>
+                </div>
+                <details class="settings-panel" id="settings-panel">
+                  <summary
+                    class="settings-panel__summary"
+                    aria-label="Display and unit settings"
+                    aria-haspopup="true"
+                    title="Display and unit settings"
+                  >
+                    <span class="settings-panel__icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M11.997 2.25a.75.75 0 0 0-.75.75v1.013a8.71 8.71 0 0 0-1.951.563l-.717-.717a.75.75 0 0 0-1.061 0l-1.06 1.06a.75.75 0 0 0 0 1.062l.717.717a8.71 8.71 0 0 0-.563 1.95H5.25a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h1.013c.126.673.34 1.316.633 1.913l-.717.717a.75.75 0 0 0 0 1.061l1.06 1.061c.293.293.768.293 1.061 0l.717-.717c.597.293 1.24.507 1.913.633v1.013c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75v-1.013a8.71 8.71 0 0 0 1.95-.563l.717.717c.293.293.768.293 1.061 0l1.061-1.06a.75.75 0 0 0 0-1.062l-.717-.717a8.71 8.71 0 0 0 .563-1.95h1.013a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75h-1.013a8.71 8.71 0 0 0-.563-1.95l.717-.717a.75.75 0 0 0 0-1.061l-1.06-1.061a.75.75 0 0 0-1.062 0l-.717.717a8.71 8.71 0 0 0-1.95-.563V3a.75.75 0 0 0-.75-.75h-1.5z"
+                        ></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path>
+                      </svg>
+                    </span>
+                  </summary>
+                  <div class="settings-panel__content">
+                    <div class="theme-toolbar" id="theme-toolbar">
+                      <div class="theme-toolbar__group">
+                        <span class="theme-toolbar__label">Mode</span>
+                        <div class="theme-toolbar__options" id="mode-toggle">
+                          <button
+                            type="button"
+                            class="mode-toggle__button mode-toggle__button--active"
+                            data-mode="light"
+                            aria-pressed="true"
+                          >
+                            Light
+                          </button>
+                          <button type="button" class="mode-toggle__button" data-mode="dark" aria-pressed="false">
+                            Dark
+                          </button>
+                          <button type="button" class="mode-toggle__button" data-mode="sepia" aria-pressed="false">
+                            Sepia
+                          </button>
+                        </div>
+                      </div>
+                      <div class="theme-toolbar__group">
+                        <span class="theme-toolbar__label">Palette</span>
+                        <div class="theme-toolbar__options theme-toolbar__options--themes" id="theme-options"></div>
+                      </div>
+                      <div class="theme-toolbar__group">
+                        <span class="theme-toolbar__label">Units</span>
+                        <div class="theme-toolbar__options" id="measurement-toggle">
+                          <button
+                            type="button"
+                            class="mode-toggle__button measurement-toggle__button"
+                            data-measurement="imperial"
+                            aria-pressed="false"
+                          >
+                            Imperial
+                          </button>
+                          <button
+                            type="button"
+                            class="mode-toggle__button measurement-toggle__button"
+                            data-measurement="metric"
+                            aria-pressed="false"
+                          >
+                            Metric
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div class="theme-toolbar__group">
-                      <span class="theme-toolbar__label">Palette</span>
-                      <div class="theme-toolbar__options theme-toolbar__options--themes" id="theme-options"></div>
-                    </div>
                   </div>
-                </div>
-              </details>
+                </details>
+              </div>
             </div>
           </div>
         </div>
@@ -65,7 +101,7 @@
       <main class="layout" id="app-layout">
         <aside class="filter-panel" id="filter-panel">
           <div class="panel-header">
-            <h2 id="filter-panel-title">Filter Meals</h2>
+            <h2 id="filter-panel-title">Filter Recipes</h2>
             <button type="button" class="reset-button" id="reset-filters">Reset</button>
           </div>
           <label class="input-group">
@@ -104,8 +140,8 @@
         </aside>
         <section class="content" id="meal-view">
           <div class="content-header">
-            <h2>Meal Library</h2>
-            <p id="meal-count">0 meals match your filters.</p>
+            <h2>Recipes</h2>
+            <p id="meal-count">0 recipes match your filters.</p>
           </div>
           <div class="meal-grid" id="meal-grid"></div>
         </section>
