@@ -21,6 +21,8 @@
   --color-text-inverse: #ffffff;
   --color-text-emphasis: #1b2848;
 
+  --color-layout-background: #dfe3ea;
+
   --color-accent: #4453d6;
   --color-accent-strong: #6f63ff;
   --color-accent-soft: rgba(68, 83, 214, 0.18);
@@ -45,21 +47,19 @@
     var(--color-accent-secondary-strong)
   );
 
-  --surface-panel-gradient: linear-gradient(
-    160deg,
-    var(--color-accent-soft),
-    var(--color-surface)
+  --color-surface-elevated: #ffffff;
+  --surface-elevated-gradient: linear-gradient(
+    158deg,
+    var(--color-accent-secondary-soft, var(--color-accent-soft)),
+    var(--color-surface-elevated)
   );
+  --surface-panel-gradient: var(--surface-elevated-gradient);
   --surface-section-gradient: linear-gradient(
     155deg,
     var(--color-accent-softer, var(--color-accent-soft)),
     var(--color-surface-soft)
   );
-  --surface-card-gradient: linear-gradient(
-    158deg,
-    var(--color-accent-secondary-soft, var(--color-accent-soft)),
-    var(--color-surface)
-  );
+  --surface-card-gradient: var(--surface-elevated-gradient);
 
   --color-neutral-50: #f6f8ff;
   --color-neutral-100: #e5eafe;
@@ -418,6 +418,8 @@ select {
   gap: 1.75rem;
   padding: 2rem 3rem 3rem;
   align-items: flex-start;
+  background: var(--color-layout-background);
+  border-radius: 24px;
 }
 
 .filter-panel,
@@ -763,6 +765,14 @@ textarea:focus {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
+}
+
+@media (orientation: landscape) {
+  .meal-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    max-width: min(100%, calc(2 * 25rem + 1.5rem));
+    margin-inline: auto;
+  }
 }
 
 .meal-card {
@@ -1149,6 +1159,8 @@ textarea:focus {
 
   .meal-grid {
     grid-template-columns: 1fr;
+    max-width: 100%;
+    margin-inline: 0;
   }
 
   .pantry-card__inline-controls {
@@ -1472,6 +1484,8 @@ textarea:focus {
   --body-gradient-mid: #061228;
   --body-gradient-end: #010816;
 
+  --color-layout-background: #1f232d;
+
   --color-text-primary: #f1f5ff;
   --color-text-strong: #f8fafc;
   --color-text-secondary: #d5defa;
@@ -1485,6 +1499,7 @@ textarea:focus {
   --color-text-emphasis: #f4f7ff;
 
   --color-surface: #0f172a;
+  --color-surface-elevated: #223049;
   --color-surface-soft: rgba(47, 109, 240, 0.18);
   --color-surface-highlight: rgba(96, 165, 250, 0.24);
   --color-header-background: rgba(15, 23, 42, 0.94);
@@ -1537,6 +1552,7 @@ textarea:focus {
   --body-gradient-end: #050311;
 
   --color-surface: #1f1936;
+  --color-surface-elevated: #2b2452;
   --color-surface-soft: rgba(168, 85, 247, 0.2);
   --color-header-background: rgba(31, 25, 54, 0.95);
   --color-header-shadow: rgba(9, 6, 25, 0.72);
@@ -1588,6 +1604,7 @@ textarea:focus {
   --body-gradient-end: #010f0c;
 
   --color-surface: #0f1f1a;
+  --color-surface-elevated: #1c2f27;
   --color-surface-soft: rgba(45, 212, 191, 0.2);
   --color-header-background: rgba(15, 31, 26, 0.95);
   --color-header-shadow: rgba(1, 15, 12, 0.7);
@@ -1639,6 +1656,7 @@ textarea:focus {
   --body-gradient-end: #080402;
 
   --color-surface: #1e130a;
+  --color-surface-elevated: #2d1c11;
   --color-surface-soft: rgba(249, 115, 22, 0.22);
   --color-header-background: rgba(30, 19, 10, 0.95);
   --color-header-shadow: rgba(8, 4, 2, 0.76);
@@ -1690,6 +1708,7 @@ textarea:focus {
   --body-gradient-end: #01070b;
 
   --color-surface: #0b1f24;
+  --color-surface-elevated: #12303a;
   --color-surface-soft: rgba(14, 165, 233, 0.22);
   --color-header-background: rgba(11, 31, 36, 0.95);
   --color-header-shadow: rgba(1, 7, 11, 0.72);
@@ -1741,6 +1760,7 @@ textarea:focus {
   --body-gradient-end: #08010a;
 
   --color-surface: #240b20;
+  --color-surface-elevated: #34142f;
   --color-surface-soft: rgba(236, 72, 153, 0.22);
   --color-header-background: rgba(36, 11, 32, 0.95);
   --color-header-shadow: rgba(8, 1, 10, 0.74);
@@ -1786,6 +1806,8 @@ textarea:focus {
 }
 
 :root[data-mode='sepia'] {
+  --color-layout-background: #ead7ba;
+
   --color-text-primary: #2b1a11;
   --color-text-strong: #1e120b;
   --color-text-secondary: #4a3121;
@@ -1800,6 +1822,7 @@ textarea:focus {
   --color-text-emphasis: #1e120b;
 
   --color-surface: #fff6e6;
+  --color-surface-elevated: #fff1dd;
   --color-surface-soft: rgba(112, 74, 51, 0.1);
   --color-surface-highlight: rgba(193, 140, 98, 0.2);
   --color-header-background: rgba(255, 247, 236, 0.94);
@@ -1837,6 +1860,9 @@ textarea:focus {
 }
 
 :root[data-mode='sepia'][data-theme='classic'] {
+  --color-layout-background: #f6ead6;
+  --color-surface-elevated: #fff7e8;
+
   --color-background: #f4ecdf;
   --body-gradient-start: #fffaf2;
   --body-gradient-mid: #f0e2cd;
@@ -1885,6 +1911,9 @@ textarea:focus {
 }
 
 :root[data-mode='sepia'][data-theme='copper'] {
+  --color-layout-background: #e8d0b4;
+  --color-surface-elevated: #fff1df;
+
   --color-background: #f1e4d7;
   --body-gradient-start: #fff8ef;
   --body-gradient-mid: #f3d3ba;
@@ -1933,6 +1962,9 @@ textarea:focus {
 }
 
 :root[data-mode='sepia'][data-theme='umber'] {
+  --color-layout-background: #d5b890;
+  --color-surface-elevated: #f6e4ca;
+
   --color-background: #e9ddca;
   --body-gradient-start: #fdf5e6;
   --body-gradient-mid: #e1c9a9;
