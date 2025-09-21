@@ -219,6 +219,10 @@ select {
 }
 
 @media (orientation: portrait) {
+  html {
+    font-size: 15px;
+  }
+
   .header-grid {
     grid-template-columns: 1fr;
   }
@@ -774,18 +778,39 @@ textarea:focus {
   flex: 1;
   overflow-y: auto;
   padding-right: 0.25rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.pantry-category {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pantry-category__title {
+  margin: 0;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.pantry-category__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
 .pantry-card {
   background: var(--color-surface-soft);
   border-radius: 16px;
-  padding: 1.1rem 1.2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
+  padding: 1rem 1.2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: center;
   border: 1px solid transparent;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -795,32 +820,16 @@ textarea:focus {
   box-shadow: 0 12px 28px -20px var(--color-card-shadow-soft);
 }
 
-.pantry-card__header {
+.pantry-card__details {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.45rem;
 }
 
-.pantry-card__header h3 {
+.pantry-card__name {
   margin: 0;
-  font-size: 1.2rem;
-}
-
-.pantry-card__header code {
-  display: inline-block;
-  margin-top: 0.4rem;
-  font-size: 0.8rem;
-  background: var(--color-code-background);
-  color: var(--color-text-inline);
-  padding: 0.2rem 0.4rem;
-  border-radius: 6px;
-}
-
-.pantry-card__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+  font-size: 1.1rem;
+  color: var(--color-text-strong);
 }
 
 .pantry-card__tags {
@@ -838,10 +847,11 @@ textarea:focus {
 }
 
 .pantry-card__controls {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.8rem;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  align-items: end;
+  justify-content: flex-end;
+  align-items: flex-end;
 }
 
 .pantry-card__control {
@@ -850,6 +860,7 @@ textarea:focus {
   gap: 0.35rem;
   font-size: 0.85rem;
   color: var(--color-text-muted);
+  min-width: 120px;
 }
 
 .pantry-card__control input,
@@ -858,6 +869,7 @@ textarea:focus {
   border-radius: 12px;
   padding: 0.5rem 0.6rem;
   font-size: 0.95rem;
+  width: 100%;
 }
 
 .pantry-card__control input[type='number'] {
@@ -907,6 +919,15 @@ textarea:focus {
 
   .meal-grid {
     grid-template-columns: 1fr;
+  }
+
+  .pantry-card {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .pantry-card__controls {
+    justify-content: flex-start;
   }
 }
 

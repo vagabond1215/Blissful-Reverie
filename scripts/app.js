@@ -886,23 +886,13 @@
 
     const entry = getPantryEntry(ingredient.slug);
 
-    const header = document.createElement('header');
-    header.className = 'pantry-card__header';
+    const details = document.createElement('div');
+    details.className = 'pantry-card__details';
 
-    const info = document.createElement('div');
     const title = document.createElement('h3');
+    title.className = 'pantry-card__name';
     title.textContent = ingredient.name;
-    info.appendChild(title);
-    const code = document.createElement('code');
-    code.textContent = ingredient.slug;
-    info.appendChild(code);
-    header.appendChild(info);
-
-    const badge = document.createElement('span');
-    badge.className = 'badge badge-soft';
-    badge.textContent = ingredient.category;
-    header.appendChild(badge);
-    card.appendChild(header);
+    details.appendChild(title);
 
     if (Array.isArray(ingredient.tags) && ingredient.tags.length) {
       const tags = document.createElement('div');
@@ -912,8 +902,10 @@
         span.textContent = tag;
         tags.appendChild(span);
       });
-      card.appendChild(tags);
+      details.appendChild(tags);
     }
+
+    card.appendChild(details);
 
     const controls = document.createElement('div');
     controls.className = 'pantry-card__controls';
@@ -991,11 +983,13 @@
     const query = search.trim().toLowerCase();
     const filteredItems = ingredients
       .filter((ingredient) => {
-        if (categories.length && !categories.includes(ingredient.category)) return false;
-        if (tags.length && !tags.every((tag) => ingredient.tags.includes(tag))) return false;
-        if (allergens.length && !allergens.every((tag) => ingredient.tags.includes(tag))) return false;
+        const ingredientTags = Array.isArray(ingredient.tags) ? ingredient.tags : [];
+        const category = ingredient.category;
+        if (categories.length && (!category || !categories.includes(category))) return false;
+        if (tags.length && !tags.every((tag) => ingredientTags.includes(tag))) return false;
+        if (allergens.length && !allergens.every((tag) => ingredientTags.includes(tag))) return false;
         if (!query) return true;
-        const haystack = `${ingredient.name} ${ingredient.slug} ${ingredient.tags.join(' ')}`.toLowerCase();
+        const haystack = `${ingredient.name} ${ingredient.slug} ${ingredientTags.join(' ')}`.toLowerCase();
         return haystack.includes(query);
       })
       .sort((a, b) => {
@@ -1020,8 +1014,34 @@
       return;
     }
 
+    const groupedItems = [];
     filteredItems.forEach((ingredient) => {
-      elements.pantryGrid.appendChild(createPantryCard(ingredient));
+      const categoryName = ingredient.category || 'Uncategorized';
+      const previous = groupedItems[groupedItems.length - 1];
+      if (!previous || previous.category !== categoryName) {
+        groupedItems.push({ category: categoryName, items: [ingredient] });
+      } else {
+        previous.items.push(ingredient);
+      }
+    });
+
+    groupedItems.forEach((group) => {
+      const section = document.createElement('section');
+      section.className = 'pantry-category';
+
+      const heading = document.createElement('h3');
+      heading.className = 'pantry-category__title';
+      heading.textContent = group.category;
+      section.appendChild(heading);
+
+      const list = document.createElement('div');
+      list.className = 'pantry-category__list';
+      group.items.forEach((ingredient) => {
+        list.appendChild(createPantryCard(ingredient));
+      });
+      section.appendChild(list);
+
+      elements.pantryGrid.appendChild(section);
     });
   };
 
