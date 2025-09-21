@@ -42,6 +42,10 @@
   const DEFAULT_MODE = 'light';
   const AVAILABLE_MODES = Object.keys(THEME_OPTIONS);
 
+  const MEASUREMENT_STORAGE_KEY = 'blissful-measurement';
+  const MEASUREMENT_SYSTEMS = ['imperial', 'metric'];
+  const DEFAULT_MEASUREMENT_SYSTEM = 'imperial';
+
   const resolveFallbackMode = () =>
     AVAILABLE_MODES.includes(DEFAULT_MODE) ? DEFAULT_MODE : AVAILABLE_MODES[0];
 
@@ -75,6 +79,20 @@
 
   const themePreferences = loadThemePreferences();
 
+  const loadMeasurementPreference = () => {
+    try {
+      const stored = localStorage.getItem(MEASUREMENT_STORAGE_KEY);
+      if (typeof stored === 'string' && MEASUREMENT_SYSTEMS.includes(stored)) {
+        return stored;
+      }
+    } catch (error) {
+      console.warn('Unable to read measurement preference.', error);
+    }
+    return DEFAULT_MEASUREMENT_SYSTEM;
+  };
+
+  const measurementPreference = loadMeasurementPreference();
+
   const getDefaultMealFilters = () => ({
     search: '',
     protein: [],
@@ -100,6 +118,7 @@
     pantryInventory: {},
     themeMode: themePreferences.mode,
     themeSelections: { ...themePreferences.selections },
+    measurementSystem: measurementPreference,
   };
 
   const equipmentOptions = Array.from(
@@ -298,6 +317,56 @@
 
   const DEFAULT_PANTRY_UNIT = 'each';
 
+  const MEASUREMENT_CONVERSIONS = {
+    metric: {
+      cup: { unit: 'mL', factor: 240 },
+      cups: { unit: 'mL', factor: 240 },
+      tablespoon: { unit: 'mL', factor: 15 },
+      tablespoons: { unit: 'mL', factor: 15 },
+      tbsp: { unit: 'mL', factor: 15 },
+      teaspoon: { unit: 'mL', factor: 5 },
+      teaspoons: { unit: 'mL', factor: 5 },
+      tsp: { unit: 'mL', factor: 5 },
+      ounce: { unit: 'g', factor: 28.3495 },
+      ounces: { unit: 'g', factor: 28.3495 },
+      oz: { unit: 'g', factor: 28.3495 },
+      pound: { unit: 'g', factor: 453.592 },
+      pounds: { unit: 'g', factor: 453.592 },
+      lb: { unit: 'g', factor: 453.592 },
+      lbs: { unit: 'g', factor: 453.592 },
+      quart: { unit: 'mL', factor: 946.353 },
+      quarts: { unit: 'mL', factor: 946.353 },
+      pint: { unit: 'mL', factor: 473.176 },
+      pints: { unit: 'mL', factor: 473.176 },
+      gallon: { unit: 'L', factor: 3.78541 },
+      gallons: { unit: 'L', factor: 3.78541 },
+    },
+    imperial: {
+      gram: { unit: 'oz', factor: 0.035274 },
+      grams: { unit: 'oz', factor: 0.035274 },
+      g: { unit: 'oz', factor: 0.035274 },
+      kilogram: { unit: 'lb', factor: 2.20462 },
+      kilograms: { unit: 'lb', factor: 2.20462 },
+      kg: { unit: 'lb', factor: 2.20462 },
+      liter: { unit: 'cups', factor: 4.22675 },
+      liters: { unit: 'cups', factor: 4.22675 },
+      l: { unit: 'cups', factor: 4.22675 },
+      milliliter: { unit: 'tsp', factor: 0.202884 },
+      milliliters: { unit: 'tsp', factor: 0.202884 },
+      ml: { unit: 'tsp', factor: 0.202884 },
+    },
+  };
+
+  const MEASUREMENT_DISPLAY_PRECISION = {
+    g: 0,
+    ml: 1,
+    l: 2,
+    oz: 2,
+    lb: 2,
+    cups: 2,
+    tsp: 1,
+  };
+
   const checkboxRegistry = {
     meals: {
       protein: new Map(),
@@ -332,6 +401,7 @@
   };
 
   let lastPersistedTheme = null;
+  let lastPersistedMeasurement = null;
 
   const applyColorTheme = (shouldPersist = true) => {
     const mode = state.themeMode;
@@ -419,12 +489,107 @@
     renderThemeOptions();
   };
 
+  const persistMeasurementPreference = () => {
+    const preference = state.measurementSystem;
+    if (preference === lastPersistedMeasurement) return;
+    try {
+      localStorage.setItem(MEASUREMENT_STORAGE_KEY, preference);
+      lastPersistedMeasurement = preference;
+    } catch (error) {
+      console.warn('Unable to persist measurement preference.', error);
+    }
+  };
+
+  const updateMeasurementButtons = () => {
+    if (!Array.isArray(elements.measurementToggleButtons)) return;
+    elements.measurementToggleButtons.forEach((button) => {
+      const system = button.dataset.measurement;
+      const isActive = system === state.measurementSystem;
+      button.classList.toggle('mode-toggle__button--active', isActive);
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  };
+
+  const setMeasurementSystem = (system) => {
+    if (!MEASUREMENT_SYSTEMS.includes(system) || state.measurementSystem === system) return;
+    state.measurementSystem = system;
+    persistMeasurementPreference();
+    updateMeasurementButtons();
+    renderApp();
+  };
+
+  const initMeasurementControls = () => {
+    updateMeasurementButtons();
+  };
+
   const normalizeText = (value) => String(value || '').toLowerCase();
+
+  const roundToPrecision = (value, decimals) => {
+    if (!Number.isFinite(value) || !Number.isInteger(decimals) || decimals < 0) {
+      return value;
+    }
+    const factor = 10 ** decimals;
+    return Math.round(value * factor) / factor;
+  };
 
   const formatQuantity = (quantity) => {
     if (quantity === null || quantity === undefined) return '';
     const rounded = Math.round(quantity * 100) / 100;
-    return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
+    if (Number.isInteger(rounded)) {
+      return String(rounded);
+    }
+    return rounded.toFixed(2).replace(/\.0+$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+  };
+
+  const convertMeasurement = (quantity, unit, targetSystem) => {
+    if (!Number.isFinite(quantity)) {
+      return { quantity, unit };
+    }
+    const normalizedUnit = typeof unit === 'string' ? unit.trim().toLowerCase() : '';
+    if (!normalizedUnit) {
+      return { quantity, unit };
+    }
+    const conversions = MEASUREMENT_CONVERSIONS[targetSystem] || {};
+    const conversion = conversions[normalizedUnit];
+    if (!conversion) {
+      return { quantity, unit };
+    }
+    return {
+      quantity: quantity * conversion.factor,
+      unit: conversion.unit,
+    };
+  };
+
+  const formatIngredientMeasurement = (quantity, unit) => {
+    const normalizedUnit = typeof unit === 'string' ? unit.trim() : '';
+    if (!Number.isFinite(quantity)) {
+      return {
+        quantityText: typeof quantity === 'string' ? quantity : '',
+        unitText: normalizedUnit,
+      };
+    }
+    let convertedQuantity = quantity;
+    let convertedUnit = normalizedUnit;
+    if (MEASUREMENT_SYSTEMS.includes(state.measurementSystem)) {
+      const result = convertMeasurement(quantity, normalizedUnit, state.measurementSystem);
+      convertedQuantity = Number.isFinite(result.quantity) ? result.quantity : quantity;
+      convertedUnit = result.unit || normalizedUnit;
+    }
+    const finalUnit = typeof convertedUnit === 'string' ? convertedUnit.trim() : '';
+    const precisionKey = finalUnit.toLowerCase();
+    const hasPrecision = Object.prototype.hasOwnProperty.call(
+      MEASUREMENT_DISPLAY_PRECISION,
+      precisionKey,
+    );
+    const precision = hasPrecision ? MEASUREMENT_DISPLAY_PRECISION[precisionKey] : null;
+    const adjustedQuantity =
+      hasPrecision && Number.isFinite(precision)
+        ? roundToPrecision(convertedQuantity, precision)
+        : convertedQuantity;
+    return {
+      quantityText: formatQuantity(adjustedQuantity),
+      unitText: finalUnit,
+    };
   };
 
   const formatAllergenLabel = (value) => {
@@ -492,6 +657,9 @@
     elements.themeOptions = document.getElementById('theme-options');
     elements.modeToggleButtons = Array.from(
       document.querySelectorAll('#mode-toggle .mode-toggle__button'),
+    );
+    elements.measurementToggleButtons = Array.from(
+      document.querySelectorAll('#measurement-toggle .mode-toggle__button'),
     );
   };
 
@@ -602,10 +770,10 @@
     configuredFilterView = view;
     const isMealsView = view === 'meals';
     if (elements.filterPanelTitle) {
-      elements.filterPanelTitle.textContent = isMealsView ? 'Filter Meals' : 'Filter Pantry';
+      elements.filterPanelTitle.textContent = isMealsView ? 'Filter Recipes' : 'Filter Pantry';
     }
     if (elements.filterSearchLabel) {
-      elements.filterSearchLabel.textContent = isMealsView ? 'Search Meals' : 'Search Pantry';
+      elements.filterSearchLabel.textContent = isMealsView ? 'Search Recipes' : 'Search Pantry';
     }
     if (elements.filterSearch) {
       elements.filterSearch.placeholder = isMealsView
@@ -765,7 +933,13 @@
       const item = document.createElement('li');
       const quantity = document.createElement('span');
       quantity.className = 'ingredient-quantity';
-      quantity.textContent = `${formatQuantity(ingredient.quantity * scale)} ${ingredient.unit || ''}`.trim();
+      const rawQuantity = ingredient.quantity;
+      const scaledQuantity =
+        typeof rawQuantity === 'number' ? rawQuantity * scale : rawQuantity;
+      const measurement = formatIngredientMeasurement(scaledQuantity, ingredient.unit);
+      quantity.textContent = [measurement.quantityText, measurement.unitText]
+        .filter(Boolean)
+        .join(' ');
       const name = document.createElement('span');
       name.className = 'ingredient-name';
       name.textContent = ingredient.item;
@@ -973,7 +1147,9 @@
 
   const renderMeals = () => {
     const filteredRecipes = recipes.filter((recipe) => matchesMealFilters(recipe));
-    elements.mealCount.textContent = `${filteredRecipes.length} ${filteredRecipes.length === 1 ? 'meal matches' : 'meals match'} your filters.`;
+    elements.mealCount.textContent = `${filteredRecipes.length} ${
+      filteredRecipes.length === 1 ? 'recipe matches' : 'recipes match'
+    } your filters.`;
     elements.mealGrid.innerHTML = '';
     if (filteredRecipes.length) {
       filteredRecipes.forEach((recipe) => {
@@ -983,7 +1159,7 @@
       const empty = document.createElement('div');
       empty.className = 'empty-state';
       const heading = document.createElement('h3');
-      heading.textContent = 'No meals found';
+      heading.textContent = 'No recipes found';
       const paragraph = document.createElement('p');
       paragraph.textContent = 'Try removing a filter or adding more pantry items to expand your options.';
       empty.appendChild(heading);
@@ -1129,12 +1305,24 @@
         });
       });
     }
+
+    if (Array.isArray(elements.measurementToggleButtons)) {
+      elements.measurementToggleButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const system = button.dataset.measurement;
+          if (system) {
+            setMeasurementSystem(system);
+          }
+        });
+      });
+    }
   };
 
   const init = () => {
     cacheElements();
     bindEvents();
     initThemeControls();
+    initMeasurementControls();
     renderApp();
   };
 
