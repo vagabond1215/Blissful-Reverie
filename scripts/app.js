@@ -11,25 +11,85 @@
   const THEME_STORAGE_KEY = 'blissful-theme';
   const THEME_OPTIONS = {
     light: [
-      { id: 'serene', label: 'Serene', preview: '#5160d9' },
-      { id: 'sunrise', label: 'Sunrise', preview: '#f97316' },
-      { id: 'meadow', label: 'Meadow', preview: '#2f855a' },
-      { id: 'mist', label: 'Misty Morning', preview: '#38bdf8' },
-      { id: 'blossom', label: 'Blossom', preview: '#ec4899' },
-      { id: 'citrine', label: 'Citrine Glow', preview: '#facc15' },
+      {
+        id: 'serene',
+        label: 'Serene',
+        preview: 'linear-gradient(135deg, #4453d6, #f59e0b)',
+      },
+      {
+        id: 'sunrise',
+        label: 'Sunrise',
+        preview: 'linear-gradient(135deg, #f97316, #0ea5e9)',
+      },
+      {
+        id: 'meadow',
+        label: 'Meadow',
+        preview: 'linear-gradient(135deg, #2f855a, #6366f1)',
+      },
+      {
+        id: 'mist',
+        label: 'Misty Morning',
+        preview: 'linear-gradient(135deg, #38bdf8, #a855f7)',
+      },
+      {
+        id: 'blossom',
+        label: 'Blossom',
+        preview: 'linear-gradient(135deg, #ec4899, #22d3ee)',
+      },
+      {
+        id: 'citrine',
+        label: 'Citrine Glow',
+        preview: 'linear-gradient(135deg, #facc15, #3b82f6)',
+      },
     ],
     dark: [
-      { id: 'midnight', label: 'Midnight', preview: '#2563eb' },
-      { id: 'nebula', label: 'Nebula', preview: '#a855f7' },
-      { id: 'forest', label: 'Forest', preview: '#34d399' },
-      { id: 'ember', label: 'Ember', preview: '#f97316' },
-      { id: 'abyss', label: 'Abyss', preview: '#14b8a6' },
-      { id: 'velvet', label: 'Velvet Night', preview: '#f472b6' },
+      {
+        id: 'midnight',
+        label: 'Midnight',
+        preview: 'linear-gradient(135deg, #2f6df0, #f472b6)',
+      },
+      {
+        id: 'nebula',
+        label: 'Nebula',
+        preview: 'linear-gradient(135deg, #a855f7, #22d3ee)',
+      },
+      {
+        id: 'forest',
+        label: 'Forest',
+        preview: 'linear-gradient(135deg, #34d399, #fbbf24)',
+      },
+      {
+        id: 'ember',
+        label: 'Ember',
+        preview: 'linear-gradient(135deg, #f97316, #2563eb)',
+      },
+      {
+        id: 'abyss',
+        label: 'Abyss',
+        preview: 'linear-gradient(135deg, #14b8a6, #8b5cf6)',
+      },
+      {
+        id: 'velvet',
+        label: 'Velvet Night',
+        preview: 'linear-gradient(135deg, #f472b6, #14b8a6)',
+      },
     ],
     sepia: [
-      { id: 'classic', label: 'Classic Sepia', preview: '#b7791f' },
-      { id: 'copper', label: 'Copper Glow', preview: '#c26a3d' },
-      { id: 'umber', label: 'Deep Umber', preview: '#8a4b2a' },
+      {
+        id: 'classic',
+        label: 'Classic Sepia',
+        preview: 'linear-gradient(135deg, #b7791f, #2f855a)',
+      },
+      {
+        id: 'copper',
+        label: 'Copper Glow',
+        preview: 'linear-gradient(135deg, #c26a3d, #0f766e)',
+      },
+      {
+        id: 'umber',
+        label: 'Deep Umber',
+        preview: 'linear-gradient(135deg, #8a4b2a, #3b82f6)',
+      },
     ],
   };
 
