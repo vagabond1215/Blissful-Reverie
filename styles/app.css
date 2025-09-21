@@ -493,6 +493,27 @@ textarea:focus {
   gap: 0.4rem;
 }
 
+.tag-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.tag-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.tag-group__title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+}
+
 .checkbox-option {
   display: flex;
   gap: 0.4rem;
