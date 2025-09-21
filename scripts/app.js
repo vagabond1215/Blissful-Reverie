@@ -318,7 +318,22 @@
   const getActiveFilters = () =>
     state.activeView === 'meals' ? state.mealFilters : state.pantryFilters;
 
-  const applyColorTheme = () => {
+  const setDocumentThemeAttributes = (mode, theme) => {
+    if (document.documentElement.dataset.mode !== mode) {
+      document.documentElement.dataset.mode = mode;
+    }
+    if (theme) {
+      if (document.documentElement.dataset.theme !== theme) {
+        document.documentElement.dataset.theme = theme;
+      }
+    } else {
+      delete document.documentElement.dataset.theme;
+    }
+  };
+
+  let lastPersistedTheme = null;
+
+  const applyColorTheme = (shouldPersist = true) => {
     const mode = state.themeMode;
     const options = THEME_OPTIONS[mode] || [];
     const fallback = DEFAULT_THEME_SELECTIONS[mode] || (options[0] ? options[0].id : undefined);
@@ -326,18 +341,17 @@
     const activeTheme = options.some((option) => option.id === currentSelection)
       ? currentSelection
       : fallback;
-    if (activeTheme !== currentSelection) {
+    const selectionChanged = activeTheme !== currentSelection;
+    if (selectionChanged) {
       state.themeSelections[mode] = activeTheme;
     }
-    document.documentElement.dataset.mode = mode;
-    if (activeTheme) {
-      document.documentElement.dataset.theme = activeTheme;
-    }
+    setDocumentThemeAttributes(mode, activeTheme);
+    if (!shouldPersist && !selectionChanged) return;
+    const serialized = JSON.stringify({ mode, selections: { ...state.themeSelections } });
+    if (serialized === lastPersistedTheme) return;
     try {
-      localStorage.setItem(
-        THEME_STORAGE_KEY,
-        JSON.stringify({ mode, selections: { ...state.themeSelections } }),
-      );
+      localStorage.setItem(THEME_STORAGE_KEY, serialized);
+      lastPersistedTheme = serialized;
     } catch (error) {
       console.warn('Unable to persist theme preferences.', error);
     }
@@ -1064,6 +1078,7 @@
   };
 
   const renderApp = () => {
+    applyColorTheme(false);
     configureFilterPanel();
     if (state.activeView === 'meals') {
       renderMeals();
