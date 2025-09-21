@@ -114,11 +114,131 @@
     ),
   ).sort((a, b) => a.localeCompare(b));
 
+  const TAG_CATEGORY_DEFINITIONS = [
+    {
+      id: 'meal-time',
+      label: 'Meal & Course',
+      tags: ['Breakfast', 'Brunch', 'Lunch', 'Dinner', 'Snack', 'Side', 'Dessert', 'Tea Time'],
+    },
+    {
+      id: 'seasonal',
+      label: 'Seasonal',
+      tags: ['Spring', 'Summer', 'Autumn', 'Fall', 'Winter'],
+    },
+    {
+      id: 'cuisine',
+      label: 'Cuisine & Region',
+      tags: ['Asian Inspired', 'Indian', 'Italian', 'Mediterranean', 'North African', 'Tex-Mex', 'Tacos'],
+    },
+    {
+      id: 'diet',
+      label: 'Diet & Nutrition',
+      tags: [
+        'Vegetarian',
+        'Vegan',
+        'Gluten Free',
+        'Dairy Free',
+        'No Dairy',
+        'Low Carb',
+        'Low Sodium',
+        'Whole Grains',
+        'High Protein',
+      ],
+    },
+    {
+      id: 'occasion',
+      label: 'Occasion & Lifestyle',
+      tags: [
+        'Comfort Food',
+        'Elegant',
+        'Freezer Friendly',
+        'Make Ahead',
+        'Meal Prep',
+        'Party',
+        'Picnic',
+        'Quick',
+        'Weeknight',
+        'Kid Friendly',
+        'Holiday',
+      ],
+    },
+    {
+      id: 'technique',
+      label: 'Technique & Prep',
+      tags: ['Baked', 'Baking', 'No Bake', 'One Pan', 'One Pot', 'Stir Fry', 'Crispy', 'Frozen'],
+    },
+    {
+      id: 'dish',
+      label: 'Dish & Format',
+      tags: ['Casserole', 'Pasta', 'Baked Pasta', 'Rice Bowl', 'Sandwich', 'Soup', 'Flatbread', 'Warm Salad', 'Cookies'],
+    },
+    {
+      id: 'ingredients',
+      label: 'Ingredients & Flavors',
+      tags: [
+        'Chocolate',
+        'Citrus',
+        'Coffee',
+        'Fruit',
+        'Matcha',
+        'Nuts',
+        'Potato',
+        'Seafood',
+        'Sesame',
+        'Spicy',
+        'Sweet Savory',
+        'Tea',
+        'Tropical',
+        'Vegetable',
+        'Dairy',
+      ],
+    },
+  ];
+
+  const TAG_CATEGORY_LOOKUP = new Map();
+  TAG_CATEGORY_DEFINITIONS.forEach((group) => {
+    group.tags.forEach((tag) => {
+      if (!TAG_CATEGORY_LOOKUP.has(tag)) {
+        TAG_CATEGORY_LOOKUP.set(tag, group.id);
+      }
+    });
+  });
+
+  const createTagGroups = (options) => {
+    const baseGroups = TAG_CATEGORY_DEFINITIONS.map((group) => ({
+      id: group.id,
+      label: group.label,
+      options: [],
+    }));
+    const defaultGroup = { id: 'other', label: 'Other Tags', options: [] };
+    const groupIndex = new Map(baseGroups.map((group) => [group.id, group]));
+    options.forEach((tag) => {
+      const targetId = TAG_CATEGORY_LOOKUP.get(tag);
+      const target = targetId ? groupIndex.get(targetId) : defaultGroup;
+      if (!target) return;
+      target.options.push(tag);
+    });
+    const populatedGroups = baseGroups
+      .filter((group) => group.options.length > 0)
+      .map((group) => ({
+        ...group,
+        options: group.options.sort((a, b) => a.localeCompare(b)),
+      }));
+    if (defaultGroup.options.length) {
+      populatedGroups.push({
+        ...defaultGroup,
+        options: defaultGroup.options.sort((a, b) => a.localeCompare(b)),
+      });
+    }
+    return populatedGroups;
+  };
+
   const PROTEIN_TAGS = new Set(['Beef', 'Chicken', 'Pork', 'Turkey']);
   const proteinOptions = rawTagOptions.filter((tag) => PROTEIN_TAGS.has(tag));
   const excludedTags = new Set(proteinOptions);
   equipmentOptions.forEach((item) => excludedTags.add(item));
   const tagOptions = rawTagOptions.filter((tag) => !excludedTags.has(tag));
+  const mealTagGroups = createTagGroups(tagOptions);
 
   const allergyDefaults = ['dairy', 'gluten', 'eggs', 'nuts', 'soy', 'fish', 'shellfish'];
   const allergyOptions = Array.from(
@@ -408,6 +528,57 @@
     });
   };
 
+  const populateGroupedTagOptions = (view, container, groups, field) => {
+    if (!container) return;
+    const registry = checkboxRegistry[view]?.[field];
+    if (!registry) return;
+    const filters = view === 'meals' ? state.mealFilters : state.pantryFilters;
+    if (!Array.isArray(filters[field])) {
+      filters[field] = [];
+    }
+    container.innerHTML = '';
+    registry.clear();
+    container.classList.add('tag-groups');
+    container.classList.remove('checkbox-grid');
+    groups.forEach((group) => {
+      if (!group.options.length) return;
+      const section = document.createElement('div');
+      section.className = 'tag-group';
+      const title = document.createElement('p');
+      title.className = 'tag-group__title';
+      title.textContent = group.label;
+      section.appendChild(title);
+      const optionGrid = document.createElement('div');
+      optionGrid.className = 'checkbox-grid';
+      group.options.forEach((option) => {
+        const label = document.createElement('label');
+        label.className = 'checkbox-option';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = option;
+        input.checked = filters[field].includes(option);
+        input.addEventListener('change', () => {
+          const current = new Set(filters[field]);
+          if (input.checked) {
+            current.add(option);
+          } else {
+            current.delete(option);
+          }
+          filters[field] = Array.from(current);
+          renderApp();
+        });
+        label.appendChild(input);
+        const span = document.createElement('span');
+        span.textContent = option;
+        label.appendChild(span);
+        optionGrid.appendChild(label);
+        registry.set(option, input);
+      });
+      section.appendChild(optionGrid);
+      container.appendChild(section);
+    });
+  };
+
   const configureFilterPanel = () => {
     const view = state.activeView;
     if (configuredFilterView === view) {
@@ -447,12 +618,16 @@
 
     if (isMealsView) {
       populateCheckboxGroup('meals', elements.proteinOptions, proteinOptions, 'protein');
-      populateCheckboxGroup('meals', elements.tagOptions, tagOptions, 'tags');
+      populateGroupedTagOptions('meals', elements.tagOptions, mealTagGroups, 'tags');
       populateCheckboxGroup('meals', elements.allergyOptions, allergyOptions, 'allergies', {
         labelFormatter: formatAllergenLabel,
       });
       populateCheckboxGroup('meals', elements.equipmentOptions, equipmentOptions, 'equipment');
     } else {
+      if (elements.tagOptions) {
+        elements.tagOptions.classList.remove('tag-groups');
+        elements.tagOptions.classList.add('checkbox-grid');
+      }
       populateCheckboxGroup('pantry', elements.proteinOptions, ingredientCategoryOptions, 'categories');
       populateCheckboxGroup('pantry', elements.tagOptions, pantryTagOptions, 'tags');
       populateCheckboxGroup(
