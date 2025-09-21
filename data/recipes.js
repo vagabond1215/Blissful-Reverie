@@ -117,7 +117,7 @@ window.BLISSFUL_RECIPES = [
       'Fold in spinach until wilted, finish with lemon juice and cilantro, and adjust seasoning before serving.',
     ],
     equipment: ['Dutch Oven', 'Stovetop'],
-    tags: ['Dinner', 'Vegetarian', 'Vegan', 'Gluten Free', 'Soup'],
+    tags: ['Dinner', 'Vegetarian', 'Vegan', 'Gluten Free', 'Soup', 'Winter'],
     nutritionPerServing: {
       calories: 340,
       protein: 18,
@@ -198,7 +198,7 @@ window.BLISSFUL_RECIPES = [
       'Serve immediately with pan juices spooned over each fillet.',
     ],
     equipment: ['Oven', 'Sheet Pan'],
-    tags: ['Dinner', 'Seafood', 'Gluten Free', 'No Dairy', 'Weeknight'],
+    tags: ['Dinner', 'Seafood', 'Gluten Free', 'No Dairy', 'Weeknight', 'Spring'],
     nutritionPerServing: {
       calories: 420,
       protein: 34,

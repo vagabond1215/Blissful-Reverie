@@ -8,6 +8,16 @@
     return;
   }
 
+  const matching = window.BlissfulMatching || {};
+  const { createIngredientMatcherIndex, mapRecipesToIngredientMatches } = matching;
+  if (
+    typeof createIngredientMatcherIndex !== 'function'
+    || typeof mapRecipesToIngredientMatches !== 'function'
+  ) {
+    console.error('Blissful Reverie ingredient matching utilities are unavailable.');
+    return;
+  }
+
   const THEME_STORAGE_KEY = 'blissful-theme';
   const THEME_OPTIONS = {
     light: [
@@ -155,7 +165,7 @@
 
   const getDefaultMealFilters = () => ({
     search: '',
-    protein: [],
+    ingredients: [],
     tags: [],
     allergies: [],
     equipment: [],
@@ -187,11 +197,47 @@
     ),
   ).sort((a, b) => a.localeCompare(b));
 
-  const rawTagOptions = Array.from(
-    new Set(
-      recipes.flatMap((recipe) => (Array.isArray(recipe.tags) ? recipe.tags : [])),
-    ),
-  ).sort((a, b) => a.localeCompare(b));
+  const TAG_SYNONYM_DEFINITIONS = [
+    { canonical: 'Autumn / Fall', tags: ['Autumn', 'Fall'] },
+    { canonical: 'Bright', tags: ['Citrus'] },
+    { canonical: 'Earthy', tags: ['Coffee', 'Matcha', 'Tea'] },
+    { canonical: 'Nutty', tags: ['Nuts', 'Sesame'] },
+    { canonical: 'Rich', tags: ['Dairy'] },
+    { canonical: 'Savory', tags: ['Vegetable', 'Potato', 'Seafood'] },
+    { canonical: 'Spicy', tags: ['Spicy'] },
+    { canonical: 'Sweet', tags: ['Chocolate', 'Fruit'] },
+    { canonical: 'Sweet & Savory', tags: ['Sweet Savory'] },
+    { canonical: 'Tropical', tags: ['Tropical'] },
+  ];
+
+  const ALWAYS_AVAILABLE_TAGS = ['Spring', 'Winter'];
+
+  const canonicalTagLookup = new Map();
+  const tagToCanonical = new Map();
+
+  const registerCanonicalTag = (canonical, tags) => {
+    const normalizedCanonical = typeof canonical === 'string' ? canonical : '';
+    if (!normalizedCanonical) return;
+    let set = canonicalTagLookup.get(normalizedCanonical);
+    if (!set) {
+      set = new Set();
+      canonicalTagLookup.set(normalizedCanonical, set);
+    }
+    (Array.isArray(tags) ? tags : []).forEach((tag) => {
+      if (typeof tag !== 'string' || !tag) return;
+      set.add(tag);
+      tagToCanonical.set(tag, normalizedCanonical);
+    });
+  };
+
+  TAG_SYNONYM_DEFINITIONS.forEach(({ canonical, tags }) => registerCanonicalTag(canonical, tags));
+
+  const rawTagSet = new Set(
+    recipes.flatMap((recipe) => (Array.isArray(recipe.tags) ? recipe.tags : [])),
+  );
+  ALWAYS_AVAILABLE_TAGS.forEach((tag) => rawTagSet.add(tag));
+  TAG_SYNONYM_DEFINITIONS.forEach(({ canonical }) => rawTagSet.add(canonical));
+  const rawTagOptions = Array.from(rawTagSet).sort((a, b) => a.localeCompare(b));
 
   const TAG_CATEGORY_DEFINITIONS = [
     {
@@ -202,7 +248,7 @@
     {
       id: 'seasonal',
       label: 'Seasonal',
-      tags: ['Spring', 'Summer', 'Autumn', 'Fall', 'Winter'],
+      tags: ['Spring', 'Summer', 'Autumn / Fall', 'Winter'],
     },
     {
       id: 'cuisine',
@@ -253,24 +299,8 @@
     },
     {
       id: 'ingredients',
-      label: 'Ingredients & Flavors',
-      tags: [
-        'Chocolate',
-        'Citrus',
-        'Coffee',
-        'Fruit',
-        'Matcha',
-        'Nuts',
-        'Potato',
-        'Seafood',
-        'Sesame',
-        'Spicy',
-        'Sweet Savory',
-        'Tea',
-        'Tropical',
-        'Vegetable',
-        'Dairy',
-      ],
+      label: 'Flavor',
+      tags: ['Bright', 'Earthy', 'Nutty', 'Rich', 'Savory', 'Spicy', 'Sweet', 'Sweet & Savory', 'Tropical'],
     },
   ];
 
@@ -280,8 +310,29 @@
       if (!TAG_CATEGORY_LOOKUP.has(tag)) {
         TAG_CATEGORY_LOOKUP.set(tag, group.id);
       }
+      registerCanonicalTag(tag, [tag]);
     });
   });
+
+  TAG_SYNONYM_DEFINITIONS.forEach(({ canonical, tags }) => {
+    const groupId = TAG_CATEGORY_LOOKUP.get(canonical);
+    if (!groupId) return;
+    tags.forEach((tag) => {
+      if (!TAG_CATEGORY_LOOKUP.has(tag)) {
+        TAG_CATEGORY_LOOKUP.set(tag, groupId);
+      }
+    });
+  });
+
+  const ensureCanonicalTag = (value) => {
+    const mapped = tagToCanonical.get(value);
+    if (mapped) {
+      registerCanonicalTag(mapped, [value]);
+      return mapped;
+    }
+    registerCanonicalTag(value, [value]);
+    return value;
+  };
 
   const createTagGroups = (options) => {
     const baseGroups = TAG_CATEGORY_DEFINITIONS.map((group) => ({
@@ -291,30 +342,68 @@
     }));
     const defaultGroup = { id: 'other', label: 'Other Tags', options: [] };
     const groupIndex = new Map(baseGroups.map((group) => [group.id, group]));
+    const canonicalEntries = new Map();
+
+    const recordCanonicalOption = (canonical, tag, groupId) => {
+      if (!canonical) return;
+      const entry = canonicalEntries.get(canonical) || {
+        tags: new Set(),
+        groupIds: new Set(),
+      };
+      if (tag) entry.tags.add(tag);
+      if (groupId) entry.groupIds.add(groupId);
+      canonicalEntries.set(canonical, entry);
+    };
+
     options.forEach((tag) => {
-      const targetId = TAG_CATEGORY_LOOKUP.get(tag);
-      const target = targetId ? groupIndex.get(targetId) : defaultGroup;
-      if (!target) return;
-      target.options.push(tag);
+      const canonical = ensureCanonicalTag(tag);
+      const groupId = TAG_CATEGORY_LOOKUP.get(tag);
+      recordCanonicalOption(canonical, tag, groupId);
     });
+
+    TAG_SYNONYM_DEFINITIONS.forEach(({ canonical, tags }) => {
+      const groupId = TAG_CATEGORY_LOOKUP.get(canonical);
+      tags.forEach((tag) => {
+        recordCanonicalOption(canonical, tag, groupId);
+      });
+    });
+
+    ALWAYS_AVAILABLE_TAGS.forEach((tag) => {
+      const canonical = ensureCanonicalTag(tag);
+      const groupId = TAG_CATEGORY_LOOKUP.get(canonical) || TAG_CATEGORY_LOOKUP.get(tag);
+      recordCanonicalOption(canonical, tag, groupId);
+    });
+
+    canonicalEntries.forEach((entry, canonical) => {
+      const actualTags = Array.from(canonicalTagLookup.get(canonical) || entry.tags || []);
+      if (!actualTags.length) return;
+      const preferredGroupId = Array.from(entry.groupIds).find((id) => groupIndex.has(id));
+      const fallbackGroupId = actualTags
+        .map((tag) => TAG_CATEGORY_LOOKUP.get(tag))
+        .find((id) => id && groupIndex.has(id));
+      const target = (preferredGroupId && groupIndex.get(preferredGroupId))
+        || (fallbackGroupId && groupIndex.get(fallbackGroupId))
+        || defaultGroup;
+      if (!target) return;
+      target.options.push({ value: canonical, label: canonical, tags: actualTags });
+    });
+
     const populatedGroups = baseGroups
       .filter((group) => group.options.length > 0)
       .map((group) => ({
         ...group,
-        options: group.options.sort((a, b) => a.localeCompare(b)),
+        options: group.options.sort((a, b) => a.label.localeCompare(b.label)),
       }));
     if (defaultGroup.options.length) {
       populatedGroups.push({
         ...defaultGroup,
-        options: defaultGroup.options.sort((a, b) => a.localeCompare(b)),
+        options: defaultGroup.options.sort((a, b) => a.label.localeCompare(b.label)),
       });
     }
     return populatedGroups;
   };
 
-  const PROTEIN_TAGS = new Set(['Beef', 'Chicken', 'Pork', 'Turkey']);
-  const proteinOptions = rawTagOptions.filter((tag) => PROTEIN_TAGS.has(tag));
-  const excludedTags = new Set(proteinOptions);
+  const excludedTags = new Set();
   equipmentOptions.forEach((item) => excludedTags.add(item));
   const tagOptions = rawTagOptions.filter((tag) => !excludedTags.has(tag));
   const mealTagGroups = createTagGroups(tagOptions);
@@ -354,6 +443,38 @@
   const allergenTagPattern = /(contains|free)/i;
   const pantryAllergenOptions = ingredientTagsSorted.filter((tag) => allergenTagPattern.test(tag));
   const pantryTagOptions = ingredientTagsSorted.filter((tag) => !allergenTagPattern.test(tag));
+
+  const INGREDIENT_FILTER_GROUPS = [
+    { id: 'protein', label: 'Protein', categories: ['Meat', 'Seafood'] },
+    { id: 'legumes', label: 'Legumes & Plant Protein', categories: ['Legume'] },
+    { id: 'vegetables', label: 'Vegetables', categories: ['Vegetable'] },
+    { id: 'fruits', label: 'Fruits', categories: ['Fruit'] },
+    { id: 'pasta-grains', label: 'Pasta & Grains', categories: ['Pasta', 'Grain'] },
+    { id: 'dairy-eggs', label: 'Dairy & Eggs', categories: ['Dairy'] },
+    { id: 'baking', label: 'Baking Essentials', categories: ['Baking'] },
+    { id: 'herbs-spices', label: 'Herbs & Spices', categories: ['Herb', 'Spice'] },
+    { id: 'nuts-seeds', label: 'Nuts & Seeds', categories: ['Nut/Seed'] },
+    { id: 'oils-condiments', label: 'Oils & Condiments', categories: ['Oil/Fat', 'Condiment/Sauce'] },
+    { id: 'sweeteners', label: 'Sweeteners', categories: ['Sweetener'] },
+    { id: 'broths-beverages', label: 'Broths & Beverages', categories: ['Beverage'] },
+  ];
+
+  const ingredientMatcherIndex = createIngredientMatcherIndex(ingredients);
+  const { recipeIngredientMatches, ingredientUsage } = mapRecipesToIngredientMatches(
+    recipes,
+    ingredientMatcherIndex,
+  );
+
+  const ingredientFilterGroups = INGREDIENT_FILTER_GROUPS.map((group) => {
+    const options = ingredients
+      .filter(
+        (ingredient) =>
+          group.categories.includes(ingredient.category) && ingredientUsage.get(ingredient.slug),
+      )
+      .map((ingredient) => ({ slug: ingredient.slug, label: ingredient.name }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+    return { id: group.id, label: group.label, options };
+  }).filter((group) => group.options.length);
 
   const PANTRY_UNITS = [
     'each',
@@ -429,7 +550,7 @@
 
   const checkboxRegistry = {
     meals: {
-      protein: new Map(),
+      ingredients: new Map(),
       tags: new Map(),
       allergies: new Map(),
       equipment: new Map(),
@@ -439,6 +560,11 @@
       tags: new Map(),
       allergens: new Map(),
     },
+  };
+
+  const tagGroupSummaryRegistry = {
+    meals: [],
+    pantry: [],
   };
 
   const elements = {};
@@ -702,15 +828,15 @@
     elements.filterSearchLabel = document.getElementById('filter-search-label');
     elements.filterSearch = document.getElementById('filter-search');
     elements.resetButton = document.getElementById('reset-filters');
-    elements.proteinSection = document.getElementById('protein-section');
+    elements.ingredientSection = document.getElementById('ingredient-section');
     elements.tagSection = document.getElementById('tag-section');
     elements.allergySection = document.getElementById('allergy-section');
     elements.equipmentSection = document.getElementById('equipment-section');
-    elements.proteinSummary = document.getElementById('protein-summary');
+    elements.ingredientSummary = document.getElementById('ingredient-summary');
     elements.tagSummary = document.getElementById('tag-summary');
     elements.allergySummary = document.getElementById('allergy-summary');
     elements.equipmentSummary = document.getElementById('equipment-summary');
-    elements.proteinOptions = document.getElementById('protein-options');
+    elements.ingredientOptions = document.getElementById('ingredient-options');
     elements.tagOptions = document.getElementById('tag-options');
     elements.allergyOptions = document.getElementById('allergy-options');
     elements.equipmentOptions = document.getElementById('equipment-options');
@@ -778,18 +904,113 @@
     if (!Array.isArray(filters[field])) {
       filters[field] = [];
     }
+    tagGroupSummaryRegistry[view] = [];
     container.innerHTML = '';
     registry.clear();
     container.classList.add('tag-groups');
     container.classList.remove('checkbox-grid');
-    groups.forEach((group) => {
+    groups.forEach((group, index) => {
       if (!group.options.length) return;
-      const section = document.createElement('div');
-      section.className = 'tag-group';
-      const title = document.createElement('p');
-      title.className = 'tag-group__title';
-      title.textContent = group.label;
-      section.appendChild(title);
+      const optionValues = group.options.map((option) => option.value);
+      const selectedCount = optionValues.reduce(
+        (count, value) => (filters[field].includes(value) ? count + 1 : count),
+        0,
+      );
+      const details = document.createElement('details');
+      details.className = 'tag-group';
+      const hasSelection = selectedCount > 0;
+      details.open = hasSelection || index === 0;
+      const summary = document.createElement('summary');
+      summary.className = 'tag-group__summary';
+      const labelSpan = document.createElement('span');
+      labelSpan.className = 'tag-group__summary-label';
+      labelSpan.textContent = group.label;
+      summary.appendChild(labelSpan);
+      const countBadge = document.createElement('span');
+      countBadge.className = 'tag-group__summary-count';
+      summary.appendChild(countBadge);
+      const updateSelectionDisplay = (count) => {
+        if (count > 0) {
+          countBadge.textContent = `${count} selected`;
+          countBadge.hidden = false;
+          summary.setAttribute('aria-label', `${group.label} (${count} selected)`);
+        } else {
+          countBadge.textContent = '';
+          countBadge.hidden = true;
+          summary.setAttribute('aria-label', `${group.label} (no tags selected)`);
+        }
+      };
+      updateSelectionDisplay(selectedCount);
+      details.appendChild(summary);
+      const optionGrid = document.createElement('div');
+      optionGrid.className = 'checkbox-grid';
+      const optionGridId = `tag-group-${view}-${group.id || index}-options`;
+      optionGrid.id = optionGridId;
+      summary.setAttribute('aria-controls', optionGridId);
+      const applyExpandedState = () => {
+        summary.setAttribute('aria-expanded', details.open ? 'true' : 'false');
+      };
+      details.addEventListener('toggle', applyExpandedState);
+      applyExpandedState();
+      group.options.forEach((option) => {
+        const label = document.createElement('label');
+        label.className = 'checkbox-option';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = option.value;
+        input.checked = filters[field].includes(option.value);
+        input.addEventListener('change', () => {
+          const current = new Set(filters[field]);
+          if (input.checked) {
+            current.add(option.value);
+          } else {
+            current.delete(option.value);
+          }
+          filters[field] = Array.from(current);
+          renderApp();
+        });
+        label.appendChild(input);
+        const span = document.createElement('span');
+        span.textContent = option.label;
+        label.appendChild(span);
+        optionGrid.appendChild(label);
+        registry.set(option.value, input);
+      });
+      details.appendChild(optionGrid);
+      container.appendChild(details);
+      tagGroupSummaryRegistry[view].push({
+        summary,
+        countBadge,
+        label: group.label,
+        field,
+        optionValues,
+        updateSelectionDisplay,
+      });
+    });
+  };
+
+  const populateIngredientFilters = (container, groups) => {
+    if (!container) return;
+    const registry = checkboxRegistry.meals?.ingredients;
+    if (!registry) return;
+    const filters = state.mealFilters;
+    if (!Array.isArray(filters.ingredients)) {
+      filters.ingredients = [];
+    }
+    container.innerHTML = '';
+    registry.clear();
+    container.classList.add('ingredient-groups');
+    container.classList.remove('checkbox-grid');
+    groups.forEach((group, index) => {
+      if (!group.options.length) return;
+      const details = document.createElement('details');
+      details.className = 'ingredient-group';
+      const hasSelection = group.options.some((option) => filters.ingredients.includes(option.slug));
+      details.open = hasSelection || index < 2;
+      const summary = document.createElement('summary');
+      summary.className = 'ingredient-group__summary';
+      summary.textContent = group.label;
+      details.appendChild(summary);
       const optionGrid = document.createElement('div');
       optionGrid.className = 'checkbox-grid';
       group.options.forEach((option) => {
@@ -797,27 +1018,27 @@
         label.className = 'checkbox-option';
         const input = document.createElement('input');
         input.type = 'checkbox';
-        input.value = option;
-        input.checked = filters[field].includes(option);
+        input.value = option.slug;
+        input.checked = filters.ingredients.includes(option.slug);
         input.addEventListener('change', () => {
-          const current = new Set(filters[field]);
+          const current = new Set(filters.ingredients);
           if (input.checked) {
-            current.add(option);
+            current.add(option.slug);
           } else {
-            current.delete(option);
+            current.delete(option.slug);
           }
-          filters[field] = Array.from(current);
+          filters.ingredients = Array.from(current);
           renderApp();
         });
         label.appendChild(input);
         const span = document.createElement('span');
-        span.textContent = option;
+        span.textContent = option.label;
         label.appendChild(span);
         optionGrid.appendChild(label);
-        registry.set(option, input);
+        registry.set(option.slug, input);
       });
-      section.appendChild(optionGrid);
-      container.appendChild(section);
+      details.appendChild(optionGrid);
+      container.appendChild(details);
     });
   };
 
@@ -841,8 +1062,8 @@
         : 'Search by ingredient name, slug, or tag';
     }
 
-    if (elements.proteinSummary) {
-      elements.proteinSummary.textContent = isMealsView ? 'Protein' : 'Categories';
+    if (elements.ingredientSummary) {
+      elements.ingredientSummary.textContent = isMealsView ? 'Ingredients' : 'Categories';
     }
     if (elements.tagSummary) {
       elements.tagSummary.textContent = 'Tags';
@@ -859,18 +1080,23 @@
     }
 
     if (isMealsView) {
-      populateCheckboxGroup('meals', elements.proteinOptions, proteinOptions, 'protein');
+      populateIngredientFilters(elements.ingredientOptions, ingredientFilterGroups);
       populateGroupedTagOptions('meals', elements.tagOptions, mealTagGroups, 'tags');
       populateCheckboxGroup('meals', elements.allergyOptions, allergyOptions, 'allergies', {
         labelFormatter: formatAllergenLabel,
       });
       populateCheckboxGroup('meals', elements.equipmentOptions, equipmentOptions, 'equipment');
     } else {
+      if (elements.ingredientOptions) {
+        elements.ingredientOptions.classList.remove('ingredient-groups');
+        elements.ingredientOptions.classList.add('checkbox-grid');
+      }
       if (elements.tagOptions) {
         elements.tagOptions.classList.remove('tag-groups');
         elements.tagOptions.classList.add('checkbox-grid');
       }
-      populateCheckboxGroup('pantry', elements.proteinOptions, ingredientCategoryOptions, 'categories');
+      tagGroupSummaryRegistry.pantry = [];
+      populateCheckboxGroup('pantry', elements.ingredientOptions, ingredientCategoryOptions, 'categories');
       populateCheckboxGroup('pantry', elements.tagOptions, pantryTagOptions, 'tags');
       populateCheckboxGroup(
         'pantry',
@@ -899,6 +1125,30 @@
         input.checked = selected.includes(option);
       });
     });
+    const summaryEntries = tagGroupSummaryRegistry[state.activeView];
+    if (Array.isArray(summaryEntries)) {
+      summaryEntries.forEach((entry) => {
+        if (!entry) return;
+        const selectedValues = Array.isArray(filters[entry.field]) ? filters[entry.field] : [];
+        const selectedCount = entry.optionValues.reduce(
+          (count, value) => (selectedValues.includes(value) ? count + 1 : count),
+          0,
+        );
+        if (typeof entry.updateSelectionDisplay === 'function') {
+          entry.updateSelectionDisplay(selectedCount);
+        } else if (entry.countBadge && entry.summary) {
+          if (selectedCount > 0) {
+            entry.countBadge.textContent = `${selectedCount} selected`;
+            entry.countBadge.hidden = false;
+            entry.summary.setAttribute('aria-label', `${entry.label} (${selectedCount} selected)`);
+          } else {
+            entry.countBadge.textContent = '';
+            entry.countBadge.hidden = true;
+            entry.summary.setAttribute('aria-label', `${entry.label} (no tags selected)`);
+          }
+        }
+      });
+    }
   };
 
   const matchesMealFilters = (recipe) => {
@@ -907,11 +1157,23 @@
     if (filters.search && !haystack.includes(filters.search.toLowerCase())) {
       return false;
     }
-    if (filters.protein.length && !filters.protein.some((protein) => (recipe.tags || []).includes(protein))) {
-      return false;
+    if (filters.ingredients.length) {
+      const matchedIngredients = recipeIngredientMatches.get(recipe.id) || new Set();
+      const hasAllSelected = filters.ingredients.every((slug) => matchedIngredients.has(slug));
+      if (!hasAllSelected) {
+        return false;
+      }
     }
-    if (filters.tags.length && !filters.tags.every((tag) => (recipe.tags || []).includes(tag))) {
-      return false;
+    if (filters.tags.length) {
+      const recipeTags = Array.isArray(recipe.tags) ? recipe.tags : [];
+      const hasAllTagSelections = filters.tags.every((selected) => {
+        const candidateSet = canonicalTagLookup.get(selected);
+        const available = candidateSet instanceof Set ? Array.from(candidateSet) : [selected];
+        return available.some((tag) => recipeTags.includes(tag));
+      });
+      if (!hasAllTagSelections) {
+        return false;
+      }
     }
     if (filters.allergies.length && (recipe.allergens || []).some((allergen) => filters.allergies.includes(allergen))) {
       return false;
