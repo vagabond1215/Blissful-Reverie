@@ -293,6 +293,25 @@
     return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
   };
 
+  const formatAllergenLabel = (value) => {
+    const text = String(value || '').trim();
+    if (!text) return '';
+    return text
+      .split(/([\s/_-]+)/)
+      .map((segment) => {
+        if (!segment) return segment;
+        if (!/[a-z0-9]/i.test(segment)) {
+          if (/^_+$/.test(segment)) {
+            return ' ';
+          }
+          return segment;
+        }
+        const lower = segment.toLowerCase();
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+      })
+      .join('');
+  };
+
   const getPantryEntry = (slug) => state.pantryInventory[slug] || { quantity: '', unit: DEFAULT_PANTRY_UNIT };
 
   const updatePantryEntry = (slug, patch) => {
@@ -342,7 +361,15 @@
     );
   };
 
-  const populateCheckboxGroup = (view, container, options, field, spanClassName) => {
+  const populateCheckboxGroup = (view, container, options, field, config) => {
+    let spanClassName;
+    let labelFormatter;
+    if (typeof config === 'string') {
+      spanClassName = config;
+    } else if (config && typeof config === 'object') {
+      spanClassName = config.spanClassName;
+      labelFormatter = config.labelFormatter;
+    }
     if (!container) return;
     const registry = checkboxRegistry[view]?.[field];
     if (!registry) return;
@@ -374,7 +401,7 @@
       if (spanClassName) {
         span.className = spanClassName;
       }
-      span.textContent = option;
+      span.textContent = typeof labelFormatter === 'function' ? labelFormatter(option) : option;
       label.appendChild(span);
       container.appendChild(label);
       registry.set(option, input);
@@ -421,7 +448,9 @@
     if (isMealsView) {
       populateCheckboxGroup('meals', elements.proteinOptions, proteinOptions, 'protein');
       populateCheckboxGroup('meals', elements.tagOptions, tagOptions, 'tags');
-      populateCheckboxGroup('meals', elements.allergyOptions, allergyOptions, 'allergies');
+      populateCheckboxGroup('meals', elements.allergyOptions, allergyOptions, 'allergies', {
+        labelFormatter: formatAllergenLabel,
+      });
       populateCheckboxGroup('meals', elements.equipmentOptions, equipmentOptions, 'equipment');
     } else {
       populateCheckboxGroup('pantry', elements.proteinOptions, ingredientCategoryOptions, 'categories');
@@ -431,6 +460,7 @@
         elements.allergyOptions,
         pantryAllergenOptions,
         'allergens',
+        { labelFormatter: formatAllergenLabel },
       );
       if (elements.equipmentOptions) {
         elements.equipmentOptions.innerHTML = '';
@@ -599,7 +629,7 @@
       recipe.allergens.forEach((allergen) => {
         const li = document.createElement('li');
         li.className = 'badge badge-soft';
-        li.textContent = allergen;
+        li.textContent = formatAllergenLabel(allergen);
         allergenList.appendChild(li);
       });
     } else {
