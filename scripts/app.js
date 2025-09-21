@@ -421,7 +421,7 @@
     if (isMealsView) {
       populateCheckboxGroup('meals', elements.proteinOptions, proteinOptions, 'protein');
       populateCheckboxGroup('meals', elements.tagOptions, tagOptions, 'tags');
-      populateCheckboxGroup('meals', elements.allergyOptions, allergyOptions, 'allergies', 'badge badge-soft');
+      populateCheckboxGroup('meals', elements.allergyOptions, allergyOptions, 'allergies');
       populateCheckboxGroup('meals', elements.equipmentOptions, equipmentOptions, 'equipment');
     } else {
       populateCheckboxGroup('pantry', elements.proteinOptions, ingredientCategoryOptions, 'categories');
@@ -431,7 +431,6 @@
         elements.allergyOptions,
         pantryAllergenOptions,
         'allergens',
-        'badge badge-soft',
       );
       if (elements.equipmentOptions) {
         elements.equipmentOptions.innerHTML = '';
