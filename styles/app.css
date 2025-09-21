@@ -87,6 +87,10 @@ body {
   background-color: var(--color-background);
 }
 
+[hidden] {
+  display: none !important;
+}
+
 input,
 textarea,
 button,
