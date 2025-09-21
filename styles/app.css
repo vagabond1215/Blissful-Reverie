@@ -807,10 +807,9 @@ textarea:focus {
   background: var(--color-surface-soft);
   border-radius: 16px;
   padding: 1rem 1.2rem;
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-  gap: 1.25rem;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   border: 1px solid transparent;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -823,13 +822,22 @@ textarea:focus {
 .pantry-card__details {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.6rem;
+}
+
+.pantry-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .pantry-card__name {
   margin: 0;
   font-size: 1.1rem;
   color: var(--color-text-strong);
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .pantry-card__tags {
@@ -846,38 +854,44 @@ textarea:focus {
   font-size: 0.78rem;
 }
 
-.pantry-card__controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  justify-content: flex-end;
-  align-items: flex-end;
+.pantry-card__inline-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  flex: 0 0 auto;
 }
 
-.pantry-card__control {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  min-width: 120px;
-}
-
-.pantry-card__control input,
-.pantry-card__control select {
+.pantry-card__inline-input {
   border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 0.5rem 0.6rem;
-  font-size: 0.95rem;
-  width: 100%;
+  border-radius: 10px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.9rem;
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.pantry-card__control input[type='number'] {
+.pantry-card__inline-input:focus {
+  outline: none;
+  border-color: var(--color-accent-border);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.pantry-card__inline-input--quantity {
+  width: 4.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
   appearance: textfield;
+  -moz-appearance: textfield;
 }
 
-.pantry-card__control input[type='number']::-webkit-inner-spin-button,
-.pantry-card__control input[type='number']::-webkit-outer-spin-button {
+.pantry-card__inline-input--unit {
+  width: 5.5rem;
+}
+
+.pantry-card__inline-input--quantity::-webkit-inner-spin-button,
+.pantry-card__inline-input--quantity::-webkit-outer-spin-button {
   appearance: none;
   margin: 0;
 }
@@ -921,13 +935,8 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
-  .pantry-card {
-    grid-template-columns: 1fr;
-    align-items: stretch;
-  }
-
-  .pantry-card__controls {
-    justify-content: flex-start;
+  .pantry-card__inline-controls {
+    margin-left: 0;
   }
 }
 
