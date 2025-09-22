@@ -470,7 +470,6 @@ select {
 
 .filter-panel,
 .pantry-view {
-  background: var(--surface-panel-gradient);
   border: 1px solid var(--color-accent-outline, var(--color-border-muted));
   border-radius: 18px;
   box-shadow: 0 24px 48px -28px var(--color-card-shadow);
@@ -481,6 +480,27 @@ select {
   flex-direction: column;
   gap: 1.4rem;
   padding: 1.5rem;
+  background: var(--view-toggle-inactive-gradient);
+  border-color: rgba(244, 247, 229, 0.35);
+  color: var(--view-toggle-inactive-text, #f4f7e5);
+  --color-text-emphasis: var(--view-toggle-inactive-text, #f4f7e5);
+  --color-text-tertiary: rgba(244, 247, 229, 0.78);
+  --color-text-muted: rgba(244, 247, 229, 0.75);
+  --color-text-soft: rgba(244, 247, 229, 0.65);
+  --color-text-badge: rgba(244, 247, 229, 0.92);
+  --color-inline-tag-text: rgba(244, 247, 229, 0.9);
+  --color-accent-outline: rgba(244, 247, 229, 0.28);
+  --color-border-muted: rgba(244, 247, 229, 0.22);
+  --color-accent-border: rgba(244, 247, 229, 0.42);
+  --surface-section-gradient: linear-gradient(
+    150deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.02)
+  );
+}
+
+.pantry-view {
+  background: var(--surface-panel-gradient);
 }
 
 .panel-header {
@@ -823,8 +843,8 @@ textarea:focus {
 }
 
 .meal-card {
-  background: var(--surface-card-gradient);
-  border: 1px solid var(--color-accent-outline, var(--color-border-muted));
+  background: var(--view-toggle-inactive-gradient);
+  border: 1px solid rgba(244, 247, 229, 0.32);
   border-radius: 18px;
   box-shadow: 0 24px 48px -28px var(--color-card-shadow-soft);
   display: flex;
@@ -832,6 +852,13 @@ textarea:focus {
   gap: 1.2rem;
   padding: 1.4rem 1.6rem;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
+  color: var(--view-toggle-inactive-text, #f4f7e5);
+  --color-text-emphasis: var(--view-toggle-inactive-text, #f4f7e5);
+  --color-text-muted: rgba(244, 247, 229, 0.78);
+  --color-text-soft: rgba(244, 247, 229, 0.65);
+  --color-text-badge: rgba(244, 247, 229, 0.92);
+  --color-text-instruction: rgba(244, 247, 229, 0.88);
+  --color-border-muted: rgba(244, 247, 229, 0.25);
 }
 
 .meal-card:hover {
