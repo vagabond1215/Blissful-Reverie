@@ -3,10 +3,10 @@
 }
 
 :root {
-  --color-background: #eef1fb;
-  --body-gradient-start: #ffffff;
-  --body-gradient-mid: #dde3fb;
-  --body-gradient-end: #c4d3ff;
+  --color-background: #f2dec7;
+  --body-gradient-start: #f9e8d7;
+  --body-gradient-mid: #e3b889;
+  --body-gradient-end: #c98246;
 
   --color-text-primary: #0f172a;
   --color-text-strong: #0b1120;
@@ -21,7 +21,7 @@
   --color-text-inverse: #ffffff;
   --color-text-emphasis: #1b2848;
 
-  --color-layout-background: #dfe3ea;
+  --color-layout-background: #d09c67;
 
   --color-accent: #4453d6;
   --color-accent-strong: #6f63ff;
@@ -156,7 +156,7 @@ select {
 }
 
 .app-header {
-  padding: 1.75rem 3rem 1.25rem;
+  padding: 0.625rem 1.5625rem;
   background: var(--color-header-background);
   color: var(
     --color-header-foreground,
@@ -172,6 +172,7 @@ select {
 .header-grid {
   display: grid;
   gap: 1.75rem;
+  padding: 0.625rem 1.5625rem;
 }
 
 .header-grid__primary {
@@ -226,12 +227,28 @@ select {
   height: 2.75rem;
   padding: 0;
   cursor: pointer;
-  color: var(--color-text-secondary);
+  color: var(
+    --view-toggle-inactive-text,
+    var(--color-accent-secondary, var(--color-accent))
+  );
   border-radius: 999px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease,
-    transform 0.2s ease;
+  border: 1px solid
+    var(
+      --view-toggle-inactive-border,
+      var(--color-accent-secondary-outline, var(--color-border))
+    );
+  background: var(
+    --view-toggle-inactive-gradient,
+    linear-gradient(
+      140deg,
+      var(--color-accent-softer, var(--color-accent-soft)),
+      var(--color-surface)
+    )
+  );
+  box-shadow: 0 6px 18px -16px
+    var(--color-accent-secondary-shadow, rgba(34, 48, 12, 0.55));
+  transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.25s ease,
+    color 0.25s ease, border-color 0.25s ease;
 }
 
 .settings-panel__summary::-webkit-details-marker {
@@ -240,7 +257,10 @@ select {
 
 .settings-panel__summary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 24px -18px var(--color-card-shadow);
+  box-shadow:
+    var(--view-toggle-hover-glow, 0 0 16px rgba(233, 204, 138, 0.45)),
+    0 12px 25px -18px
+      var(--color-accent-secondary-shadow, rgba(34, 48, 12, 0.55));
 }
 
 .settings-panel__summary:focus-visible {
@@ -249,10 +269,11 @@ select {
 }
 
 .settings-panel[open] .settings-panel__summary {
-  background: var(--gradient-accent);
-  color: var(--color-accent-contrast);
-  border-color: transparent;
-  box-shadow: 0 18px 32px -20px var(--color-accent-shadow-strong);
+  background: var(--view-toggle-active-gradient, var(--gradient-accent));
+  color: var(--view-toggle-active-text, var(--color-accent-contrast));
+  border-color: rgba(212, 129, 69, 0.65);
+  box-shadow: 0 18px 32px -20px
+    var(--color-accent-shadow-strong, rgba(184, 93, 46, 0.65));
 }
 
 .settings-panel__icon {
@@ -444,7 +465,7 @@ select {
   padding: 2rem 3rem 3rem;
   align-items: flex-start;
   background: var(--color-layout-background);
-  border-radius: 24px;
+  border-radius: 0;
 }
 
 .filter-panel,
@@ -483,13 +504,11 @@ select {
   padding: 0.35rem 0.85rem;
   color: var(--color-accent-secondary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .reset-button:hover {
-  background: var(--color-accent-secondary-soft, var(--color-accent-outline));
-  color: var(--color-accent-secondary-contrast, var(--color-text-strong));
-  border-color: transparent;
+  transform: translateY(-1px);
   box-shadow: 0 12px 25px -18px
     var(--color-accent-secondary-shadow, var(--color-card-shadow-soft));
 }
@@ -1198,7 +1217,7 @@ textarea:focus {
 
 @media (max-width: 640px) {
   .app-header {
-    padding: 1.35rem 1.5rem 1.1rem;
+    padding: 0.625rem 1.5625rem;
   }
 
   .layout {
@@ -1257,7 +1276,6 @@ textarea:focus {
     var(--view-toggle-hover-glow, 0 0 16px rgba(233, 204, 138, 0.45)),
     0 12px 25px -18px
       var(--color-accent-secondary-shadow, rgba(34, 48, 12, 0.55));
-  background: linear-gradient(135deg, #596f2a 0%, #8faa52 48%, #65792f 100%);
 }
 
 .view-toggle__button--active {
@@ -1753,7 +1771,6 @@ textarea:focus {
 }
 
 :root[data-mode='dark'][data-theme='ember'] .view-toggle__button:hover {
-  background: linear-gradient(135deg, #367e70, #23584f);
   box-shadow: 0 14px 28px -20px rgba(47, 111, 99, 0.6);
 }
 
@@ -1765,7 +1782,6 @@ textarea:focus {
 }
 
 :root[data-mode='dark'][data-theme='ember'] .view-toggle__button--active:hover {
-  background: linear-gradient(135deg, #fff0d2 0%, #f8b476 45%, #d87c33 100%);
   box-shadow: 0 22px 40px -18px rgba(216, 124, 51, 0.6);
 }
 
