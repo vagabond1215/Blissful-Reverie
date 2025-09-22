@@ -2198,7 +2198,7 @@ textarea:focus {
   --color-accent-secondary-strong: #536222;
   --color-accent-secondary-soft: rgba(108, 125, 43, 0.24);
   --color-accent-secondary-outline: rgba(108, 125, 43, 0.36);
-  --color-accent-secondary-contrast: #f4f7e3;
+  --color-accent-secondary-contrast: #2a3439;
   --color-accent-secondary-shadow: rgba(85, 99, 33, 0.38);
 
   --view-toggle-inactive-gradient: linear-gradient(
@@ -2208,7 +2208,7 @@ textarea:focus {
     #6c7d2b 100%
   );
   --view-toggle-inactive-border: rgba(148, 168, 69, 0.5);
-  --view-toggle-inactive-text: #f8faeb;
+  --view-toggle-inactive-text: #2a3439;
   --view-toggle-hover-glow: 0 0 18px rgba(243, 181, 116, 0.55);
   --view-toggle-active-gradient: linear-gradient(
     135deg,
@@ -2225,7 +2225,9 @@ textarea:focus {
   --color-neutral-600: #8f5a3d;
 
   --color-inline-tag-background: rgba(234, 173, 137, 0.3);
-  --color-inline-tag-text: #5c2d18;
+  --color-inline-tag-text: #2a3439;
+  --color-tag-text: #2a3439;
+  --color-text-badge: #2a3439;
 
   --color-surface-soft: rgba(194, 106, 61, 0.1);
   --color-surface-highlight: rgba(234, 173, 137, 0.26);
@@ -2244,9 +2246,75 @@ textarea:focus {
 
 :root[data-mode='sepia'][data-theme='copper'] .meal-card .badge {
   background: var(--view-toggle-inactive-gradient);
-  color: var(--view-toggle-inactive-text, #f8faeb);
+  color: var(--view-toggle-inactive-text, #2a3439);
   border-color: rgba(248, 250, 235, 0.38);
   box-shadow: 0 16px 32px -24px rgba(108, 125, 43, 0.45);
+}
+
+:root[data-mode='sepia'][data-theme='copper'] .filter-panel {
+  color: #2a3439;
+  --color-text-emphasis: #2a3439;
+  --color-text-tertiary: rgba(42, 52, 57, 0.72);
+  --color-text-muted: rgba(42, 52, 57, 0.72);
+  --color-text-soft: rgba(42, 52, 57, 0.6);
+  --color-text-badge: #2a3439;
+  --color-inline-tag-text: #2a3439;
+  --color-text-instruction: rgba(42, 52, 57, 0.68);
+}
+
+:root[data-mode='sepia'][data-theme='copper'] .meal-card {
+  color: #2a3439;
+  --color-text-emphasis: #2a3439;
+  --color-text-tertiary: rgba(42, 52, 57, 0.7);
+  --color-text-muted: rgba(42, 52, 57, 0.7);
+  --color-text-soft: rgba(42, 52, 57, 0.58);
+  --color-text-badge: #2a3439;
+  --color-text-instruction: rgba(42, 52, 57, 0.68);
+}
+
+:root[data-mode='sepia'][data-theme='copper'] .favorite-filter,
+:root[data-mode='sepia'][data-theme='copper'] .reset-button,
+:root[data-mode='sepia'][data-theme='copper'] .tag-group__summary,
+:root[data-mode='sepia'][data-theme='copper'] .tag-group__summary-count,
+:root[data-mode='sepia'][data-theme='copper'] .ingredient-group__summary {
+  color: #2a3439;
+}
+
+:root[data-mode='sepia'][data-theme='copper'] .favorite-filter.favorite-filter--active,
+:root[data-mode='sepia'][data-theme='copper'] .favorite-filter[aria-pressed='true'] {
+  color: var(--color-accent-contrast, #ffffff);
+}
+
+:root[data-mode='sepia'][data-theme='copper'] .meal-card__favorite-button {
+  background: linear-gradient(135deg, #b51783 0%, #d94ba5 50%, #8f1bb1 100%);
+  border-color: rgba(233, 150, 196, 0.58);
+  color: #fff7fb;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
+  font-size: 1.45rem;
+  line-height: 1;
+  border-radius: 50%;
+  box-shadow: 0 14px 32px -18px rgba(162, 28, 175, 0.55);
+}
+
+:root[data-mode='sepia'][data-theme='copper'] .meal-card__favorite-button:hover {
+  box-shadow: 0 18px 36px -18px rgba(201, 54, 139, 0.58);
+  background: linear-gradient(135deg, #c32a90 0%, #e15ab1 50%, #9b27bd 100%);
+}
+
+:root[data-mode='sepia'][data-theme='copper'] .meal-card__favorite-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(217, 75, 165, 0.45);
+}
+
+:root[data-mode='sepia'][data-theme='copper'] .meal-card__favorite-button--active,
+:root[data-mode='sepia'][data-theme='copper'] .meal-card__favorite-button[aria-pressed='true'] {
+  background: linear-gradient(135deg, #d94ba5 0%, #f472b6 45%, #c026d3 100%);
+  color: #fff5fb;
+  border-color: transparent;
+  box-shadow: 0 20px 42px -20px rgba(168, 37, 149, 0.6);
 }
 
 :root[data-mode='sepia'][data-theme='umber'] {
