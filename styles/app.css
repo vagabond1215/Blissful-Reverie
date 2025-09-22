@@ -244,11 +244,14 @@ select {
   justify-content: center;
   width: 1.85rem;
   height: 1.85rem;
+  overflow: visible;
 }
 
 .settings-panel__icon svg {
   width: 100%;
   height: 100%;
+  transform: scale(1.5);
+  transform-origin: center;
 }
 
 .settings-panel__content {
@@ -1665,7 +1668,12 @@ textarea:focus {
   --color-surface: #1e130a;
   --color-surface-elevated: #2d1c11;
   --color-surface-soft: rgba(249, 115, 22, 0.22);
-  --color-header-background: rgba(30, 19, 10, 0.95);
+  --color-header-background: linear-gradient(
+    135deg,
+    rgba(58, 32, 18, 0.95) 0%,
+    rgba(40, 22, 12, 0.95) 45%,
+    rgba(24, 12, 6, 0.95) 100%
+  );
   --color-header-shadow: rgba(8, 4, 2, 0.76);
 
   --color-accent: #f97316;
@@ -1706,6 +1714,29 @@ textarea:focus {
 
   --color-focus-ring: rgba(251, 146, 60, 0.48);
   --color-code-background: rgba(60, 32, 18, 0.84);
+}
+
+:root[data-mode='dark'][data-theme='ember'] .view-toggle__button {
+  background: linear-gradient(135deg, #2f6f63, #1f4740);
+  border-color: rgba(47, 111, 99, 0.65);
+  color: #e8f6f0;
+}
+
+:root[data-mode='dark'][data-theme='ember'] .view-toggle__button:hover {
+  background: linear-gradient(135deg, #367e70, #23584f);
+  box-shadow: 0 14px 28px -20px rgba(47, 111, 99, 0.6);
+}
+
+:root[data-mode='dark'][data-theme='ember'] .view-toggle__button--active {
+  background: linear-gradient(135deg, #ffe0b5 0%, #f5a262 45%, #c56a28 100%);
+  border-color: rgba(245, 162, 98, 0.75);
+  color: #2b1307;
+  box-shadow: 0 20px 36px -18px rgba(197, 106, 40, 0.55);
+}
+
+:root[data-mode='dark'][data-theme='ember'] .view-toggle__button--active:hover {
+  background: linear-gradient(135deg, #fff0d2 0%, #f8b476 45%, #d87c33 100%);
+  box-shadow: 0 22px 40px -18px rgba(216, 124, 51, 0.6);
 }
 
 :root[data-mode='dark'][data-theme='abyss'] {
