@@ -163,12 +163,38 @@
 
   const measurementPreference = loadMeasurementPreference();
 
+  const FAVORITES_STORAGE_KEY = 'blissful-favorites';
+
+  const recipeIdSet = new Set(recipes.map((recipe) => recipe.id));
+
+  const loadFavoriteRecipeIds = () => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY));
+      if (!Array.isArray(stored)) {
+        return [];
+      }
+      const filtered = new Set();
+      stored.forEach((id) => {
+        if (recipeIdSet.has(id)) {
+          filtered.add(id);
+        }
+      });
+      return Array.from(filtered);
+    } catch (error) {
+      console.warn('Unable to read favorite recipes.', error);
+      return [];
+    }
+  };
+
+  const favoriteRecipeIds = loadFavoriteRecipeIds();
+
   const getDefaultMealFilters = () => ({
     search: '',
     ingredients: [],
     tags: [],
     allergies: [],
     equipment: [],
+    favoritesOnly: false,
   });
 
   const getDefaultPantryFilters = () => ({
@@ -189,6 +215,7 @@
     themeMode: themePreferences.mode,
     themeSelections: { ...themePreferences.selections },
     measurementSystem: measurementPreference,
+    favoriteRecipes: new Set(favoriteRecipeIds),
   };
 
   const equipmentOptions = Array.from(
@@ -588,6 +615,20 @@
 
   let lastPersistedTheme = null;
   let lastPersistedMeasurement = null;
+  let lastPersistedFavorites = JSON.stringify(favoriteRecipeIds);
+
+  const persistFavoriteRecipeIds = () => {
+    const serialized = JSON.stringify(Array.from(state.favoriteRecipes));
+    if (serialized === lastPersistedFavorites) {
+      return;
+    }
+    try {
+      localStorage.setItem(FAVORITES_STORAGE_KEY, serialized);
+      lastPersistedFavorites = serialized;
+    } catch (error) {
+      console.warn('Unable to persist favorite recipes.', error);
+    }
+  };
 
   const applyColorTheme = (shouldPersist = true) => {
     const mode = state.themeMode;
@@ -828,6 +869,7 @@
     elements.filterSearchLabel = document.getElementById('filter-search-label');
     elements.filterSearch = document.getElementById('filter-search');
     elements.resetButton = document.getElementById('reset-filters');
+    elements.favoriteFilterToggle = document.getElementById('favorite-filter');
     elements.ingredientSection = document.getElementById('ingredient-section');
     elements.tagSection = document.getElementById('tag-section');
     elements.allergySection = document.getElementById('allergy-section');
@@ -1079,6 +1121,18 @@
       elements.equipmentSection.hidden = !isMealsView;
     }
 
+    if (elements.favoriteFilterToggle) {
+      if (isMealsView) {
+        elements.favoriteFilterToggle.hidden = false;
+        elements.favoriteFilterToggle.disabled = false;
+        elements.favoriteFilterToggle.removeAttribute('aria-hidden');
+      } else {
+        elements.favoriteFilterToggle.hidden = true;
+        elements.favoriteFilterToggle.disabled = true;
+        elements.favoriteFilterToggle.setAttribute('aria-hidden', 'true');
+      }
+    }
+
     if (isMealsView) {
       populateIngredientFilters(elements.ingredientOptions, ingredientFilterGroups);
       populateGroupedTagOptions('meals', elements.tagOptions, mealTagGroups, 'tags');
@@ -1117,6 +1171,32 @@
     if (!elements.filterSearch) return;
     const filters = getActiveFilters();
     elements.filterSearch.value = filters.search || '';
+    if (elements.favoriteFilterToggle) {
+      const isMealsView = state.activeView === 'meals';
+      const favoritesOnly = isMealsView && Boolean(filters.favoritesOnly);
+      elements.favoriteFilterToggle.setAttribute('aria-pressed', favoritesOnly ? 'true' : 'false');
+      elements.favoriteFilterToggle.classList.toggle('favorite-filter--active', favoritesOnly);
+      const labelEl = elements.favoriteFilterToggle.querySelector('.favorite-filter__label');
+      const favoriteCount = state.favoriteRecipes.size;
+      if (labelEl) {
+        if (favoritesOnly) {
+          labelEl.textContent = favoriteCount
+            ? `${favoriteCount} favorite${favoriteCount === 1 ? '' : 's'} selected`
+            : 'No favorites selected';
+        } else if (favoriteCount) {
+          labelEl.textContent = `Show favorites only (${favoriteCount})`;
+        } else {
+          labelEl.textContent = 'Show favorites only';
+        }
+      }
+      const titleText = favoritesOnly
+        ? 'Showing favorite recipes only'
+        : favoriteCount
+          ? 'Show only your favorite recipes'
+          : 'Show only favorite recipes';
+      elements.favoriteFilterToggle.setAttribute('title', titleText);
+      elements.favoriteFilterToggle.setAttribute('aria-label', titleText);
+    }
     const registry = checkboxRegistry[state.activeView];
     if (!registry) return;
     Object.entries(registry).forEach(([field, map]) => {
@@ -1181,12 +1261,33 @@
     if (filters.equipment.length && !filters.equipment.every((item) => (recipe.equipment || []).includes(item))) {
       return false;
     }
+    if (filters.favoritesOnly && !state.favoriteRecipes.has(recipe.id)) {
+      return false;
+    }
     return true;
+  };
+
+  const isRecipeFavorite = (recipeId) => state.favoriteRecipes.has(recipeId);
+
+  const toggleFavoriteRecipe = (recipeId) => {
+    if (!recipeId) return;
+    if (state.favoriteRecipes.has(recipeId)) {
+      state.favoriteRecipes.delete(recipeId);
+    } else {
+      state.favoriteRecipes.add(recipeId);
+    }
+    persistFavoriteRecipeIds();
+    renderApp();
   };
 
   const createMealCard = (recipe) => {
     const card = document.createElement('article');
     card.className = 'meal-card';
+
+    const favorite = isRecipeFavorite(recipe.id);
+    if (favorite) {
+      card.classList.add('meal-card--favorite');
+    }
 
     const currentServings = state.servingOverrides[recipe.id] ?? recipe.baseServings;
     const scale = recipe.baseServings ? currentServings / recipe.baseServings : 1;
@@ -1215,6 +1316,28 @@
     headerInfo.appendChild(tagList);
     header.appendChild(headerInfo);
 
+    const headerActions = document.createElement('div');
+    headerActions.className = 'meal-card__header-actions';
+
+    const favoriteButton = document.createElement('button');
+    favoriteButton.type = 'button';
+    favoriteButton.className = 'meal-card__favorite-button';
+    favoriteButton.setAttribute('aria-pressed', favorite ? 'true' : 'false');
+    favoriteButton.setAttribute(
+      'aria-label',
+      favorite ? 'Remove from favorites' : 'Add to favorites',
+    );
+    favoriteButton.title = favorite ? 'Remove from favorites' : 'Add to favorites';
+    if (favorite) {
+      favoriteButton.classList.add('meal-card__favorite-button--active');
+    }
+    favoriteButton.textContent = '♥';
+    favoriteButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      toggleFavoriteRecipe(recipe.id);
+    });
+    headerActions.appendChild(favoriteButton);
+
     const controls = document.createElement('div');
     controls.className = 'serving-controls';
     const label = document.createElement('label');
@@ -1241,7 +1364,8 @@
     base.className = 'base-serving';
     base.textContent = `Base: ${recipe.baseServings}`;
     controls.appendChild(base);
-    header.appendChild(controls);
+    headerActions.appendChild(controls);
+    header.appendChild(headerActions);
     card.appendChild(header);
 
     const ingredientSection = document.createElement('section');
@@ -1468,10 +1592,16 @@
   };
 
   const renderMeals = () => {
+    const filters = state.mealFilters;
     const filteredRecipes = recipes.filter((recipe) => matchesMealFilters(recipe));
-    elements.mealCount.textContent = `${filteredRecipes.length} ${
-      filteredRecipes.length === 1 ? 'recipe matches' : 'recipes match'
-    } your filters.`;
+    const matchLabel = filters.favoritesOnly
+      ? filteredRecipes.length === 1
+        ? 'favorite recipe matches'
+        : 'favorite recipes match'
+      : filteredRecipes.length === 1
+        ? 'recipe matches'
+        : 'recipes match';
+    elements.mealCount.textContent = `${filteredRecipes.length} ${matchLabel} your filters.`;
     elements.mealGrid.innerHTML = '';
     if (filteredRecipes.length) {
       filteredRecipes.forEach((recipe) => {
@@ -1481,9 +1611,16 @@
       const empty = document.createElement('div');
       empty.className = 'empty-state';
       const heading = document.createElement('h3');
-      heading.textContent = 'No recipes found';
       const paragraph = document.createElement('p');
-      paragraph.textContent = 'Try removing a filter or adding more pantry items to expand your options.';
+      if (filters.favoritesOnly) {
+        heading.textContent = 'No favorite recipes yet';
+        paragraph.textContent =
+          'Tap the heart icon on any recipe to save it as a favorite and quickly find it here.';
+      } else {
+        heading.textContent = 'No recipes found';
+        paragraph.textContent =
+          'Try removing a filter or adding more pantry items to expand your options.';
+      }
       empty.appendChild(heading);
       empty.appendChild(paragraph);
       elements.mealGrid.appendChild(empty);
@@ -1613,6 +1750,14 @@
         } else {
           state.pantryFilters = getDefaultPantryFilters();
         }
+        renderApp();
+      });
+    }
+
+    if (elements.favoriteFilterToggle) {
+      elements.favoriteFilterToggle.addEventListener('click', () => {
+        if (state.activeView !== 'meals') return;
+        state.mealFilters.favoritesOnly = !state.mealFilters.favoritesOnly;
         renderApp();
       });
     }
