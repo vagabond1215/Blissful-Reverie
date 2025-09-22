@@ -47,6 +47,23 @@
     var(--color-accent-secondary-strong)
   );
 
+  --view-toggle-inactive-gradient: linear-gradient(
+    135deg,
+    #4c5f24 0%,
+    #7d9341 45%,
+    #556b27 100%
+  );
+  --view-toggle-inactive-border: rgba(125, 147, 65, 0.45);
+  --view-toggle-inactive-text: #f4f7e5;
+  --view-toggle-hover-glow: 0 0 16px rgba(233, 204, 138, 0.45);
+  --view-toggle-active-gradient: linear-gradient(
+    135deg,
+    #d07a3b 0%,
+    #f3bf88 48%,
+    #b85d2e 100%
+  );
+  --view-toggle-active-text: #34190c;
+
   --color-surface-elevated: #ffffff;
   --surface-elevated-gradient: linear-gradient(
     158deg,
@@ -139,7 +156,7 @@ select {
 }
 
 .app-header {
-  padding: 2.5rem 3rem 2rem;
+  padding: 1.75rem 3rem 1.25rem;
   background: var(--color-header-background);
   color: var(
     --color-header-foreground,
@@ -242,15 +259,16 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.85rem;
-  height: 1.85rem;
+  width: 2rem;
+  height: 2rem;
   overflow: visible;
 }
 
 .settings-panel__icon svg {
   width: 100%;
   height: 100%;
-  transform: scale(1.5);
+  display: block;
+  transform: translate(0.5px, 0.5px) scale(1.2);
   transform-origin: center;
 }
 
@@ -1180,7 +1198,7 @@ textarea:focus {
 
 @media (max-width: 640px) {
   .app-header {
-    padding: 2rem 1.5rem 1.5rem;
+    padding: 1.35rem 1.5rem 1.1rem;
   }
 
   .layout {
@@ -1203,44 +1221,56 @@ textarea:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--color-accent-secondary-outline, var(--color-border));
+  border: 1px solid
+    var(
+      --view-toggle-inactive-border,
+      var(--color-accent-secondary-outline, var(--color-border))
+    );
   border-radius: 999px;
   padding: 0.45rem 1.15rem;
-  background: linear-gradient(
-    140deg,
-    var(--color-accent-softer, var(--color-accent-soft)),
-    var(--color-surface)
+  background: var(
+    --view-toggle-inactive-gradient,
+    linear-gradient(
+      140deg,
+      var(--color-accent-softer, var(--color-accent-soft)),
+      var(--color-surface)
+    )
   );
-  color: var(--color-accent-secondary, var(--color-accent));
+  color: var(
+    --view-toggle-inactive-text,
+    var(--color-accent-secondary, var(--color-accent))
+  );
   font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 6px 18px -16px rgba(12, 22, 9, 0.55);
   transition:
     transform 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease;
+    box-shadow 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
 }
 
 .view-toggle__button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 25px -18px
-    var(--color-accent-secondary-shadow, var(--color-accent-shadow));
-  background: linear-gradient(
-    140deg,
-    var(--color-accent-secondary-soft, var(--color-accent-soft)),
-    var(--color-surface)
-  );
+  box-shadow:
+    var(--view-toggle-hover-glow, 0 0 16px rgba(233, 204, 138, 0.45)),
+    0 12px 25px -18px
+      var(--color-accent-secondary-shadow, rgba(34, 48, 12, 0.55));
+  background: linear-gradient(135deg, #596f2a 0%, #8faa52 48%, #65792f 100%);
 }
 
 .view-toggle__button--active {
-  background: var(--gradient-accent);
-  color: var(--color-accent-contrast);
-  border-color: transparent;
+  background: var(--view-toggle-active-gradient, var(--gradient-accent));
+  color: var(--view-toggle-active-text, var(--color-accent-contrast));
+  border-color: rgba(212, 129, 69, 0.65);
+  box-shadow: 0 18px 32px -22px rgba(184, 93, 46, 0.65);
 }
 
 .view-toggle__button--active:hover {
-  box-shadow: 0 18px 35px -20px var(--color-accent-shadow-strong);
+  box-shadow:
+    var(--view-toggle-hover-glow, 0 0 16px rgba(233, 204, 138, 0.45)),
+    0 18px 35px -20px var(--color-accent-shadow-strong, rgba(184, 93, 46, 0.75));
 }
 
 :root[data-mode='light'][data-theme='sunrise'] {
@@ -1957,25 +1987,48 @@ textarea:focus {
   --body-gradient-mid: #efbe8f;
   --body-gradient-end: #de9864;
 
-  --color-header-background: rgba(79, 43, 31, 0.94);
+  --color-header-background: linear-gradient(
+    135deg,
+    rgba(88, 46, 29, 0.96) 0%,
+    rgba(161, 95, 55, 0.88) 46%,
+    rgba(71, 37, 23, 0.98) 100%
+  );
   --color-header-foreground: #fbe6d5;
-  --color-header-shadow: rgba(34, 16, 10, 0.55);
+  --color-header-shadow: rgba(56, 28, 17, 0.55);
 
-  --color-accent: #c26a3d;
-  --color-accent-strong: #e2814a;
-  --color-accent-soft: rgba(194, 106, 61, 0.32);
-  --color-accent-softer: rgba(226, 129, 74, 0.2);
-  --color-accent-outline: rgba(226, 129, 74, 0.36);
-  --color-accent-border: rgba(234, 173, 137, 0.65);
-  --color-accent-shadow: rgba(168, 78, 44, 0.52);
-  --color-accent-shadow-strong: rgba(226, 129, 74, 0.52);
+  --color-accent: #d07a3b;
+  --color-accent-strong: #f3b574;
+  --color-accent-soft: rgba(208, 122, 59, 0.32);
+  --color-accent-softer: rgba(243, 181, 116, 0.22);
+  --color-accent-outline: rgba(240, 173, 120, 0.42);
+  --color-accent-border: rgba(242, 195, 143, 0.68);
+  --color-accent-shadow: rgba(180, 92, 48, 0.52);
+  --color-accent-shadow-strong: rgba(230, 149, 90, 0.55);
+  --gradient-accent: linear-gradient(135deg, #d07a3b 0%, #f6c78d 50%, #bb5e30 100%);
 
-  --color-accent-secondary: #0f766e;
-  --color-accent-secondary-strong: #0b5c58;
-  --color-accent-secondary-soft: rgba(15, 118, 110, 0.22);
-  --color-accent-secondary-outline: rgba(15, 118, 110, 0.32);
-  --color-accent-secondary-contrast: #f0fffb;
-  --color-accent-secondary-shadow: rgba(15, 118, 110, 0.3);
+  --color-accent-secondary: #6c7d2b;
+  --color-accent-secondary-strong: #536222;
+  --color-accent-secondary-soft: rgba(108, 125, 43, 0.24);
+  --color-accent-secondary-outline: rgba(108, 125, 43, 0.36);
+  --color-accent-secondary-contrast: #f4f7e3;
+  --color-accent-secondary-shadow: rgba(85, 99, 33, 0.38);
+
+  --view-toggle-inactive-gradient: linear-gradient(
+    135deg,
+    #566720 0%,
+    #94a845 48%,
+    #6c7d2b 100%
+  );
+  --view-toggle-inactive-border: rgba(148, 168, 69, 0.5);
+  --view-toggle-inactive-text: #f8faeb;
+  --view-toggle-hover-glow: 0 0 18px rgba(243, 181, 116, 0.55);
+  --view-toggle-active-gradient: linear-gradient(
+    135deg,
+    #d88543 0%,
+    #f7c993 50%,
+    #c46833 100%
+  );
+  --view-toggle-active-text: #3a1d0c;
 
   --color-neutral-50: #f7eae0;
   --color-neutral-100: #ebd5c5;
