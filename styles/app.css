@@ -141,6 +141,10 @@ select {
 .app-header {
   padding: 2.5rem 3rem 2rem;
   background: var(--color-header-background);
+  color: var(
+    --color-header-foreground,
+    var(--color-text-strong)
+  );
   backdrop-filter: blur(10px);
   box-shadow: 0 20px 45px -30px var(--color-header-shadow);
   position: sticky;
@@ -238,8 +242,8 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.55rem;
-  height: 1.55rem;
+  width: 1.85rem;
+  height: 1.85rem;
 }
 
 .settings-panel__icon svg {
@@ -289,7 +293,7 @@ select {
 
 @media (orientation: landscape) {
   .header-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(260px, auto);
+    grid-template-columns: minmax(0, 1fr) max-content;
     align-items: start;
   }
 
@@ -762,15 +766,18 @@ textarea:focus {
 }
 
 .meal-grid {
+  --meal-card-width: 20rem;
+  --meal-grid-gap: 1.5rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(var(--meal-card-width), 1fr));
+  gap: var(--meal-grid-gap);
 }
 
 @media (orientation: landscape) {
   .meal-grid {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    max-width: min(100%, calc(2 * 25rem + 1.5rem));
+    --meal-card-width: clamp(20rem, 35vw, 32rem);
+    --meal-grid-max-width: calc(2 * var(--meal-card-width) + var(--meal-grid-gap));
+    max-width: min(100%, var(--meal-grid-max-width));
     margin-inline: auto;
   }
 }
@@ -1911,15 +1918,17 @@ textarea:focus {
 }
 
 :root[data-mode='sepia'][data-theme='copper'] {
-  --color-layout-background: #e8d0b4;
-  --color-surface-elevated: #fff1df;
+  --color-layout-background: #ecd1b6;
+  --color-surface-elevated: #ffe8d5;
 
-  --color-background: #f1e4d7;
-  --body-gradient-start: #fff8ef;
-  --body-gradient-mid: #f3d3ba;
-  --body-gradient-end: #e6b996;
+  --color-background: #f4d8c4;
+  --body-gradient-start: #fff3e6;
+  --body-gradient-mid: #efbe8f;
+  --body-gradient-end: #de9864;
 
-  --color-header-background: rgba(241, 228, 214, 0.95);
+  --color-header-background: rgba(79, 43, 31, 0.94);
+  --color-header-foreground: #fbe6d5;
+  --color-header-shadow: rgba(34, 16, 10, 0.55);
 
   --color-accent: #c26a3d;
   --color-accent-strong: #e2814a;
