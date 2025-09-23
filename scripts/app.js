@@ -865,8 +865,6 @@
     elements.mealCount = document.getElementById('meal-count');
     elements.pantryGrid = document.getElementById('pantry-grid');
     elements.pantryCount = document.getElementById('pantry-count');
-    elements.filterPanelTitle = document.getElementById('filter-panel-title');
-    elements.filterSearchLabel = document.getElementById('filter-search-label');
     elements.filterSearch = document.getElementById('filter-search');
     elements.resetButton = document.getElementById('reset-filters');
     elements.favoriteFilterToggle = document.getElementById('favorite-filter');
@@ -1092,16 +1090,15 @@
     }
     configuredFilterView = view;
     const isMealsView = view === 'meals';
-    if (elements.filterPanelTitle) {
-      elements.filterPanelTitle.textContent = isMealsView ? 'Filter Recipes' : 'Filter Pantry';
-    }
-    if (elements.filterSearchLabel) {
-      elements.filterSearchLabel.textContent = isMealsView ? 'Search Recipes' : 'Search Pantry';
-    }
     if (elements.filterSearch) {
-      elements.filterSearch.placeholder = isMealsView
+      const searchPlaceholder = isMealsView
         ? 'Search by name, description, or tag'
         : 'Search by ingredient name, slug, or tag';
+      elements.filterSearch.placeholder = searchPlaceholder;
+      elements.filterSearch.setAttribute(
+        'aria-label',
+        isMealsView ? 'Search recipes' : 'Search pantry',
+      );
     }
 
     if (elements.ingredientSummary) {
