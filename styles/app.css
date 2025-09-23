@@ -2272,6 +2272,23 @@ textarea:focus {
   --color-text-instruction: rgba(42, 52, 57, 0.68);
 }
 
+:root[data-mode='sepia'][data-theme='copper'] .meal-card__header,
+:root[data-mode='sepia'][data-theme='copper'] .meal-card__section,
+:root[data-mode='sepia'][data-theme='copper'] .meal-card__details > div {
+  color: var(--color-header-foreground, #fbe6d5);
+  --color-text-strong: var(--color-header-foreground, #fbe6d5);
+  --color-text-emphasis: var(--color-header-foreground, #fbe6d5);
+  --color-text-tertiary: rgba(251, 230, 213, 0.82);
+  --color-text-muted: rgba(251, 230, 213, 0.76);
+  --color-text-soft: rgba(251, 230, 213, 0.65);
+  --color-text-badge: var(--color-header-foreground, #fbe6d5);
+  --color-tag-text: var(--color-header-foreground, #fbe6d5);
+  --color-inline-tag-text: var(--color-header-foreground, #fbe6d5);
+  --color-text-inline: var(--color-header-foreground, #fbe6d5);
+  --color-text-instruction: rgba(251, 230, 213, 0.88);
+  --color-accent-secondary-contrast: var(--color-header-foreground, #fbe6d5);
+}
+
 :root[data-mode='sepia'][data-theme='copper'] .favorite-filter,
 :root[data-mode='sepia'][data-theme='copper'] .reset-button,
 :root[data-mode='sepia'][data-theme='copper'] .tag-group__summary,
