@@ -25,6 +25,9 @@
                   <button type="button" class="view-toggle__button" data-view-target="pantry">
                     Pantry
                   </button>
+                  <button type="button" class="view-toggle__button" data-view-target="meal-plan">
+                    Meal Plan
+                  </button>
                 </div>
                 <details class="settings-panel" id="settings-panel">
                   <summary
@@ -161,6 +164,100 @@
             </div>
           </header>
           <div class="pantry-grid" id="pantry-grid"></div>
+        </section>
+        <section class="meal-plan-view" id="meal-plan-view" hidden>
+          <header class="meal-plan-view__header">
+            <div>
+              <h2>Meal Plan</h2>
+              <p>Organize meals, drinks, and snacks across your calendar.</p>
+            </div>
+            <div class="meal-plan-view__actions">
+              <div class="view-toggle meal-plan-view__mode-toggle" role="tablist">
+                <button
+                  type="button"
+                  class="view-toggle__button meal-plan-view__mode-button"
+                  data-meal-plan-mode="day"
+                  aria-pressed="false"
+                >
+                  Day
+                </button>
+                <button
+                  type="button"
+                  class="view-toggle__button meal-plan-view__mode-button"
+                  data-meal-plan-mode="week"
+                  aria-pressed="false"
+                >
+                  Week
+                </button>
+                <button
+                  type="button"
+                  class="view-toggle__button meal-plan-view__mode-button"
+                  data-meal-plan-mode="month"
+                  aria-pressed="false"
+                >
+                  Month
+                </button>
+              </div>
+              <div class="meal-plan-view__navigator">
+                <button
+                  type="button"
+                  class="meal-plan-nav__button"
+                  id="meal-plan-prev"
+                  aria-label="Previous period"
+                >
+                  ‹
+                </button>
+                <span class="meal-plan-nav__label" id="meal-plan-period"></span>
+                <button
+                  type="button"
+                  class="meal-plan-nav__button"
+                  id="meal-plan-next"
+                  aria-label="Next period"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
+          </header>
+          <div class="meal-plan-view__layout">
+            <div class="meal-plan-calendar" id="meal-plan-calendar" aria-live="polite"></div>
+            <aside class="meal-plan-sidebar" id="meal-plan-sidebar">
+              <section class="meal-plan-day" id="meal-plan-day-details"></section>
+              <form class="meal-plan-form" id="meal-plan-form">
+                <h3 class="meal-plan-form__title">Add to your plan</h3>
+                <div class="meal-plan-form__row">
+                  <label class="meal-plan-form__label" for="meal-plan-entry-type">Type</label>
+                  <select class="meal-plan-form__control" id="meal-plan-entry-type" required>
+                    <option value="meal">Meal</option>
+                    <option value="drink">Drink</option>
+                    <option value="snack">Snack</option>
+                  </select>
+                </div>
+                <div class="meal-plan-form__row">
+                  <label class="meal-plan-form__label" for="meal-plan-entry-title">Details</label>
+                  <input
+                    type="text"
+                    class="meal-plan-form__control"
+                    id="meal-plan-entry-title"
+                    name="meal-plan-entry-title"
+                    placeholder="e.g., Lemon Herb Chicken or Afternoon Tea"
+                    required
+                  />
+                </div>
+                <div class="meal-plan-form__row">
+                  <label class="meal-plan-form__label" for="meal-plan-entry-date">Calendar day</label>
+                  <input
+                    type="date"
+                    class="meal-plan-form__control"
+                    id="meal-plan-entry-date"
+                    name="meal-plan-entry-date"
+                    required
+                  />
+                </div>
+                <button type="submit" class="meal-plan-form__submit">Add to calendar</button>
+              </form>
+            </aside>
+          </div>
         </section>
       </main>
       <datalist id="pantry-unit-options">
