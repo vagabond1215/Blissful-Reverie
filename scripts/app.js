@@ -116,6 +116,25 @@
   const MEASUREMENT_SYSTEMS = ['imperial', 'metric'];
   const DEFAULT_MEASUREMENT_SYSTEM = 'imperial';
 
+  const MEAL_PLAN_STORAGE_KEY = 'blissful-meal-plan';
+  const MEAL_PLAN_VIEW_MODES = ['day', 'week', 'month'];
+  const DEFAULT_MEAL_PLAN_MODE = 'month';
+  const MEAL_PLAN_ENTRY_TYPES = [
+    { value: 'meal', label: 'Meal' },
+    { value: 'drink', label: 'Drink' },
+    { value: 'snack', label: 'Snack' },
+  ];
+  const MEAL_PLAN_WEEK_START = 0;
+  const MEAL_PLAN_DAY_NAMES = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
+
   const resolveFallbackMode = () =>
     AVAILABLE_MODES.includes(DEFAULT_MODE) ? DEFAULT_MODE : AVAILABLE_MODES[0];
 
@@ -159,6 +178,110 @@
       console.warn('Unable to read measurement preference.', error);
     }
     return DEFAULT_MEASUREMENT_SYSTEM;
+  };
+
+  const padNumber = (value) => String(value).padStart(2, '0');
+
+  const toISODateString = (date) => {
+    if (!(date instanceof Date)) {
+      return '';
+    }
+    return `${date.getFullYear()}-${padNumber(date.getMonth() + 1)}-${padNumber(date.getDate())}`;
+  };
+
+  const isValidISODateString = (value) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+
+  const parseISODateString = (value) => {
+    if (!isValidISODateString(value)) {
+      return null;
+    }
+    const [yearStr, monthStr, dayStr] = value.split('-');
+    const year = Number(yearStr);
+    const month = Number(monthStr);
+    const day = Number(dayStr);
+    if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) {
+      return null;
+    }
+    const date = new Date(year, month - 1, day);
+    if (
+      date.getFullYear() !== year
+      || date.getMonth() !== month - 1
+      || date.getDate() !== day
+    ) {
+      return null;
+    }
+    return date;
+  };
+
+  const getStartOfDay = (date) => {
+    const result = new Date(date);
+    result.setHours(0, 0, 0, 0);
+    return result;
+  };
+
+  const addDays = (date, days) => {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  };
+
+  const addMonths = (date, months) => {
+    const result = new Date(date);
+    result.setMonth(result.getMonth() + months);
+    return result;
+  };
+
+  const getStartOfWeek = (date) => {
+    const start = getStartOfDay(date);
+    const diff = (start.getDay() - MEAL_PLAN_WEEK_START + 7) % 7;
+    return addDays(start, -diff);
+  };
+
+  const getEndOfWeek = (date) => addDays(getStartOfWeek(date), 6);
+
+  const getTodayIsoDate = () => toISODateString(new Date());
+
+  const mealPlanEntryTypeLookup = new Map(
+    MEAL_PLAN_ENTRY_TYPES.map(({ value, label }) => [value, label]),
+  );
+
+  const createMealPlanEntryId = () =>
+    `entry_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+
+  const loadMealPlan = () => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(MEAL_PLAN_STORAGE_KEY));
+      if (!stored || typeof stored !== 'object') {
+        return {};
+      }
+      const normalized = {};
+      Object.entries(stored).forEach(([dateKey, entries]) => {
+        if (!isValidISODateString(dateKey)) {
+          return;
+        }
+        const parsedDate = parseISODateString(dateKey);
+        if (!parsedDate) {
+          return;
+        }
+        const list = Array.isArray(entries) ? entries : [];
+        const cleaned = [];
+        list.forEach((entry) => {
+          if (!entry || typeof entry !== 'object') return;
+          const title = typeof entry.title === 'string' ? entry.title.trim() : '';
+          if (!title) return;
+          const type = mealPlanEntryTypeLookup.has(entry.type) ? entry.type : 'meal';
+          const id = typeof entry.id === 'string' && entry.id ? entry.id : createMealPlanEntryId();
+          cleaned.push({ id, type, title });
+        });
+        if (cleaned.length) {
+          normalized[dateKey] = cleaned;
+        }
+      });
+      return normalized;
+    } catch (error) {
+      console.warn('Unable to read saved meal plan.', error);
+      return {};
+    }
   };
 
   const measurementPreference = loadMeasurementPreference();
@@ -208,6 +331,9 @@
     activeView: 'meals',
     mealFilters: getDefaultMealFilters(),
     pantryFilters: getDefaultPantryFilters(),
+    mealPlanViewMode: DEFAULT_MEAL_PLAN_MODE,
+    mealPlanSelectedDate: getTodayIsoDate(),
+    mealPlan: loadMealPlan(),
     servingOverrides: {},
     notes: {},
     openNotes: {},
@@ -616,6 +742,20 @@
   let lastPersistedTheme = null;
   let lastPersistedMeasurement = null;
   let lastPersistedFavorites = JSON.stringify(favoriteRecipeIds);
+  let lastPersistedMealPlan = JSON.stringify(state.mealPlan);
+
+  const persistMealPlan = () => {
+    const serialized = JSON.stringify(state.mealPlan);
+    if (serialized === lastPersistedMealPlan) {
+      return;
+    }
+    try {
+      localStorage.setItem(MEAL_PLAN_STORAGE_KEY, serialized);
+      lastPersistedMealPlan = serialized;
+    } catch (error) {
+      console.warn('Unable to persist meal plan entries.', error);
+    }
+  };
 
   const persistFavoriteRecipeIds = () => {
     const serialized = JSON.stringify(Array.from(state.favoriteRecipes));
@@ -857,10 +997,79 @@
     }
   };
 
+  const getMealPlanEntries = (isoDate) => {
+    if (!isValidISODateString(isoDate)) {
+      return [];
+    }
+    const entries = state.mealPlan[isoDate];
+    return Array.isArray(entries) ? entries : [];
+  };
+
+  const ensureMealPlanSelection = () => {
+    if (!isValidISODateString(state.mealPlanSelectedDate)) {
+      state.mealPlanSelectedDate = getTodayIsoDate();
+    }
+    return state.mealPlanSelectedDate;
+  };
+
+  const setMealPlanSelectedDate = (isoDate) => {
+    if (isValidISODateString(isoDate)) {
+      state.mealPlanSelectedDate = isoDate;
+    } else {
+      state.mealPlanSelectedDate = getTodayIsoDate();
+    }
+  };
+
+  const addMealPlanEntry = (isoDate, type, title) => {
+    const dateKey = isValidISODateString(isoDate) ? isoDate : ensureMealPlanSelection();
+    const normalizedTitle = typeof title === 'string' ? title.trim() : '';
+    if (!normalizedTitle) {
+      return false;
+    }
+    const entryType = mealPlanEntryTypeLookup.has(type) ? type : 'meal';
+    const nextEntries = getMealPlanEntries(dateKey).slice();
+    nextEntries.push({ id: createMealPlanEntryId(), type: entryType, title: normalizedTitle });
+    state.mealPlan[dateKey] = nextEntries;
+    persistMealPlan();
+    return true;
+  };
+
+  const removeMealPlanEntry = (isoDate, entryId) => {
+    if (!isValidISODateString(isoDate) || typeof entryId !== 'string' || !entryId) {
+      return;
+    }
+    const currentEntries = getMealPlanEntries(isoDate);
+    if (!currentEntries.length) {
+      return;
+    }
+    const filtered = currentEntries.filter((entry) => entry.id !== entryId);
+    if (filtered.length) {
+      state.mealPlan[isoDate] = filtered;
+    } else {
+      delete state.mealPlan[isoDate];
+    }
+    persistMealPlan();
+  };
+
   const cacheElements = () => {
     elements.viewToggleButtons = Array.from(document.querySelectorAll('[data-view-target]'));
+    elements.filterPanel = document.getElementById('filter-panel');
     elements.mealView = document.getElementById('meal-view');
     elements.pantryView = document.getElementById('pantry-view');
+    elements.mealPlanView = document.getElementById('meal-plan-view');
+    elements.mealPlanCalendar = document.getElementById('meal-plan-calendar');
+    elements.mealPlanSidebar = document.getElementById('meal-plan-sidebar');
+    elements.mealPlanDayDetails = document.getElementById('meal-plan-day-details');
+    elements.mealPlanForm = document.getElementById('meal-plan-form');
+    elements.mealPlanEntryType = document.getElementById('meal-plan-entry-type');
+    elements.mealPlanEntryTitle = document.getElementById('meal-plan-entry-title');
+    elements.mealPlanEntryDate = document.getElementById('meal-plan-entry-date');
+    elements.mealPlanModeButtons = Array.from(
+      document.querySelectorAll('[data-meal-plan-mode]'),
+    );
+    elements.mealPlanPeriod = document.getElementById('meal-plan-period');
+    elements.mealPlanPrevButton = document.getElementById('meal-plan-prev');
+    elements.mealPlanNextButton = document.getElementById('meal-plan-next');
     elements.mealGrid = document.getElementById('meal-grid');
     elements.mealCount = document.getElementById('meal-count');
     elements.pantryGrid = document.getElementById('pantry-grid');
@@ -1084,6 +1293,10 @@
 
   const configureFilterPanel = () => {
     const view = state.activeView;
+    if (view === 'meal-plan') {
+      configuredFilterView = view;
+      return;
+    }
     if (configuredFilterView === view) {
       syncFilterControls();
       return;
@@ -1226,6 +1439,371 @@
         }
       });
     }
+  };
+
+  const formatMealPlanLongDate = (date) =>
+    date.toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
+  const formatMealPlanMonthLabel = (date) =>
+    date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+  const formatMealPlanWeekLabel = (date) => {
+    const start = getStartOfWeek(date);
+    const end = getEndOfWeek(date);
+    const sameYear = start.getFullYear() === end.getFullYear();
+    const sameMonth = sameYear && start.getMonth() === end.getMonth();
+    if (sameMonth) {
+      const monthName = start.toLocaleDateString(undefined, { month: 'long' });
+      return `${monthName} ${start.getDate()}–${end.getDate()}, ${start.getFullYear()}`;
+    }
+    const startOptions = { month: 'short', day: 'numeric' };
+    const endOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+    if (!sameYear) {
+      startOptions.year = 'numeric';
+    }
+    const startLabel = start.toLocaleDateString(undefined, startOptions);
+    const endLabel = end.toLocaleDateString(undefined, endOptions);
+    return `${startLabel} – ${endLabel}`;
+  };
+
+  const createMealPlanDayNamesRow = () => {
+    const row = document.createElement('div');
+    row.className = 'meal-plan-calendar__day-names';
+    for (let offset = 0; offset < 7; offset += 1) {
+      const dayIndex = (MEAL_PLAN_WEEK_START + offset) % 7;
+      const label = MEAL_PLAN_DAY_NAMES[dayIndex] || '';
+      const cell = document.createElement('div');
+      cell.className = 'meal-plan-calendar__day-name';
+      cell.textContent = label.slice(0, 3);
+      cell.title = label;
+      row.appendChild(cell);
+    }
+    return row;
+  };
+
+  const createMealPlanCalendarEntry = (entry) => {
+    const normalizedType = mealPlanEntryTypeLookup.has(entry.type) ? entry.type : 'meal';
+    const typeLabel = mealPlanEntryTypeLookup.get(normalizedType) || 'Meal';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'meal-plan-calendar__entry';
+    const typeBadge = document.createElement('span');
+    typeBadge.className = `meal-plan-calendar__entry-type meal-plan-calendar__entry-type--${normalizedType}`;
+    typeBadge.textContent = typeLabel.charAt(0).toUpperCase();
+    typeBadge.title = typeLabel;
+    wrapper.appendChild(typeBadge);
+    const title = document.createElement('span');
+    title.className = 'meal-plan-calendar__entry-title';
+    title.textContent = entry.title;
+    wrapper.appendChild(title);
+    return wrapper;
+  };
+
+  const createMealPlanEntryElement = (entry, options = {}) => {
+    const { showRemove = false, dateKey, showMeta = true } = options;
+    const normalizedType = mealPlanEntryTypeLookup.has(entry.type) ? entry.type : 'meal';
+    const typeLabel = mealPlanEntryTypeLookup.get(normalizedType) || 'Meal';
+    const article = document.createElement('article');
+    article.className = 'meal-plan-entry';
+    const badge = document.createElement('span');
+    badge.className = `meal-plan-entry__type meal-plan-entry__type--${normalizedType}`;
+    badge.textContent = typeLabel.charAt(0).toUpperCase();
+    badge.title = typeLabel;
+    article.appendChild(badge);
+    const content = document.createElement('div');
+    content.className = 'meal-plan-entry__content';
+    const title = document.createElement('p');
+    title.className = 'meal-plan-entry__title';
+    title.textContent = entry.title;
+    content.appendChild(title);
+    if (showMeta) {
+      const meta = document.createElement('p');
+      meta.className = 'meal-plan-entry__meta';
+      meta.textContent = typeLabel;
+      content.appendChild(meta);
+    }
+    article.appendChild(content);
+    if (showRemove && dateKey) {
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'meal-plan-entry__remove';
+      removeButton.dataset.removeEntry = entry.id;
+      removeButton.dataset.entryDate = dateKey;
+      removeButton.textContent = 'Remove';
+      article.appendChild(removeButton);
+    }
+    return article;
+  };
+
+  const createMealPlanCalendarCell = (date, options = {}) => {
+    const iso = toISODateString(date);
+    const entries = Array.isArray(options.entries) ? options.entries : getMealPlanEntries(iso);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'meal-plan-calendar__cell';
+    if (options.isCurrentMonth === false) {
+      button.classList.add('meal-plan-calendar__cell--muted');
+    }
+    const isSelected = iso === state.mealPlanSelectedDate;
+    if (isSelected) {
+      button.classList.add('meal-plan-calendar__cell--selected');
+      button.setAttribute('aria-current', 'date');
+    }
+    if (entries.length) {
+      button.classList.add('meal-plan-calendar__cell--has-entries');
+    }
+    const descriptiveLabel = `${formatMealPlanLongDate(date)}${entries.length
+      ? `, ${entries.length} planned ${entries.length === 1 ? 'item' : 'items'}`
+      : ', no planned items'}`;
+    button.setAttribute('aria-label', descriptiveLabel);
+    button.dataset.date = iso;
+    button.addEventListener('click', () => {
+      if (state.mealPlanSelectedDate !== iso) {
+        setMealPlanSelectedDate(iso);
+        renderMealPlan();
+      }
+    });
+    const dateContainer = document.createElement('div');
+    dateContainer.className = 'meal-plan-calendar__date';
+    const number = document.createElement('span');
+    number.className = 'meal-plan-calendar__date-number';
+    number.textContent = String(date.getDate());
+    dateContainer.appendChild(number);
+    button.appendChild(dateContainer);
+    const list = document.createElement('div');
+    list.className = 'meal-plan-calendar__entries';
+    const maxEntries = typeof options.maxEntries === 'number' ? options.maxEntries : 3;
+    entries.slice(0, maxEntries).forEach((entry) => {
+      list.appendChild(createMealPlanCalendarEntry(entry));
+    });
+    if (entries.length > maxEntries) {
+      const more = document.createElement('span');
+      more.className = 'meal-plan-calendar__more';
+      more.textContent = `+${entries.length - maxEntries} more`;
+      list.appendChild(more);
+    }
+    button.appendChild(list);
+    return button;
+  };
+
+  const renderMealPlanMonthView = (selectedDate) => {
+    const container = document.createElement('div');
+    container.className = 'meal-plan-calendar__month';
+    container.appendChild(createMealPlanDayNamesRow());
+    const monthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+    const monthEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+    let cursor = getStartOfWeek(monthStart);
+    const gridEnd = getEndOfWeek(monthEnd);
+    while (cursor <= gridEnd) {
+      const weekRow = document.createElement('div');
+      weekRow.className = 'meal-plan-calendar__week';
+      for (let dayOffset = 0; dayOffset < 7; dayOffset += 1) {
+        const currentDate = new Date(cursor);
+        const iso = toISODateString(currentDate);
+        weekRow.appendChild(
+          createMealPlanCalendarCell(currentDate, {
+            isCurrentMonth: currentDate.getMonth() === selectedDate.getMonth(),
+            entries: getMealPlanEntries(iso),
+            maxEntries: 3,
+          }),
+        );
+        cursor = addDays(cursor, 1);
+      }
+      container.appendChild(weekRow);
+    }
+    return container;
+  };
+
+  const renderMealPlanWeekView = (selectedDate) => {
+    const container = document.createElement('div');
+    container.className = 'meal-plan-calendar__week-view';
+    const header = document.createElement('div');
+    header.className = 'meal-plan-calendar__week-header';
+    const weekStart = getStartOfWeek(selectedDate);
+    for (let offset = 0; offset < 7; offset += 1) {
+      const dayIndex = (MEAL_PLAN_WEEK_START + offset) % 7;
+      const day = addDays(weekStart, offset);
+      const cell = document.createElement('div');
+      cell.className = 'meal-plan-calendar__week-header-cell';
+      const name = document.createElement('span');
+      name.className = 'meal-plan-calendar__day-name';
+      const label = MEAL_PLAN_DAY_NAMES[dayIndex] || '';
+      name.textContent = label.slice(0, 3);
+      name.title = label;
+      cell.appendChild(name);
+      const dateLabel = document.createElement('span');
+      dateLabel.className = 'meal-plan-calendar__week-header-date';
+      dateLabel.textContent = day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      cell.appendChild(dateLabel);
+      header.appendChild(cell);
+    }
+    container.appendChild(header);
+    const body = document.createElement('div');
+    body.className = 'meal-plan-calendar__week';
+    for (let offset = 0; offset < 7; offset += 1) {
+      const day = addDays(weekStart, offset);
+      const iso = toISODateString(day);
+      body.appendChild(
+        createMealPlanCalendarCell(day, {
+          isCurrentMonth: true,
+          entries: getMealPlanEntries(iso),
+          maxEntries: 4,
+        }),
+      );
+    }
+    container.appendChild(body);
+    return container;
+  };
+
+  const renderMealPlanDayView = (selectedIso) => {
+    const container = document.createElement('div');
+    container.className = 'meal-plan-calendar__day';
+    const entries = getMealPlanEntries(selectedIso);
+    MEAL_PLAN_ENTRY_TYPES.forEach(({ value, label }) => {
+      const column = document.createElement('section');
+      column.className = 'meal-plan-calendar__day-column';
+      const heading = document.createElement('h4');
+      heading.className = 'meal-plan-calendar__day-title';
+      heading.textContent = label;
+      column.appendChild(heading);
+      const filtered = entries.filter((entry) => entry.type === value);
+      if (!filtered.length) {
+        const empty = document.createElement('p');
+        empty.className = 'meal-plan-empty';
+        empty.textContent = `No ${label.toLowerCase()} planned.`;
+        column.appendChild(empty);
+      } else {
+        const list = document.createElement('div');
+        list.className = 'meal-plan-day__list';
+        filtered.forEach((entry) => {
+          list.appendChild(createMealPlanEntryElement(entry, { showMeta: false }));
+        });
+        column.appendChild(list);
+      }
+      container.appendChild(column);
+    });
+    return container;
+  };
+
+  const renderMealPlanDayDetails = (selectedDate, selectedIso) => {
+    if (!elements.mealPlanDayDetails) return;
+    const container = elements.mealPlanDayDetails;
+    container.innerHTML = '';
+    const header = document.createElement('div');
+    header.className = 'meal-plan-day__header';
+    const title = document.createElement('h3');
+    title.className = 'meal-plan-day__title';
+    title.textContent = formatMealPlanLongDate(selectedDate);
+    header.appendChild(title);
+    const entries = getMealPlanEntries(selectedIso);
+    const subtitle = document.createElement('p');
+    subtitle.className = 'meal-plan-day__subtitle';
+    subtitle.textContent = entries.length
+      ? `${entries.length} planned ${entries.length === 1 ? 'item' : 'items'}`
+      : 'No meals planned yet.';
+    header.appendChild(subtitle);
+    container.appendChild(header);
+    if (!entries.length) {
+      const empty = document.createElement('p');
+      empty.className = 'meal-plan-empty';
+      empty.textContent = 'Add meals, drinks, or snacks to fill this day.';
+      container.appendChild(empty);
+      return;
+    }
+    const list = document.createElement('div');
+    list.className = 'meal-plan-day__list';
+    entries.forEach((entry) => {
+      list.appendChild(createMealPlanEntryElement(entry, { showRemove: true, dateKey: selectedIso }));
+    });
+    container.appendChild(list);
+  };
+
+  const updateMealPlanModeButtons = () => {
+    if (!Array.isArray(elements.mealPlanModeButtons)) return;
+    elements.mealPlanModeButtons.forEach((button) => {
+      const mode = button.dataset.mealPlanMode;
+      const isActive = mode === state.mealPlanViewMode;
+      button.classList.toggle('view-toggle__button--active', isActive);
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  };
+
+  const updateMealPlanPeriodLabel = (selectedDate) => {
+    if (!elements.mealPlanPeriod) return;
+    let label = '';
+    if (state.mealPlanViewMode === 'week') {
+      label = formatMealPlanWeekLabel(selectedDate);
+    } else if (state.mealPlanViewMode === 'day') {
+      label = formatMealPlanLongDate(selectedDate);
+    } else {
+      label = formatMealPlanMonthLabel(selectedDate);
+    }
+    elements.mealPlanPeriod.textContent = label;
+  };
+
+  const renderMealPlanCalendar = (selectedDate, selectedIso) => {
+    if (!elements.mealPlanCalendar) return;
+    elements.mealPlanCalendar.innerHTML = '';
+    elements.mealPlanCalendar.dataset.viewMode = state.mealPlanViewMode;
+    let view;
+    if (state.mealPlanViewMode === 'week') {
+      view = renderMealPlanWeekView(selectedDate);
+    } else if (state.mealPlanViewMode === 'day') {
+      view = renderMealPlanDayView(selectedIso);
+    } else {
+      view = renderMealPlanMonthView(selectedDate);
+    }
+    if (view) {
+      elements.mealPlanCalendar.appendChild(view);
+    }
+  };
+
+  const updateMealPlanForm = (selectedIso) => {
+    if (elements.mealPlanEntryDate) {
+      elements.mealPlanEntryDate.value = selectedIso;
+    }
+  };
+
+  const renderMealPlan = () => {
+    const selectedIso = ensureMealPlanSelection();
+    const selectedDate = parseISODateString(selectedIso) || new Date();
+    updateMealPlanModeButtons();
+    updateMealPlanPeriodLabel(selectedDate);
+    renderMealPlanCalendar(selectedDate, selectedIso);
+    renderMealPlanDayDetails(selectedDate, selectedIso);
+    updateMealPlanForm(selectedIso);
+  };
+
+  const setMealPlanViewMode = (mode) => {
+    if (!MEAL_PLAN_VIEW_MODES.includes(mode) || state.mealPlanViewMode === mode) {
+      return;
+    }
+    state.mealPlanViewMode = mode;
+    renderMealPlan();
+  };
+
+  const adjustMealPlanSelection = (step) => {
+    if (!Number.isInteger(step) || step === 0) {
+      return;
+    }
+    const current = parseISODateString(ensureMealPlanSelection());
+    if (!current) {
+      return;
+    }
+    let nextDate;
+    if (state.mealPlanViewMode === 'month') {
+      nextDate = addMonths(current, step);
+    } else if (state.mealPlanViewMode === 'week') {
+      nextDate = addDays(current, step * 7);
+    } else {
+      nextDate = addDays(current, step);
+    }
+    setMealPlanSelectedDate(toISODateString(nextDate));
+    renderMealPlan();
   };
 
   const matchesMealFilters = (recipe) => {
@@ -1707,6 +2285,18 @@
     if (elements.pantryView) {
       elements.pantryView.hidden = state.activeView !== 'pantry';
     }
+    if (elements.mealPlanView) {
+      elements.mealPlanView.hidden = state.activeView !== 'meal-plan';
+    }
+    if (elements.filterPanel) {
+      const hideFilter = state.activeView === 'meal-plan';
+      elements.filterPanel.hidden = hideFilter;
+      if (hideFilter) {
+        elements.filterPanel.setAttribute('aria-hidden', 'true');
+      } else {
+        elements.filterPanel.removeAttribute('aria-hidden');
+      }
+    }
   };
 
   const renderApp = () => {
@@ -1714,8 +2304,10 @@
     configureFilterPanel();
     if (state.activeView === 'meals') {
       renderMeals();
-    } else {
+    } else if (state.activeView === 'pantry') {
       renderPantry();
+    } else {
+      renderMealPlan();
     }
     updateView();
   };
@@ -1731,6 +2323,71 @@
         }
       });
     });
+
+    if (Array.isArray(elements.mealPlanModeButtons)) {
+      elements.mealPlanModeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const mode = button.dataset.mealPlanMode;
+          if (mode) {
+            setMealPlanViewMode(mode);
+          }
+        });
+      });
+    }
+
+    if (elements.mealPlanPrevButton) {
+      elements.mealPlanPrevButton.addEventListener('click', () => {
+        adjustMealPlanSelection(-1);
+      });
+    }
+
+    if (elements.mealPlanNextButton) {
+      elements.mealPlanNextButton.addEventListener('click', () => {
+        adjustMealPlanSelection(1);
+      });
+    }
+
+    if (elements.mealPlanForm) {
+      elements.mealPlanForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const dateValue = elements.mealPlanEntryDate?.value || state.mealPlanSelectedDate;
+        const typeValue = elements.mealPlanEntryType?.value;
+        const titleValue = elements.mealPlanEntryTitle?.value;
+        const added = addMealPlanEntry(dateValue, typeValue, titleValue);
+        if (!added) {
+          return;
+        }
+        if (elements.mealPlanEntryTitle) {
+          elements.mealPlanEntryTitle.value = '';
+        }
+        if (isValidISODateString(dateValue)) {
+          setMealPlanSelectedDate(dateValue);
+        }
+        renderMealPlan();
+      });
+    }
+
+    if (elements.mealPlanEntryDate) {
+      elements.mealPlanEntryDate.addEventListener('change', (event) => {
+        const { value } = event.target;
+        if (isValidISODateString(value)) {
+          setMealPlanSelectedDate(value);
+          renderMealPlan();
+        }
+      });
+    }
+
+    if (elements.mealPlanDayDetails) {
+      elements.mealPlanDayDetails.addEventListener('click', (event) => {
+        const target = event.target instanceof Element ? event.target.closest('[data-remove-entry]') : null;
+        if (!target) return;
+        const { removeEntry, entryDate } = target.dataset;
+        if (removeEntry && entryDate) {
+          removeMealPlanEntry(entryDate, removeEntry);
+          renderMealPlan();
+        }
+      });
+    }
 
     if (elements.filterSearch) {
       elements.filterSearch.addEventListener('input', (event) => {
