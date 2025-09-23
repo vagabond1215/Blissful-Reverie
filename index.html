@@ -100,20 +100,18 @@
       </header>
       <main class="layout" id="app-layout">
         <aside class="filter-panel" id="filter-panel">
-          <div class="panel-header">
-            <h2 id="filter-panel-title">Filter Recipes</h2>
+          <div class="panel-header panel-header--actions-only">
             <button type="button" class="reset-button" id="reset-filters">Reset</button>
           </div>
           <p class="filter-panel__count" id="meal-count">0 recipes match your filters.</p>
-          <label class="input-group">
-            <span id="filter-search-label">Search</span>
+          <div class="input-group input-group--search">
             <input
               type="search"
               id="filter-search"
               placeholder="Search by name, description, or tag"
-              aria-describedby="filter-search-label"
+              aria-label="Search recipes"
             />
-          </label>
+          </div>
           <button
             type="button"
             class="favorite-filter"
