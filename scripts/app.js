@@ -1391,19 +1391,21 @@
       if (labelEl) {
         if (favoritesOnly) {
           labelEl.textContent = favoriteCount
-            ? `${favoriteCount} favorite${favoriteCount === 1 ? '' : 's'} selected`
-            : 'No favorites selected';
+            ? `${favoriteCount} favorite${favoriteCount === 1 ? '' : 's'}`
+            : 'No favorites';
         } else if (favoriteCount) {
-          labelEl.textContent = `Show favorites only (${favoriteCount})`;
+          labelEl.textContent = `Favorites (${favoriteCount})`;
         } else {
-          labelEl.textContent = 'Show favorites only';
+          labelEl.textContent = 'Favorites';
         }
       }
       const titleText = favoritesOnly
-        ? 'Showing favorite recipes only'
+        ? favoriteCount
+          ? `Showing ${favoriteCount} favorite${favoriteCount === 1 ? '' : 's'}`
+          : 'Showing favorite recipes only'
         : favoriteCount
-          ? 'Show only your favorite recipes'
-          : 'Show only favorite recipes';
+          ? `Filter to ${favoriteCount} favorite${favoriteCount === 1 ? '' : 's'}`
+          : 'Filter by favorite recipes';
       elements.favoriteFilterToggle.setAttribute('title', titleText);
       elements.favoriteFilterToggle.setAttribute('aria-label', titleText);
     }
