@@ -531,13 +531,13 @@ select {
 .panel-header__actions {
   display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 0.75rem;
 }
 
 .panel-header--actions-only {
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .panel-header h2 {
@@ -549,8 +549,13 @@ select {
 }
 
 .filter-panel__count {
-  margin: -0.15rem 0 0;
-  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  margin: 0;
+  font-size: 1.425rem;
+  font-weight: 600;
   color: var(--color-text-muted);
 }
 
@@ -3003,6 +3008,29 @@ textarea:focus {
 :root[data-mode='sepia'][data-theme='copper'] .meal-card__favorite-button[aria-pressed='true'] {
   background: var(--favorite-heart-on);
   box-shadow: var(--favorite-heart-shadow);
+}
+
+:root[data-mode='sepia'][data-theme='copper'] .serving-controls span,
+:root[data-mode='sepia'][data-theme='copper'] .base-serving {
+  color: #000000;
+}
+
+:root[data-mode='sepia'][data-theme='copper'] .meal-plan-view {
+  background: var(--color-burnished-copper);
+  color: var(--color-header-foreground, #fbe6d5);
+  --color-text-emphasis: var(--color-header-foreground, #fbe6d5);
+  --color-text-secondary: rgba(251, 230, 213, 0.86);
+  --color-text-tertiary: rgba(251, 230, 213, 0.78);
+  --color-text-muted: rgba(251, 230, 213, 0.72);
+  --color-text-soft: rgba(251, 230, 213, 0.64);
+  --meal-plan-border: rgba(251, 230, 213, 0.32);
+}
+
+:root[data-mode='sepia'][data-theme='copper'] .meal-plan-calendar,
+:root[data-mode='sepia'][data-theme='copper'] .meal-plan-sidebar {
+  background: var(--color-burnished-copper);
+  border-color: rgba(251, 230, 213, 0.32);
+  box-shadow: 0 18px 32px -24px rgba(28, 14, 10, 0.65);
 }
 
 :root[data-mode='sepia'][data-theme='umber'] {
