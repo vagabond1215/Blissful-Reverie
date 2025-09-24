@@ -2179,7 +2179,9 @@
       : filteredRecipes.length === 1
         ? 'recipe matches'
         : 'recipes match';
-    elements.mealCount.textContent = `${filteredRecipes.length} ${matchLabel} your filters.`;
+    const matchesText = `${filteredRecipes.length} ${matchLabel} your filters.`;
+    elements.mealCount.textContent = String(filteredRecipes.length);
+    elements.mealCount.setAttribute('aria-label', matchesText);
     elements.mealGrid.innerHTML = '';
     if (filteredRecipes.length) {
       filteredRecipes.forEach((recipe) => {
