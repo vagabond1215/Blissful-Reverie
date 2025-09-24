@@ -19,6 +19,7 @@
   --color-text-inline: #2a3a5a;
   --color-tag-text: #1c2a6d;
   --color-text-inverse: #ffffff;
+  --color-gunmetal: #2a3439;
   --color-text-emphasis: #1b2848;
 
   --color-layout-background: #d09c67;
@@ -1287,7 +1288,23 @@ textarea:focus {
 
 .meal-plan-view__mode-toggle {
   margin-left: auto;
-  justify-content: flex-end;
+  width: min(100%, 420px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.meal-plan-view__mode-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0.75rem 1.15rem;
+  text-align: center;
+  line-height: 1.4;
+  white-space: normal;
 }
 
 .meal-plan-view__navigator {
@@ -3085,6 +3102,16 @@ textarea:focus {
   );
   border-color: rgba(251, 230, 213, 0.28);
   box-shadow: 0 22px 40px -26px rgba(18, 26, 14, 0.7);
+}
+
+:root[data-mode='sepia'][data-theme='copper'] .meal-plan-calendar__cell,
+:root[data-mode='sepia'][data-theme='copper'] .meal-plan-calendar__entry,
+:root[data-mode='sepia'][data-theme='copper'] .meal-plan-calendar__entry-title,
+:root[data-mode='sepia'][data-theme='copper'] .meal-plan-calendar__more,
+:root[data-mode='sepia'][data-theme='copper'] .meal-plan-calendar__day-title,
+:root[data-mode='sepia'][data-theme='copper'] .meal-plan-calendar__week-header-date,
+:root[data-mode='sepia'][data-theme='copper'] .meal-plan-calendar__date-number {
+  color: var(--color-gunmetal);
 }
 
 :root[data-mode='sepia'][data-theme='umber'] {
