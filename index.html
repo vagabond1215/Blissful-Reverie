@@ -174,38 +174,9 @@
         </section>
         <section class="meal-plan-view" id="meal-plan-view" hidden>
           <header class="meal-plan-view__header">
-            <div>
-              <h2>Meal Plan</h2>
-              <p>Organize meals, drinks, and snacks across your calendar.</p>
-            </div>
-            <div class="meal-plan-view__actions">
-              <div class="view-toggle meal-plan-view__mode-toggle" role="tablist">
-                <button
-                  type="button"
-                  class="view-toggle__button meal-plan-view__mode-button"
-                  data-meal-plan-mode="day"
-                  aria-pressed="false"
-                >
-                  Day
-                </button>
-                <button
-                  type="button"
-                  class="view-toggle__button meal-plan-view__mode-button"
-                  data-meal-plan-mode="week"
-                  aria-pressed="false"
-                >
-                  Week
-                </button>
-                <button
-                  type="button"
-                  class="view-toggle__button meal-plan-view__mode-button"
-                  data-meal-plan-mode="month"
-                  aria-pressed="false"
-                >
-                  Month
-                </button>
-              </div>
-              <div class="meal-plan-view__navigator">
+            <div class="meal-plan-view__navigator">
+              <span class="meal-plan-nav__label" id="meal-plan-period"></span>
+              <div class="meal-plan-nav__controls">
                 <button
                   type="button"
                   class="meal-plan-nav__button"
@@ -214,7 +185,6 @@
                 >
                   ‹
                 </button>
-                <span class="meal-plan-nav__label" id="meal-plan-period"></span>
                 <button
                   type="button"
                   class="meal-plan-nav__button"
@@ -224,6 +194,32 @@
                   ›
                 </button>
               </div>
+            </div>
+            <div class="view-toggle meal-plan-view__mode-toggle" role="tablist">
+              <button
+                type="button"
+                class="view-toggle__button meal-plan-view__mode-button"
+                data-meal-plan-mode="day"
+                aria-pressed="false"
+              >
+                Day
+              </button>
+              <button
+                type="button"
+                class="view-toggle__button meal-plan-view__mode-button"
+                data-meal-plan-mode="week"
+                aria-pressed="false"
+              >
+                Week
+              </button>
+              <button
+                type="button"
+                class="view-toggle__button meal-plan-view__mode-button"
+                data-meal-plan-mode="month"
+                aria-pressed="false"
+              >
+                Month
+              </button>
             </div>
           </header>
           <div class="meal-plan-view__layout">
