@@ -1053,6 +1053,7 @@
 
   const cacheElements = () => {
     elements.viewToggleButtons = Array.from(document.querySelectorAll('[data-view-target]'));
+    elements.appLayout = document.getElementById('app-layout');
     elements.filterPanel = document.getElementById('filter-panel');
     elements.mealView = document.getElementById('meal-view');
     elements.pantryView = document.getElementById('pantry-view');
@@ -2281,6 +2282,7 @@
         button.classList.remove('view-toggle__button--active');
       }
     });
+    const hideFilter = state.activeView === 'meal-plan';
     if (elements.mealView) {
       elements.mealView.hidden = state.activeView !== 'meals';
     }
@@ -2290,8 +2292,10 @@
     if (elements.mealPlanView) {
       elements.mealPlanView.hidden = state.activeView !== 'meal-plan';
     }
+    if (elements.appLayout) {
+      elements.appLayout.classList.toggle('layout--single-column', hideFilter);
+    }
     if (elements.filterPanel) {
-      const hideFilter = state.activeView === 'meal-plan';
       elements.filterPanel.hidden = hideFilter;
       if (hideFilter) {
         elements.filterPanel.setAttribute('aria-hidden', 'true');
