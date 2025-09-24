@@ -116,9 +116,11 @@
   const MEASUREMENT_SYSTEMS = ['imperial', 'metric'];
   const DEFAULT_MEASUREMENT_SYSTEM = 'imperial';
 
+  const APP_STATE_STORAGE_KEY = 'blissful-app-state';
   const MEAL_PLAN_STORAGE_KEY = 'blissful-meal-plan';
   const MEAL_PLAN_VIEW_MODES = ['day', 'week', 'month'];
   const DEFAULT_MEAL_PLAN_MODE = 'month';
+  const AVAILABLE_VIEWS = ['meals', 'pantry', 'meal-plan'];
   const MEAL_PLAN_ENTRY_TYPES = [
     { value: 'meal', label: 'Meal' },
     { value: 'drink', label: 'Drink' },
@@ -327,17 +329,184 @@
     allergens: [],
   });
 
+  const toUniqueStringArray = (value) => {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    const unique = new Set();
+    value.forEach((entry) => {
+      if (typeof entry !== 'string') return;
+      const trimmed = entry.trim();
+      if (trimmed) {
+        unique.add(trimmed);
+      }
+    });
+    return Array.from(unique);
+  };
+
+  const sanitizeMealFilters = (value) => {
+    const defaults = getDefaultMealFilters();
+    if (!value || typeof value !== 'object') {
+      return defaults;
+    }
+    return {
+      search: typeof value.search === 'string' ? value.search : defaults.search,
+      ingredients: toUniqueStringArray(value.ingredients),
+      tags: toUniqueStringArray(value.tags),
+      allergies: toUniqueStringArray(value.allergies),
+      equipment: toUniqueStringArray(value.equipment),
+      favoritesOnly: Boolean(value.favoritesOnly),
+    };
+  };
+
+  const sanitizePantryFilters = (value) => {
+    const defaults = getDefaultPantryFilters();
+    if (!value || typeof value !== 'object') {
+      return defaults;
+    }
+    return {
+      search: typeof value.search === 'string' ? value.search : defaults.search,
+      categories: toUniqueStringArray(value.categories),
+      tags: toUniqueStringArray(value.tags),
+      allergens: toUniqueStringArray(value.allergens),
+    };
+  };
+
+  const sanitizeServingOverrides = (value) => {
+    if (!value || typeof value !== 'object') {
+      return {};
+    }
+    const overrides = {};
+    Object.entries(value).forEach(([key, raw]) => {
+      if (typeof key !== 'string' || !key) {
+        return;
+      }
+      const parsed = Number(raw);
+      if (Number.isFinite(parsed) && parsed > 0) {
+        overrides[key] = Math.max(1, Math.round(parsed));
+      }
+    });
+    return overrides;
+  };
+
+  const sanitizeNotes = (value) => {
+    if (!value || typeof value !== 'object') {
+      return {};
+    }
+    const notes = {};
+    Object.entries(value).forEach(([key, raw]) => {
+      if (typeof key !== 'string' || !key || typeof raw !== 'string') {
+        return;
+      }
+      notes[key] = raw;
+    });
+    return notes;
+  };
+
+  const sanitizeOpenNotes = (value) => {
+    if (!value || typeof value !== 'object') {
+      return {};
+    }
+    const open = {};
+    Object.entries(value).forEach(([key, raw]) => {
+      if (typeof key !== 'string' || !key) {
+        return;
+      }
+      if (Boolean(raw)) {
+        open[key] = true;
+      }
+    });
+    return open;
+  };
+
+  const sanitizePantryInventory = (value) => {
+    if (!value || typeof value !== 'object') {
+      return {};
+    }
+    const inventory = {};
+    Object.entries(value).forEach(([slug, entry]) => {
+      if (typeof slug !== 'string' || !slug || !entry || typeof entry !== 'object') {
+        return;
+      }
+      const quantityRaw = entry.quantity;
+      const unitRaw = entry.unit;
+      const quantity =
+        quantityRaw === null || quantityRaw === undefined
+          ? ''
+          : typeof quantityRaw === 'string'
+            ? quantityRaw.trim()
+            : String(quantityRaw);
+      const unit = typeof unitRaw === 'string' ? unitRaw.trim() : '';
+      const hasQuantity = quantity !== '';
+      const isDefaultUnit = unit.toLowerCase() === 'each';
+      if (!hasQuantity && (!unit || isDefaultUnit)) {
+        return;
+      }
+      inventory[slug] = {
+        quantity: hasQuantity ? quantity : '',
+        unit: unit || 'each',
+      };
+    });
+    return inventory;
+  };
+
+  const loadAppState = () => {
+    const fallback = {
+      activeView: 'meals',
+      mealFilters: getDefaultMealFilters(),
+      pantryFilters: getDefaultPantryFilters(),
+      mealPlanViewMode: DEFAULT_MEAL_PLAN_MODE,
+      mealPlanSelectedDate: getTodayIsoDate(),
+      servingOverrides: {},
+      notes: {},
+      openNotes: {},
+      pantryInventory: {},
+    };
+    try {
+      const stored = JSON.parse(localStorage.getItem(APP_STATE_STORAGE_KEY));
+      if (!stored || typeof stored !== 'object') {
+        return fallback;
+      }
+      const result = { ...fallback };
+      if (AVAILABLE_VIEWS.includes(stored.activeView)) {
+        result.activeView = stored.activeView;
+      }
+      if (stored.mealFilters) {
+        result.mealFilters = sanitizeMealFilters(stored.mealFilters);
+      }
+      if (stored.pantryFilters) {
+        result.pantryFilters = sanitizePantryFilters(stored.pantryFilters);
+      }
+      if (MEAL_PLAN_VIEW_MODES.includes(stored.mealPlanViewMode)) {
+        result.mealPlanViewMode = stored.mealPlanViewMode;
+      }
+      if (isValidISODateString(stored.mealPlanSelectedDate)) {
+        result.mealPlanSelectedDate = stored.mealPlanSelectedDate;
+      }
+      result.servingOverrides = sanitizeServingOverrides(stored.servingOverrides);
+      result.notes = sanitizeNotes(stored.notes);
+      result.openNotes = sanitizeOpenNotes(stored.openNotes);
+      result.pantryInventory = sanitizePantryInventory(stored.pantryInventory);
+      return result;
+    } catch (error) {
+      console.warn('Unable to read saved application state.', error);
+      return fallback;
+    }
+  };
+
+  const storedAppState = loadAppState();
+
   const state = {
-    activeView: 'meals',
-    mealFilters: getDefaultMealFilters(),
-    pantryFilters: getDefaultPantryFilters(),
-    mealPlanViewMode: DEFAULT_MEAL_PLAN_MODE,
-    mealPlanSelectedDate: getTodayIsoDate(),
+    activeView: storedAppState.activeView,
+    mealFilters: sanitizeMealFilters(storedAppState.mealFilters),
+    pantryFilters: sanitizePantryFilters(storedAppState.pantryFilters),
+    mealPlanViewMode: storedAppState.mealPlanViewMode,
+    mealPlanSelectedDate: storedAppState.mealPlanSelectedDate,
     mealPlan: loadMealPlan(),
-    servingOverrides: {},
-    notes: {},
-    openNotes: {},
-    pantryInventory: {},
+    servingOverrides: sanitizeServingOverrides(storedAppState.servingOverrides),
+    notes: sanitizeNotes(storedAppState.notes),
+    openNotes: sanitizeOpenNotes(storedAppState.openNotes),
+    pantryInventory: sanitizePantryInventory(storedAppState.pantryInventory),
     themeMode: themePreferences.mode,
     themeSelections: { ...themePreferences.selections },
     measurementSystem: measurementPreference,
@@ -743,6 +912,98 @@
   let lastPersistedMeasurement = null;
   let lastPersistedFavorites = JSON.stringify(favoriteRecipeIds);
   let lastPersistedMealPlan = JSON.stringify(state.mealPlan);
+  let lastPersistedAppState = null;
+
+  const createAppStateSnapshot = () => {
+    const mealFilters = state.mealFilters || getDefaultMealFilters();
+    const pantryFilters = state.pantryFilters || getDefaultPantryFilters();
+    const snapshot = {
+      activeView: AVAILABLE_VIEWS.includes(state.activeView) ? state.activeView : 'meals',
+      mealFilters: {
+        search: typeof mealFilters.search === 'string' ? mealFilters.search : '',
+        ingredients: toUniqueStringArray(mealFilters.ingredients),
+        tags: toUniqueStringArray(mealFilters.tags),
+        allergies: toUniqueStringArray(mealFilters.allergies),
+        equipment: toUniqueStringArray(mealFilters.equipment),
+        favoritesOnly: Boolean(mealFilters.favoritesOnly),
+      },
+      pantryFilters: {
+        search: typeof pantryFilters.search === 'string' ? pantryFilters.search : '',
+        categories: toUniqueStringArray(pantryFilters.categories),
+        tags: toUniqueStringArray(pantryFilters.tags),
+        allergens: toUniqueStringArray(pantryFilters.allergens),
+      },
+      mealPlanViewMode: MEAL_PLAN_VIEW_MODES.includes(state.mealPlanViewMode)
+        ? state.mealPlanViewMode
+        : DEFAULT_MEAL_PLAN_MODE,
+      mealPlanSelectedDate: isValidISODateString(state.mealPlanSelectedDate)
+        ? state.mealPlanSelectedDate
+        : getTodayIsoDate(),
+      servingOverrides: {},
+      notes: {},
+      openNotes: {},
+      pantryInventory: {},
+    };
+
+    Object.entries(state.servingOverrides || {}).forEach(([key, value]) => {
+      if (typeof key !== 'string' || !key) return;
+      const numeric = Number(value);
+      if (Number.isFinite(numeric) && numeric > 0) {
+        snapshot.servingOverrides[key] = Math.max(1, Math.round(numeric));
+      }
+    });
+
+    Object.entries(state.notes || {}).forEach(([key, value]) => {
+      if (typeof key === 'string' && key && typeof value === 'string') {
+        snapshot.notes[key] = value;
+      }
+    });
+
+    Object.entries(state.openNotes || {}).forEach(([key, value]) => {
+      if (typeof key === 'string' && key && Boolean(value)) {
+        snapshot.openNotes[key] = true;
+      }
+    });
+
+    Object.entries(state.pantryInventory || {}).forEach(([slug, entry]) => {
+      if (typeof slug !== 'string' || !slug || !entry || typeof entry !== 'object') {
+        return;
+      }
+      const rawQuantity = entry.quantity;
+      const rawUnit = entry.unit;
+      const quantityText =
+        rawQuantity === null || rawQuantity === undefined
+          ? ''
+          : typeof rawQuantity === 'string'
+            ? rawQuantity.trim()
+            : String(rawQuantity);
+      const unitText = typeof rawUnit === 'string' ? rawUnit.trim() : '';
+      const hasQuantity = quantityText !== '';
+      const isDefaultUnit = unitText.toLowerCase() === 'each';
+      if (!hasQuantity && (!unitText || isDefaultUnit)) {
+        return;
+      }
+      snapshot.pantryInventory[slug] = {
+        quantity: hasQuantity ? quantityText : '',
+        unit: unitText || 'each',
+      };
+    });
+
+    return snapshot;
+  };
+
+  const persistAppState = () => {
+    const serialized = JSON.stringify(createAppStateSnapshot());
+    if (serialized === lastPersistedAppState) {
+      return;
+    }
+    try {
+      localStorage.setItem(APP_STATE_STORAGE_KEY, serialized);
+      lastPersistedAppState = serialized;
+    } catch (error) {
+      console.warn('Unable to persist application state.', error);
+    }
+  };
 
   const persistMealPlan = () => {
     const serialized = JSON.stringify(state.mealPlan);
@@ -995,6 +1256,7 @@
         unit: normalizedUnit,
       };
     }
+    persistAppState();
   };
 
   const getMealPlanEntries = (isoDate) => {
@@ -1018,6 +1280,7 @@
     } else {
       state.mealPlanSelectedDate = getTodayIsoDate();
     }
+    persistAppState();
   };
 
   const addMealPlanEntry = (isoDate, type, title) => {
@@ -1787,6 +2050,7 @@
     }
     state.mealPlanViewMode = mode;
     renderMealPlan();
+    persistAppState();
   };
 
   const adjustMealPlanSelection = (step) => {
@@ -2084,6 +2348,7 @@
       textarea.placeholder = 'Add personal notes, timing adjustments, or plating ideas';
       textarea.addEventListener('input', (event) => {
         state.notes[recipe.id] = event.target.value;
+        persistAppState();
       });
       footer.appendChild(textarea);
     }
@@ -2318,6 +2583,7 @@
       renderMealPlan();
     }
     updateView();
+    persistAppState();
   };
 
   const bindEvents = () => {
