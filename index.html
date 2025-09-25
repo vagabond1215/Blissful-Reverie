@@ -226,39 +226,38 @@
             <div class="meal-plan-calendar" id="meal-plan-calendar" aria-live="polite"></div>
             <aside class="meal-plan-sidebar" id="meal-plan-sidebar">
               <section class="meal-plan-day" id="meal-plan-day-details"></section>
-              <form class="meal-plan-form" id="meal-plan-form">
-                <h3 class="meal-plan-form__title">Add to your plan</h3>
-                <div class="meal-plan-form__row">
-                  <label class="meal-plan-form__label" for="meal-plan-entry-type">Type</label>
-                  <select class="meal-plan-form__control" id="meal-plan-entry-type" required>
-                    <option value="meal">Meal</option>
-                    <option value="drink">Drink</option>
-                    <option value="snack">Snack</option>
-                  </select>
+              <section class="meal-plan-summary" id="meal-plan-summary">
+                <h3 class="meal-plan-summary__title">Daily macros</h3>
+                <div class="meal-plan-summary__controls">
+                  <label class="meal-plan-summary__control" for="meal-plan-adults">
+                    <span class="meal-plan-summary__control-label">Adults</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      class="meal-plan-summary__input"
+                      id="meal-plan-adults"
+                      name="meal-plan-adults"
+                    />
+                  </label>
+                  <label class="meal-plan-summary__control" for="meal-plan-kids">
+                    <span class="meal-plan-summary__control-label">Kids</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      class="meal-plan-summary__input"
+                      id="meal-plan-kids"
+                      name="meal-plan-kids"
+                    />
+                  </label>
+                  <label class="meal-plan-summary__toggle" for="meal-plan-split">
+                    <input type="checkbox" id="meal-plan-split" name="meal-plan-split" />
+                    <span>Separate meals for adults &amp; kids</span>
+                  </label>
                 </div>
-                <div class="meal-plan-form__row">
-                  <label class="meal-plan-form__label" for="meal-plan-entry-title">Details</label>
-                  <input
-                    type="text"
-                    class="meal-plan-form__control"
-                    id="meal-plan-entry-title"
-                    name="meal-plan-entry-title"
-                    placeholder="e.g., Lemon Herb Chicken or Afternoon Tea"
-                    required
-                  />
-                </div>
-                <div class="meal-plan-form__row">
-                  <label class="meal-plan-form__label" for="meal-plan-entry-date">Calendar day</label>
-                  <input
-                    type="date"
-                    class="meal-plan-form__control"
-                    id="meal-plan-entry-date"
-                    name="meal-plan-entry-date"
-                    required
-                  />
-                </div>
-                <button type="submit" class="meal-plan-form__submit">Add to calendar</button>
-              </form>
+                <div class="meal-plan-summary__macros" id="meal-plan-macros" aria-live="polite"></div>
+              </section>
             </aside>
           </div>
         </section>
