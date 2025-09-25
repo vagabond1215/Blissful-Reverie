@@ -129,6 +129,12 @@
     } else if (essentialTokens.length === 1) {
       variants.add(essentialTokens[0]);
     }
+    if (Array.isArray(ingredient.aliases)) {
+      ingredient.aliases
+        .map((alias) => sanitizeComparisonText(alias))
+        .filter(Boolean)
+        .forEach((alias) => variants.add(alias));
+    }
     return { slug: ingredient.slug, label: ingredient.name, tokens, variants };
   };
 
