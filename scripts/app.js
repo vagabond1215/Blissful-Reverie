@@ -786,6 +786,33 @@
     return sanitized;
   };
 
+  const sanitizeMealPlanMemberFilter = (value, members) => {
+    const sourceMembers = Array.isArray(members)
+      ? members
+      : typeof state !== 'undefined' && Array.isArray(state.familyMembers)
+        ? state.familyMembers
+        : [];
+    const availableIds = new Set(
+      sourceMembers
+        .map((member) => (typeof member?.id === 'string' ? member.id : ''))
+        .filter(Boolean),
+    );
+    if (!availableIds.size) {
+      return [];
+    }
+    const list = Array.isArray(value) ? value : [];
+    const sanitized = [];
+    list.forEach((entry) => {
+      if (typeof entry !== 'string') return;
+      const trimmed = entry.trim();
+      if (!trimmed || sanitized.includes(trimmed) || !availableIds.has(trimmed)) {
+        return;
+      }
+      sanitized.push(trimmed);
+    });
+    return sanitized;
+  };
+
   const sanitizeMealPlanAttendance = (value) => {
     const attendance = { members: [], guests: 0 };
     if (!value) {
@@ -819,10 +846,17 @@
 
   const ensureFamilySanitized = () => {
     const sanitized = sanitizeFamilyMembers(state.familyMembers);
-    const previousSerialized = JSON.stringify(state.familyMembers);
-    const sanitizedSerialized = JSON.stringify(sanitized);
+    const previousMembersSerialized = JSON.stringify(state.familyMembers);
+    const sanitizedMembersSerialized = JSON.stringify(sanitized);
+    const nextFilter = sanitizeMealPlanMemberFilter(state.mealPlanMemberFilter, sanitized);
+    const previousFilterSerialized = JSON.stringify(state.mealPlanMemberFilter || []);
+    const sanitizedFilterSerialized = JSON.stringify(nextFilter);
     state.familyMembers = sanitized;
-    if (sanitizedSerialized !== previousSerialized) {
+    state.mealPlanMemberFilter = nextFilter;
+    if (
+      sanitizedMembersSerialized !== previousMembersSerialized
+      || sanitizedFilterSerialized !== previousFilterSerialized
+    ) {
       persistAppState();
     }
     return state.familyMembers;
@@ -853,6 +887,7 @@
       pantryFilters: getDefaultPantryFilters(),
       mealPlanViewMode: DEFAULT_MEAL_PLAN_MODE,
       mealPlanSelectedDate: getTodayIsoDate(),
+      mealPlanMemberFilter: [],
       servingOverrides: {},
       notes: {},
       openNotes: {},
@@ -880,11 +915,15 @@
       if (isValidISODateString(stored.mealPlanSelectedDate)) {
         result.mealPlanSelectedDate = stored.mealPlanSelectedDate;
       }
+      result.familyMembers = sanitizeFamilyMembers(stored.familyMembers);
+      result.mealPlanMemberFilter = sanitizeMealPlanMemberFilter(
+        stored.mealPlanMemberFilter,
+        result.familyMembers,
+      );
       result.servingOverrides = sanitizeServingOverrides(stored.servingOverrides);
       result.notes = sanitizeNotes(stored.notes);
       result.openNotes = sanitizeOpenNotes(stored.openNotes);
       result.pantryInventory = sanitizePantryInventory(stored.pantryInventory);
-      result.familyMembers = sanitizeFamilyMembers(stored.familyMembers);
       return result;
     } catch (error) {
       console.warn('Unable to read saved application state.', error);
@@ -900,6 +939,10 @@
     pantryFilters: sanitizePantryFilters(storedAppState.pantryFilters),
     mealPlanViewMode: storedAppState.mealPlanViewMode,
     mealPlanSelectedDate: storedAppState.mealPlanSelectedDate,
+    mealPlanMemberFilter: sanitizeMealPlanMemberFilter(
+      storedAppState.mealPlanMemberFilter,
+      storedAppState.familyMembers,
+    ),
     mealPlan: loadMealPlan(),
     servingOverrides: sanitizeServingOverrides(storedAppState.servingOverrides),
     notes: sanitizeNotes(storedAppState.notes),
@@ -1719,14 +1762,18 @@
       return false;
     }
     const sanitized = sanitizeFamilyMembers(updated);
-    const before = JSON.stringify(state.familyMembers);
-    const after = JSON.stringify(sanitized);
+    const beforeMembers = JSON.stringify(state.familyMembers);
+    const beforeFilter = JSON.stringify(state.mealPlanMemberFilter || []);
+    const afterMembers = JSON.stringify(sanitized);
+    const nextFilter = sanitizeMealPlanMemberFilter(state.mealPlanMemberFilter, sanitized);
+    const afterFilter = JSON.stringify(nextFilter);
     state.familyMembers = sanitized;
-    if (after !== before) {
+    state.mealPlanMemberFilter = nextFilter;
+    if (afterMembers !== beforeMembers || afterFilter !== beforeFilter) {
       persistAppState();
     }
     refreshScheduleDialogMembersIfOpen();
-    return after !== before;
+    return afterMembers !== beforeMembers || afterFilter !== beforeFilter;
   };
 
   const addFamilyMember = () => {
@@ -2075,6 +2122,7 @@
       mealPlanSelectedDate: isValidISODateString(state.mealPlanSelectedDate)
         ? state.mealPlanSelectedDate
         : getTodayIsoDate(),
+      mealPlanMemberFilter: sanitizeMealPlanMemberFilter(state.mealPlanMemberFilter),
       servingOverrides: {},
       notes: {},
       openNotes: {},
@@ -2626,6 +2674,7 @@
       document.querySelectorAll('[data-meal-plan-mode]'),
     );
     elements.mealPlanPeriod = document.getElementById('meal-plan-period');
+    elements.mealPlanFamilyFilter = document.getElementById('meal-plan-family-filter');
     elements.mealPlanPrevButton = document.getElementById('meal-plan-prev');
     elements.mealPlanNextButton = document.getElementById('meal-plan-next');
     elements.mealGrid = document.getElementById('meal-grid');
@@ -3073,6 +3122,7 @@
     title.className = 'meal-plan-calendar__entry-title';
     title.textContent = entry.title;
     wrapper.appendChild(title);
+    applyMealPlanFilterToElement(wrapper, entry);
     return wrapper;
   };
 
@@ -3116,6 +3166,7 @@
       removeButton.textContent = 'Remove';
       article.appendChild(removeButton);
     }
+    applyMealPlanFilterToElement(article, entry);
     return article;
   };
 
@@ -3176,6 +3227,75 @@
     controls.appendChild(guestField);
 
     article.appendChild(controls);
+  };
+
+  const ensureMealPlanMemberFilter = () => {
+    const previous = JSON.stringify(state.mealPlanMemberFilter || []);
+    const sanitized = sanitizeMealPlanMemberFilter(state.mealPlanMemberFilter);
+    const next = JSON.stringify(sanitized);
+    if (next !== previous) {
+      state.mealPlanMemberFilter = sanitized;
+      persistAppState();
+    }
+    return sanitized;
+  };
+
+  const doesEntryMatchMemberFilter = (entry, memberFilter) => {
+    const activeFilter = Array.isArray(memberFilter)
+      ? memberFilter
+      : Array.isArray(state.mealPlanMemberFilter)
+        ? state.mealPlanMemberFilter
+        : [];
+    if (!entry || !activeFilter.length) {
+      return true;
+    }
+    const attendance = sanitizeMealPlanAttendance(entry.attendance ?? entry.servings);
+    if (!attendance.members.length) {
+      return false;
+    }
+    return attendance.members.some((memberId) => activeFilter.includes(memberId));
+  };
+
+  const applyMealPlanFilterToElement = (element, entry, memberFilter) => {
+    if (!(element instanceof HTMLElement)) {
+      return;
+    }
+    const activeFilter = Array.isArray(memberFilter)
+      ? memberFilter
+      : Array.isArray(state.mealPlanMemberFilter)
+        ? state.mealPlanMemberFilter
+        : [];
+    const shouldDim =
+      activeFilter.length > 0 && !doesEntryMatchMemberFilter(entry, activeFilter);
+    element.classList.toggle('meal-plan-item--dimmed', shouldDim);
+  };
+
+  const setMealPlanMemberFilter = (memberIds) => {
+    const sanitized = sanitizeMealPlanMemberFilter(memberIds);
+    const previous = JSON.stringify(state.mealPlanMemberFilter || []);
+    const next = JSON.stringify(sanitized);
+    if (previous === next) {
+      return false;
+    }
+    state.mealPlanMemberFilter = sanitized;
+    persistAppState();
+    return true;
+  };
+
+  const toggleMealPlanMemberFilter = (memberId) => {
+    if (typeof memberId !== 'string' || !memberId) {
+      return;
+    }
+    const current = new Set(ensureMealPlanMemberFilter());
+    if (current.has(memberId)) {
+      current.delete(memberId);
+    } else {
+      current.add(memberId);
+    }
+    const changed = setMealPlanMemberFilter(Array.from(current));
+    if (changed) {
+      renderMealPlan();
+    }
   };
 
   const createMealPlanCalendarCell = (date, options = {}) => {
@@ -3242,6 +3362,56 @@
     }
     button.appendChild(list);
     return button;
+  };
+
+  const renderMealPlanFamilyFilter = (memberFilter = ensureMealPlanMemberFilter()) => {
+    if (!elements.mealPlanFamilyFilter) {
+      return;
+    }
+    const container = elements.mealPlanFamilyFilter;
+    const members = ensureFamilySanitized();
+    container.innerHTML = '';
+    if (!members.length) {
+      container.hidden = true;
+      container.removeAttribute('data-filter-active');
+      return;
+    }
+    container.hidden = false;
+    if (memberFilter.length) {
+      container.dataset.filterActive = 'true';
+    } else {
+      delete container.dataset.filterActive;
+    }
+    const label = document.createElement('span');
+    label.className = 'meal-plan-family-filter__label';
+    label.textContent = 'Family';
+    container.appendChild(label);
+    const list = document.createElement('div');
+    list.className = 'meal-plan-family-filter__list';
+    list.setAttribute('role', 'group');
+    list.setAttribute('aria-label', 'Filter meal plan by family member');
+    members.forEach((member) => {
+      if (!member || !member.id) {
+        return;
+      }
+      const isActive = memberFilter.includes(member.id);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'meal-plan-family-filter__button';
+      if (isActive) {
+        button.classList.add('meal-plan-family-filter__button--active');
+      }
+      button.textContent = member.icon || '👤';
+      const labelText = `Filter meals for ${member.name}`;
+      button.title = labelText;
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      button.setAttribute('aria-label', isActive ? `${labelText} (active)` : labelText);
+      button.addEventListener('click', () => {
+        toggleMealPlanMemberFilter(member.id);
+      });
+      list.appendChild(button);
+    });
+    container.appendChild(list);
   };
 
   const renderMealPlanMonthView = (selectedDate) => {
@@ -3558,6 +3728,15 @@
   const renderMealPlan = () => {
     const selectedIso = ensureMealPlanSelection();
     const selectedDate = parseISODateString(selectedIso) || new Date();
+    const memberFilter = ensureMealPlanMemberFilter();
+    if (elements.mealPlanView) {
+      if (memberFilter.length) {
+        elements.mealPlanView.dataset.memberFilter = 'active';
+      } else {
+        delete elements.mealPlanView.dataset.memberFilter;
+      }
+    }
+    renderMealPlanFamilyFilter(memberFilter);
     updateMealPlanModeButtons();
     updateMealPlanPeriodLabel(selectedDate);
     renderMealPlanCalendar(selectedDate, selectedIso);
