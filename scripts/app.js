@@ -48,35 +48,116 @@
       'chicken',
       {
         label: 'Chicken',
-        keywords: ['chicken', 'breast', 'thigh', 'wing', 'leg', 'drumstick', 'tender', 'cutlet'],
+        keywords: [
+          'chicken',
+          'breast',
+          'thigh',
+          'wing',
+          'leg',
+          'drumstick',
+          'tender',
+          'tenderloin',
+          'cutlet',
+          'rotisserie',
+        ],
       },
     ],
     [
       'beef',
       {
         label: 'Beef',
-        keywords: ['beef', 'steak', 'ground', 'ribeye', 'roast'],
+        keywords: ['beef', 'steak', 'ground', 'ribeye', 'roast', 'short rib', 'sirloin'],
       },
     ],
     [
       'pork',
       {
         label: 'Pork',
-        keywords: ['pork', 'bacon', 'shoulder', 'loin', 'chop', 'rib'],
+        keywords: ['pork', 'bacon', 'shoulder', 'loin', 'chop', 'rib', 'tenderloin'],
       },
     ],
     [
       'turkey',
       {
         label: 'Turkey',
-        keywords: ['turkey', 'ground', 'breast', 'thigh'],
+        keywords: ['turkey', 'ground', 'breast', 'thigh', 'drumstick', 'wing', 'tenderloin'],
       },
     ],
     [
       'lamb',
       {
         label: 'Lamb',
-        keywords: ['lamb', 'leg', 'chop', 'shoulder'],
+        keywords: ['lamb', 'leg', 'chop', 'shoulder', 'shank'],
+      },
+    ],
+    [
+      'venison',
+      {
+        label: 'Venison',
+        keywords: ['venison', 'deer', 'backstrap', 'loin', 'steak'],
+      },
+    ],
+    [
+      'bison',
+      {
+        label: 'Bison',
+        keywords: ['bison', 'buffalo', 'ground', 'steak'],
+      },
+    ],
+    [
+      'veal',
+      {
+        label: 'Veal',
+        keywords: ['veal', 'cutlet', 'chop'],
+      },
+    ],
+    [
+      'goat',
+      {
+        label: 'Goat',
+        keywords: ['goat', 'chevon', 'shoulder', 'curry'],
+      },
+    ],
+    [
+      'duck',
+      {
+        label: 'Duck',
+        keywords: ['duck', 'breast', 'leg', 'confit'],
+      },
+    ],
+    [
+      'goose',
+      {
+        label: 'Goose',
+        keywords: ['goose', 'breast', 'leg'],
+      },
+    ],
+    [
+      'chorizo',
+      {
+        label: 'Chorizo',
+        keywords: ['chorizo', 'mexican chorizo', 'spanish chorizo'],
+      },
+    ],
+    [
+      'andouille',
+      {
+        label: 'Andouille',
+        keywords: ['andouille'],
+      },
+    ],
+    [
+      'prosciutto',
+      {
+        label: 'Prosciutto',
+        keywords: ['prosciutto'],
+      },
+    ],
+    [
+      'salami',
+      {
+        label: 'Salami',
+        keywords: ['salami'],
       },
     ],
     ['salmon', { label: 'Salmon', keywords: ['salmon'] }],
@@ -160,22 +241,29 @@
           phraseSet.add(`${labelLower} ${normalized}`);
         }
       });
-      const matcherName = Array.from(phraseSet)
-        .map((phrase) => formatProteinLabel(phrase))
-        .join(' ');
-      return {
-        key: entry.key,
+    const searchPhrases = Array.from(phraseSet);
+    const matcherName = entry.label;
+    const matcherAliases = Array.from(
+      new Set(
+        searchPhrases
+          .map((phrase) => formatProteinLabel(phrase))
+          .filter((phrase) => phrase.toLowerCase() !== labelLower),
+      ),
+    );
+    return {
+      key: entry.key,
+      slug,
+      label: entry.label,
+      category: entry.category,
+      matcherIngredient: {
         slug,
-        label: entry.label,
+        name: matcherName,
         category: entry.category,
-        matcherIngredient: {
-          slug,
-          name: matcherName,
-          category: entry.category,
-        },
-      };
-    });
-  };
+        aliases: matcherAliases,
+      },
+    };
+  });
+};
 
   const recipeLookupById = new Map();
   const recipeLookupByName = new Map();
