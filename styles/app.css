@@ -898,6 +898,31 @@ textarea:focus {
   margin-top: 0.4rem;
 }
 
+.ingredient-group__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.ingredient-group__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ingredient-group__section-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-soft);
+  padding: 0 0.2rem;
+}
+
+.ingredient-group__section .checkbox-grid {
+  margin-top: 0.1rem;
+}
+
 .checkbox-option {
   display: flex;
   gap: 0.4rem;

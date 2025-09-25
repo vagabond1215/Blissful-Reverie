@@ -39,6 +39,27 @@
       .join(' ');
 
   const PROTEIN_CATEGORY_SET = new Set(['Meat', 'Seafood']);
+  const PROTEIN_SECTION_PRIORITY = new Map([
+    ['Meat', 0],
+    ['Fish', 1],
+    ['Shellfish', 2],
+  ]);
+  const PROTEIN_SECTION_ORDER = ['Meat', 'Fish', 'Shellfish'];
+  const getProteinSectionLabel = (category) =>
+    ({ Meat: 'Meat', Fish: 'Fish', Shellfish: 'Shellfish' }[category] || 'Protein');
+
+  const classifyProteinCategory = (ingredient) => {
+    if (!ingredient || typeof ingredient !== 'object') {
+      return 'Meat';
+    }
+    if (ingredient.category === 'Seafood') {
+      const tags = Array.isArray(ingredient.tags) ? ingredient.tags : [];
+      return tags.some((tag) => String(tag || '').toLowerCase() === 'shellfish')
+        ? 'Shellfish'
+        : 'Fish';
+    }
+    return 'Meat';
+  };
   const PROTEIN_BASE_OVERRIDES = new Map([
     ['meat-bacon', 'pork'],
     ['bacon', 'pork'],
@@ -203,8 +224,11 @@
         };
         baseLookup.set(baseKey, entry);
       }
-      if (ingredient.category === 'Seafood') {
-        entry.category = 'Seafood';
+      const proteinCategory = classifyProteinCategory(ingredient);
+      const existingPriority = PROTEIN_SECTION_PRIORITY.get(entry.category || 'Meat') || 0;
+      const nextPriority = PROTEIN_SECTION_PRIORITY.get(proteinCategory) || 0;
+      if (!entry.category || nextPriority >= existingPriority) {
+        entry.category = proteinCategory;
       }
       entry.names.add(String(ingredient.name || '').toLowerCase());
       entry.names.add(slugParts.join(' '));
@@ -1585,7 +1609,7 @@
 
   const INGREDIENT_FILTER_GROUPS = [
     { id: 'protein', label: 'Protein', categories: ['Meat', 'Seafood'] },
-    { id: 'legumes', label: 'Legumes & Plant Protein', categories: ['Legume'] },
+    { id: 'legumes', label: 'Legumes & Plant Proteins', categories: ['Legume'] },
     { id: 'vegetables', label: 'Vegetables', categories: ['Vegetable'] },
     { id: 'fruits', label: 'Fruits', categories: ['Fruit'] },
     { id: 'pasta-grains', label: 'Pasta & Grains', categories: ['Pasta', 'Grain'] },
@@ -1606,14 +1630,27 @@
     recipes,
     ingredientMatcherIndex,
   );
-  const proteinFilterOptions = proteinFilterDefinitions
+  const proteinOptionsByCategory = new Map();
+  proteinFilterDefinitions
     .filter((definition) => ingredientUsage.get(definition.slug))
-    .map(({ slug, label }) => ({ slug, label }))
-    .sort((a, b) => a.label.localeCompare(b.label));
+    .forEach(({ slug, label, category }) => {
+      const key = category || 'Meat';
+      if (!proteinOptionsByCategory.has(key)) {
+        proteinOptionsByCategory.set(key, []);
+      }
+      proteinOptionsByCategory.get(key).push({ slug, label });
+    });
+
+  const proteinFilterSections = PROTEIN_SECTION_ORDER.map((category) => {
+    const options = (proteinOptionsByCategory.get(category) || []).sort((a, b) =>
+      a.label.localeCompare(b.label),
+    );
+    return { id: category.toLowerCase(), label: getProteinSectionLabel(category), options };
+  }).filter((section) => section.options.length);
 
   const ingredientFilterGroups = INGREDIENT_FILTER_GROUPS.map((group) => {
     if (group.id === 'protein') {
-      return { id: group.id, label: group.label, options: proteinFilterOptions };
+      return { id: group.id, label: group.label, sections: proteinFilterSections };
     }
     const options = ingredients
       .filter(
@@ -1623,7 +1660,12 @@
       .map((ingredient) => ({ slug: ingredient.slug, label: ingredient.name }))
       .sort((a, b) => a.label.localeCompare(b.label));
     return { id: group.id, label: group.label, options };
-  }).filter((group) => group.options.length);
+  }).filter((group) => {
+    if (Array.isArray(group.sections)) {
+      return group.sections.some((section) => Array.isArray(section.options) && section.options.length);
+    }
+    return Array.isArray(group.options) && group.options.length;
+  });
 
   const PANTRY_UNITS = [
     'each',
@@ -3275,43 +3317,88 @@
     registry.clear();
     container.classList.add('ingredient-groups');
     container.classList.remove('checkbox-grid');
+    const flattenGroupOptions = (group) => {
+      if (Array.isArray(group.sections)) {
+        return group.sections.flatMap((section) =>
+          Array.isArray(section.options) ? section.options : [],
+        );
+      }
+      return Array.isArray(group.options) ? group.options : [];
+    };
+
+    const renderOption = (option, optionGrid) => {
+      if (!option || !option.slug) return;
+      const label = document.createElement('label');
+      label.className = 'checkbox-option';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.value = option.slug;
+      input.checked = filters.ingredients.includes(option.slug);
+      input.addEventListener('change', () => {
+        const current = new Set(filters.ingredients);
+        if (input.checked) {
+          current.add(option.slug);
+        } else {
+          current.delete(option.slug);
+        }
+        filters.ingredients = Array.from(current);
+        renderApp();
+      });
+      label.appendChild(input);
+      const span = document.createElement('span');
+      span.textContent = option.label;
+      label.appendChild(span);
+      optionGrid.appendChild(label);
+      registry.set(option.slug, input);
+    };
+
     groups.forEach((group, index) => {
-      if (!group.options.length) return;
+      const allOptions = flattenGroupOptions(group);
+      if (!allOptions.length) return;
       const details = document.createElement('details');
       details.className = 'ingredient-group';
-      const hasSelection = group.options.some((option) => filters.ingredients.includes(option.slug));
+      const hasSelection = allOptions.some((option) => filters.ingredients.includes(option.slug));
       details.open = hasSelection || index < 2;
       const summary = document.createElement('summary');
       summary.className = 'ingredient-group__summary';
       summary.textContent = group.label;
       details.appendChild(summary);
-      const optionGrid = document.createElement('div');
-      optionGrid.className = 'checkbox-grid';
-      group.options.forEach((option) => {
-        const label = document.createElement('label');
-        label.className = 'checkbox-option';
-        const input = document.createElement('input');
-        input.type = 'checkbox';
-        input.value = option.slug;
-        input.checked = filters.ingredients.includes(option.slug);
-        input.addEventListener('change', () => {
-          const current = new Set(filters.ingredients);
-          if (input.checked) {
-            current.add(option.slug);
-          } else {
-            current.delete(option.slug);
+
+      if (Array.isArray(group.sections) && group.sections.length) {
+        const sectionsContainer = document.createElement('div');
+        sectionsContainer.className = 'ingredient-group__options';
+        group.sections.forEach((section) => {
+          if (!section || !Array.isArray(section.options) || !section.options.length) {
+            return;
           }
-          filters.ingredients = Array.from(current);
-          renderApp();
+          const sectionWrapper = document.createElement('div');
+          sectionWrapper.className = 'ingredient-group__section';
+          if (section.label) {
+            const sectionTitle = document.createElement('h4');
+            sectionTitle.className = 'ingredient-group__section-title';
+            sectionTitle.textContent = section.label;
+            sectionWrapper.appendChild(sectionTitle);
+          }
+          const optionGrid = document.createElement('div');
+          optionGrid.className = 'checkbox-grid';
+          section.options.forEach((option) => renderOption(option, optionGrid));
+          if (optionGrid.childNodes.length) {
+            sectionWrapper.appendChild(optionGrid);
+            sectionsContainer.appendChild(sectionWrapper);
+          }
         });
-        label.appendChild(input);
-        const span = document.createElement('span');
-        span.textContent = option.label;
-        label.appendChild(span);
-        optionGrid.appendChild(label);
-        registry.set(option.slug, input);
-      });
-      details.appendChild(optionGrid);
+        if (sectionsContainer.childNodes.length) {
+          details.appendChild(sectionsContainer);
+        }
+      } else {
+        const optionGrid = document.createElement('div');
+        optionGrid.className = 'checkbox-grid';
+        allOptions.forEach((option) => renderOption(option, optionGrid));
+        if (optionGrid.childNodes.length) {
+          details.appendChild(optionGrid);
+        }
+      }
+
       container.appendChild(details);
     });
   };

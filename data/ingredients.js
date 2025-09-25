@@ -109,6 +109,8 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'spice-nutmeg-ground', name: 'Nutmeg (Ground)', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'spice-smoked-paprika', name: 'Paprika (Smoked)', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Nightshade'] },
   { slug: 'spice-clove-ground', name: 'Cloves (Ground)', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'spice-matcha-powder', name: 'Matcha Powder', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'spice-instant-espresso', name: 'Instant Espresso Powder', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'spice-taco-seasoning', name: 'Taco Seasoning', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Nightshade'] },
 
   // Vegetables
@@ -204,6 +206,12 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'legume-split-peas', name: 'Split Peas', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'legume-cannellini-beans', name: 'Cannellini Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'legume-great-northern-beans', name: 'Great Northern Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'legume-black-eyed-peas', name: 'Black-Eyed Peas', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'legume-lentil-red', name: 'Lentils (Red)', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'legume-tofu-extra-firm', name: 'Tofu (Extra-Firm)', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Contains Soy'] },
+  { slug: 'legume-tempeh', name: 'Tempeh', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Contains Soy'] },
+  { slug: 'legume-textured-vegetable-protein', name: 'Textured Vegetable Protein (TVP)', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Contains Soy'] },
+  { slug: 'legume-chickpea-flour', name: 'Chickpea Flour', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
 
   // Oils & Fats
   { slug: 'oil-avocado', name: 'Avocado Oil', category: 'Oil/Fat', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
@@ -290,5 +298,6 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'bev-beef-bouillon', name: 'Beef Bouillon', category: 'Beverage', tags: ['Gluten-Free*', 'Stock', 'Bouillon'] },
   { slug: 'bev-vegetable-bouillon', name: 'Vegetable Bouillon', category: 'Beverage', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan', 'Stock', 'Bouillon'] },
   { slug: 'bev-coconut-water', name: 'Coconut Water', category: 'Beverage', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'bev-coconut-milk', name: 'Coconut Milk', category: 'Beverage', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'bev-sparkling-water', name: 'Sparkling Water', category: 'Beverage', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
 ];
