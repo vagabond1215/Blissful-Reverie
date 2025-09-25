@@ -1504,12 +1504,20 @@ textarea:focus {
 
 .meal-plan-entry {
   display: flex;
+  flex-direction: column;
   gap: 0.75rem;
-  align-items: center;
+  align-items: stretch;
   padding: 0.6rem 0.75rem;
   border-radius: 14px;
   background: rgba(68, 83, 214, 0.08);
   border: 1px solid rgba(68, 83, 214, 0.12);
+}
+
+.meal-plan-entry__main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
 }
 
 .meal-plan-entry__type {
@@ -2178,17 +2186,20 @@ textarea:focus {
 
 
 .meal-plan-entry__attendance {
-  margin-top: 0.75rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
   align-items: center;
+  justify-content: flex-start;
+  width: 100%;
 }
 
 .meal-plan-entry__members {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .meal-plan-entry__member {
@@ -2219,6 +2230,7 @@ textarea:focus {
   margin: 0;
   font-size: 0.8rem;
   color: var(--color-text-muted);
+  flex: 1 1 auto;
 }
 
 .meal-plan-entry__guest-field {
@@ -2227,6 +2239,7 @@ textarea:focus {
   gap: 0.4rem;
   font-size: 0.8rem;
   color: var(--color-text-secondary);
+  margin-left: auto;
 }
 
 .meal-plan-entry__guest-label {
