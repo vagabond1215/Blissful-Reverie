@@ -10,6 +10,18 @@
 
   const matching = window.BlissfulMatching || {};
   const { createIngredientMatcherIndex, mapRecipesToIngredientMatches } = matching;
+
+  const recipeLookupById = new Map();
+  const recipeLookupByName = new Map();
+  recipes.forEach((recipe) => {
+    if (!recipe || typeof recipe !== 'object') return;
+    if (typeof recipe.id === 'string' && recipe.id) {
+      recipeLookupById.set(recipe.id, recipe);
+    }
+    if (typeof recipe.name === 'string' && recipe.name) {
+      recipeLookupByName.set(recipe.name.toLowerCase(), recipe);
+    }
+  });
   if (
     typeof createIngredientMatcherIndex !== 'function'
     || typeof mapRecipesToIngredientMatches !== 'function'
@@ -126,6 +138,25 @@
     { value: 'drink', label: 'Drink' },
     { value: 'snack', label: 'Snack' },
   ];
+  const DEFAULT_HOUSEHOLD = {
+    adults: 2,
+    kids: 0,
+    splitMeals: false,
+  };
+  const HOUSEHOLD_GROUPS = ['adults', 'kids'];
+  const MACRO_KEYS = ['calories', 'protein', 'carbs', 'fat'];
+  const MACRO_PRECISION = {
+    calories: 0,
+    protein: 1,
+    carbs: 1,
+    fat: 1,
+  };
+  const MACRO_LABELS = {
+    calories: 'Calories',
+    protein: 'Protein',
+    carbs: 'Carbs',
+    fat: 'Fat',
+  };
   const MEAL_PLAN_WEEK_START = 0;
   const MEAL_PLAN_DAY_NAMES = [
     'Sunday',
@@ -329,6 +360,20 @@
           if (time) {
             cleanedEntry.time = time;
           }
+          let recipeId = typeof entry.recipeId === 'string' ? entry.recipeId : '';
+          if (recipeId && !recipeLookupById.has(recipeId)) {
+            recipeId = '';
+          }
+          if (!recipeId) {
+            const matchedRecipe = recipeLookupByName.get(title.toLowerCase());
+            if (matchedRecipe?.id) {
+              recipeId = matchedRecipe.id;
+            }
+          }
+          if (recipeId) {
+            cleanedEntry.recipeId = recipeId;
+          }
+          cleanedEntry.servings = sanitizeMealPlanEntryServings(entry.servings);
           cleaned.push(cleanedEntry);
         });
         if (cleaned.length) {
@@ -506,6 +551,50 @@
     return inventory;
   };
 
+  const sanitizeHouseholdSettings = (value) => {
+    const defaults = { ...DEFAULT_HOUSEHOLD };
+    if (!value || typeof value !== 'object') {
+      return defaults;
+    }
+    const adults = Number(value.adults);
+    const kids = Number(value.kids);
+    const sanitized = {
+      adults: Number.isFinite(adults) && adults >= 0 ? Math.round(adults) : defaults.adults,
+      kids: Number.isFinite(kids) && kids >= 0 ? Math.round(kids) : defaults.kids,
+      splitMeals: Boolean(value.splitMeals),
+    };
+    return sanitized;
+  };
+
+  const sanitizeMealPlanEntryServings = (value) => {
+    const servings = { adults: 0, kids: 0 };
+    if (!value || typeof value !== 'object') {
+      return servings;
+    }
+    HOUSEHOLD_GROUPS.forEach((group) => {
+      servings[group] = Math.max(0, parseNonNegativeInteger(value[group], 0));
+    });
+    return servings;
+  };
+
+  const parseNonNegativeInteger = (value, fallback = 0) => {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      return fallback;
+    }
+    return Math.round(parsed);
+  };
+
+  const formatMacroValue = (value, macroKey) => {
+    const numeric = Number(value);
+    const safe = Number.isFinite(numeric) ? numeric : 0;
+    const decimals = MACRO_PRECISION[macroKey] ?? 0;
+    return safe.toLocaleString(undefined, {
+      minimumFractionDigits: decimals > 0 ? 1 : 0,
+      maximumFractionDigits: decimals,
+    });
+  };
+
   const loadAppState = () => {
     const fallback = {
       activeView: 'meals',
@@ -517,6 +606,7 @@
       notes: {},
       openNotes: {},
       pantryInventory: {},
+      household: { ...DEFAULT_HOUSEHOLD },
     };
     try {
       const stored = JSON.parse(localStorage.getItem(APP_STATE_STORAGE_KEY));
@@ -543,6 +633,7 @@
       result.notes = sanitizeNotes(stored.notes);
       result.openNotes = sanitizeOpenNotes(stored.openNotes);
       result.pantryInventory = sanitizePantryInventory(stored.pantryInventory);
+      result.household = sanitizeHouseholdSettings(stored.household);
       return result;
     } catch (error) {
       console.warn('Unable to read saved application state.', error);
@@ -563,6 +654,7 @@
     notes: sanitizeNotes(storedAppState.notes),
     openNotes: sanitizeOpenNotes(storedAppState.openNotes),
     pantryInventory: sanitizePantryInventory(storedAppState.pantryInventory),
+    household: sanitizeHouseholdSettings(storedAppState.household),
     themeMode: themePreferences.mode,
     themeSelections: { ...themePreferences.selections },
     measurementSystem: measurementPreference,
@@ -954,6 +1046,10 @@
     dateInput: null,
     timeInput: null,
     lastTimeValue: '',
+    adultServingsInput: null,
+    kidServingsInput: null,
+    lastAdultServings: null,
+    lastKidServings: null,
     currentRecipe: null,
   };
 
@@ -974,7 +1070,13 @@
   };
 
   const submitRecipeScheduleDialog = () => {
-    const { currentRecipe, dateInput, timeInput } = scheduleDialogState;
+    const {
+      currentRecipe,
+      dateInput,
+      timeInput,
+      adultServingsInput,
+      kidServingsInput,
+    } = scheduleDialogState;
     if (!currentRecipe || !dateInput || !timeInput) {
       return;
     }
@@ -989,11 +1091,23 @@
       return;
     }
     const recipeTitle = typeof currentRecipe.name === 'string' ? currentRecipe.name : '';
-    const added = addMealPlanEntry(dateValue, 'meal', recipeTitle, timeValue);
+    const adultServings = adultServingsInput
+      ? Math.max(0, parseNonNegativeInteger(adultServingsInput.value, 0))
+      : 0;
+    const kidServings = kidServingsInput
+      ? Math.max(0, parseNonNegativeInteger(kidServingsInput.value, 0))
+      : 0;
+    const metadata = {
+      recipeId: typeof currentRecipe.id === 'string' ? currentRecipe.id : undefined,
+      servings: { adults: adultServings, kids: kidServings },
+    };
+    const added = addMealPlanEntry(dateValue, 'meal', recipeTitle, timeValue, metadata);
     if (!added) {
       return;
     }
     scheduleDialogState.lastTimeValue = timeValue;
+    scheduleDialogState.lastAdultServings = adultServings;
+    scheduleDialogState.lastKidServings = kidServings;
     setMealPlanSelectedDate(dateValue);
     closeRecipeScheduleDialog();
     if (state.activeView === 'meal-plan') {
@@ -1057,6 +1171,48 @@
     timeField.appendChild(timeInput);
     form.appendChild(timeField);
 
+    const servingsFieldset = document.createElement('fieldset');
+    servingsFieldset.className = 'schedule-dialog__fieldset';
+    const servingsLegend = document.createElement('legend');
+    servingsLegend.className = 'schedule-dialog__label';
+    servingsLegend.textContent = 'Servings';
+    servingsFieldset.appendChild(servingsLegend);
+    const servingsWrapper = document.createElement('div');
+    servingsWrapper.className = 'schedule-dialog__servings';
+
+    const adultField = document.createElement('label');
+    adultField.className = 'schedule-dialog__serving-field';
+    adultField.setAttribute('for', 'schedule-dialog-adult-servings');
+    const adultText = document.createElement('span');
+    adultText.textContent = 'Adults';
+    const adultInput = document.createElement('input');
+    adultInput.type = 'number';
+    adultInput.min = '0';
+    adultInput.step = '1';
+    adultInput.id = 'schedule-dialog-adult-servings';
+    adultInput.className = 'schedule-dialog__serving-input';
+    adultField.appendChild(adultText);
+    adultField.appendChild(adultInput);
+
+    const kidField = document.createElement('label');
+    kidField.className = 'schedule-dialog__serving-field';
+    kidField.setAttribute('for', 'schedule-dialog-kid-servings');
+    const kidText = document.createElement('span');
+    kidText.textContent = 'Kids';
+    const kidInput = document.createElement('input');
+    kidInput.type = 'number';
+    kidInput.min = '0';
+    kidInput.step = '1';
+    kidInput.id = 'schedule-dialog-kid-servings';
+    kidInput.className = 'schedule-dialog__serving-input';
+    kidField.appendChild(kidText);
+    kidField.appendChild(kidInput);
+
+    servingsWrapper.appendChild(adultField);
+    servingsWrapper.appendChild(kidField);
+    servingsFieldset.appendChild(servingsWrapper);
+    form.appendChild(servingsFieldset);
+
     const actions = document.createElement('div');
     actions.className = 'schedule-dialog__actions';
     const cancelButton = document.createElement('button');
@@ -1094,6 +1250,8 @@
     scheduleDialogState.recipeLabel = recipeLabel;
     scheduleDialogState.dateInput = dateInput;
     scheduleDialogState.timeInput = timeInput;
+    scheduleDialogState.adultServingsInput = adultInput;
+    scheduleDialogState.kidServingsInput = kidInput;
 
     return scheduleDialogState;
   };
@@ -1117,6 +1275,22 @@
     const defaultTime = normalizeMealPlanTime(dialog.lastTimeValue) || '18:00';
     if (dialog.timeInput) {
       dialog.timeInput.value = defaultTime;
+    }
+    const defaultAdultServings =
+      typeof scheduleDialogState.lastAdultServings === 'number'
+      && scheduleDialogState.lastAdultServings >= 0
+        ? scheduleDialogState.lastAdultServings
+        : parseNonNegativeInteger(state.household?.adults, DEFAULT_HOUSEHOLD.adults);
+    const defaultKidServings =
+      typeof scheduleDialogState.lastKidServings === 'number'
+      && scheduleDialogState.lastKidServings >= 0
+        ? scheduleDialogState.lastKidServings
+        : parseNonNegativeInteger(state.household?.kids, DEFAULT_HOUSEHOLD.kids);
+    if (dialog.adultServingsInput) {
+      dialog.adultServingsInput.value = String(defaultAdultServings || 0);
+    }
+    if (dialog.kidServingsInput) {
+      dialog.kidServingsInput.value = String(defaultKidServings || 0);
     }
     dialog.root.hidden = false;
     dialog.root.dataset.open = 'true';
@@ -1223,6 +1397,8 @@
         unit: unitText || 'each',
       };
     });
+
+    snapshot.household = sanitizeHouseholdSettings(state.household);
 
     return snapshot;
   };
@@ -1494,6 +1670,62 @@
     persistAppState();
   };
 
+  const getRecipeForEntry = (entry) => {
+    if (!entry || typeof entry !== 'object') {
+      return null;
+    }
+    if (entry.recipeId && recipeLookupById.has(entry.recipeId)) {
+      return recipeLookupById.get(entry.recipeId);
+    }
+    const title = typeof entry.title === 'string' ? entry.title.toLowerCase() : '';
+    if (!title) {
+      return null;
+    }
+    return recipeLookupByName.get(title) || null;
+  };
+
+  const createMacroBucket = () => {
+    const bucket = { servings: 0 };
+    MACRO_KEYS.forEach((key) => {
+      bucket[key] = 0;
+    });
+    return bucket;
+  };
+
+  const calculateDailyMacroSummary = (isoDate) => {
+    const summary = {
+      adults: createMacroBucket(),
+      kids: createMacroBucket(),
+      overall: createMacroBucket(),
+    };
+    const entries = getMealPlanEntries(isoDate);
+    entries.forEach((entry) => {
+      const recipe = getRecipeForEntry(entry);
+      if (!recipe || !recipe.nutritionPerServing) {
+        return;
+      }
+      const servings = sanitizeMealPlanEntryServings(entry.servings);
+      HOUSEHOLD_GROUPS.forEach((group) => {
+        const count = servings[group];
+        if (!count) {
+          return;
+        }
+        summary[group].servings += count;
+        MACRO_KEYS.forEach((macro) => {
+          const perServing = Number(recipe.nutritionPerServing?.[macro]) || 0;
+          summary[group][macro] += perServing * count;
+        });
+      });
+    });
+    HOUSEHOLD_GROUPS.forEach((group) => {
+      summary.overall.servings += summary[group].servings;
+      MACRO_KEYS.forEach((macro) => {
+        summary.overall[macro] += summary[group][macro];
+      });
+    });
+    return summary;
+  };
+
   const getMealPlanEntries = (isoDate) => {
     if (!isValidISODateString(isoDate)) {
       return [];
@@ -1518,7 +1750,7 @@
     persistAppState();
   };
 
-  const addMealPlanEntry = (isoDate, type, title, time) => {
+  const addMealPlanEntry = (isoDate, type, title, time, metadata = {}) => {
     const dateKey = isValidISODateString(isoDate) ? isoDate : ensureMealPlanSelection();
     const normalizedTitle = typeof title === 'string' ? title.trim() : '';
     if (!normalizedTitle) {
@@ -1531,6 +1763,13 @@
     if (normalizedTime) {
       entry.time = normalizedTime;
     }
+    if (metadata && typeof metadata === 'object') {
+      const { recipeId } = metadata;
+      if (typeof recipeId === 'string' && recipeLookupById.has(recipeId)) {
+        entry.recipeId = recipeId;
+      }
+    }
+    entry.servings = sanitizeMealPlanEntryServings(metadata?.servings);
     nextEntries.push(entry);
     state.mealPlan[dateKey] = sortMealPlanEntries(nextEntries);
     persistMealPlan();
@@ -1554,6 +1793,32 @@
     persistMealPlan();
   };
 
+  const setMealPlanEntryServings = (isoDate, entryId, group, value) => {
+    if (!isValidISODateString(isoDate) || typeof entryId !== 'string' || !entryId) {
+      return;
+    }
+    if (!HOUSEHOLD_GROUPS.includes(group)) {
+      return;
+    }
+    const entries = state.mealPlan[isoDate];
+    if (!Array.isArray(entries)) {
+      return;
+    }
+    const target = entries.find((entry) => entry.id === entryId);
+    if (!target) {
+      return;
+    }
+    const normalized = Math.max(0, parseNonNegativeInteger(value, 0));
+    const servings = sanitizeMealPlanEntryServings(target.servings);
+    if (servings[group] === normalized) {
+      return;
+    }
+    servings[group] = normalized;
+    target.servings = servings;
+    state.mealPlan[isoDate] = sortMealPlanEntries(entries);
+    persistMealPlan();
+  };
+
   const cacheElements = () => {
     elements.viewToggleButtons = Array.from(document.querySelectorAll('[data-view-target]'));
     elements.appLayout = document.getElementById('app-layout');
@@ -1564,10 +1829,11 @@
     elements.mealPlanCalendar = document.getElementById('meal-plan-calendar');
     elements.mealPlanSidebar = document.getElementById('meal-plan-sidebar');
     elements.mealPlanDayDetails = document.getElementById('meal-plan-day-details');
-    elements.mealPlanForm = document.getElementById('meal-plan-form');
-    elements.mealPlanEntryType = document.getElementById('meal-plan-entry-type');
-    elements.mealPlanEntryTitle = document.getElementById('meal-plan-entry-title');
-    elements.mealPlanEntryDate = document.getElementById('meal-plan-entry-date');
+    elements.mealPlanSummary = document.getElementById('meal-plan-summary');
+    elements.mealPlanAdultsInput = document.getElementById('meal-plan-adults');
+    elements.mealPlanKidsInput = document.getElementById('meal-plan-kids');
+    elements.mealPlanSplitToggle = document.getElementById('meal-plan-split');
+    elements.mealPlanMacros = document.getElementById('meal-plan-macros');
     elements.mealPlanModeButtons = Array.from(
       document.querySelectorAll('[data-meal-plan-mode]'),
     );
@@ -2059,6 +2325,40 @@
     return article;
   };
 
+  const appendEntryServingControls = (article, entry, dateKey, groups) => {
+    if (!(article instanceof HTMLElement) || !entry || !Array.isArray(groups) || !groups.length) {
+      return;
+    }
+    const servings = sanitizeMealPlanEntryServings(entry.servings);
+    const controls = document.createElement('div');
+    controls.className = 'meal-plan-entry__servings';
+    groups.forEach((group) => {
+      if (!HOUSEHOLD_GROUPS.includes(group)) {
+        return;
+      }
+      const field = document.createElement('label');
+      field.className = 'meal-plan-entry__serving-field';
+      const label = document.createElement('span');
+      label.className = 'meal-plan-entry__serving-label';
+      label.textContent = group === 'adults' ? 'Adults' : 'Kids';
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = '0';
+      input.step = '1';
+      input.className = 'meal-plan-entry__serving-input';
+      input.value = String(servings[group] || 0);
+      input.dataset.entryServings = entry.id;
+      input.dataset.entryDate = dateKey;
+      input.dataset.servingsGroup = group;
+      field.appendChild(label);
+      field.appendChild(input);
+      controls.appendChild(field);
+    });
+    if (controls.childElementCount) {
+      article.appendChild(controls);
+    }
+  };
+
   const createMealPlanCalendarCell = (date, options = {}) => {
     const iso = toISODateString(date);
     const sourceEntries = Array.isArray(options.entries)
@@ -2237,12 +2537,159 @@
       container.appendChild(empty);
       return;
     }
-    const list = document.createElement('div');
-    list.className = 'meal-plan-day__list';
-    entries.forEach((entry) => {
-      list.appendChild(createMealPlanEntryElement(entry, { showRemove: true, dateKey: selectedIso }));
+    const splitMeals = Boolean(state.household?.splitMeals);
+    if (splitMeals) {
+      const groupsWrapper = document.createElement('div');
+      groupsWrapper.className = 'meal-plan-day__groups';
+      HOUSEHOLD_GROUPS.forEach((group) => {
+        const column = document.createElement('div');
+        column.className = 'meal-plan-day__group-column';
+        const heading = document.createElement('h4');
+        heading.className = 'meal-plan-day__group-title';
+        heading.textContent = group === 'adults' ? 'Adults' : 'Kids';
+        column.appendChild(heading);
+        const groupEntries = entries.filter((entry) => {
+          const servings = sanitizeMealPlanEntryServings(entry.servings);
+          return servings[group] > 0;
+        });
+        if (!groupEntries.length) {
+          const empty = document.createElement('p');
+          empty.className = 'meal-plan-day__group-empty';
+          empty.textContent = 'No meals assigned.';
+          column.appendChild(empty);
+        } else {
+          groupEntries.forEach((entry) => {
+            const article = createMealPlanEntryElement(entry, {
+              showRemove: true,
+              dateKey: selectedIso,
+            });
+            appendEntryServingControls(article, entry, selectedIso, [group]);
+            column.appendChild(article);
+          });
+        }
+        groupsWrapper.appendChild(column);
+      });
+      container.appendChild(groupsWrapper);
+    } else {
+      const list = document.createElement('div');
+      list.className = 'meal-plan-day__list';
+      entries.forEach((entry) => {
+        const article = createMealPlanEntryElement(entry, {
+          showRemove: true,
+          dateKey: selectedIso,
+        });
+        appendEntryServingControls(article, entry, selectedIso, HOUSEHOLD_GROUPS);
+        list.appendChild(article);
+      });
+      container.appendChild(list);
+    }
+  };
+
+  const renderMealPlanSummary = (selectedIso) => {
+    if (!elements.mealPlanSummary) {
+      return;
+    }
+    const sanitized = sanitizeHouseholdSettings(state.household);
+    let householdChanged = false;
+    if (!state.household || typeof state.household !== 'object') {
+      state.household = { ...sanitized };
+      householdChanged = true;
+    } else {
+      HOUSEHOLD_GROUPS.forEach((group) => {
+        if (state.household[group] !== sanitized[group]) {
+          state.household[group] = sanitized[group];
+          householdChanged = true;
+        }
+      });
+      if (Boolean(state.household.splitMeals) !== Boolean(sanitized.splitMeals)) {
+        state.household.splitMeals = Boolean(sanitized.splitMeals);
+        householdChanged = true;
+      }
+    }
+    const household = state.household;
+    if (householdChanged) {
+      persistAppState();
+    }
+    if (elements.mealPlanAdultsInput) {
+      elements.mealPlanAdultsInput.value = String(household.adults);
+    }
+    if (elements.mealPlanKidsInput) {
+      elements.mealPlanKidsInput.value = String(household.kids);
+    }
+    if (elements.mealPlanSplitToggle) {
+      elements.mealPlanSplitToggle.checked = Boolean(household.splitMeals);
+    }
+    if (!elements.mealPlanMacros) {
+      return;
+    }
+    const macrosContainer = elements.mealPlanMacros;
+    macrosContainer.innerHTML = '';
+    const macroSummary = calculateDailyMacroSummary(selectedIso);
+    const entries = getMealPlanEntries(selectedIso);
+    const hasMacroData = entries.some((entry) => {
+      const recipe = getRecipeForEntry(entry);
+      return recipe && recipe.nutritionPerServing;
     });
-    container.appendChild(list);
+    if (!hasMacroData) {
+      const empty = document.createElement('p');
+      empty.className = 'meal-plan-summary__empty';
+      empty.textContent = 'Schedule recipes with nutrition details to see daily macros.';
+      macrosContainer.appendChild(empty);
+      return;
+    }
+
+    const buildGroupCard = (label, bucket, count, showPerPerson = true) => {
+      const section = document.createElement('section');
+      section.className = 'meal-plan-summary__group';
+      const heading = document.createElement('h4');
+      heading.className = 'meal-plan-summary__group-title';
+      heading.textContent = label;
+      if (typeof count === 'number' && Number.isFinite(count)) {
+        const countSpan = document.createElement('span');
+        countSpan.textContent = `${count} ${count === 1 ? 'person' : 'people'}`;
+        heading.appendChild(countSpan);
+      }
+      section.appendChild(heading);
+      const subtitle = document.createElement('p');
+      subtitle.className = 'meal-plan-summary__group-subtitle';
+      subtitle.textContent = `Servings planned: ${bucket.servings || 0}`;
+      section.appendChild(subtitle);
+      const statList = document.createElement('dl');
+      statList.className = 'meal-plan-summary__stat-list';
+      MACRO_KEYS.forEach((macro) => {
+        const stat = document.createElement('div');
+        stat.className = 'meal-plan-summary__stat';
+        const dt = document.createElement('dt');
+        dt.textContent = MACRO_LABELS[macro] || macro;
+        const dd = document.createElement('dd');
+        dd.textContent = `${formatMacroValue(bucket[macro], macro)} total`;
+        if (showPerPerson && count > 0) {
+          const perPerson = bucket[macro] / count;
+          const note = document.createElement('span');
+          note.className = 'meal-plan-summary__stat-note';
+          note.textContent = `${formatMacroValue(perPerson, macro)} each`;
+          dd.appendChild(note);
+        }
+        stat.appendChild(dt);
+        stat.appendChild(dd);
+        statList.appendChild(stat);
+      });
+      section.appendChild(statList);
+      return section;
+    };
+
+    const totalPeople = HOUSEHOLD_GROUPS.reduce(
+      (acc, group) => acc + parseNonNegativeInteger(household[group], 0),
+      0,
+    );
+    macrosContainer.appendChild(
+      buildGroupCard('Daily total', macroSummary.overall, totalPeople, totalPeople > 0),
+    );
+    HOUSEHOLD_GROUPS.forEach((group) => {
+      const label = group === 'adults' ? 'Adults' : 'Kids';
+      const count = parseNonNegativeInteger(household[group], 0);
+      macrosContainer.appendChild(buildGroupCard(label, macroSummary[group], count, count > 0));
+    });
   };
 
   const updateMealPlanModeButtons = () => {
@@ -2285,12 +2732,6 @@
     }
   };
 
-  const updateMealPlanForm = (selectedIso) => {
-    if (elements.mealPlanEntryDate) {
-      elements.mealPlanEntryDate.value = selectedIso;
-    }
-  };
-
   const renderMealPlan = () => {
     const selectedIso = ensureMealPlanSelection();
     const selectedDate = parseISODateString(selectedIso) || new Date();
@@ -2298,7 +2739,7 @@
     updateMealPlanPeriodLabel(selectedDate);
     renderMealPlanCalendar(selectedDate, selectedIso);
     renderMealPlanDayDetails(selectedDate, selectedIso);
-    updateMealPlanForm(selectedIso);
+    renderMealPlanSummary(selectedIso);
   };
 
   const setMealPlanViewMode = (mode) => {
@@ -2907,36 +3348,6 @@
       });
     }
 
-    if (elements.mealPlanForm) {
-      elements.mealPlanForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const dateValue = elements.mealPlanEntryDate?.value || state.mealPlanSelectedDate;
-        const typeValue = elements.mealPlanEntryType?.value;
-        const titleValue = elements.mealPlanEntryTitle?.value;
-        const added = addMealPlanEntry(dateValue, typeValue, titleValue);
-        if (!added) {
-          return;
-        }
-        if (elements.mealPlanEntryTitle) {
-          elements.mealPlanEntryTitle.value = '';
-        }
-        if (isValidISODateString(dateValue)) {
-          setMealPlanSelectedDate(dateValue);
-        }
-        renderMealPlan();
-      });
-    }
-
-    if (elements.mealPlanEntryDate) {
-      elements.mealPlanEntryDate.addEventListener('change', (event) => {
-        const { value } = event.target;
-        if (isValidISODateString(value)) {
-          setMealPlanSelectedDate(value);
-          renderMealPlan();
-        }
-      });
-    }
-
     if (elements.mealPlanDayDetails) {
       elements.mealPlanDayDetails.addEventListener('click', (event) => {
         const target = event.target instanceof Element ? event.target.closest('[data-remove-entry]') : null;
@@ -2946,6 +3357,49 @@
           removeMealPlanEntry(entryDate, removeEntry);
           renderMealPlan();
         }
+      });
+      elements.mealPlanDayDetails.addEventListener('change', (event) => {
+        const target = event.target instanceof HTMLInputElement ? event.target : null;
+        if (!target) return;
+        const { entryServings, entryDate, servingsGroup } = target.dataset;
+        if (!entryServings || !entryDate || !servingsGroup) {
+          return;
+        }
+        const normalized = Math.max(0, parseNonNegativeInteger(target.value, 0));
+        target.value = String(normalized);
+        setMealPlanEntryServings(entryDate, entryServings, servingsGroup, normalized);
+        const currentIso = state.mealPlanSelectedDate;
+        const currentDate = parseISODateString(currentIso) || new Date();
+        renderMealPlanDayDetails(currentDate, currentIso);
+        renderMealPlanSummary(currentIso);
+      });
+    }
+
+    if (elements.mealPlanAdultsInput) {
+      elements.mealPlanAdultsInput.addEventListener('change', (event) => {
+        const value = Math.max(0, parseNonNegativeInteger(event.target.value, DEFAULT_HOUSEHOLD.adults));
+        event.target.value = String(value);
+        state.household.adults = value;
+        persistAppState();
+        renderMealPlanSummary(state.mealPlanSelectedDate);
+      });
+    }
+
+    if (elements.mealPlanKidsInput) {
+      elements.mealPlanKidsInput.addEventListener('change', (event) => {
+        const value = Math.max(0, parseNonNegativeInteger(event.target.value, DEFAULT_HOUSEHOLD.kids));
+        event.target.value = String(value);
+        state.household.kids = value;
+        persistAppState();
+        renderMealPlanSummary(state.mealPlanSelectedDate);
+      });
+    }
+
+    if (elements.mealPlanSplitToggle) {
+      elements.mealPlanSplitToggle.addEventListener('change', (event) => {
+        state.household.splitMeals = Boolean(event.target.checked);
+        persistAppState();
+        renderMealPlan();
       });
     }
 

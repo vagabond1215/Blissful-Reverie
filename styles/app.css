@@ -1623,6 +1623,54 @@ textarea:focus {
   gap: 0.75rem;
 }
 
+.schedule-dialog__fieldset {
+  border: 1px solid var(--color-border-muted);
+  border-radius: 12px;
+  padding: 0.75rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.schedule-dialog__fieldset legend {
+  padding: 0 0.25rem;
+}
+
+.schedule-dialog__servings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.schedule-dialog__serving-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1 1 120px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.schedule-dialog__serving-field span {
+  font-weight: 600;
+}
+
+.schedule-dialog__serving-input {
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border-muted);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-emphasis);
+  font-size: 0.95rem;
+}
+
+.schedule-dialog__serving-input:focus {
+  outline: none;
+  border-color: var(--color-accent-border);
+  box-shadow: 0 0 0 2px rgba(68, 83, 214, 0.18);
+}
+
 .schedule-dialog__button {
   border-radius: 999px;
   padding: 0.5rem 1.1rem;
@@ -1655,7 +1703,7 @@ textarea:focus {
   box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
-.meal-plan-form {
+.meal-plan-summary {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -1665,26 +1713,34 @@ textarea:focus {
   border: 1px solid rgba(68, 83, 214, 0.16);
 }
 
-.meal-plan-form__title {
+.meal-plan-summary__title {
   margin: 0;
   font-size: 1.15rem;
   font-weight: 600;
   color: var(--color-text-emphasis);
 }
 
-.meal-plan-form__row {
+.meal-plan-summary__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.meal-plan-summary__control {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  flex: 1 1 120px;
 }
 
-.meal-plan-form__label {
+.meal-plan-summary__control-label {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-text-secondary);
 }
 
-.meal-plan-form__control {
+.meal-plan-summary__input {
   width: 100%;
   padding: 0.65rem 0.75rem;
   border-radius: 12px;
@@ -1694,33 +1750,167 @@ textarea:focus {
   transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 
-.meal-plan-form__control:focus {
+.meal-plan-summary__input:focus {
   border-color: var(--color-accent-border);
   box-shadow: 0 0 0 3px rgba(68, 83, 214, 0.15);
   outline: none;
 }
 
-.meal-plan-form__submit {
-  align-self: flex-end;
-  padding: 0.65rem 1.4rem;
-  border-radius: 999px;
-  border: none;
-  background: var(--gradient-accent);
-  color: var(--color-accent-contrast);
+.meal-plan-summary__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
   font-weight: 600;
+  color: var(--color-text-secondary);
   cursor: pointer;
-  box-shadow: 0 18px 36px -24px var(--color-accent-shadow);
-  transition: transform 120ms ease, box-shadow 120ms ease;
 }
 
-.meal-plan-form__submit:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 20px 40px -24px var(--color-accent-shadow-strong);
+.meal-plan-summary__toggle input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--color-accent, #4453d6);
 }
 
-.meal-plan-form__submit:focus-visible {
-  outline: 3px solid var(--color-focus-ring);
-  outline-offset: 2px;
+.meal-plan-summary__macros {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.meal-plan-summary__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: rgba(68, 83, 214, 0.12);
+  border: 1px solid rgba(68, 83, 214, 0.18);
+}
+
+.meal-plan-summary__group-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-emphasis);
+  margin: 0;
+}
+
+.meal-plan-summary__group-subtitle {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.meal-plan-summary__stat-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+
+.meal-plan-summary__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--color-text-strong);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.meal-plan-summary__stat dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.meal-plan-summary__stat dd {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.meal-plan-summary__empty {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.meal-plan-summary__stat-note {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.meal-plan-day__groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.meal-plan-day__group-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.meal-plan-day__group-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+.meal-plan-day__group-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.meal-plan-entry__servings {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.meal-plan-entry__serving-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.meal-plan-entry__serving-label {
+  font-weight: 600;
+}
+
+.meal-plan-entry__serving-input {
+  width: 100%;
+  min-width: 80px;
+  padding: 0.45rem 0.55rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border-muted);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-emphasis);
+  font-size: 0.85rem;
+}
+
+.meal-plan-entry__serving-input:focus {
+  outline: none;
+  border-color: var(--color-accent-border);
+  box-shadow: 0 0 0 2px rgba(68, 83, 214, 0.18);
 }
 
 .meal-plan-calendar__day-names,
