@@ -9,7 +9,173 @@
   }
 
   const matching = window.BlissfulMatching || {};
-  const { createIngredientMatcherIndex, mapRecipesToIngredientMatches } = matching;
+  const {
+    createIngredientMatcherIndex,
+    mapRecipesToIngredientMatches,
+    buildTokenSet: matchingBuildTokenSet,
+  } = matching;
+
+  const getIngredientTokens =
+    typeof matchingBuildTokenSet === 'function'
+      ? (value) => matchingBuildTokenSet(value)
+      : (value) => {
+          const normalized = String(value || '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, ' ')
+            .trim();
+          if (!normalized) {
+            return new Set();
+          }
+          return new Set(normalized.split(/\s+/));
+        };
+
+  const formatProteinLabel = (value) =>
+    String(value || '')
+      .replace(/[-_/]+/g, ' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+
+  const PROTEIN_CATEGORY_SET = new Set(['Meat', 'Seafood']);
+  const PROTEIN_BASE_OVERRIDES = new Map([
+    ['meat-bacon', 'pork'],
+    ['bacon', 'pork'],
+  ]);
+  const PROTEIN_BASE_KEYWORD_CONFIG = new Map([
+    [
+      'chicken',
+      {
+        label: 'Chicken',
+        keywords: ['chicken', 'breast', 'thigh', 'wing', 'leg', 'drumstick', 'tender', 'cutlet'],
+      },
+    ],
+    [
+      'beef',
+      {
+        label: 'Beef',
+        keywords: ['beef', 'steak', 'ground', 'ribeye', 'roast'],
+      },
+    ],
+    [
+      'pork',
+      {
+        label: 'Pork',
+        keywords: ['pork', 'bacon', 'shoulder', 'loin', 'chop', 'rib'],
+      },
+    ],
+    [
+      'turkey',
+      {
+        label: 'Turkey',
+        keywords: ['turkey', 'ground', 'breast', 'thigh'],
+      },
+    ],
+    [
+      'lamb',
+      {
+        label: 'Lamb',
+        keywords: ['lamb', 'leg', 'chop', 'shoulder'],
+      },
+    ],
+    ['salmon', { label: 'Salmon', keywords: ['salmon'] }],
+    ['tuna', { label: 'Tuna', keywords: ['tuna'] }],
+    ['shrimp', { label: 'Shrimp', keywords: ['shrimp', 'prawn'] }],
+    ['cod', { label: 'Cod', keywords: ['cod'] }],
+    ['scallops', { label: 'Scallops', keywords: ['scallop'] }],
+    ['mussels', { label: 'Mussels', keywords: ['mussel'] }],
+  ]);
+
+  const createProteinBaseDefinitions = (ingredientList) => {
+    const baseLookup = new Map();
+    (Array.isArray(ingredientList) ? ingredientList : []).forEach((ingredient) => {
+      if (!ingredient || !PROTEIN_CATEGORY_SET.has(ingredient.category)) {
+        return;
+      }
+      const slug = String(ingredient.slug || '');
+      if (!slug) return;
+      const slugParts = slug.split('-').slice(1);
+      if (!slugParts.length) return;
+      const primaryToken = slugParts[0];
+      const baseKey = String(
+        PROTEIN_BASE_OVERRIDES.get(slug)
+          || PROTEIN_BASE_OVERRIDES.get(primaryToken)
+          || primaryToken,
+      ).toLowerCase();
+      if (!baseKey) return;
+      let entry = baseLookup.get(baseKey);
+      if (!entry) {
+        const config = PROTEIN_BASE_KEYWORD_CONFIG.get(baseKey) || {};
+        entry = {
+          key: baseKey,
+          label: config.label || formatProteinLabel(baseKey),
+          category: ingredient.category === 'Seafood' ? 'Seafood' : 'Meat',
+          keywords: new Set(
+            Array.isArray(config.keywords)
+              ? config.keywords
+                  .map((keyword) => String(keyword || '').toLowerCase())
+                  .filter(Boolean)
+              : [],
+          ),
+          names: new Set(),
+        };
+        baseLookup.set(baseKey, entry);
+      }
+      if (ingredient.category === 'Seafood') {
+        entry.category = 'Seafood';
+      }
+      entry.names.add(String(ingredient.name || '').toLowerCase());
+      entry.names.add(slugParts.join(' '));
+      entry.keywords.add(baseKey);
+      slugParts.slice(1).forEach((part) => entry.keywords.add(String(part || '').toLowerCase()));
+      const nameTokens = getIngredientTokens(ingredient.name);
+      if (nameTokens && typeof nameTokens.forEach === 'function') {
+        nameTokens.forEach((token) => entry.keywords.add(String(token || '').toLowerCase()));
+      }
+    });
+
+    return Array.from(baseLookup.values()).map((entry) => {
+      const slug = `protein-${entry.key}`;
+      const phraseSet = new Set();
+      const labelLower = entry.label.toLowerCase();
+      phraseSet.add(labelLower);
+      entry.names.forEach((name) => {
+        const normalized = String(name || '')
+          .toLowerCase()
+          .replace(/[-_/]+/g, ' ')
+          .trim();
+        if (normalized) {
+          phraseSet.add(normalized);
+        }
+      });
+      entry.keywords.forEach((keyword) => {
+        const normalized = String(keyword || '')
+          .toLowerCase()
+          .replace(/[-_/]+/g, ' ')
+          .trim();
+        if (!normalized) return;
+        phraseSet.add(normalized);
+        if (normalized !== labelLower) {
+          phraseSet.add(`${labelLower} ${normalized}`);
+        }
+      });
+      const matcherName = Array.from(phraseSet)
+        .map((phrase) => formatProteinLabel(phrase))
+        .join(' ');
+      return {
+        key: entry.key,
+        slug,
+        label: entry.label,
+        category: entry.category,
+        matcherIngredient: {
+          slug,
+          name: matcherName,
+          category: entry.category,
+        },
+      };
+    });
+  };
 
   const recipeLookupById = new Map();
   const recipeLookupByName = new Map();
@@ -1344,13 +1510,23 @@
     { id: 'broths-beverages', label: 'Broths & Beverages', categories: ['Beverage'] },
   ];
 
-  const ingredientMatcherIndex = createIngredientMatcherIndex(ingredients);
+  const proteinFilterDefinitions = createProteinBaseDefinitions(ingredients);
+  const proteinMatcherIngredients = proteinFilterDefinitions.map((definition) => definition.matcherIngredient);
+  const matcherIngredients = ingredients.concat(proteinMatcherIngredients);
+  const ingredientMatcherIndex = createIngredientMatcherIndex(matcherIngredients);
   const { recipeIngredientMatches, ingredientUsage } = mapRecipesToIngredientMatches(
     recipes,
     ingredientMatcherIndex,
   );
+  const proteinFilterOptions = proteinFilterDefinitions
+    .filter((definition) => ingredientUsage.get(definition.slug))
+    .map(({ slug, label }) => ({ slug, label }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   const ingredientFilterGroups = INGREDIENT_FILTER_GROUPS.map((group) => {
+    if (group.id === 'protein') {
+      return { id: group.id, label: group.label, options: proteinFilterOptions };
+    }
     const options = ingredients
       .filter(
         (ingredient) =>
