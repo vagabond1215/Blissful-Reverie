@@ -138,12 +138,52 @@
     { value: 'drink', label: 'Drink' },
     { value: 'snack', label: 'Snack' },
   ];
-  const DEFAULT_HOUSEHOLD = {
-    adults: 2,
-    kids: 0,
-    splitMeals: false,
-  };
-  const HOUSEHOLD_GROUPS = ['adults', 'kids'];
+  const FAMILY_ICON_OPTIONS = [
+    '🧑',
+    '👩',
+    '👨',
+    '🧑‍🍳',
+    '🧑‍🌾',
+    '🧑‍🎓',
+    '🧑‍🔬',
+    '🧑‍💻',
+    '🧑‍🦽',
+    '👵',
+    '👴',
+    '🧒',
+    '👧',
+    '👦',
+    '👶',
+    '🐾',
+  ];
+
+  const createFamilyMemberId = () =>
+    `member_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+
+  const createFamilyMember = (overrides = {}) => ({
+    id:
+      typeof overrides.id === 'string' && overrides.id
+        ? overrides.id
+        : createFamilyMemberId(),
+    name: typeof overrides.name === 'string' && overrides.name ? overrides.name : 'Guest',
+    icon:
+      typeof overrides.icon === 'string' && overrides.icon
+        ? overrides.icon
+        : FAMILY_ICON_OPTIONS[0],
+    targetCalories:
+      Number.isFinite(overrides.targetCalories) && overrides.targetCalories >= 0
+        ? Math.round(overrides.targetCalories)
+        : null,
+    allergies: Array.isArray(overrides.allergies) ? overrides.allergies : [],
+    diets: Array.isArray(overrides.diets) ? overrides.diets : [],
+    preferences:
+      typeof overrides.preferences === 'string' ? overrides.preferences.trim() : '',
+  });
+
+  const createDefaultFamilyMembers = () => [
+    createFamilyMember({ name: 'Alex', icon: '🧑', targetCalories: 2100 }),
+    createFamilyMember({ name: 'Riley', icon: '🧑‍🍳', targetCalories: 1800 }),
+  ];
   const MACRO_KEYS = ['calories', 'protein', 'carbs', 'fat'];
   const MACRO_PRECISION = {
     calories: 0,
@@ -373,7 +413,9 @@
           if (recipeId) {
             cleanedEntry.recipeId = recipeId;
           }
-          cleanedEntry.servings = sanitizeMealPlanEntryServings(entry.servings);
+          cleanedEntry.attendance = sanitizeMealPlanAttendance(
+            entry.attendance ?? entry.servings,
+          );
           cleaned.push(cleanedEntry);
         });
         if (cleaned.length) {
@@ -551,30 +593,102 @@
     return inventory;
   };
 
-  const sanitizeHouseholdSettings = (value) => {
-    const defaults = { ...DEFAULT_HOUSEHOLD };
-    if (!value || typeof value !== 'object') {
-      return defaults;
-    }
-    const adults = Number(value.adults);
-    const kids = Number(value.kids);
-    const sanitized = {
-      adults: Number.isFinite(adults) && adults >= 0 ? Math.round(adults) : defaults.adults,
-      kids: Number.isFinite(kids) && kids >= 0 ? Math.round(kids) : defaults.kids,
-      splitMeals: Boolean(value.splitMeals),
+  const normalizeStringArray = (value) => {
+    const normalized = [];
+    const pushValue = (input) => {
+      if (typeof input !== 'string') return;
+      const trimmed = input.trim();
+      if (!trimmed) return;
+      if (!normalized.includes(trimmed)) {
+        normalized.push(trimmed);
+      }
     };
+    if (Array.isArray(value)) {
+      value.forEach((entry) => pushValue(entry));
+    } else if (typeof value === 'string') {
+      value
+        .split(/[\n,;]/)
+        .map((item) => item.trim())
+        .forEach((item) => pushValue(item));
+    }
+    return normalized;
+  };
+
+  const sanitizeFamilyMember = (value, fallbackName = 'Family member') => {
+    const member = createFamilyMember({ id: value?.id });
+    const preferredName =
+      typeof value?.name === 'string' && value.name.trim() ? value.name.trim() : fallbackName;
+    member.name = preferredName;
+    const icon = typeof value?.icon === 'string' ? value.icon : '';
+    member.icon = FAMILY_ICON_OPTIONS.includes(icon) ? icon : FAMILY_ICON_OPTIONS[0];
+    const calories = Number(value?.targetCalories);
+    member.targetCalories =
+      Number.isFinite(calories) && calories >= 0 ? Math.round(calories) : null;
+    member.allergies = normalizeStringArray(value?.allergies);
+    member.diets = normalizeStringArray(value?.diets);
+    member.preferences = typeof value?.preferences === 'string' ? value.preferences.trim() : '';
+    return member;
+  };
+
+  const sanitizeFamilyMembers = (value) => {
+    const list = Array.isArray(value) ? value : [];
+    const sanitized = [];
+    const usedIds = new Set();
+    list.forEach((entry, index) => {
+      const fallbackName = `Member ${index + 1}`;
+      const member = sanitizeFamilyMember(entry, fallbackName);
+      if (usedIds.has(member.id)) {
+        member.id = createFamilyMemberId();
+      }
+      usedIds.add(member.id);
+      sanitized.push(member);
+    });
+    if (!sanitized.length) {
+      return createDefaultFamilyMembers();
+    }
     return sanitized;
   };
 
-  const sanitizeMealPlanEntryServings = (value) => {
-    const servings = { adults: 0, kids: 0 };
-    if (!value || typeof value !== 'object') {
-      return servings;
+  const sanitizeMealPlanAttendance = (value) => {
+    const attendance = { members: [], guests: 0 };
+    if (!value) {
+      return attendance;
     }
-    HOUSEHOLD_GROUPS.forEach((group) => {
-      servings[group] = Math.max(0, parseNonNegativeInteger(value[group], 0));
-    });
-    return servings;
+    const uniqueMembers = new Set();
+    const collectMember = (id) => {
+      if (typeof id !== 'string' || !id.trim()) return;
+      uniqueMembers.add(id.trim());
+    };
+    if (Array.isArray(value)) {
+      value.forEach((item) => collectMember(item));
+    }
+    if (Array.isArray(value?.members)) {
+      value.members.forEach((item) => collectMember(item));
+    }
+    attendance.members = Array.from(uniqueMembers);
+    let guests = 0;
+    if (value && typeof value === 'object') {
+      guests += parseNonNegativeInteger(value.guests, 0);
+      if ('adults' in value || 'kids' in value) {
+        guests += parseNonNegativeInteger(value.adults, 0);
+        guests += parseNonNegativeInteger(value.kids, 0);
+      }
+    } else if (typeof value === 'number') {
+      guests += Math.max(0, Math.round(value));
+    }
+    attendance.guests = guests;
+    return attendance;
+  };
+
+  const ensureFamilySanitized = () => {
+    const sanitized = sanitizeFamilyMembers(state.familyMembers);
+    const previousSerialized = JSON.stringify(state.familyMembers);
+    const sanitizedSerialized = JSON.stringify(sanitized);
+    state.familyMembers = sanitized;
+    if (sanitizedSerialized !== previousSerialized) {
+      persistAppState();
+    }
+    return state.familyMembers;
   };
 
   const parseNonNegativeInteger = (value, fallback = 0) => {
@@ -606,7 +720,7 @@
       notes: {},
       openNotes: {},
       pantryInventory: {},
-      household: { ...DEFAULT_HOUSEHOLD },
+      familyMembers: createDefaultFamilyMembers(),
     };
     try {
       const stored = JSON.parse(localStorage.getItem(APP_STATE_STORAGE_KEY));
@@ -633,7 +747,7 @@
       result.notes = sanitizeNotes(stored.notes);
       result.openNotes = sanitizeOpenNotes(stored.openNotes);
       result.pantryInventory = sanitizePantryInventory(stored.pantryInventory);
-      result.household = sanitizeHouseholdSettings(stored.household);
+      result.familyMembers = sanitizeFamilyMembers(stored.familyMembers);
       return result;
     } catch (error) {
       console.warn('Unable to read saved application state.', error);
@@ -654,7 +768,7 @@
     notes: sanitizeNotes(storedAppState.notes),
     openNotes: sanitizeOpenNotes(storedAppState.openNotes),
     pantryInventory: sanitizePantryInventory(storedAppState.pantryInventory),
-    household: sanitizeHouseholdSettings(storedAppState.household),
+    familyMembers: sanitizeFamilyMembers(storedAppState.familyMembers),
     themeMode: themePreferences.mode,
     themeSelections: { ...themePreferences.selections },
     measurementSystem: measurementPreference,
@@ -1046,10 +1160,11 @@
     dateInput: null,
     timeInput: null,
     lastTimeValue: '',
-    adultServingsInput: null,
-    kidServingsInput: null,
-    lastAdultServings: null,
-    lastKidServings: null,
+    memberContainer: null,
+    guestInput: null,
+    selectedMembers: null,
+    lastSelectedMembers: null,
+    lastGuestCount: 0,
     currentRecipe: null,
   };
 
@@ -1069,14 +1184,52 @@
     }
   };
 
+  const renderScheduleDialogMembers = () => {
+    const container = scheduleDialogState.memberContainer;
+    if (!container) {
+      return;
+    }
+    container.innerHTML = '';
+    const members = Array.isArray(state.familyMembers) ? state.familyMembers : [];
+    if (scheduleDialogState.selectedMembers instanceof Set) {
+      const availableIds = new Set(members.map((member) => member?.id).filter(Boolean));
+      scheduleDialogState.selectedMembers = new Set(
+        Array.from(scheduleDialogState.selectedMembers).filter((id) => availableIds.has(id)),
+      );
+    }
+    if (!members.length) {
+      const empty = document.createElement('p');
+      empty.className = 'schedule-dialog__members-empty';
+      empty.textContent = 'Add family members from the Family menu to assign meals.';
+      container.appendChild(empty);
+      return;
+    }
+    members.forEach((member) => {
+      if (!member || !member.id) {
+        return;
+      }
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'schedule-dialog__member';
+      button.dataset.scheduleMember = member.id;
+      button.title = member.name;
+      const icon = document.createElement('span');
+      icon.className = 'schedule-dialog__member-icon';
+      icon.textContent = member.icon || '👤';
+      const name = document.createElement('span');
+      name.className = 'schedule-dialog__member-name';
+      name.textContent = member.name;
+      if (scheduleDialogState.selectedMembers instanceof Set && scheduleDialogState.selectedMembers.has(member.id)) {
+        button.classList.add('schedule-dialog__member--active');
+      }
+      button.appendChild(icon);
+      button.appendChild(name);
+      container.appendChild(button);
+    });
+  };
+
   const submitRecipeScheduleDialog = () => {
-    const {
-      currentRecipe,
-      dateInput,
-      timeInput,
-      adultServingsInput,
-      kidServingsInput,
-    } = scheduleDialogState;
+    const { currentRecipe, dateInput, timeInput, guestInput } = scheduleDialogState;
     if (!currentRecipe || !dateInput || !timeInput) {
       return;
     }
@@ -1091,25 +1244,344 @@
       return;
     }
     const recipeTitle = typeof currentRecipe.name === 'string' ? currentRecipe.name : '';
-    const adultServings = adultServingsInput
-      ? Math.max(0, parseNonNegativeInteger(adultServingsInput.value, 0))
-      : 0;
-    const kidServings = kidServingsInput
-      ? Math.max(0, parseNonNegativeInteger(kidServingsInput.value, 0))
+    const members = Array.from(scheduleDialogState.selectedMembers || []);
+    const guests = guestInput
+      ? Math.max(0, parseNonNegativeInteger(guestInput.value, 0))
       : 0;
     const metadata = {
       recipeId: typeof currentRecipe.id === 'string' ? currentRecipe.id : undefined,
-      servings: { adults: adultServings, kids: kidServings },
+      attendance: { members, guests },
     };
     const added = addMealPlanEntry(dateValue, 'meal', recipeTitle, timeValue, metadata);
     if (!added) {
       return;
     }
     scheduleDialogState.lastTimeValue = timeValue;
-    scheduleDialogState.lastAdultServings = adultServings;
-    scheduleDialogState.lastKidServings = kidServings;
+    scheduleDialogState.lastSelectedMembers = members;
+    scheduleDialogState.lastGuestCount = guests;
     setMealPlanSelectedDate(dateValue);
     closeRecipeScheduleDialog();
+    if (state.activeView === 'meal-plan') {
+      renderMealPlan();
+    }
+  };
+
+  const refreshScheduleDialogMembersIfOpen = () => {
+    if (scheduleDialogState.root && scheduleDialogState.root.dataset.open === 'true') {
+      renderScheduleDialogMembers();
+    }
+  };
+
+  const renderFamilyPanel = () => {
+    if (!elements.familyMemberList) {
+      return;
+    }
+    let focusState = null;
+    const activeElement = document.activeElement;
+    if (
+      activeElement instanceof HTMLInputElement
+      || activeElement instanceof HTMLTextAreaElement
+      || activeElement instanceof HTMLSelectElement
+    ) {
+      const card = activeElement.closest('[data-family-id]');
+      const field = activeElement.dataset.familyField;
+      if (card && field) {
+        focusState = {
+          memberId: card.dataset.familyId,
+          field,
+          start: 'selectionStart' in activeElement ? activeElement.selectionStart ?? 0 : 0,
+          end: 'selectionEnd' in activeElement ? activeElement.selectionEnd ?? 0 : 0,
+        };
+      }
+    }
+    const members = ensureFamilySanitized();
+    elements.familyMemberList.innerHTML = '';
+    if (!members.length) {
+      const empty = document.createElement('p');
+      empty.className = 'family-panel__empty';
+      empty.textContent = 'No family members yet. Add someone to personalize your plans.';
+      elements.familyMemberList.appendChild(empty);
+      return;
+    }
+    members.forEach((member, index) => {
+      if (!member || !member.id) {
+        return;
+      }
+      const card = document.createElement('article');
+      card.className = 'family-member-card';
+      card.dataset.familyId = member.id;
+
+      const header = document.createElement('div');
+      header.className = 'family-member-card__header';
+      const avatar = document.createElement('span');
+      avatar.className = 'family-member-card__avatar';
+      avatar.textContent = member.icon || '👤';
+      header.appendChild(avatar);
+
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.className = 'family-member-card__name';
+      nameInput.value = member.name || `Member ${index + 1}`;
+      nameInput.placeholder = 'Name';
+      nameInput.dataset.familyField = 'name';
+      card.appendChild(header);
+      header.appendChild(nameInput);
+
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'family-member-card__remove';
+      removeButton.dataset.removeFamily = member.id;
+      removeButton.textContent = 'Remove';
+      header.appendChild(removeButton);
+
+      const fieldGrid = document.createElement('div');
+      fieldGrid.className = 'family-member-card__fields';
+
+      const iconField = document.createElement('label');
+      iconField.className = 'family-member-card__field';
+      const iconLabel = document.createElement('span');
+      iconLabel.textContent = 'Icon';
+      const iconSelect = document.createElement('select');
+      iconSelect.className = 'family-member-card__icon-select';
+      iconSelect.dataset.familyField = 'icon';
+      FAMILY_ICON_OPTIONS.forEach((icon) => {
+        const option = document.createElement('option');
+        option.value = icon;
+        option.textContent = icon;
+        if (icon === member.icon) {
+          option.selected = true;
+        }
+        iconSelect.appendChild(option);
+      });
+      iconField.appendChild(iconLabel);
+      iconField.appendChild(iconSelect);
+      fieldGrid.appendChild(iconField);
+
+      const caloriesField = document.createElement('label');
+      caloriesField.className = 'family-member-card__field';
+      const caloriesLabel = document.createElement('span');
+      caloriesLabel.textContent = 'Target calories';
+      const caloriesInput = document.createElement('input');
+      caloriesInput.type = 'number';
+      caloriesInput.min = '0';
+      caloriesInput.step = '50';
+      caloriesInput.placeholder = 'e.g. 2000';
+      caloriesInput.value =
+        typeof member.targetCalories === 'number' && Number.isFinite(member.targetCalories)
+          ? String(member.targetCalories)
+          : '';
+      caloriesInput.dataset.familyField = 'targetCalories';
+      caloriesField.appendChild(caloriesLabel);
+      caloriesField.appendChild(caloriesInput);
+      fieldGrid.appendChild(caloriesField);
+
+      const dietsField = document.createElement('label');
+      dietsField.className = 'family-member-card__field';
+      const dietsLabel = document.createElement('span');
+      dietsLabel.textContent = 'Diets';
+      const dietsInput = document.createElement('input');
+      dietsInput.type = 'text';
+      dietsInput.placeholder = 'Comma separated (e.g. vegetarian, keto)';
+      dietsInput.value = member.diets && member.diets.length ? member.diets.join(', ') : '';
+      dietsInput.dataset.familyField = 'diets';
+      dietsField.appendChild(dietsLabel);
+      dietsField.appendChild(dietsInput);
+      fieldGrid.appendChild(dietsField);
+
+      const allergiesField = document.createElement('label');
+      allergiesField.className = 'family-member-card__field';
+      const allergiesLabel = document.createElement('span');
+      allergiesLabel.textContent = 'Allergies';
+      const allergiesInput = document.createElement('input');
+      allergiesInput.type = 'text';
+      allergiesInput.placeholder = 'Comma separated (e.g. peanuts, shellfish)';
+      allergiesInput.value = member.allergies && member.allergies.length ? member.allergies.join(', ') : '';
+      allergiesInput.dataset.familyField = 'allergies';
+      allergiesField.appendChild(allergiesLabel);
+      allergiesField.appendChild(allergiesInput);
+      fieldGrid.appendChild(allergiesField);
+
+      const preferencesField = document.createElement('label');
+      preferencesField.className = 'family-member-card__field family-member-card__field--textarea';
+      const preferencesLabel = document.createElement('span');
+      preferencesLabel.textContent = 'Preferences & notes';
+      const preferencesInput = document.createElement('textarea');
+      preferencesInput.rows = 2;
+      preferencesInput.placeholder = 'Favorite flavors, dislikes, or reminders';
+      preferencesInput.value = member.preferences || '';
+      preferencesInput.dataset.familyField = 'preferences';
+      preferencesField.appendChild(preferencesLabel);
+      preferencesField.appendChild(preferencesInput);
+      fieldGrid.appendChild(preferencesField);
+
+      card.appendChild(fieldGrid);
+      elements.familyMemberList.appendChild(card);
+    });
+
+    if (focusState) {
+      const selector = `.family-member-card[data-family-id="${focusState.memberId}"] [data-family-field="${focusState.field}"]`;
+      const restored = elements.familyMemberList.querySelector(selector);
+      if (restored instanceof HTMLInputElement || restored instanceof HTMLTextAreaElement) {
+        restored.focus();
+        if (typeof restored.setSelectionRange === 'function') {
+          const start = focusState.start ?? restored.value.length;
+          const end = focusState.end ?? start;
+          try {
+            restored.setSelectionRange(start, end);
+          } catch (error) {
+            // ignore selection errors for inputs that do not support it
+          }
+        }
+      } else if (restored instanceof HTMLSelectElement) {
+        restored.focus();
+      }
+    }
+  };
+
+  const handleFamilyPanelKeydown = (event) => {
+    if (event.key === 'Escape') {
+      closeFamilyPanel();
+    }
+  };
+
+  const openFamilyPanel = () => {
+    if (!elements.familyPanel) {
+      return;
+    }
+    renderFamilyPanel();
+    elements.familyPanel.hidden = false;
+    elements.familyPanel.dataset.open = 'true';
+    document.addEventListener('keydown', handleFamilyPanelKeydown);
+    window.requestAnimationFrame(() => {
+      const firstInput = elements.familyPanel?.querySelector('.family-member-card__name');
+      if (firstInput instanceof HTMLElement) {
+        firstInput.focus();
+      } else {
+        elements.familyAddButton?.focus();
+      }
+    });
+  };
+
+  const closeFamilyPanel = () => {
+    if (!elements.familyPanel) {
+      return;
+    }
+    elements.familyPanel.hidden = true;
+    elements.familyPanel.removeAttribute('data-open');
+    document.removeEventListener('keydown', handleFamilyPanelKeydown);
+  };
+
+  const applyFamilyUpdate = (updater) => {
+    const members = Array.isArray(state.familyMembers) ? state.familyMembers.slice() : [];
+    const updated = updater(members);
+    if (!updated) {
+      return false;
+    }
+    const sanitized = sanitizeFamilyMembers(updated);
+    const before = JSON.stringify(state.familyMembers);
+    const after = JSON.stringify(sanitized);
+    state.familyMembers = sanitized;
+    if (after !== before) {
+      persistAppState();
+    }
+    refreshScheduleDialogMembersIfOpen();
+    return after !== before;
+  };
+
+  const addFamilyMember = () => {
+    const newMember = createFamilyMember({ name: `Member ${state.familyMembers.length + 1}` });
+    applyFamilyUpdate((members) => [...members, newMember]);
+    renderFamilyPanel();
+    if (state.activeView === 'meal-plan') {
+      renderMealPlan();
+    }
+    window.requestAnimationFrame(() => {
+      const selector = `.family-member-card[data-family-id="${newMember.id}"] .family-member-card__name`;
+      const input = elements.familyPanel?.querySelector(selector);
+      if (input instanceof HTMLElement) {
+        input.focus();
+        input.select?.();
+      }
+    });
+  };
+
+  const updateFamilyMember = (memberId, field, value, options = {}) => {
+    if (!memberId || !field) {
+      return;
+    }
+    const changed = applyFamilyUpdate((members) => {
+      const index = members.findIndex((member) => member.id === memberId);
+      if (index === -1) {
+        return members;
+      }
+      const next = { ...members[index] };
+      if (field === 'name') {
+        next.name = typeof value === 'string' ? value : '';
+      } else if (field === 'icon') {
+        next.icon = typeof value === 'string' ? value : next.icon;
+      } else if (field === 'targetCalories') {
+        const numeric = Number(value);
+        next.targetCalories = Number.isFinite(numeric) && numeric > 0 ? Math.round(numeric) : null;
+      } else if (field === 'diets') {
+        next.diets = normalizeStringArray(value);
+      } else if (field === 'allergies') {
+        next.allergies = normalizeStringArray(value);
+      } else if (field === 'preferences') {
+        next.preferences = typeof value === 'string' ? value : '';
+      }
+      members[index] = next;
+      return members;
+    });
+    if (options.skipRender) {
+      return;
+    }
+    renderFamilyPanel();
+    if (state.activeView === 'meal-plan') {
+      renderMealPlan();
+    }
+  };
+
+  const removeFamilyMember = (memberId) => {
+    if (!memberId) {
+      return;
+    }
+    const changed = applyFamilyUpdate((members) => members.filter((member) => member.id !== memberId));
+    if (!changed) {
+      renderFamilyPanel();
+      return;
+    }
+    if (Array.isArray(scheduleDialogState.lastSelectedMembers)) {
+      scheduleDialogState.lastSelectedMembers = scheduleDialogState.lastSelectedMembers.filter(
+        (id) => id !== memberId,
+      );
+    }
+    if (scheduleDialogState.selectedMembers instanceof Set) {
+      scheduleDialogState.selectedMembers.delete(memberId);
+    }
+    let mealPlanChanged = false;
+    Object.entries(state.mealPlan).forEach(([dateKey, entries]) => {
+      if (!Array.isArray(entries)) {
+        return;
+      }
+      let entryChanged = false;
+      entries.forEach((entry) => {
+        const attendance = sanitizeMealPlanAttendance(entry.attendance ?? entry.servings);
+        if (attendance.members.includes(memberId)) {
+          attendance.members = attendance.members.filter((id) => id !== memberId);
+          entry.attendance = attendance;
+          entry.servings = attendance;
+          entryChanged = true;
+        }
+      });
+      if (entryChanged) {
+        state.mealPlan[dateKey] = sortMealPlanEntries(entries);
+        mealPlanChanged = true;
+      }
+    });
+    if (mealPlanChanged) {
+      persistMealPlan();
+    }
+    renderFamilyPanel();
     if (state.activeView === 'meal-plan') {
       renderMealPlan();
     }
@@ -1171,47 +1643,60 @@
     timeField.appendChild(timeInput);
     form.appendChild(timeField);
 
-    const servingsFieldset = document.createElement('fieldset');
-    servingsFieldset.className = 'schedule-dialog__fieldset';
-    const servingsLegend = document.createElement('legend');
-    servingsLegend.className = 'schedule-dialog__label';
-    servingsLegend.textContent = 'Servings';
-    servingsFieldset.appendChild(servingsLegend);
-    const servingsWrapper = document.createElement('div');
-    servingsWrapper.className = 'schedule-dialog__servings';
+    const attendanceFieldset = document.createElement('fieldset');
+    attendanceFieldset.className = 'schedule-dialog__fieldset';
+    const attendanceLegend = document.createElement('legend');
+    attendanceLegend.className = 'schedule-dialog__label';
+    attendanceLegend.textContent = "Who's eating?";
+    attendanceFieldset.appendChild(attendanceLegend);
 
-    const adultField = document.createElement('label');
-    adultField.className = 'schedule-dialog__serving-field';
-    adultField.setAttribute('for', 'schedule-dialog-adult-servings');
-    const adultText = document.createElement('span');
-    adultText.textContent = 'Adults';
-    const adultInput = document.createElement('input');
-    adultInput.type = 'number';
-    adultInput.min = '0';
-    adultInput.step = '1';
-    adultInput.id = 'schedule-dialog-adult-servings';
-    adultInput.className = 'schedule-dialog__serving-input';
-    adultField.appendChild(adultText);
-    adultField.appendChild(adultInput);
+    const memberContainer = document.createElement('div');
+    memberContainer.className = 'schedule-dialog__members';
+    attendanceFieldset.appendChild(memberContainer);
 
-    const kidField = document.createElement('label');
-    kidField.className = 'schedule-dialog__serving-field';
-    kidField.setAttribute('for', 'schedule-dialog-kid-servings');
-    const kidText = document.createElement('span');
-    kidText.textContent = 'Kids';
-    const kidInput = document.createElement('input');
-    kidInput.type = 'number';
-    kidInput.min = '0';
-    kidInput.step = '1';
-    kidInput.id = 'schedule-dialog-kid-servings';
-    kidInput.className = 'schedule-dialog__serving-input';
-    kidField.appendChild(kidText);
-    kidField.appendChild(kidInput);
+    const guestField = document.createElement('label');
+    guestField.className = 'schedule-dialog__guest-field';
+    guestField.setAttribute('for', 'schedule-dialog-guests');
+    const guestLabel = document.createElement('span');
+    guestLabel.textContent = 'Guests';
+    const guestInput = document.createElement('input');
+    guestInput.type = 'number';
+    guestInput.min = '0';
+    guestInput.step = '1';
+    guestInput.id = 'schedule-dialog-guests';
+    guestInput.className = 'schedule-dialog__guest-input';
+    guestField.appendChild(guestLabel);
+    guestField.appendChild(guestInput);
+    attendanceFieldset.appendChild(guestField);
 
-    servingsWrapper.appendChild(adultField);
-    servingsWrapper.appendChild(kidField);
-    servingsFieldset.appendChild(servingsWrapper);
-    form.appendChild(servingsFieldset);
+    form.appendChild(attendanceFieldset);
+
+    memberContainer.addEventListener('click', (event) => {
+      const target = event.target instanceof Element ? event.target.closest('[data-schedule-member]') : null;
+      if (!target) {
+        return;
+      }
+      event.preventDefault();
+      const { scheduleMember } = target.dataset;
+      if (!scheduleMember) {
+        return;
+      }
+      if (!(scheduleDialogState.selectedMembers instanceof Set)) {
+        scheduleDialogState.selectedMembers = new Set();
+      }
+      if (scheduleDialogState.selectedMembers.has(scheduleMember)) {
+        scheduleDialogState.selectedMembers.delete(scheduleMember);
+        target.classList.remove('schedule-dialog__member--active');
+      } else {
+        scheduleDialogState.selectedMembers.add(scheduleMember);
+        target.classList.add('schedule-dialog__member--active');
+      }
+    });
+
+    guestInput.addEventListener('input', () => {
+      const normalized = Math.max(0, parseNonNegativeInteger(guestInput.value, 0));
+      guestInput.value = String(normalized);
+    });
 
     const actions = document.createElement('div');
     actions.className = 'schedule-dialog__actions';
@@ -1250,8 +1735,8 @@
     scheduleDialogState.recipeLabel = recipeLabel;
     scheduleDialogState.dateInput = dateInput;
     scheduleDialogState.timeInput = timeInput;
-    scheduleDialogState.adultServingsInput = adultInput;
-    scheduleDialogState.kidServingsInput = kidInput;
+    scheduleDialogState.memberContainer = memberContainer;
+    scheduleDialogState.guestInput = guestInput;
 
     return scheduleDialogState;
   };
@@ -1276,21 +1761,20 @@
     if (dialog.timeInput) {
       dialog.timeInput.value = defaultTime;
     }
-    const defaultAdultServings =
-      typeof scheduleDialogState.lastAdultServings === 'number'
-      && scheduleDialogState.lastAdultServings >= 0
-        ? scheduleDialogState.lastAdultServings
-        : parseNonNegativeInteger(state.household?.adults, DEFAULT_HOUSEHOLD.adults);
-    const defaultKidServings =
-      typeof scheduleDialogState.lastKidServings === 'number'
-      && scheduleDialogState.lastKidServings >= 0
-        ? scheduleDialogState.lastKidServings
-        : parseNonNegativeInteger(state.household?.kids, DEFAULT_HOUSEHOLD.kids);
-    if (dialog.adultServingsInput) {
-      dialog.adultServingsInput.value = String(defaultAdultServings || 0);
+    const availableIds = state.familyMembers
+      .map((member) => (member && member.id ? member.id : null))
+      .filter(Boolean);
+    let defaultMembers = Array.isArray(scheduleDialogState.lastSelectedMembers)
+      ? scheduleDialogState.lastSelectedMembers.filter((id) => availableIds.includes(id))
+      : [];
+    if (!defaultMembers.length) {
+      defaultMembers = availableIds.slice();
     }
-    if (dialog.kidServingsInput) {
-      dialog.kidServingsInput.value = String(defaultKidServings || 0);
+    scheduleDialogState.selectedMembers = new Set(defaultMembers);
+    renderScheduleDialogMembers();
+    if (dialog.guestInput) {
+      const lastGuests = Math.max(0, parseNonNegativeInteger(scheduleDialogState.lastGuestCount, 0));
+      dialog.guestInput.value = String(lastGuests);
     }
     dialog.root.hidden = false;
     dialog.root.dataset.open = 'true';
@@ -1398,7 +1882,7 @@
       };
     });
 
-    snapshot.household = sanitizeHouseholdSettings(state.household);
+    snapshot.familyMembers = sanitizeFamilyMembers(state.familyMembers);
 
     return snapshot;
   };
@@ -1692,37 +2176,62 @@
     return bucket;
   };
 
+  const accumulateMacroBucket = (bucket, recipe, count) => {
+    if (!bucket || !recipe || !recipe.nutritionPerServing) {
+      return;
+    }
+    const servings = Math.max(0, Number(count) || 0);
+    if (!servings) {
+      return;
+    }
+    bucket.servings += servings;
+    MACRO_KEYS.forEach((macro) => {
+      const perServing = Number(recipe.nutritionPerServing?.[macro]) || 0;
+      bucket[macro] += perServing * servings;
+    });
+  };
+
   const calculateDailyMacroSummary = (isoDate) => {
     const summary = {
-      adults: createMacroBucket(),
-      kids: createMacroBucket(),
       overall: createMacroBucket(),
+      members: new Map(),
+      guests: createMacroBucket(),
     };
     const entries = getMealPlanEntries(isoDate);
+    const knownMembers = new Map();
+    state.familyMembers.forEach((member) => {
+      if (member?.id) {
+        knownMembers.set(member.id, member);
+      }
+    });
     entries.forEach((entry) => {
       const recipe = getRecipeForEntry(entry);
       if (!recipe || !recipe.nutritionPerServing) {
         return;
       }
-      const servings = sanitizeMealPlanEntryServings(entry.servings);
-      HOUSEHOLD_GROUPS.forEach((group) => {
-        const count = servings[group];
-        if (!count) {
+      const attendance = sanitizeMealPlanAttendance(entry.attendance ?? entry.servings);
+      attendance.members.forEach((memberId) => {
+        if (!knownMembers.has(memberId)) {
           return;
         }
-        summary[group].servings += count;
-        MACRO_KEYS.forEach((macro) => {
-          const perServing = Number(recipe.nutritionPerServing?.[macro]) || 0;
-          summary[group][macro] += perServing * count;
-        });
+        const bucket = summary.members.get(memberId) || createMacroBucket();
+        accumulateMacroBucket(bucket, recipe, 1);
+        summary.members.set(memberId, bucket);
       });
+      if (attendance.guests > 0) {
+        accumulateMacroBucket(summary.guests, recipe, attendance.guests);
+      }
     });
-    HOUSEHOLD_GROUPS.forEach((group) => {
-      summary.overall.servings += summary[group].servings;
+    summary.members.forEach((bucket) => {
       MACRO_KEYS.forEach((macro) => {
-        summary.overall[macro] += summary[group][macro];
+        summary.overall[macro] += bucket[macro];
       });
+      summary.overall.servings += bucket.servings;
     });
+    MACRO_KEYS.forEach((macro) => {
+      summary.overall[macro] += summary.guests[macro];
+    });
+    summary.overall.servings += summary.guests.servings;
     return summary;
   };
 
@@ -1769,7 +2278,15 @@
         entry.recipeId = recipeId;
       }
     }
-    entry.servings = sanitizeMealPlanEntryServings(metadata?.servings);
+    let attendance = sanitizeMealPlanAttendance(metadata?.attendance ?? metadata?.servings);
+    if (!attendance.members.length && state.familyMembers.length) {
+      attendance = {
+        ...attendance,
+        members: state.familyMembers.map((member) => member.id).filter(Boolean),
+      };
+    }
+    entry.attendance = attendance;
+    entry.servings = attendance;
     nextEntries.push(entry);
     state.mealPlan[dateKey] = sortMealPlanEntries(nextEntries);
     persistMealPlan();
@@ -1793,11 +2310,8 @@
     persistMealPlan();
   };
 
-  const setMealPlanEntryServings = (isoDate, entryId, group, value) => {
+  const updateMealPlanEntryAttendance = (isoDate, entryId, updater) => {
     if (!isValidISODateString(isoDate) || typeof entryId !== 'string' || !entryId) {
-      return;
-    }
-    if (!HOUSEHOLD_GROUPS.includes(group)) {
       return;
     }
     const entries = state.mealPlan[isoDate];
@@ -1808,15 +2322,38 @@
     if (!target) {
       return;
     }
-    const normalized = Math.max(0, parseNonNegativeInteger(value, 0));
-    const servings = sanitizeMealPlanEntryServings(target.servings);
-    if (servings[group] === normalized) {
+    const current = sanitizeMealPlanAttendance(target.attendance ?? target.servings);
+    const updated = updater({ members: current.members.slice(), guests: current.guests });
+    if (!updated) {
       return;
     }
-    servings[group] = normalized;
-    target.servings = servings;
+    const normalized = sanitizeMealPlanAttendance(updated);
+    target.attendance = normalized;
+    target.servings = normalized;
     state.mealPlan[isoDate] = sortMealPlanEntries(entries);
     persistMealPlan();
+  };
+
+  const toggleMealPlanEntryMember = (isoDate, entryId, memberId) => {
+    if (typeof memberId !== 'string' || !memberId) {
+      return;
+    }
+    updateMealPlanEntryAttendance(isoDate, entryId, (attendance) => {
+      const members = new Set(attendance.members);
+      if (members.has(memberId)) {
+        members.delete(memberId);
+      } else {
+        members.add(memberId);
+      }
+      return { ...attendance, members: Array.from(members) };
+    });
+  };
+
+  const setMealPlanEntryGuests = (isoDate, entryId, guests) => {
+    updateMealPlanEntryAttendance(isoDate, entryId, (attendance) => ({
+      ...attendance,
+      guests: Math.max(0, parseNonNegativeInteger(guests, 0)),
+    }));
   };
 
   const cacheElements = () => {
@@ -1830,9 +2367,6 @@
     elements.mealPlanSidebar = document.getElementById('meal-plan-sidebar');
     elements.mealPlanDayDetails = document.getElementById('meal-plan-day-details');
     elements.mealPlanSummary = document.getElementById('meal-plan-summary');
-    elements.mealPlanAdultsInput = document.getElementById('meal-plan-adults');
-    elements.mealPlanKidsInput = document.getElementById('meal-plan-kids');
-    elements.mealPlanSplitToggle = document.getElementById('meal-plan-split');
     elements.mealPlanMacros = document.getElementById('meal-plan-macros');
     elements.mealPlanModeButtons = Array.from(
       document.querySelectorAll('[data-meal-plan-mode]'),
@@ -1866,6 +2400,12 @@
     elements.measurementToggleButtons = Array.from(
       document.querySelectorAll('#measurement-toggle .mode-toggle__button'),
     );
+    elements.familyButton = document.getElementById('family-button');
+    elements.familyPanel = document.getElementById('family-panel');
+    elements.familyPanelBackdrop = document.getElementById('family-panel-backdrop');
+    elements.familyPanelClose = document.getElementById('family-panel-close');
+    elements.familyMemberList = document.getElementById('family-member-list');
+    elements.familyAddButton = document.getElementById('family-add-member');
   };
 
   const populateCheckboxGroup = (view, container, options, field, config) => {
@@ -2325,38 +2865,63 @@
     return article;
   };
 
-  const appendEntryServingControls = (article, entry, dateKey, groups) => {
-    if (!(article instanceof HTMLElement) || !entry || !Array.isArray(groups) || !groups.length) {
+  const appendEntryAttendanceControls = (article, entry, dateKey) => {
+    if (!(article instanceof HTMLElement) || !entry || !dateKey) {
       return;
     }
-    const servings = sanitizeMealPlanEntryServings(entry.servings);
+    const attendance = sanitizeMealPlanAttendance(entry.attendance ?? entry.servings);
     const controls = document.createElement('div');
-    controls.className = 'meal-plan-entry__servings';
-    groups.forEach((group) => {
-      if (!HOUSEHOLD_GROUPS.includes(group)) {
+    controls.className = 'meal-plan-entry__attendance';
+
+    const memberList = document.createElement('div');
+    memberList.className = 'meal-plan-entry__members';
+    state.familyMembers.forEach((member) => {
+      if (!member || !member.id) {
         return;
       }
-      const field = document.createElement('label');
-      field.className = 'meal-plan-entry__serving-field';
-      const label = document.createElement('span');
-      label.className = 'meal-plan-entry__serving-label';
-      label.textContent = group === 'adults' ? 'Adults' : 'Kids';
-      const input = document.createElement('input');
-      input.type = 'number';
-      input.min = '0';
-      input.step = '1';
-      input.className = 'meal-plan-entry__serving-input';
-      input.value = String(servings[group] || 0);
-      input.dataset.entryServings = entry.id;
-      input.dataset.entryDate = dateKey;
-      input.dataset.servingsGroup = group;
-      field.appendChild(label);
-      field.appendChild(input);
-      controls.appendChild(field);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'meal-plan-entry__member';
+      button.dataset.entryId = entry.id;
+      button.dataset.entryDate = dateKey;
+      button.dataset.entryMember = member.id;
+      button.title = member.name;
+      button.textContent = member.icon || '👤';
+      if (attendance.members.includes(member.id)) {
+        button.classList.add('meal-plan-entry__member--active');
+      }
+      memberList.appendChild(button);
     });
-    if (controls.childElementCount) {
-      article.appendChild(controls);
+    if (memberList.childElementCount) {
+      controls.appendChild(memberList);
+    } else {
+      const empty = document.createElement('p');
+      empty.className = 'meal-plan-entry__no-members';
+      empty.textContent = 'Add family members to assign meals.';
+      controls.appendChild(empty);
     }
+
+    const guestField = document.createElement('label');
+    guestField.className = 'meal-plan-entry__guest-field';
+    guestField.setAttribute('for', `meal-plan-guests-${entry.id}`);
+    const guestLabel = document.createElement('span');
+    guestLabel.className = 'meal-plan-entry__guest-label';
+    guestLabel.textContent = 'Guests';
+    const guestInput = document.createElement('input');
+    guestInput.type = 'number';
+    guestInput.min = '0';
+    guestInput.step = '1';
+    guestInput.id = `meal-plan-guests-${entry.id}`;
+    guestInput.className = 'meal-plan-entry__guest-input';
+    guestInput.value = String(attendance.guests || 0);
+    guestInput.dataset.entryId = entry.id;
+    guestInput.dataset.entryDate = dateKey;
+    guestInput.dataset.entryGuests = 'true';
+    guestField.appendChild(guestLabel);
+    guestField.appendChild(guestInput);
+    controls.appendChild(guestField);
+
+    article.appendChild(controls);
   };
 
   const createMealPlanCalendarCell = (date, options = {}) => {
@@ -2537,91 +3102,24 @@
       container.appendChild(empty);
       return;
     }
-    const splitMeals = Boolean(state.household?.splitMeals);
-    if (splitMeals) {
-      const groupsWrapper = document.createElement('div');
-      groupsWrapper.className = 'meal-plan-day__groups';
-      HOUSEHOLD_GROUPS.forEach((group) => {
-        const column = document.createElement('div');
-        column.className = 'meal-plan-day__group-column';
-        const heading = document.createElement('h4');
-        heading.className = 'meal-plan-day__group-title';
-        heading.textContent = group === 'adults' ? 'Adults' : 'Kids';
-        column.appendChild(heading);
-        const groupEntries = entries.filter((entry) => {
-          const servings = sanitizeMealPlanEntryServings(entry.servings);
-          return servings[group] > 0;
-        });
-        if (!groupEntries.length) {
-          const empty = document.createElement('p');
-          empty.className = 'meal-plan-day__group-empty';
-          empty.textContent = 'No meals assigned.';
-          column.appendChild(empty);
-        } else {
-          groupEntries.forEach((entry) => {
-            const article = createMealPlanEntryElement(entry, {
-              showRemove: true,
-              dateKey: selectedIso,
-            });
-            appendEntryServingControls(article, entry, selectedIso, [group]);
-            column.appendChild(article);
-          });
-        }
-        groupsWrapper.appendChild(column);
+    const list = document.createElement('div');
+    list.className = 'meal-plan-day__list';
+    entries.forEach((entry) => {
+      const article = createMealPlanEntryElement(entry, {
+        showRemove: true,
+        dateKey: selectedIso,
       });
-      container.appendChild(groupsWrapper);
-    } else {
-      const list = document.createElement('div');
-      list.className = 'meal-plan-day__list';
-      entries.forEach((entry) => {
-        const article = createMealPlanEntryElement(entry, {
-          showRemove: true,
-          dateKey: selectedIso,
-        });
-        appendEntryServingControls(article, entry, selectedIso, HOUSEHOLD_GROUPS);
-        list.appendChild(article);
-      });
-      container.appendChild(list);
-    }
+      appendEntryAttendanceControls(article, entry, selectedIso);
+      list.appendChild(article);
+    });
+    container.appendChild(list);
   };
 
   const renderMealPlanSummary = (selectedIso) => {
-    if (!elements.mealPlanSummary) {
+    if (!elements.mealPlanSummary || !elements.mealPlanMacros) {
       return;
     }
-    const sanitized = sanitizeHouseholdSettings(state.household);
-    let householdChanged = false;
-    if (!state.household || typeof state.household !== 'object') {
-      state.household = { ...sanitized };
-      householdChanged = true;
-    } else {
-      HOUSEHOLD_GROUPS.forEach((group) => {
-        if (state.household[group] !== sanitized[group]) {
-          state.household[group] = sanitized[group];
-          householdChanged = true;
-        }
-      });
-      if (Boolean(state.household.splitMeals) !== Boolean(sanitized.splitMeals)) {
-        state.household.splitMeals = Boolean(sanitized.splitMeals);
-        householdChanged = true;
-      }
-    }
-    const household = state.household;
-    if (householdChanged) {
-      persistAppState();
-    }
-    if (elements.mealPlanAdultsInput) {
-      elements.mealPlanAdultsInput.value = String(household.adults);
-    }
-    if (elements.mealPlanKidsInput) {
-      elements.mealPlanKidsInput.value = String(household.kids);
-    }
-    if (elements.mealPlanSplitToggle) {
-      elements.mealPlanSplitToggle.checked = Boolean(household.splitMeals);
-    }
-    if (!elements.mealPlanMacros) {
-      return;
-    }
+    const familyMembers = ensureFamilySanitized();
     const macrosContainer = elements.mealPlanMacros;
     macrosContainer.innerHTML = '';
     const macroSummary = calculateDailyMacroSummary(selectedIso);
@@ -2638,22 +3136,31 @@
       return;
     }
 
-    const buildGroupCard = (label, bucket, count, showPerPerson = true) => {
+    const totalPeople = macroSummary.overall.servings;
+    const buildCard = (config) => {
+      const { label, icon, bucket, note, targetCalories } = config;
       const section = document.createElement('section');
       section.className = 'meal-plan-summary__group';
+      if (icon) {
+        const avatar = document.createElement('span');
+        avatar.className = 'meal-plan-summary__group-icon';
+        avatar.textContent = icon;
+        section.appendChild(avatar);
+      }
       const heading = document.createElement('h4');
       heading.className = 'meal-plan-summary__group-title';
       heading.textContent = label;
-      if (typeof count === 'number' && Number.isFinite(count)) {
-        const countSpan = document.createElement('span');
-        countSpan.textContent = `${count} ${count === 1 ? 'person' : 'people'}`;
-        heading.appendChild(countSpan);
-      }
       section.appendChild(heading);
       const subtitle = document.createElement('p');
       subtitle.className = 'meal-plan-summary__group-subtitle';
       subtitle.textContent = `Servings planned: ${bucket.servings || 0}`;
       section.appendChild(subtitle);
+      if (note) {
+        const noteEl = document.createElement('p');
+        noteEl.className = 'meal-plan-summary__group-note';
+        noteEl.textContent = note;
+        section.appendChild(noteEl);
+      }
       const statList = document.createElement('dl');
       statList.className = 'meal-plan-summary__stat-list';
       MACRO_KEYS.forEach((macro) => {
@@ -2663,33 +3170,77 @@
         dt.textContent = MACRO_LABELS[macro] || macro;
         const dd = document.createElement('dd');
         dd.textContent = `${formatMacroValue(bucket[macro], macro)} total`;
-        if (showPerPerson && count > 0) {
-          const perPerson = bucket[macro] / count;
-          const note = document.createElement('span');
-          note.className = 'meal-plan-summary__stat-note';
-          note.textContent = `${formatMacroValue(perPerson, macro)} each`;
-          dd.appendChild(note);
+        if (bucket.servings > 0) {
+          const perPerson = bucket[macro] / bucket.servings;
+          const noteSpan = document.createElement('span');
+          noteSpan.className = 'meal-plan-summary__stat-note';
+          noteSpan.textContent = `${formatMacroValue(perPerson, macro)} each`;
+          dd.appendChild(noteSpan);
         }
         stat.appendChild(dt);
         stat.appendChild(dd);
         statList.appendChild(stat);
       });
+      if (typeof targetCalories === 'number' && bucket.servings > 0) {
+        const totalCalories = bucket.calories || 0;
+        const diff = targetCalories - totalCalories;
+        const diffNote = document.createElement('div');
+        diffNote.className = 'meal-plan-summary__target';
+        diffNote.textContent = `Target: ${formatMacroValue(targetCalories, 'calories')} kcal · ${
+          diff === 0
+            ? 'on track'
+            : `${diff > 0 ? '+' : ''}${formatMacroValue(diff, 'calories')} ${diff > 0 ? 'remaining' : 'over'}`
+        }`;
+        statList.appendChild(diffNote);
+      }
       section.appendChild(statList);
       return section;
     };
 
-    const totalPeople = HOUSEHOLD_GROUPS.reduce(
-      (acc, group) => acc + parseNonNegativeInteger(household[group], 0),
-      0,
-    );
     macrosContainer.appendChild(
-      buildGroupCard('Daily total', macroSummary.overall, totalPeople, totalPeople > 0),
+      buildCard({
+        label: 'Daily total',
+        bucket: macroSummary.overall,
+        note: totalPeople
+          ? `${totalPeople} ${totalPeople === 1 ? 'person' : 'people'} scheduled`
+          : undefined,
+      }),
     );
-    HOUSEHOLD_GROUPS.forEach((group) => {
-      const label = group === 'adults' ? 'Adults' : 'Kids';
-      const count = parseNonNegativeInteger(household[group], 0);
-      macrosContainer.appendChild(buildGroupCard(label, macroSummary[group], count, count > 0));
+
+    familyMembers.forEach((member) => {
+      const bucket = macroSummary.members.get(member.id) || createMacroBucket();
+      const noteParts = [];
+      if (member.allergies.length) {
+        noteParts.push(`Allergies: ${member.allergies.join(', ')}`);
+      }
+      if (member.diets.length) {
+        noteParts.push(`Diets: ${member.diets.join(', ')}`);
+      }
+      if (member.preferences) {
+        noteParts.push(member.preferences);
+      }
+      const note = noteParts.length ? noteParts.join(' • ') : undefined;
+      macrosContainer.appendChild(
+        buildCard({
+          label: member.name,
+          icon: member.icon,
+          bucket,
+          note,
+          targetCalories: member.targetCalories || undefined,
+        }),
+      );
     });
+
+    if (macroSummary.guests.servings > 0) {
+      macrosContainer.appendChild(
+        buildCard({
+          label: 'Guests',
+          icon: '🎉',
+          bucket: macroSummary.guests,
+          note: 'Adjust guest count per meal entry.',
+        }),
+      );
+    }
   };
 
   const updateMealPlanModeButtons = () => {
@@ -3350,56 +3901,41 @@
 
     if (elements.mealPlanDayDetails) {
       elements.mealPlanDayDetails.addEventListener('click', (event) => {
-        const target = event.target instanceof Element ? event.target.closest('[data-remove-entry]') : null;
-        if (!target) return;
-        const { removeEntry, entryDate } = target.dataset;
-        if (removeEntry && entryDate) {
-          removeMealPlanEntry(entryDate, removeEntry);
-          renderMealPlan();
+        const targetElement = event.target instanceof Element ? event.target : null;
+        if (!targetElement) return;
+        const removeTarget = targetElement.closest('[data-remove-entry]');
+        if (removeTarget) {
+          const { removeEntry, entryDate } = removeTarget.dataset;
+          if (removeEntry && entryDate) {
+            removeMealPlanEntry(entryDate, removeEntry);
+            renderMealPlan();
+            return;
+          }
+        }
+        const memberButton = targetElement.closest('[data-entry-member]');
+        if (memberButton) {
+          const { entryMember, entryDate, entryId } = memberButton.dataset;
+          if (entryMember && entryDate && entryId) {
+            toggleMealPlanEntryMember(entryDate, entryId, entryMember);
+            const currentIso = state.mealPlanSelectedDate;
+            const currentDate = parseISODateString(currentIso) || new Date();
+            renderMealPlanDayDetails(currentDate, currentIso);
+            renderMealPlanSummary(currentIso);
+          }
         }
       });
       elements.mealPlanDayDetails.addEventListener('change', (event) => {
-        const target = event.target instanceof HTMLInputElement ? event.target : null;
-        if (!target) return;
-        const { entryServings, entryDate, servingsGroup } = target.dataset;
-        if (!entryServings || !entryDate || !servingsGroup) {
-          return;
+        const input = event.target instanceof HTMLInputElement ? event.target : null;
+        if (!input) return;
+        if (input.dataset.entryGuests && input.dataset.entryDate && input.dataset.entryId) {
+          const normalized = Math.max(0, parseNonNegativeInteger(input.value, 0));
+          input.value = String(normalized);
+          setMealPlanEntryGuests(input.dataset.entryDate, input.dataset.entryId, normalized);
+          const currentIso = state.mealPlanSelectedDate;
+          const currentDate = parseISODateString(currentIso) || new Date();
+          renderMealPlanDayDetails(currentDate, currentIso);
+          renderMealPlanSummary(currentIso);
         }
-        const normalized = Math.max(0, parseNonNegativeInteger(target.value, 0));
-        target.value = String(normalized);
-        setMealPlanEntryServings(entryDate, entryServings, servingsGroup, normalized);
-        const currentIso = state.mealPlanSelectedDate;
-        const currentDate = parseISODateString(currentIso) || new Date();
-        renderMealPlanDayDetails(currentDate, currentIso);
-        renderMealPlanSummary(currentIso);
-      });
-    }
-
-    if (elements.mealPlanAdultsInput) {
-      elements.mealPlanAdultsInput.addEventListener('change', (event) => {
-        const value = Math.max(0, parseNonNegativeInteger(event.target.value, DEFAULT_HOUSEHOLD.adults));
-        event.target.value = String(value);
-        state.household.adults = value;
-        persistAppState();
-        renderMealPlanSummary(state.mealPlanSelectedDate);
-      });
-    }
-
-    if (elements.mealPlanKidsInput) {
-      elements.mealPlanKidsInput.addEventListener('change', (event) => {
-        const value = Math.max(0, parseNonNegativeInteger(event.target.value, DEFAULT_HOUSEHOLD.kids));
-        event.target.value = String(value);
-        state.household.kids = value;
-        persistAppState();
-        renderMealPlanSummary(state.mealPlanSelectedDate);
-      });
-    }
-
-    if (elements.mealPlanSplitToggle) {
-      elements.mealPlanSplitToggle.addEventListener('change', (event) => {
-        state.household.splitMeals = Boolean(event.target.checked);
-        persistAppState();
-        renderMealPlan();
       });
     }
 
@@ -3427,6 +3963,77 @@
         if (state.activeView !== 'meals') return;
         state.mealFilters.favoritesOnly = !state.mealFilters.favoritesOnly;
         renderApp();
+      });
+    }
+
+    if (elements.familyButton) {
+      elements.familyButton.addEventListener('click', () => {
+        if (elements.familyPanel?.dataset.open === 'true') {
+          closeFamilyPanel();
+        } else {
+          openFamilyPanel();
+        }
+      });
+    }
+
+    if (elements.familyPanelBackdrop) {
+      elements.familyPanelBackdrop.addEventListener('click', () => {
+        closeFamilyPanel();
+      });
+    }
+
+    if (elements.familyPanelClose) {
+      elements.familyPanelClose.addEventListener('click', () => {
+        closeFamilyPanel();
+      });
+    }
+
+    if (elements.familyAddButton) {
+      elements.familyAddButton.addEventListener('click', () => {
+        addFamilyMember();
+      });
+    }
+
+    if (elements.familyMemberList) {
+      elements.familyMemberList.addEventListener('input', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
+          return;
+        }
+        const field = target.dataset.familyField;
+        const card = target.closest('[data-family-id]');
+        if (!field || !card) {
+          return;
+        }
+        updateFamilyMember(card.dataset.familyId, field, target.value, { skipRender: true });
+      });
+      elements.familyMemberList.addEventListener('change', (event) => {
+        const target = event.target;
+        if (
+          !(
+            target instanceof HTMLInputElement
+            || target instanceof HTMLSelectElement
+            || target instanceof HTMLTextAreaElement
+          )
+        ) {
+          return;
+        }
+        const field = target.dataset.familyField;
+        const card = target.closest('[data-family-id]');
+        if (!field || !card) {
+          return;
+        }
+        updateFamilyMember(card.dataset.familyId, field, target.value);
+      });
+      elements.familyMemberList.addEventListener('click', (event) => {
+        const removeButton =
+          event.target instanceof Element ? event.target.closest('[data-remove-family]') : null;
+        if (removeButton) {
+          const { removeFamily } = removeButton.dataset;
+          if (removeFamily) {
+            removeFamilyMember(removeFamily);
+          }
+        }
       });
     }
 
