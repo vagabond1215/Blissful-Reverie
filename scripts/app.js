@@ -304,6 +304,109 @@
     return result;
   };
 
+  const getNthWeekdayOfMonth = (year, monthIndex, weekday, occurrence) => {
+    if (
+      !Number.isFinite(year)
+      || !Number.isFinite(monthIndex)
+      || !Number.isFinite(weekday)
+      || !Number.isFinite(occurrence)
+    ) {
+      return null;
+    }
+    const firstDay = new Date(year, monthIndex, 1);
+    const offset = (weekday - firstDay.getDay() + 7) % 7;
+    const day = 1 + offset + (occurrence - 1) * 7;
+    return new Date(year, monthIndex, day);
+  };
+
+  const getLastWeekdayOfMonth = (year, monthIndex, weekday) => {
+    if (!Number.isFinite(year) || !Number.isFinite(monthIndex) || !Number.isFinite(weekday)) {
+      return null;
+    }
+    const lastDay = new Date(year, monthIndex + 1, 0);
+    const diff = (lastDay.getDay() - weekday + 7) % 7;
+    const day = lastDay.getDate() - diff;
+    return new Date(year, monthIndex, day);
+  };
+
+  const HOLIDAY_DEFINITIONS = [
+    { id: 'new-years-day', label: "New Year's Day", getDate: (year) => new Date(year, 0, 1) },
+    {
+      id: 'martin-luther-king-jr-day',
+      label: 'Martin Luther King Jr. Day',
+      getDate: (year) => getNthWeekdayOfMonth(year, 0, 1, 3),
+    },
+    { id: 'valentines-day', label: "Valentine's Day", getDate: (year) => new Date(year, 1, 14) },
+    {
+      id: 'presidents-day',
+      label: "Presidents' Day",
+      getDate: (year) => getNthWeekdayOfMonth(year, 1, 1, 3),
+    },
+    { id: 'st-patricks-day', label: "St. Patrick's Day", getDate: (year) => new Date(year, 2, 17) },
+    {
+      id: 'mothers-day',
+      label: "Mother's Day",
+      getDate: (year) => getNthWeekdayOfMonth(year, 4, 0, 2),
+    },
+    {
+      id: 'memorial-day',
+      label: 'Memorial Day',
+      getDate: (year) => getLastWeekdayOfMonth(year, 4, 1),
+    },
+    { id: 'juneteenth', label: 'Juneteenth', getDate: (year) => new Date(year, 5, 19) },
+    {
+      id: 'independence-day',
+      label: 'Independence Day',
+      getDate: (year) => new Date(year, 6, 4),
+    },
+    {
+      id: 'labor-day',
+      label: 'Labor Day',
+      getDate: (year) => getNthWeekdayOfMonth(year, 8, 1, 1),
+    },
+    { id: 'halloween', label: 'Halloween', getDate: (year) => new Date(year, 9, 31) },
+    {
+      id: 'thanksgiving-day',
+      label: 'Thanksgiving',
+      getDate: (year) => getNthWeekdayOfMonth(year, 10, 4, 4),
+    },
+    { id: 'christmas-eve', label: 'Christmas Eve', getDate: (year) => new Date(year, 11, 24) },
+    { id: 'christmas-day', label: 'Christmas Day', getDate: (year) => new Date(year, 11, 25) },
+    { id: 'new-years-eve', label: "New Year's Eve", getDate: (year) => new Date(year, 11, 31) },
+  ];
+
+  const holidayCache = new Map();
+
+  const getHolidayLabelsForDate = (date) => {
+    if (!(date instanceof Date)) {
+      return [];
+    }
+    const year = date.getFullYear();
+    if (!holidayCache.has(year)) {
+      const yearMap = new Map();
+      HOLIDAY_DEFINITIONS.forEach((definition) => {
+        if (!definition || typeof definition.getDate !== 'function') {
+          return;
+        }
+        const resolved = definition.getDate(year);
+        if (!(resolved instanceof Date) || Number.isNaN(resolved.getTime())) {
+          return;
+        }
+        const iso = toISODateString(resolved);
+        if (!iso) {
+          return;
+        }
+        const labels = yearMap.get(iso) || [];
+        labels.push(definition.label);
+        yearMap.set(iso, labels);
+      });
+      holidayCache.set(year, yearMap);
+    }
+    const iso = toISODateString(date);
+    const labels = holidayCache.get(year).get(iso);
+    return Array.isArray(labels) ? labels.slice() : [];
+  };
+
   const getStartOfWeek = (date) => {
     const start = getStartOfDay(date);
     const diff = (start.getDay() - MEAL_PLAN_WEEK_START + 7) % 7;
@@ -2944,7 +3047,13 @@
     if (entries.length) {
       button.classList.add('meal-plan-calendar__cell--has-entries');
     }
-    const descriptiveLabel = `${formatMealPlanLongDate(date)}${entries.length
+    const holidayLabels = getHolidayLabelsForDate(date);
+    if (holidayLabels.length) {
+      button.classList.add('meal-plan-calendar__cell--holiday');
+    }
+    const descriptiveLabel = `${formatMealPlanLongDate(date)}${holidayLabels.length
+      ? `, ${holidayLabels.join(' and ')}`
+      : ''}${entries.length
       ? `, ${entries.length} planned ${entries.length === 1 ? 'item' : 'items'}`
       : ', no planned items'}`;
     button.setAttribute('aria-label', descriptiveLabel);
@@ -2961,6 +3070,12 @@
     number.className = 'meal-plan-calendar__date-number';
     number.textContent = String(date.getDate());
     dateContainer.appendChild(number);
+    if (holidayLabels.length) {
+      const holiday = document.createElement('span');
+      holiday.className = 'meal-plan-calendar__holiday';
+      holiday.textContent = holidayLabels.join(' • ');
+      dateContainer.appendChild(holiday);
+    }
     button.appendChild(dateContainer);
     const list = document.createElement('div');
     list.className = 'meal-plan-calendar__entries';

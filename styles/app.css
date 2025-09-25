@@ -2290,14 +2290,33 @@ textarea:focus {
 .meal-plan-calendar__date {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
 .meal-plan-calendar__date-number {
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--color-text-emphasis);
+}
+
+.meal-plan-calendar__holiday {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--color-accent-secondary-strong, var(--color-accent-strong));
+  background: var(--color-accent-secondary-soft, var(--color-accent-softer));
+}
+
+.meal-plan-calendar__cell--holiday {
+  border-color: var(--color-accent-secondary-outline, var(--color-accent-outline));
+  box-shadow: 0 22px 44px -28px var(--color-accent-secondary-shadow, var(--color-card-shadow-soft));
 }
 
 .meal-plan-calendar__entries {
