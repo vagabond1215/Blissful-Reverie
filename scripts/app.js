@@ -243,6 +243,57 @@
 
   const getTodayIsoDate = () => toISODateString(new Date());
 
+  const MEAL_PLAN_TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+  const normalizeMealPlanTime = (value) => {
+    if (typeof value !== 'string') {
+      return null;
+    }
+    const trimmed = value.trim();
+    if (!MEAL_PLAN_TIME_PATTERN.test(trimmed)) {
+      return null;
+    }
+    return trimmed;
+  };
+
+  const formatMealPlanTime = (value) => {
+    const normalized = normalizeMealPlanTime(value);
+    if (!normalized) {
+      return '';
+    }
+    const [hourStr, minuteStr] = normalized.split(':');
+    const hours = Number(hourStr);
+    const minutes = Number(minuteStr);
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+      return '';
+    }
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHour = hours % 12 || 12;
+    return `${displayHour}:${minuteStr} ${period}`;
+  };
+
+  const sortMealPlanEntries = (entries) => {
+    if (!Array.isArray(entries)) {
+      return [];
+    }
+    return entries.slice().sort((a, b) => {
+      const timeA = normalizeMealPlanTime(a?.time);
+      const timeB = normalizeMealPlanTime(b?.time);
+      if (timeA && timeB && timeA !== timeB) {
+        return timeA.localeCompare(timeB);
+      }
+      if (timeA && !timeB) {
+        return -1;
+      }
+      if (!timeA && timeB) {
+        return 1;
+      }
+      const titleA = typeof a?.title === 'string' ? a.title : '';
+      const titleB = typeof b?.title === 'string' ? b.title : '';
+      return titleA.localeCompare(titleB);
+    });
+  };
+
   const mealPlanEntryTypeLookup = new Map(
     MEAL_PLAN_ENTRY_TYPES.map(({ value, label }) => [value, label]),
   );
@@ -273,10 +324,15 @@
           if (!title) return;
           const type = mealPlanEntryTypeLookup.has(entry.type) ? entry.type : 'meal';
           const id = typeof entry.id === 'string' && entry.id ? entry.id : createMealPlanEntryId();
-          cleaned.push({ id, type, title });
+          const time = normalizeMealPlanTime(entry.time);
+          const cleanedEntry = { id, type, title };
+          if (time) {
+            cleanedEntry.time = time;
+          }
+          cleaned.push(cleanedEntry);
         });
         if (cleaned.length) {
-          normalized[dateKey] = cleaned;
+          normalized[dateKey] = sortMealPlanEntries(cleaned);
         }
       });
       return normalized;
@@ -890,6 +946,185 @@
   };
 
   const elements = {};
+
+  const scheduleDialogState = {
+    root: null,
+    form: null,
+    recipeLabel: null,
+    dateInput: null,
+    timeInput: null,
+    lastTimeValue: '',
+    currentRecipe: null,
+  };
+
+  const closeRecipeScheduleDialog = () => {
+    if (!scheduleDialogState.root) {
+      return;
+    }
+    scheduleDialogState.root.hidden = true;
+    scheduleDialogState.root.removeAttribute('data-open');
+    scheduleDialogState.currentRecipe = null;
+    document.removeEventListener('keydown', handleScheduleDialogKeydown);
+  };
+
+  const handleScheduleDialogKeydown = (event) => {
+    if (event.key === 'Escape') {
+      closeRecipeScheduleDialog();
+    }
+  };
+
+  const submitRecipeScheduleDialog = () => {
+    const { currentRecipe, dateInput, timeInput } = scheduleDialogState;
+    if (!currentRecipe || !dateInput || !timeInput) {
+      return;
+    }
+    const dateValue = dateInput.value;
+    if (!isValidISODateString(dateValue)) {
+      dateInput.focus();
+      return;
+    }
+    const timeValue = normalizeMealPlanTime(timeInput.value);
+    if (!timeValue) {
+      timeInput.focus();
+      return;
+    }
+    const recipeTitle = typeof currentRecipe.name === 'string' ? currentRecipe.name : '';
+    const added = addMealPlanEntry(dateValue, 'meal', recipeTitle, timeValue);
+    if (!added) {
+      return;
+    }
+    scheduleDialogState.lastTimeValue = timeValue;
+    setMealPlanSelectedDate(dateValue);
+    closeRecipeScheduleDialog();
+    if (state.activeView === 'meal-plan') {
+      renderMealPlan();
+    }
+  };
+
+  const ensureRecipeScheduleDialog = () => {
+    if (scheduleDialogState.root) {
+      return scheduleDialogState;
+    }
+    const root = document.createElement('div');
+    root.className = 'schedule-dialog';
+    root.hidden = true;
+
+    const form = document.createElement('form');
+    form.className = 'schedule-dialog__panel';
+    form.setAttribute('role', 'dialog');
+    form.setAttribute('aria-modal', 'true');
+
+    const title = document.createElement('h3');
+    title.className = 'schedule-dialog__title';
+    title.id = 'schedule-dialog-title';
+    title.textContent = 'Add to calendar';
+    form.appendChild(title);
+
+    const recipeLabel = document.createElement('p');
+    recipeLabel.className = 'schedule-dialog__recipe';
+    recipeLabel.id = 'schedule-dialog-recipe';
+    form.appendChild(recipeLabel);
+    form.setAttribute('aria-labelledby', 'schedule-dialog-title');
+    form.setAttribute('aria-describedby', 'schedule-dialog-recipe');
+
+    const dateField = document.createElement('div');
+    dateField.className = 'schedule-dialog__field';
+    const dateLabel = document.createElement('label');
+    dateLabel.className = 'schedule-dialog__label';
+    dateLabel.setAttribute('for', 'schedule-dialog-date');
+    dateLabel.textContent = 'Date';
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.required = true;
+    dateInput.id = 'schedule-dialog-date';
+    dateInput.className = 'schedule-dialog__input';
+    dateField.appendChild(dateLabel);
+    dateField.appendChild(dateInput);
+    form.appendChild(dateField);
+
+    const timeField = document.createElement('div');
+    timeField.className = 'schedule-dialog__field';
+    const timeLabel = document.createElement('label');
+    timeLabel.className = 'schedule-dialog__label';
+    timeLabel.setAttribute('for', 'schedule-dialog-time');
+    timeLabel.textContent = 'Time';
+    const timeInput = document.createElement('input');
+    timeInput.type = 'time';
+    timeInput.required = true;
+    timeInput.id = 'schedule-dialog-time';
+    timeInput.className = 'schedule-dialog__input';
+    timeField.appendChild(timeLabel);
+    timeField.appendChild(timeInput);
+    form.appendChild(timeField);
+
+    const actions = document.createElement('div');
+    actions.className = 'schedule-dialog__actions';
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.className = 'schedule-dialog__button';
+    cancelButton.textContent = 'Cancel';
+    const submitButton = document.createElement('button');
+    submitButton.type = 'submit';
+    submitButton.className = 'schedule-dialog__button schedule-dialog__button--primary';
+    submitButton.textContent = 'Add to calendar';
+    actions.appendChild(cancelButton);
+    actions.appendChild(submitButton);
+    form.appendChild(actions);
+
+    root.appendChild(form);
+    document.body.appendChild(root);
+
+    root.addEventListener('click', (event) => {
+      if (event.target === root) {
+        closeRecipeScheduleDialog();
+      }
+    });
+
+    cancelButton.addEventListener('click', () => {
+      closeRecipeScheduleDialog();
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      submitRecipeScheduleDialog();
+    });
+
+    scheduleDialogState.root = root;
+    scheduleDialogState.form = form;
+    scheduleDialogState.recipeLabel = recipeLabel;
+    scheduleDialogState.dateInput = dateInput;
+    scheduleDialogState.timeInput = timeInput;
+
+    return scheduleDialogState;
+  };
+
+  const openRecipeScheduleDialog = (recipe) => {
+    if (!recipe) {
+      return;
+    }
+    const dialog = ensureRecipeScheduleDialog();
+    dialog.currentRecipe = recipe;
+    const recipeTitle = typeof recipe.name === 'string' ? recipe.name : 'Recipe';
+    if (dialog.recipeLabel) {
+      dialog.recipeLabel.textContent = recipeTitle;
+    }
+    const defaultDate = isValidISODateString(state.mealPlanSelectedDate)
+      ? state.mealPlanSelectedDate
+      : getTodayIsoDate();
+    if (dialog.dateInput) {
+      dialog.dateInput.value = defaultDate;
+    }
+    const defaultTime = normalizeMealPlanTime(dialog.lastTimeValue) || '18:00';
+    if (dialog.timeInput) {
+      dialog.timeInput.value = defaultTime;
+    }
+    dialog.root.hidden = false;
+    dialog.root.dataset.open = 'true';
+    document.addEventListener('keydown', handleScheduleDialogKeydown);
+    window.requestAnimationFrame(() => {
+      dialog.dateInput?.focus();
+    });
+  };
   let configuredFilterView = null;
 
   const getActiveFilters = () =>
@@ -1264,7 +1499,7 @@
       return [];
     }
     const entries = state.mealPlan[isoDate];
-    return Array.isArray(entries) ? entries : [];
+    return Array.isArray(entries) ? sortMealPlanEntries(entries) : [];
   };
 
   const ensureMealPlanSelection = () => {
@@ -1283,16 +1518,21 @@
     persistAppState();
   };
 
-  const addMealPlanEntry = (isoDate, type, title) => {
+  const addMealPlanEntry = (isoDate, type, title, time) => {
     const dateKey = isValidISODateString(isoDate) ? isoDate : ensureMealPlanSelection();
     const normalizedTitle = typeof title === 'string' ? title.trim() : '';
     if (!normalizedTitle) {
       return false;
     }
     const entryType = mealPlanEntryTypeLookup.has(type) ? type : 'meal';
+    const normalizedTime = normalizeMealPlanTime(time);
     const nextEntries = getMealPlanEntries(dateKey).slice();
-    nextEntries.push({ id: createMealPlanEntryId(), type: entryType, title: normalizedTitle });
-    state.mealPlan[dateKey] = nextEntries;
+    const entry = { id: createMealPlanEntryId(), type: entryType, title: normalizedTitle };
+    if (normalizedTime) {
+      entry.time = normalizedTime;
+    }
+    nextEntries.push(entry);
+    state.mealPlan[dateKey] = sortMealPlanEntries(nextEntries);
     persistMealPlan();
     return true;
   };
@@ -1307,7 +1547,7 @@
     }
     const filtered = currentEntries.filter((entry) => entry.id !== entryId);
     if (filtered.length) {
-      state.mealPlan[isoDate] = filtered;
+      state.mealPlan[isoDate] = sortMealPlanEntries(filtered);
     } else {
       delete state.mealPlan[isoDate];
     }
@@ -1762,6 +2002,13 @@
     typeBadge.textContent = typeLabel.charAt(0).toUpperCase();
     typeBadge.title = typeLabel;
     wrapper.appendChild(typeBadge);
+    const timeLabel = formatMealPlanTime(entry.time);
+    if (timeLabel) {
+      const time = document.createElement('span');
+      time.className = 'meal-plan-calendar__entry-time';
+      time.textContent = timeLabel;
+      wrapper.appendChild(time);
+    }
     const title = document.createElement('span');
     title.className = 'meal-plan-calendar__entry-title';
     title.textContent = entry.title;
@@ -1786,6 +2033,13 @@
     title.className = 'meal-plan-entry__title';
     title.textContent = entry.title;
     content.appendChild(title);
+    const timeLabel = formatMealPlanTime(entry.time);
+    if (timeLabel) {
+      const time = document.createElement('p');
+      time.className = 'meal-plan-entry__time';
+      time.textContent = timeLabel;
+      content.appendChild(time);
+    }
     if (showMeta) {
       const meta = document.createElement('p');
       meta.className = 'meal-plan-entry__meta';
@@ -1807,7 +2061,10 @@
 
   const createMealPlanCalendarCell = (date, options = {}) => {
     const iso = toISODateString(date);
-    const entries = Array.isArray(options.entries) ? options.entries : getMealPlanEntries(iso);
+    const sourceEntries = Array.isArray(options.entries)
+      ? options.entries
+      : getMealPlanEntries(iso);
+    const entries = sortMealPlanEntries(sourceEntries);
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'meal-plan-calendar__cell';
@@ -2160,6 +2417,35 @@
 
     const headerActions = document.createElement('div');
     headerActions.className = 'meal-card__header-actions';
+
+    const scheduleButton = document.createElement('button');
+    scheduleButton.type = 'button';
+    scheduleButton.className = 'meal-card__schedule-button';
+    const recipeNameForLabel = typeof recipe.name === 'string' ? recipe.name : 'this recipe';
+    scheduleButton.setAttribute('aria-label', `Add ${recipeNameForLabel} to calendar`);
+    scheduleButton.title = 'Schedule recipe';
+    scheduleButton.innerHTML = `
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <rect x="3.75" y="4.5" width="16.5" height="15" rx="2" stroke="currentColor" stroke-width="1.5" />
+        <path d="M8 2.75v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        <path d="M16 2.75v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        <path d="M3.75 9h16.5" stroke="currentColor" stroke-width="1.5" />
+        <circle cx="12" cy="14.5" r="3" stroke="currentColor" stroke-width="1.5" />
+        <path d="M12 13v2l1.25.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    `;
+    scheduleButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      openRecipeScheduleDialog(recipe);
+    });
+    headerActions.appendChild(scheduleButton);
 
     const favoriteButton = document.createElement('button');
     favoriteButton.type = 'button';
