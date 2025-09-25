@@ -880,6 +880,28 @@
     return sanitized;
   };
 
+  const sanitizeMealPlanMacroSelection = (value, members) => {
+    const sourceMembers = Array.isArray(members)
+      ? members
+      : typeof state !== 'undefined' && Array.isArray(state.familyMembers)
+        ? state.familyMembers
+        : [];
+    const availableIds = new Set(['overall', 'guests']);
+    sourceMembers.forEach((member) => {
+      if (member && typeof member.id === 'string' && member.id) {
+        availableIds.add(member.id);
+      }
+    });
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (availableIds.has(trimmed)) {
+        return trimmed;
+      }
+    }
+    const fallback = sourceMembers.find((member) => member && member.id);
+    return fallback && fallback.id ? fallback.id : 'overall';
+  };
+
   const sanitizeMealPlanAttendance = (value) => {
     const attendance = { members: [], guests: 0 };
     if (!value) {
@@ -918,11 +940,18 @@
     const nextFilter = sanitizeMealPlanMemberFilter(state.mealPlanMemberFilter, sanitized);
     const previousFilterSerialized = JSON.stringify(state.mealPlanMemberFilter || []);
     const sanitizedFilterSerialized = JSON.stringify(nextFilter);
+    const nextMacroSelection = sanitizeMealPlanMacroSelection(
+      state.mealPlanMacroSelection,
+      sanitized,
+    );
+    const selectionChanged = nextMacroSelection !== state.mealPlanMacroSelection;
     state.familyMembers = sanitized;
     state.mealPlanMemberFilter = nextFilter;
+    state.mealPlanMacroSelection = nextMacroSelection;
     if (
       sanitizedMembersSerialized !== previousMembersSerialized
       || sanitizedFilterSerialized !== previousFilterSerialized
+      || selectionChanged
     ) {
       persistAppState();
     }
@@ -955,6 +984,7 @@
       mealPlanViewMode: DEFAULT_MEAL_PLAN_MODE,
       mealPlanSelectedDate: getTodayIsoDate(),
       mealPlanMemberFilter: [],
+      mealPlanMacroSelection: 'overall',
       servingOverrides: {},
       notes: {},
       openNotes: {},
@@ -987,6 +1017,10 @@
         stored.mealPlanMemberFilter,
         result.familyMembers,
       );
+      result.mealPlanMacroSelection = sanitizeMealPlanMacroSelection(
+        stored.mealPlanMacroSelection,
+        result.familyMembers,
+      );
       result.servingOverrides = sanitizeServingOverrides(stored.servingOverrides);
       result.notes = sanitizeNotes(stored.notes);
       result.openNotes = sanitizeOpenNotes(stored.openNotes);
@@ -1008,6 +1042,10 @@
     mealPlanSelectedDate: storedAppState.mealPlanSelectedDate,
     mealPlanMemberFilter: sanitizeMealPlanMemberFilter(
       storedAppState.mealPlanMemberFilter,
+      storedAppState.familyMembers,
+    ),
+    mealPlanMacroSelection: sanitizeMealPlanMacroSelection(
+      storedAppState.mealPlanMacroSelection,
       storedAppState.familyMembers,
     ),
     mealPlan: loadMealPlan(),
@@ -1831,16 +1869,20 @@
     const sanitized = sanitizeFamilyMembers(updated);
     const beforeMembers = JSON.stringify(state.familyMembers);
     const beforeFilter = JSON.stringify(state.mealPlanMemberFilter || []);
+    const beforeSelection = state.mealPlanMacroSelection;
     const afterMembers = JSON.stringify(sanitized);
     const nextFilter = sanitizeMealPlanMemberFilter(state.mealPlanMemberFilter, sanitized);
     const afterFilter = JSON.stringify(nextFilter);
+    const nextSelection = sanitizeMealPlanMacroSelection(beforeSelection, sanitized);
     state.familyMembers = sanitized;
     state.mealPlanMemberFilter = nextFilter;
-    if (afterMembers !== beforeMembers || afterFilter !== beforeFilter) {
+    state.mealPlanMacroSelection = nextSelection;
+    const selectionChanged = nextSelection !== beforeSelection;
+    if (afterMembers !== beforeMembers || afterFilter !== beforeFilter || selectionChanged) {
       persistAppState();
     }
     refreshScheduleDialogMembersIfOpen();
-    return afterMembers !== beforeMembers || afterFilter !== beforeFilter;
+    return afterMembers !== beforeMembers || afterFilter !== beforeFilter || selectionChanged;
   };
 
   const addFamilyMember = () => {
@@ -2190,6 +2232,10 @@
         ? state.mealPlanSelectedDate
         : getTodayIsoDate(),
       mealPlanMemberFilter: sanitizeMealPlanMemberFilter(state.mealPlanMemberFilter),
+      mealPlanMacroSelection: sanitizeMealPlanMacroSelection(
+        state.mealPlanMacroSelection,
+        state.familyMembers,
+      ),
       servingOverrides: {},
       notes: {},
       openNotes: {},
@@ -2626,6 +2672,41 @@
       state.mealPlanSelectedDate = getTodayIsoDate();
     }
     persistAppState();
+  };
+
+  const ensureMealPlanMacroSelection = (availableIds = []) => {
+    const validIds = Array.isArray(availableIds)
+      ? availableIds.filter((id) => typeof id === 'string' && id)
+      : [];
+    const current = typeof state.mealPlanMacroSelection === 'string'
+      ? state.mealPlanMacroSelection
+      : '';
+    if (validIds.length && validIds.includes(current)) {
+      return current;
+    }
+    const fallback = validIds[0] || 'overall';
+    if (fallback && current !== fallback) {
+      state.mealPlanMacroSelection = fallback;
+      persistAppState();
+    }
+    return fallback;
+  };
+
+  const setMealPlanMacroSelection = (selection, options = {}) => {
+    const { shouldPersist = true, shouldRender = true } = options;
+    const sanitized = sanitizeMealPlanMacroSelection(selection, state.familyMembers);
+    if (sanitized === state.mealPlanMacroSelection) {
+      return sanitized;
+    }
+    state.mealPlanMacroSelection = sanitized;
+    if (shouldPersist) {
+      persistAppState();
+    }
+    if (shouldRender) {
+      const iso = ensureMealPlanSelection();
+      renderMealPlanSummary(iso);
+    }
+    return sanitized;
   };
 
   const addMealPlanEntry = (isoDate, type, title, time, metadata = {}) => {
@@ -3643,6 +3724,88 @@
     }
 
     const totalPeople = macroSummary.overall.servings;
+    const macroOptions = [];
+    macroOptions.push({
+      id: 'overall',
+      label: 'Daily total',
+      icon: '👥',
+      bucket: macroSummary.overall,
+      note: totalPeople
+        ? `${totalPeople} ${totalPeople === 1 ? 'person' : 'people'} scheduled`
+        : undefined,
+    });
+
+    familyMembers.forEach((member) => {
+      const bucket = macroSummary.members.get(member.id) || createMacroBucket();
+      const noteParts = [];
+      if (member.allergies.length) {
+        noteParts.push(`Allergies: ${member.allergies.join(', ')}`);
+      }
+      if (member.diets.length) {
+        noteParts.push(`Diets: ${member.diets.join(', ')}`);
+      }
+      if (member.birthday) {
+        const birthdayText = formatBirthday(member.birthday);
+        if (birthdayText) {
+          noteParts.push(`Birthday: ${birthdayText}`);
+        }
+      }
+      if (member.preferences) {
+        noteParts.push(member.preferences);
+      }
+      const note = noteParts.length ? noteParts.join(' • ') : undefined;
+      macroOptions.push({
+        id: member.id,
+        label: member.name,
+        icon: member.icon,
+        bucket,
+        note,
+        targetCalories: member.targetCalories || undefined,
+      });
+    });
+
+    if (macroSummary.guests.servings > 0) {
+      macroOptions.push({
+        id: 'guests',
+        label: 'Guests',
+        icon: '🎉',
+        bucket: macroSummary.guests,
+        note: 'Adjust guest count per meal entry.',
+      });
+    }
+
+    const availableIds = macroOptions.map((option) => option.id);
+    const activeId = ensureMealPlanMacroSelection(availableIds);
+    const activeOption = macroOptions.find((option) => option.id === activeId) || macroOptions[0];
+
+    if (macroOptions.length) {
+      const iconRow = document.createElement('div');
+      iconRow.className = 'meal-plan-macro-icons';
+      macroOptions.forEach((option) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'meal-plan-macro-icons__button';
+        const isActive = option.id === activeId;
+        if (isActive) {
+          button.classList.add('meal-plan-macro-icons__button--active');
+        }
+        const icon = option.icon || '👤';
+        button.textContent = icon;
+        const labelText = option.label || 'Family member';
+        button.title = labelText;
+        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        button.setAttribute(
+          'aria-label',
+          isActive ? `${labelText} macros selected` : `Show macros for ${labelText}`,
+        );
+        button.addEventListener('click', () => {
+          setMealPlanMacroSelection(option.id);
+        });
+        iconRow.appendChild(button);
+      });
+      macrosContainer.appendChild(iconRow);
+    }
+
     const buildCard = (config) => {
       const { label, icon, bucket, note, targetCalories } = config;
       const section = document.createElement('section');
@@ -3703,55 +3866,8 @@
       return section;
     };
 
-    macrosContainer.appendChild(
-      buildCard({
-        label: 'Daily total',
-        bucket: macroSummary.overall,
-        note: totalPeople
-          ? `${totalPeople} ${totalPeople === 1 ? 'person' : 'people'} scheduled`
-          : undefined,
-      }),
-    );
-
-    familyMembers.forEach((member) => {
-      const bucket = macroSummary.members.get(member.id) || createMacroBucket();
-      const noteParts = [];
-      if (member.allergies.length) {
-        noteParts.push(`Allergies: ${member.allergies.join(', ')}`);
-      }
-      if (member.diets.length) {
-        noteParts.push(`Diets: ${member.diets.join(', ')}`);
-      }
-      if (member.birthday) {
-        const birthdayText = formatBirthday(member.birthday);
-        if (birthdayText) {
-          noteParts.push(`Birthday: ${birthdayText}`);
-        }
-      }
-      if (member.preferences) {
-        noteParts.push(member.preferences);
-      }
-      const note = noteParts.length ? noteParts.join(' • ') : undefined;
-      macrosContainer.appendChild(
-        buildCard({
-          label: member.name,
-          icon: member.icon,
-          bucket,
-          note,
-          targetCalories: member.targetCalories || undefined,
-        }),
-      );
-    });
-
-    if (macroSummary.guests.servings > 0) {
-      macrosContainer.appendChild(
-        buildCard({
-          label: 'Guests',
-          icon: '🎉',
-          bucket: macroSummary.guests,
-          note: 'Adjust guest count per meal entry.',
-        }),
-      );
+    if (activeOption) {
+      macrosContainer.appendChild(buildCard(activeOption));
     }
   };
 
@@ -3979,32 +4095,49 @@
     });
     headerActions.appendChild(favoriteButton);
 
-    const controls = document.createElement('div');
-    controls.className = 'serving-controls';
-    const label = document.createElement('label');
-    const span = document.createElement('span');
-    span.textContent = 'Servings';
-    const input = document.createElement('input');
-    input.type = 'number';
-    input.min = '1';
-    input.value = String(currentServings);
-    input.addEventListener('change', (event) => {
-      const parsed = Number(event.target.value);
-      const valid = Number.isFinite(parsed) && parsed > 0 ? Math.max(1, Math.round(parsed)) : recipe.baseServings;
-      if (valid === recipe.baseServings) {
+    const baseServings = Math.max(1, Number(recipe.baseServings) || 1);
+    const updateServings = (delta) => {
+      const currentValue = state.servingOverrides[recipe.id] ?? baseServings;
+      const nextValue = Math.max(1, Math.round(currentValue + delta));
+      if (nextValue === currentValue) {
+        return;
+      }
+      if (nextValue === baseServings) {
         delete state.servingOverrides[recipe.id];
       } else {
-        state.servingOverrides[recipe.id] = valid;
+        state.servingOverrides[recipe.id] = nextValue;
       }
       renderApp();
+    };
+
+    const controls = document.createElement('div');
+    controls.className = 'serving-controls';
+    const increaseButton = document.createElement('button');
+    increaseButton.type = 'button';
+    increaseButton.className = 'serving-controls__chevron';
+    increaseButton.textContent = '⌃';
+    increaseButton.setAttribute('aria-label', `Increase servings for ${recipeNameForLabel}`);
+    increaseButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      updateServings(1);
     });
-    label.appendChild(span);
-    label.appendChild(input);
-    controls.appendChild(label);
-    const base = document.createElement('p');
-    base.className = 'base-serving';
-    base.textContent = `Base: ${recipe.baseServings}`;
-    controls.appendChild(base);
+    controls.appendChild(increaseButton);
+
+    const display = document.createElement('div');
+    display.className = 'serving-controls__display';
+    display.textContent = `[${currentServings}] Servings`;
+    controls.appendChild(display);
+
+    const decreaseButton = document.createElement('button');
+    decreaseButton.type = 'button';
+    decreaseButton.className = 'serving-controls__chevron';
+    decreaseButton.textContent = '⌄';
+    decreaseButton.setAttribute('aria-label', `Decrease servings for ${recipeNameForLabel}`);
+    decreaseButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      updateServings(-1);
+    });
+    controls.appendChild(decreaseButton);
     headerActions.appendChild(controls);
     header.appendChild(headerActions);
     card.appendChild(header);
