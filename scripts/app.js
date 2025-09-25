@@ -155,6 +155,73 @@
     '👦',
     '👶',
     '🐾',
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'H',
+    'I',
+    'J',
+    'K',
+    'L',
+    'M',
+    'N',
+    'O',
+    'P',
+    'Q',
+    'R',
+    'S',
+    'T',
+    'U',
+    'V',
+    'W',
+    'X',
+    'Y',
+    'Z',
+    '0',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '🔴',
+    '🟠',
+    '🟡',
+    '🟢',
+    '🔵',
+    '🟣',
+    '🟤',
+    '⚫',
+    '⚪',
+    '🐶',
+    '🐱',
+    '🐭',
+    '🐹',
+    '🐰',
+    '🦊',
+    '🐻',
+    '🐼',
+    '🐨',
+    '🐯',
+    '🦁',
+    '🐮',
+    '🐷',
+    '🐸',
+    '🐵',
+    '🐤',
+    '🐧',
+    '🐦',
+    '🦄',
+    '🐢',
+    '🦕',
+    '🦖',
   ];
 
   const FAMILY_DIET_OPTIONS = [
@@ -3082,11 +3149,13 @@
     const typeLabel = mealPlanEntryTypeLookup.get(normalizedType) || 'Meal';
     const article = document.createElement('article');
     article.className = 'meal-plan-entry';
+    const main = document.createElement('div');
+    main.className = 'meal-plan-entry__main';
     const badge = document.createElement('span');
     badge.className = `meal-plan-entry__type meal-plan-entry__type--${normalizedType}`;
     badge.textContent = typeLabel.charAt(0).toUpperCase();
     badge.title = typeLabel;
-    article.appendChild(badge);
+    main.appendChild(badge);
     const content = document.createElement('div');
     content.className = 'meal-plan-entry__content';
     const title = document.createElement('p');
@@ -3106,7 +3175,8 @@
       meta.textContent = typeLabel;
       content.appendChild(meta);
     }
-    article.appendChild(content);
+    main.appendChild(content);
+    article.appendChild(main);
     if (showRemove && dateKey) {
       const removeButton = document.createElement('button');
       removeButton.type = 'button';
@@ -3114,7 +3184,7 @@
       removeButton.dataset.removeEntry = entry.id;
       removeButton.dataset.entryDate = dateKey;
       removeButton.textContent = 'Remove';
-      article.appendChild(removeButton);
+      main.appendChild(removeButton);
     }
     return article;
   };
