@@ -1609,7 +1609,7 @@
 
   const INGREDIENT_FILTER_GROUPS = [
     { id: 'protein', label: 'Protein', categories: ['Meat', 'Seafood'] },
-    { id: 'legumes', label: 'Legumes & Plant Proteins', categories: ['Legume'] },
+    { id: 'legumes', label: 'Legumes and Plant Proteins', categories: ['Legume', 'Plant Protein'] },
     { id: 'vegetables', label: 'Vegetables', categories: ['Vegetable'] },
     { id: 'fruits', label: 'Fruits', categories: ['Fruit'] },
     { id: 'pasta-grains', label: 'Pasta & Grains', categories: ['Pasta', 'Grain'] },

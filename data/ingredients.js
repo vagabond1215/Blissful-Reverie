@@ -176,6 +176,9 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'nut-walnut', name: 'Walnuts', category: 'Nut/Seed', tags: ['Contains Nuts', 'Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'nut-pecan', name: 'Pecans', category: 'Nut/Seed', tags: ['Contains Nuts', 'Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'nut-hazelnut', name: 'Hazelnuts', category: 'Nut/Seed', tags: ['Contains Nuts', 'Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'nut-macadamia', name: 'Macadamia Nuts', category: 'Nut/Seed', tags: ['Contains Nuts', 'Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'nut-brazil', name: 'Brazil Nuts', category: 'Nut/Seed', tags: ['Contains Nuts', 'Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'seed-pine-nut', name: 'Pine Nuts', category: 'Nut/Seed', tags: ['Contains Nuts', 'Gluten-Free', 'Vegetarian', 'Vegan'] },
 
   // Grains & Cereals
   { slug: 'grain-barley', name: 'Barley', category: 'Grain', tags: ['Contains Gluten', 'Vegetarian', 'Vegan'] },
@@ -194,7 +197,7 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'grain-granola', name: 'Granola', category: 'Grain', tags: ['Contains Gluten', 'Vegetarian', 'Vegan'] },
   { slug: 'grain-tortilla-strips', name: 'Tortilla Strips', category: 'Grain', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan'] },
 
-  // Legumes
+  // Legumes & Plant Proteins
   { slug: 'legume-black-beans', name: 'Black Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'legume-chickpea', name: 'Chickpeas', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'legume-edamame', name: 'Edamame', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Contains Soy'] },
@@ -208,10 +211,14 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'legume-great-northern-beans', name: 'Great Northern Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'legume-black-eyed-peas', name: 'Black-Eyed Peas', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'legume-lentil-red', name: 'Lentils (Red)', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
-  { slug: 'legume-tofu-extra-firm', name: 'Tofu (Extra-Firm)', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Contains Soy'] },
-  { slug: 'legume-tempeh', name: 'Tempeh', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Contains Soy'] },
-  { slug: 'legume-textured-vegetable-protein', name: 'Textured Vegetable Protein (TVP)', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Contains Soy'] },
-  { slug: 'legume-chickpea-flour', name: 'Chickpea Flour', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'legume-lima-beans', name: 'Lima Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'legume-butter-beans', name: 'Butter Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'legume-refried-beans', name: 'Refried Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'legume-adzuki-beans', name: 'Adzuki Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'legume-tofu-extra-firm', name: 'Tofu (Extra-Firm)', category: 'Plant Protein', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Contains Soy'] },
+  { slug: 'legume-tempeh', name: 'Tempeh', category: 'Plant Protein', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Contains Soy'] },
+  { slug: 'legume-textured-vegetable-protein', name: 'Textured Vegetable Protein (TVP)', category: 'Plant Protein', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Contains Soy'] },
+  { slug: 'legume-chickpea-flour', name: 'Chickpea Flour', category: 'Plant Protein', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
 
   // Oils & Fats
   { slug: 'oil-avocado', name: 'Avocado Oil', category: 'Oil/Fat', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
