@@ -29,6 +29,9 @@
                     Meal Plan
                   </button>
                 </div>
+                <button type="button" class="family-button" id="family-button">
+                  Family
+                </button>
                 <details class="settings-panel" id="settings-panel">
                   <summary
                     class="settings-panel__summary"
@@ -227,35 +230,11 @@
             <aside class="meal-plan-sidebar" id="meal-plan-sidebar">
               <section class="meal-plan-day" id="meal-plan-day-details"></section>
               <section class="meal-plan-summary" id="meal-plan-summary">
-                <h3 class="meal-plan-summary__title">Daily macros</h3>
-                <div class="meal-plan-summary__controls">
-                  <label class="meal-plan-summary__control" for="meal-plan-adults">
-                    <span class="meal-plan-summary__control-label">Adults</span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      class="meal-plan-summary__input"
-                      id="meal-plan-adults"
-                      name="meal-plan-adults"
-                    />
-                  </label>
-                  <label class="meal-plan-summary__control" for="meal-plan-kids">
-                    <span class="meal-plan-summary__control-label">Kids</span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      class="meal-plan-summary__input"
-                      id="meal-plan-kids"
-                      name="meal-plan-kids"
-                    />
-                  </label>
-                  <label class="meal-plan-summary__toggle" for="meal-plan-split">
-                    <input type="checkbox" id="meal-plan-split" name="meal-plan-split" />
-                    <span>Separate meals for adults &amp; kids</span>
-                  </label>
-                </div>
+                <h3 class="meal-plan-summary__title">Daily overview</h3>
+                <p class="meal-plan-summary__hint">
+                  Manage your household in the Family menu, then toggle icons on each meal to track
+                  attendance and guest counts.
+                </p>
                 <div class="meal-plan-summary__macros" id="meal-plan-macros" aria-live="polite"></div>
               </section>
             </aside>
@@ -286,5 +265,29 @@
     <script src="data/recipes.js"></script>
     <script src="scripts/ingredient-matching.js"></script>
     <script src="scripts/app.js"></script>
+    <div class="family-panel" id="family-panel" hidden>
+      <div class="family-panel__backdrop" id="family-panel-backdrop" aria-hidden="true"></div>
+      <section
+        class="family-panel__content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="family-panel-title"
+      >
+        <header class="family-panel__header">
+          <h2 class="family-panel__title" id="family-panel-title">Family</h2>
+          <button type="button" class="family-panel__close" id="family-panel-close" aria-label="Close family panel">
+            Close
+          </button>
+        </header>
+        <div class="family-panel__body">
+          <p class="family-panel__intro">
+            Add the people you cook for regularly, including allergies, diets, targets, and icons for
+            quick planning.
+          </p>
+          <div class="family-panel__list" id="family-member-list"></div>
+          <button type="button" class="family-panel__add" id="family-add-member">Add family member</button>
+        </div>
+      </section>
+    </div>
   </body>
 </html>

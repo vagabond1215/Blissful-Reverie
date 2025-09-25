@@ -221,6 +221,33 @@ select {
   flex: 0 0 auto;
 }
 
+.family-button {
+  flex: 0 0 auto;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(
+      --view-toggle-inactive-border,
+      rgba(125, 147, 65, 0.45)
+    );
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease,
+    color 0.2s ease;
+}
+
+.family-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px -18px var(--color-card-shadow-soft);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.family-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
 .menu-column .view-toggle {
   justify-content: flex-start;
 }
@@ -1637,38 +1664,81 @@ textarea:focus {
   padding: 0 0.25rem;
 }
 
-.schedule-dialog__servings {
+.schedule-dialog__members {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.6rem;
+  margin: 0.5rem 0 0.75rem;
 }
 
-.schedule-dialog__serving-field {
-  display: flex;
+.schedule-dialog__member {
+  display: inline-flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.35rem;
-  flex: 1 1 120px;
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
+  padding: 0.55rem 0.65rem;
+  border-radius: 12px;
+  border: 1px solid rgba(68, 83, 214, 0.25);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-strong);
+  cursor: pointer;
+  min-width: 3.25rem;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
 }
 
-.schedule-dialog__serving-field span {
+.schedule-dialog__member:hover {
+  border-color: rgba(68, 83, 214, 0.45);
+}
+
+.schedule-dialog__member--active {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(68, 83, 214, 0.16);
+  background: rgba(68, 83, 214, 0.14);
+}
+
+.schedule-dialog__member-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.schedule-dialog__member-name {
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
-.schedule-dialog__serving-input {
-  padding: 0.55rem 0.65rem;
-  border-radius: 10px;
-  border: 1px solid var(--color-border-muted);
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--color-text-emphasis);
-  font-size: 0.95rem;
+.schedule-dialog__members-empty {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
 }
 
-.schedule-dialog__serving-input:focus {
+.schedule-dialog__guest-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 160px;
+}
+
+.schedule-dialog__guest-field span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.schedule-dialog__guest-input {
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(68, 83, 214, 0.25);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-strong);
+  font-weight: 600;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.schedule-dialog__guest-input:focus {
   outline: none;
   border-color: var(--color-accent-border);
-  box-shadow: 0 0 0 2px rgba(68, 83, 214, 0.18);
+  box-shadow: 0 0 0 3px rgba(68, 83, 214, 0.18);
 }
 
 .schedule-dialog__button {
@@ -1703,6 +1773,226 @@ textarea:focus {
   box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
+
+.family-panel {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  z-index: 40;
+}
+
+.family-panel__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(6px);
+}
+
+.family-panel__content {
+  position: relative;
+  width: min(720px, 92vw);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(68, 83, 214, 0.18);
+  box-shadow: 0 30px 70px -40px rgba(15, 23, 42, 0.5);
+  overflow: hidden;
+}
+
+.family-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.5rem;
+  background: linear-gradient(135deg, rgba(68, 83, 214, 0.15), rgba(245, 158, 11, 0.12));
+  border-bottom: 1px solid rgba(68, 83, 214, 0.12);
+}
+
+.family-panel__title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-text-emphasis);
+}
+
+.family-panel__close {
+  border: none;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.family-panel__close:hover {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 10px 25px -20px var(--color-card-shadow);
+}
+
+.family-panel__close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.family-panel__body {
+  padding: 1.25rem 1.5rem 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.family-panel__intro {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.family-panel__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.family-panel__empty {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.family-panel__add {
+  align-self: flex-start;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid var(--view-toggle-inactive-border, rgba(125, 147, 65, 0.45));
+  background: rgba(68, 83, 214, 0.12);
+  color: var(--color-text-emphasis);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.family-panel__add:hover {
+  transform: translateY(-1px);
+  background: rgba(68, 83, 214, 0.18);
+  box-shadow: 0 12px 24px -18px var(--color-card-shadow-soft);
+}
+
+.family-panel__add:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.family-member-card {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(68, 83, 214, 0.18);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  box-shadow: 0 18px 40px -32px var(--color-card-shadow);
+}
+
+.family-member-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.family-member-card__avatar {
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  border: 1px solid rgba(68, 83, 214, 0.18);
+  background: rgba(68, 83, 214, 0.08);
+}
+
+.family-member-card__name {
+  flex: 1 1 auto;
+  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  color: var(--color-text-strong);
+}
+
+.family-member-card__name:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.family-member-card__remove {
+  border: none;
+  background: transparent;
+  color: var(--color-danger);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.family-member-card__remove:hover {
+  background: rgba(185, 28, 28, 0.12);
+}
+
+.family-member-card__remove:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.2);
+}
+
+.family-member-card__fields {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.family-member-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.family-member-card__field--textarea textarea {
+  min-height: 3.75rem;
+  resize: vertical;
+}
+
+.family-member-card__field input,
+.family-member-card__field select,
+.family-member-card__field textarea {
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border-muted);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--color-text-strong);
+  font: inherit;
+}
+
+.family-member-card__field input:focus-visible,
+.family-member-card__field select:focus-visible,
+.family-member-card__field textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
 .meal-plan-summary {
   display: flex;
   flex-direction: column;
@@ -1720,56 +2010,10 @@ textarea:focus {
   color: var(--color-text-emphasis);
 }
 
-.meal-plan-summary__controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: flex-end;
-}
-
-.meal-plan-summary__control {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  flex: 1 1 120px;
-}
-
-.meal-plan-summary__control-label {
-  font-size: 0.9rem;
-  font-weight: 600;
+.meal-plan-summary__hint {
+  margin: 0;
+  font-size: 0.85rem;
   color: var(--color-text-secondary);
-}
-
-.meal-plan-summary__input {
-  width: 100%;
-  padding: 0.65rem 0.75rem;
-  border-radius: 12px;
-  border: 1px solid var(--color-border, rgba(148, 168, 69, 0.35));
-  background: #ffffff;
-  color: var(--color-text-strong);
-  transition: border-color 120ms ease, box-shadow 120ms ease;
-}
-
-.meal-plan-summary__input:focus {
-  border-color: var(--color-accent-border);
-  box-shadow: 0 0 0 3px rgba(68, 83, 214, 0.15);
-  outline: none;
-}
-
-.meal-plan-summary__toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-}
-
-.meal-plan-summary__toggle input {
-  width: 1.1rem;
-  height: 1.1rem;
-  accent-color: var(--color-accent, #4453d6);
 }
 
 .meal-plan-summary__macros {
@@ -1788,6 +2032,11 @@ textarea:focus {
   border: 1px solid rgba(68, 83, 214, 0.18);
 }
 
+.meal-plan-summary__group-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
 .meal-plan-summary__group-title {
   display: flex;
   justify-content: space-between;
@@ -1802,6 +2051,12 @@ textarea:focus {
 .meal-plan-summary__group-subtitle {
   margin: 0;
   font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.meal-plan-summary__group-note {
+  margin: 0;
+  font-size: 0.75rem;
   color: var(--color-text-muted);
 }
 
@@ -1850,68 +2105,89 @@ textarea:focus {
   color: var(--color-text-muted);
 }
 
-.meal-plan-day__groups {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-  gap: 1rem;
+.meal-plan-summary__target {
+  grid-column: 1 / -1;
+  padding: 0.6rem 0.7rem;
+  border-radius: 10px;
+  background: rgba(68, 83, 214, 0.14);
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
-.meal-plan-day__group-column {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
 
-.meal-plan-day__group-title {
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-}
-
-.meal-plan-day__group-empty {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-}
-
-.meal-plan-entry__servings {
+.meal-plan-entry__attendance {
   margin-top: 0.75rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.6rem;
+  align-items: center;
 }
 
-.meal-plan-entry__serving-field {
+.meal-plan-entry__members {
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.meal-plan-entry__member {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(68, 83, 214, 0.25);
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 1.35rem;
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.meal-plan-entry__member:hover {
+  border-color: rgba(68, 83, 214, 0.45);
+}
+
+.meal-plan-entry__member--active {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(68, 83, 214, 0.16);
+  background: rgba(68, 83, 214, 0.14);
+}
+
+.meal-plan-entry__no-members {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.meal-plan-entry__guest-field {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.8rem;
   color: var(--color-text-secondary);
 }
 
-.meal-plan-entry__serving-label {
+.meal-plan-entry__guest-label {
   font-weight: 600;
 }
 
-.meal-plan-entry__serving-input {
-  width: 100%;
-  min-width: 80px;
-  padding: 0.45rem 0.55rem;
+.meal-plan-entry__guest-input {
+  width: 3.5rem;
+  padding: 0.45rem 0.5rem;
   border-radius: 10px;
   border: 1px solid var(--color-border-muted);
   background: rgba(255, 255, 255, 0.92);
-  color: var(--color-text-emphasis);
-  font-size: 0.85rem;
+  color: var(--color-text-strong);
+  font-size: 0.9rem;
 }
 
-.meal-plan-entry__serving-input:focus {
+.meal-plan-entry__guest-input:focus {
   outline: none;
   border-color: var(--color-accent-border);
-  box-shadow: 0 0 0 2px rgba(68, 83, 214, 0.18);
+  box-shadow: 0 0 0 3px rgba(68, 83, 214, 0.14);
 }
+
 
 .meal-plan-calendar__day-names,
 .meal-plan-calendar__week,
