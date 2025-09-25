@@ -11,6 +11,9 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'pasta-rice-noodles', name: 'Rice Noodles', category: 'Pasta', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'pasta-soba-buckwheat', name: 'Soba (Buckwheat)', category: 'Pasta', tags: ['May Contain Gluten', 'Vegetarian'] }, // many soba blends include wheat
   { slug: 'pasta-gluten-free-blend', name: 'Gluten-Free Pasta (corn/rice/quinoa)', category: 'Pasta', tags: ['Gluten-Free', 'Vegetarian'] },
+  { slug: 'pasta-farfalle', name: 'Farfalle', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
+  { slug: 'pasta-lasagna-noodles', name: 'Lasagna Noodles', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
+  { slug: 'pasta-orzo', name: 'Orzo', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
 
   // Dairy
   { slug: 'dairy-butter-unsalted', name: 'Butter (Unsalted)', category: 'Dairy', tags: ['Contains Dairy', 'Vegetarian'] },
@@ -25,6 +28,10 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'dairy-cheese-parmesan', name: 'Parmesan', category: 'Dairy', tags: ['Contains Dairy', 'Vegetarian'] },
   { slug: 'dairy-yogurt-plain', name: 'Yogurt (Plain)', category: 'Dairy', tags: ['Contains Dairy', 'Vegetarian'] },
   { slug: 'dairy-ghee', name: 'Ghee', category: 'Dairy', tags: ['Contains Dairy', 'Vegetarian'] },
+  { slug: 'dairy-cream-cheese', name: 'Cream Cheese', category: 'Dairy', tags: ['Contains Dairy', 'Vegetarian'] },
+  { slug: 'dairy-cheese-ricotta', name: 'Ricotta', category: 'Dairy', tags: ['Contains Dairy', 'Vegetarian'] },
+  { slug: 'dairy-yogurt-greek', name: 'Yogurt (Greek)', category: 'Dairy', tags: ['Contains Dairy', 'Vegetarian'] },
+  { slug: 'dairy-buttermilk', name: 'Buttermilk', category: 'Dairy', tags: ['Contains Dairy', 'Vegetarian'] },
 
   // Meat (raw single-ingredient; suitability tags are general)
   { slug: 'meat-beef-ground-85', name: 'Ground Beef (85% Lean)', category: 'Meat', tags: ['Halal-Friendly', 'Kosher-Friendly', 'Paleo'] },
@@ -36,6 +43,9 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'meat-turkey-ground', name: 'Ground Turkey', category: 'Meat', tags: ['Halal-Friendly', 'Kosher-Friendly', 'Paleo'] },
   { slug: 'meat-lamb-leg', name: 'Lamb Leg', category: 'Meat', tags: ['Halal-Friendly', 'Kosher-Friendly', 'Paleo'] },
   { slug: 'meat-bacon', name: 'Bacon', category: 'Meat', tags: ['Paleo'] },
+  { slug: 'meat-sausage-italian', name: 'Italian Sausage', category: 'Meat', tags: ['Paleo'] },
+  { slug: 'meat-ham', name: 'Ham', category: 'Meat', tags: [] },
+  { slug: 'meat-chicken-drumstick', name: 'Chicken Drumsticks', category: 'Meat', tags: ['Halal-Friendly', 'Kosher-Friendly', 'Paleo'] },
 
   // Seafood (included for completeness; mark pescatarian)
   { slug: 'seafood-salmon', name: 'Salmon', category: 'Seafood', tags: ['Pescatarian', 'Gluten-Free'] },
@@ -44,6 +54,9 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'seafood-cod', name: 'Cod Fillets', category: 'Seafood', tags: ['Pescatarian', 'Gluten-Free'] },
   { slug: 'seafood-scallops', name: 'Sea Scallops', category: 'Seafood', tags: ['Pescatarian', 'Gluten-Free', 'Shellfish'] },
   { slug: 'seafood-mussels', name: 'Mussels', category: 'Seafood', tags: ['Pescatarian', 'Gluten-Free', 'Shellfish'] },
+  { slug: 'seafood-crab', name: 'Crab', category: 'Seafood', tags: ['Pescatarian', 'Gluten-Free', 'Shellfish'] },
+  { slug: 'seafood-lobster', name: 'Lobster', category: 'Seafood', tags: ['Pescatarian', 'Gluten-Free', 'Shellfish'] },
+  { slug: 'seafood-clams', name: 'Clams', category: 'Seafood', tags: ['Pescatarian', 'Gluten-Free', 'Shellfish'] },
 
   // Herbs
   { slug: 'herb-basil', name: 'Basil', category: 'Herb', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
@@ -54,6 +67,9 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'herb-parsley', name: 'Parsley', category: 'Herb', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'herb-rosemary', name: 'Rosemary', category: 'Herb', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'herb-thyme', name: 'Thyme', category: 'Herb', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'herb-chives', name: 'Chives', category: 'Herb', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'herb-sage', name: 'Sage', category: 'Herb', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'herb-tarragon', name: 'Tarragon', category: 'Herb', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
 
   // Spices
   { slug: 'spice-black-pepper', name: 'Black Pepper', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
@@ -66,6 +82,10 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'spice-paprika', name: 'Paprika', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Nightshade'] },
   { slug: 'spice-turmeric', name: 'Turmeric', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'spice-ginger-ground', name: 'Ginger (Ground)', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'spice-bay-leaf', name: 'Bay Leaf', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'spice-nutmeg-ground', name: 'Nutmeg (Ground)', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'spice-smoked-paprika', name: 'Paprika (Smoked)', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Nightshade'] },
+  { slug: 'spice-clove-ground', name: 'Cloves (Ground)', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
 
   // Vegetables
   { slug: 'veg-asparagus', name: 'Asparagus', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Low-FODMAP'] },
@@ -89,6 +109,11 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'veg-sweet-potato', name: 'Sweet Potato', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Low-FODMAP'] },
   { slug: 'veg-tomato-roma', name: 'Tomato (Roma)', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Nightshade'] },
   { slug: 'veg-zucchini', name: 'Zucchini', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Low-FODMAP'] },
+  { slug: 'veg-brussels-sprouts', name: 'Brussels Sprouts', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'veg-cabbage-green', name: 'Green Cabbage', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'veg-onion-red', name: 'Onion (Red)', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Allium'] },
+  { slug: 'veg-shallot', name: 'Shallot', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Allium'] },
+  { slug: 'veg-bok-choy', name: 'Bok Choy', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
 
   // Fruits
   { slug: 'fruit-apple', name: 'Apple', category: 'Fruit', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Low-FODMAP'] },
@@ -100,6 +125,9 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'fruit-lime', name: 'Lime', category: 'Fruit', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Low-FODMAP'] },
   { slug: 'fruit-orange', name: 'Orange', category: 'Fruit', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Low-FODMAP'] },
   { slug: 'fruit-strawberry', name: 'Strawberries', category: 'Fruit', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Low-FODMAP'] },
+  { slug: 'fruit-pineapple', name: 'Pineapple', category: 'Fruit', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'fruit-mango', name: 'Mango', category: 'Fruit', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'fruit-peach', name: 'Peach', category: 'Fruit', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
 
   // Nuts & Seeds
   { slug: 'nut-almond', name: 'Almonds', category: 'Nut/Seed', tags: ['Contains Nuts', 'Gluten-Free', 'Vegetarian', 'Vegan'] },
@@ -112,6 +140,8 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'seed-sesame', name: 'Sesame Seeds', category: 'Nut/Seed', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Sesame'] },
   { slug: 'seed-sunflower', name: 'Sunflower Seeds', category: 'Nut/Seed', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'nut-walnut', name: 'Walnuts', category: 'Nut/Seed', tags: ['Contains Nuts', 'Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'nut-pecan', name: 'Pecans', category: 'Nut/Seed', tags: ['Contains Nuts', 'Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'nut-hazelnut', name: 'Hazelnuts', category: 'Nut/Seed', tags: ['Contains Nuts', 'Gluten-Free', 'Vegetarian', 'Vegan'] },
 
   // Grains & Cereals
   { slug: 'grain-barley', name: 'Barley', category: 'Grain', tags: ['Contains Gluten', 'Vegetarian', 'Vegan'] },
@@ -124,6 +154,9 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'grain-rice-basmati', name: 'Rice (Basmati)', category: 'Grain', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Low-FODMAP'] },
   { slug: 'grain-rice-brown', name: 'Rice (Brown)', category: 'Grain', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'grain-wheat-flour-ap', name: 'Wheat Flour (All-Purpose)', category: 'Grain', tags: ['Contains Gluten', 'Vegetarian', 'Vegan'] },
+  { slug: 'grain-couscous', name: 'Couscous', category: 'Grain', tags: ['Contains Gluten', 'Vegetarian', 'Vegan'] },
+  { slug: 'grain-millet', name: 'Millet', category: 'Grain', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'grain-polenta', name: 'Polenta', category: 'Grain', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
 
   // Legumes
   { slug: 'legume-black-beans', name: 'Black Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
@@ -135,6 +168,8 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'legume-pinto-beans', name: 'Pinto Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'legume-navy-beans', name: 'Navy Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'legume-split-peas', name: 'Split Peas', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'legume-cannellini-beans', name: 'Cannellini Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'legume-great-northern-beans', name: 'Great Northern Beans', category: 'Legume', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
 
   // Oils & Fats
   { slug: 'oil-avocado', name: 'Avocado Oil', category: 'Oil/Fat', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
@@ -146,6 +181,8 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'oil-grapeseed', name: 'Grapeseed Oil', category: 'Oil/Fat', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'oil-peanut', name: 'Peanut Oil', category: 'Oil/Fat', tags: ['Contains Nuts', 'Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'oil-clarified-butter', name: 'Clarified Butter', category: 'Oil/Fat', tags: ['Contains Dairy', 'Vegetarian'] },
+  { slug: 'oil-vegetable', name: 'Vegetable Oil', category: 'Oil/Fat', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'oil-sunflower', name: 'Sunflower Oil', category: 'Oil/Fat', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
 
   // Sweeteners
   { slug: 'sweetener-brown-sugar', name: 'Brown Sugar', category: 'Sweetener', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
@@ -155,6 +192,8 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'sweetener-agave-nectar', name: 'Agave Nectar', category: 'Sweetener', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'sweetener-coconut-sugar', name: 'Coconut Sugar', category: 'Sweetener', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'sweetener-date-syrup', name: 'Date Syrup', category: 'Sweetener', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'sweetener-molasses', name: 'Molasses', category: 'Sweetener', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'sweetener-powdered-sugar', name: 'Powdered Sugar', category: 'Sweetener', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
 
   // Baking
   { slug: 'baking-baking-powder', name: 'Baking Powder', category: 'Baking', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan'] }, // *many are GF; check brand
@@ -164,6 +203,8 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'baking-egg', name: 'Eggs', category: 'Baking', tags: ['Contains Eggs'] },
   { slug: 'baking-yeast-active-dry', name: 'Yeast (Active Dry)', category: 'Baking', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'baking-vanilla-extract', name: 'Vanilla Extract', category: 'Baking', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'baking-chocolate-chips', name: 'Chocolate Chips', category: 'Baking', tags: ['Contains Dairy', 'Vegetarian'] }, // many contain dairy
+  { slug: 'baking-pie-crust', name: 'Pie Crust (Ready-Made)', category: 'Baking', tags: ['Contains Gluten'] },
 
   // Condiments & Sauces
   { slug: 'condiment-apple-cider-vinegar', name: 'Apple Cider Vinegar', category: 'Condiment/Sauce', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Low-FODMAP'] },
@@ -176,14 +217,27 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'condiment-sriracha', name: 'Sriracha', category: 'Condiment/Sauce', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan', 'Nightshade'] },
   { slug: 'condiment-hot-sauce', name: 'Hot Sauce', category: 'Condiment/Sauce', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan', 'Nightshade'] },
   { slug: 'condiment-worcestershire', name: 'Worcestershire Sauce', category: 'Condiment/Sauce', tags: ['Gluten-Free*', 'Contains Fish*', 'Vegetarian*'] }, // many contain anchovy; some are veg/GF
+  { slug: 'condiment-fish-sauce', name: 'Fish Sauce', category: 'Condiment/Sauce', tags: ['Contains Fish', 'Gluten-Free*'] },
+  { slug: 'condiment-oyster-sauce', name: 'Oyster Sauce', category: 'Condiment/Sauce', tags: ['Contains Shellfish', 'Contains Gluten'] },
+  { slug: 'condiment-bbq-sauce', name: 'Barbecue Sauce', category: 'Condiment/Sauce', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan'] },
+  { slug: 'condiment-tahini', name: 'Tahini', category: 'Condiment/Sauce', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Sesame'] },
+  { slug: 'condiment-hoisin-sauce', name: 'Hoisin Sauce', category: 'Condiment/Sauce', tags: ['Contains Gluten', 'Contains Soy', 'Vegetarian', 'Vegan'] },
+  { slug: 'condiment-teriyaki-sauce', name: 'Teriyaki Sauce', category: 'Condiment/Sauce', tags: ['Contains Gluten', 'Contains Soy', 'Vegetarian', 'Vegan'] },
 
   // Beverages (common cooking uses: deglazing, marinades)
-  { slug: 'bev-chicken-stock', name: 'Chicken Stock', category: 'Beverage', tags: ['Gluten-Free*'] },
-  { slug: 'bev-vegetable-stock', name: 'Vegetable Stock', category: 'Beverage', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan'] },
+  { slug: 'bev-chicken-stock', name: 'Chicken Stock', category: 'Beverage', tags: ['Gluten-Free*', 'Stock'] },
+  { slug: 'bev-vegetable-stock', name: 'Vegetable Stock', category: 'Beverage', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan', 'Stock'] },
   { slug: 'bev-red-wine', name: 'Red Wine', category: 'Beverage', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'bev-white-wine', name: 'White Wine', category: 'Beverage', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'bev-beer', name: 'Beer (Standard)', category: 'Beverage', tags: ['Contains Gluten', 'Vegetarian', 'Vegan'] },
-  { slug: 'bev-beef-stock', name: 'Beef Stock', category: 'Beverage', tags: ['Gluten-Free*'] },
+  { slug: 'bev-beef-stock', name: 'Beef Stock', category: 'Beverage', tags: ['Gluten-Free*', 'Stock'] },
+  { slug: 'bev-seafood-stock', name: 'Seafood Stock', category: 'Beverage', tags: ['Gluten-Free*', 'Pescatarian', 'Stock'] },
+  { slug: 'bev-turkey-stock', name: 'Turkey Stock', category: 'Beverage', tags: ['Gluten-Free*', 'Stock'] },
+  { slug: 'bev-bone-broth', name: 'Bone Broth', category: 'Beverage', tags: ['Gluten-Free*', 'Stock', 'Paleo'] },
+  { slug: 'bev-mushroom-stock', name: 'Mushroom Stock', category: 'Beverage', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan', 'Stock'] },
+  { slug: 'bev-chicken-bouillon', name: 'Chicken Bouillon', category: 'Beverage', tags: ['Gluten-Free*', 'Stock', 'Bouillon'] },
+  { slug: 'bev-beef-bouillon', name: 'Beef Bouillon', category: 'Beverage', tags: ['Gluten-Free*', 'Stock', 'Bouillon'] },
+  { slug: 'bev-vegetable-bouillon', name: 'Vegetable Bouillon', category: 'Beverage', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan', 'Stock', 'Bouillon'] },
   { slug: 'bev-coconut-water', name: 'Coconut Water', category: 'Beverage', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'bev-sparkling-water', name: 'Sparkling Water', category: 'Beverage', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
 ];
