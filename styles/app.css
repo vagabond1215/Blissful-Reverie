@@ -229,18 +229,20 @@ select {
       --view-toggle-inactive-border,
       rgba(125, 147, 65, 0.45)
     );
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--color-text-secondary);
+  background: var(--view-toggle-inactive-gradient);
+  color: var(--view-toggle-inactive-text, #f4f7e5);
   font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 10px 24px -20px var(--color-card-shadow);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease,
     color 0.2s ease;
 }
 
 .family-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 24px -18px var(--color-card-shadow-soft);
-  background: rgba(255, 255, 255, 0.95);
+  box-shadow: var(--view-toggle-hover-glow, 0 0 16px rgba(233, 204, 138, 0.45));
+  background: var(--view-toggle-inactive-gradient);
+  color: var(--view-toggle-inactive-text, #f4f7e5);
 }
 
 .family-button:focus-visible {
@@ -1975,7 +1977,66 @@ textarea:focus {
   resize: vertical;
 }
 
-.family-member-card__field input,
+.family-member-card__field--toggles {
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.family-toggle-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.family-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-muted);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border 0.2s ease,
+    box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.family-toggle__checkbox {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.family-toggle__label {
+  pointer-events: none;
+}
+
+.family-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px -18px var(--color-card-shadow-soft);
+}
+
+.family-toggle:focus-within {
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.family-toggle--active {
+  background: var(--view-toggle-active-gradient, var(--gradient-accent));
+  color: var(--view-toggle-active-text, var(--color-accent-contrast));
+  border-color: transparent;
+  box-shadow: var(--view-toggle-hover-glow, 0 0 16px rgba(233, 204, 138, 0.45));
+}
+
+.family-toggle--active:hover {
+  box-shadow: var(--view-toggle-hover-glow, 0 0 16px rgba(233, 204, 138, 0.45));
+}
+
+.family-member-card__field input:not(.family-toggle__checkbox),
 .family-member-card__field select,
 .family-member-card__field textarea {
   padding: 0.55rem 0.7rem;
@@ -1986,7 +2047,7 @@ textarea:focus {
   font: inherit;
 }
 
-.family-member-card__field input:focus-visible,
+.family-member-card__field input:not(.family-toggle__checkbox):focus-visible,
 .family-member-card__field select:focus-visible,
 .family-member-card__field textarea:focus-visible {
   outline: none;

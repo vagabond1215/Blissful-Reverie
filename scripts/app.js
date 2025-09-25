@@ -157,6 +157,19 @@
     '🐾',
   ];
 
+  const FAMILY_DIET_OPTIONS = [
+    'Vegetarian',
+    'Vegan',
+    'Gluten Free',
+    'Dairy Free',
+    'Low Carb',
+    'Low Sodium',
+    'Whole Grains',
+    'High Protein',
+    'Pescatarian',
+    'Keto',
+  ];
+
   const createFamilyMemberId = () =>
     `member_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 
@@ -176,6 +189,7 @@
         : null,
     allergies: Array.isArray(overrides.allergies) ? overrides.allergies : [],
     diets: Array.isArray(overrides.diets) ? overrides.diets : [],
+    birthday: typeof overrides.birthday === 'string' ? overrides.birthday : '',
     preferences:
       typeof overrides.preferences === 'string' ? overrides.preferences.trim() : '',
   });
@@ -727,8 +741,28 @@
     const calories = Number(value?.targetCalories);
     member.targetCalories =
       Number.isFinite(calories) && calories >= 0 ? Math.round(calories) : null;
-    member.allergies = normalizeStringArray(value?.allergies);
-    member.diets = normalizeStringArray(value?.diets);
+    const normalizeWithCanonical = (list, options = []) => {
+      const normalizedList = normalizeStringArray(list);
+      const result = [];
+      const seen = new Set();
+      normalizedList.forEach((entry) => {
+        const key = typeof entry === 'string' ? entry.trim().toLowerCase() : '';
+        if (!key || seen.has(key)) {
+          return;
+        }
+        seen.add(key);
+        if (Array.isArray(options) && options.length) {
+          const match = options.find((option) => option.toLowerCase() === key);
+          result.push(match || entry);
+        } else {
+          result.push(entry);
+        }
+      });
+      return result;
+    };
+    member.allergies = normalizeWithCanonical(value?.allergies);
+    member.diets = normalizeWithCanonical(value?.diets, FAMILY_DIET_OPTIONS);
+    member.birthday = isValidISODateString(value?.birthday) ? value.birthday : '';
     member.preferences = typeof value?.preferences === 'string' ? value.preferences.trim() : '';
     return member;
   };
@@ -972,6 +1006,22 @@
         'Weeknight',
         'Kid Friendly',
         'Holiday',
+      ],
+    },
+    {
+      id: 'holiday',
+      label: 'Holidays & Celebrations',
+      tags: [
+        'Christmas',
+        'Thanksgiving',
+        'Hanukkah',
+        "New Year's",
+        'Easter',
+        "Valentine's Day",
+        'Halloween',
+        'Fourth of July',
+        "Mother's Day",
+        "Father's Day",
       ],
     },
     {
@@ -1406,6 +1456,91 @@
       elements.familyMemberList.appendChild(empty);
       return;
     }
+    const buildToggleField = (labelText, fieldName, optionList, selectedValues, formatExtraLabel) => {
+      const field = document.createElement('div');
+      field.className = 'family-member-card__field family-member-card__field--toggles';
+      const label = document.createElement('span');
+      label.textContent = labelText;
+      field.appendChild(label);
+
+      const group = document.createElement('div');
+      group.className = 'family-toggle-group';
+      field.appendChild(group);
+
+      const selectedLookup = new Map();
+      if (Array.isArray(selectedValues)) {
+        selectedValues.forEach((entry) => {
+          if (typeof entry !== 'string') {
+            return;
+          }
+          const key = entry.trim().toLowerCase();
+          if (key) {
+            selectedLookup.set(key, entry);
+          }
+        });
+      }
+
+      const seen = new Set();
+      const finalOptions = [];
+      optionList.forEach((option) => {
+        if (!option || typeof option.value !== 'string') {
+          return;
+        }
+        const value = option.value;
+        const key = value.trim().toLowerCase();
+        if (!key || seen.has(key)) {
+          return;
+        }
+        seen.add(key);
+        finalOptions.push({
+          value,
+          label: typeof option.label === 'string' && option.label ? option.label : value,
+        });
+      });
+      if (Array.isArray(selectedValues)) {
+        selectedValues.forEach((entry) => {
+          if (typeof entry !== 'string') {
+            return;
+          }
+          const key = entry.trim().toLowerCase();
+          if (!key || seen.has(key)) {
+            return;
+          }
+          seen.add(key);
+          finalOptions.push({
+            value: entry,
+            label:
+              typeof formatExtraLabel === 'function'
+                ? formatExtraLabel(entry)
+                : entry,
+          });
+        });
+      }
+
+      finalOptions.forEach((option) => {
+        const toggleLabel = document.createElement('label');
+        toggleLabel.className = 'family-toggle';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'family-toggle__checkbox';
+        checkbox.dataset.familyField = fieldName;
+        checkbox.value = option.value;
+        const normalizedKey = option.value.trim().toLowerCase();
+        const isChecked = normalizedKey ? selectedLookup.has(normalizedKey) : false;
+        checkbox.checked = isChecked;
+        const text = document.createElement('span');
+        text.className = 'family-toggle__label';
+        text.textContent = option.label;
+        toggleLabel.appendChild(checkbox);
+        toggleLabel.appendChild(text);
+        if (isChecked) {
+          toggleLabel.classList.add('family-toggle--active');
+        }
+        group.appendChild(toggleLabel);
+      });
+
+      return field;
+    };
     members.forEach((member, index) => {
       if (!member || !member.id) {
         return;
@@ -1478,30 +1613,33 @@
       caloriesField.appendChild(caloriesInput);
       fieldGrid.appendChild(caloriesField);
 
-      const dietsField = document.createElement('label');
-      dietsField.className = 'family-member-card__field';
-      const dietsLabel = document.createElement('span');
-      dietsLabel.textContent = 'Diets';
-      const dietsInput = document.createElement('input');
-      dietsInput.type = 'text';
-      dietsInput.placeholder = 'Comma separated (e.g. vegetarian, keto)';
-      dietsInput.value = member.diets && member.diets.length ? member.diets.join(', ') : '';
-      dietsInput.dataset.familyField = 'diets';
-      dietsField.appendChild(dietsLabel);
-      dietsField.appendChild(dietsInput);
+      const birthdayField = document.createElement('label');
+      birthdayField.className = 'family-member-card__field';
+      const birthdayLabel = document.createElement('span');
+      birthdayLabel.textContent = 'Birthday';
+      const birthdayInput = document.createElement('input');
+      birthdayInput.type = 'date';
+      birthdayInput.dataset.familyField = 'birthday';
+      birthdayInput.value = isValidISODateString(member.birthday) ? member.birthday : '';
+      birthdayField.appendChild(birthdayLabel);
+      birthdayField.appendChild(birthdayInput);
+      fieldGrid.appendChild(birthdayField);
+
+      const dietsField = buildToggleField(
+        'Diets',
+        'diets',
+        FAMILY_DIET_OPTIONS.map((value) => ({ value, label: value })),
+        Array.isArray(member.diets) ? member.diets : [],
+      );
       fieldGrid.appendChild(dietsField);
 
-      const allergiesField = document.createElement('label');
-      allergiesField.className = 'family-member-card__field';
-      const allergiesLabel = document.createElement('span');
-      allergiesLabel.textContent = 'Allergies';
-      const allergiesInput = document.createElement('input');
-      allergiesInput.type = 'text';
-      allergiesInput.placeholder = 'Comma separated (e.g. peanuts, shellfish)';
-      allergiesInput.value = member.allergies && member.allergies.length ? member.allergies.join(', ') : '';
-      allergiesInput.dataset.familyField = 'allergies';
-      allergiesField.appendChild(allergiesLabel);
-      allergiesField.appendChild(allergiesInput);
+      const allergiesField = buildToggleField(
+        'Allergies',
+        'allergies',
+        allergyOptions.map((value) => ({ value, label: formatAllergenLabel(value) })),
+        Array.isArray(member.allergies) ? member.allergies : [],
+        formatAllergenLabel,
+      );
       fieldGrid.appendChild(allergiesField);
 
       const preferencesField = document.createElement('label');
@@ -1629,6 +1767,8 @@
         next.diets = normalizeStringArray(value);
       } else if (field === 'allergies') {
         next.allergies = normalizeStringArray(value);
+      } else if (field === 'birthday') {
+        next.birthday = typeof value === 'string' && isValidISODateString(value) ? value : '';
       } else if (field === 'preferences') {
         next.preferences = typeof value === 'string' ? value : '';
       }
@@ -2216,6 +2356,17 @@
       quantityText: formatQuantity(adjustedQuantity),
       unitText: finalUnit,
     };
+  };
+
+  const formatBirthday = (value) => {
+    if (!isValidISODateString(value)) {
+      return '';
+    }
+    const date = new Date(`${value}T00:00:00`);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    return date.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
   };
 
   const formatAllergenLabel = (value) => {
@@ -3331,6 +3482,12 @@
       if (member.diets.length) {
         noteParts.push(`Diets: ${member.diets.join(', ')}`);
       }
+      if (member.birthday) {
+        const birthdayText = formatBirthday(member.birthday);
+        if (birthdayText) {
+          noteParts.push(`Birthday: ${birthdayText}`);
+        }
+      }
       if (member.preferences) {
         noteParts.push(member.preferences);
       }
@@ -4112,7 +4269,14 @@
     if (elements.familyMemberList) {
       elements.familyMemberList.addEventListener('input', (event) => {
         const target = event.target;
-        if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
+        if (
+          !(
+            target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement
+          )
+        ) {
+          return;
+        }
+        if (target instanceof HTMLInputElement && target.type === 'checkbox') {
           return;
         }
         const field = target.dataset.familyField;
@@ -4136,6 +4300,19 @@
         const field = target.dataset.familyField;
         const card = target.closest('[data-family-id]');
         if (!field || !card) {
+          return;
+        }
+        if (
+          target instanceof HTMLInputElement
+          && target.type === 'checkbox'
+          && (field === 'diets' || field === 'allergies')
+        ) {
+          const values = Array.from(
+            card.querySelectorAll(`input[data-family-field="${field}"]`),
+          )
+            .filter((input) => input instanceof HTMLInputElement && input.checked)
+            .map((input) => input.value);
+          updateFamilyMember(card.dataset.familyId, field, values);
           return;
         }
         updateFamilyMember(card.dataset.familyId, field, target.value);
