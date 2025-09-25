@@ -1003,9 +1003,41 @@ textarea:focus {
 
 .meal-card__header-actions {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.75rem;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.meal-card__schedule-button {
+  appearance: none;
+  border: 1px solid var(--color-border-muted);
+  border-radius: 999px;
+  background: rgba(68, 83, 214, 0.08);
+  color: var(--color-text-muted);
+  padding: 0.35rem 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease,
+    box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.meal-card__schedule-button:hover {
+  transform: translateY(-1px);
+  background: rgba(68, 83, 214, 0.16);
+  color: var(--color-text-emphasis);
+  box-shadow: 0 12px 28px -20px var(--color-card-shadow-soft);
+}
+
+.meal-card__schedule-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .meal-card__favorite-button {
@@ -1288,23 +1320,19 @@ textarea:focus {
 
 .meal-plan-view__mode-toggle {
   margin-left: auto;
-  width: min(100%, 420px);
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  display: flex;
+  align-items: center;
   gap: 0.75rem;
-  align-items: stretch;
+  flex-wrap: nowrap;
 }
 
 .meal-plan-view__mode-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
-  padding: 0.75rem 1.15rem;
-  text-align: center;
+  padding: 0.6rem 1.1rem;
   line-height: 1.4;
-  white-space: normal;
+  white-space: nowrap;
 }
 
 .meal-plan-view__navigator {
@@ -1494,6 +1522,13 @@ textarea:focus {
   font-size: 0.8rem;
 }
 
+.meal-plan-entry__time {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 .meal-plan-entry__remove {
   background: none;
   border: none;
@@ -1513,6 +1548,104 @@ textarea:focus {
 .meal-plan-entry__remove:focus-visible {
   outline: 3px solid var(--color-focus-ring);
   outline-offset: 2px;
+}
+
+.schedule-dialog {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(12, 22, 9, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+}
+
+.schedule-dialog[hidden] {
+  display: none;
+}
+
+.schedule-dialog__panel {
+  width: min(100%, 360px);
+  background: var(--color-header-background, rgba(255, 255, 255, 0.96));
+  border-radius: 18px;
+  border: 1px solid var(--color-border-muted);
+  box-shadow: 0 32px 64px -28px var(--color-card-shadow);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.schedule-dialog__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text-emphasis);
+}
+
+.schedule-dialog__recipe {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.schedule-dialog__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.schedule-dialog__label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.schedule-dialog__input {
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border-muted);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-emphasis);
+  font-size: 0.95rem;
+}
+
+.schedule-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.schedule-dialog__button {
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--color-border-muted);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-emphasis);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease,
+    color 0.2s ease;
+}
+
+.schedule-dialog__button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px -20px var(--color-card-shadow-soft);
+}
+
+.schedule-dialog__button--primary {
+  background: var(--gradient-accent);
+  color: var(--color-accent-contrast, #fff);
+  border-color: rgba(212, 129, 69, 0.65);
+}
+
+.schedule-dialog__button--primary:hover {
+  box-shadow: 0 18px 36px -24px var(--color-accent-shadow, rgba(0, 0, 0, 0.2));
+}
+
+.schedule-dialog__button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .meal-plan-form {
@@ -1589,6 +1722,11 @@ textarea:focus {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.75rem;
+  align-items: stretch;
+}
+
+.meal-plan-calendar__week {
+  grid-auto-rows: minmax(0, 1fr);
 }
 
 .meal-plan-calendar__day-name,
@@ -1619,6 +1757,7 @@ textarea:focus {
   flex-direction: column;
   gap: 0.5rem;
   align-items: stretch;
+  height: 100%;
   border-radius: 16px;
   border: 1px solid rgba(68, 83, 214, 0.16);
   background: var(--meal-plan-surface);
@@ -1694,6 +1833,12 @@ textarea:focus {
   border-radius: 10px;
   background: rgba(68, 83, 214, 0.12);
   color: var(--color-text-secondary);
+}
+
+.meal-plan-calendar__entry-time {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
 .meal-plan-calendar__entry-type {
@@ -1945,6 +2090,7 @@ textarea:focus {
 
   .meal-plan-view__mode-toggle {
     margin-left: 0;
+    flex-wrap: wrap;
     justify-content: center;
   }
 
