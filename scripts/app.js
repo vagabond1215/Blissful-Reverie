@@ -4550,6 +4550,7 @@
       showMeta = true,
       showHeader = true,
       headingId,
+      showEntries = true,
     } = options;
     const entries = sortMealPlanEntries(getMealPlanEntries(selectedIso));
     const wrapper = document.createElement('div');
@@ -4575,10 +4576,16 @@
       wrapper.appendChild(header);
     }
     if (!entries.length) {
+      if (!showEntries) {
+        return { container: wrapper, titleText, subtitleText, entryCount: entries.length };
+      }
       const empty = document.createElement('p');
       empty.className = 'meal-plan-empty';
       empty.textContent = 'Add meals, drinks, or snacks to fill this day.';
       wrapper.appendChild(empty);
+      return { container: wrapper, titleText, subtitleText, entryCount: entries.length };
+    }
+    if (!showEntries) {
       return { container: wrapper, titleText, subtitleText, entryCount: entries.length };
     }
     const list = document.createElement('div');
@@ -4617,10 +4624,11 @@
     const container = elements.mealPlanDayDetails;
     container.innerHTML = '';
     const { container: content } = createMealPlanDayDetailsContent(selectedDate, selectedIso, {
-      allowAttendance: true,
-      allowRemoval: true,
-      showMeta: true,
+      allowAttendance: false,
+      allowRemoval: false,
+      showMeta: false,
       showHeader: true,
+      showEntries: false,
     });
     container.appendChild(content);
   };
