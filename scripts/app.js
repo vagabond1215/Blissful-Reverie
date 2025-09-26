@@ -3368,6 +3368,7 @@
     elements.mealPlanSidebar = document.getElementById('meal-plan-sidebar');
     elements.mealPlanDayDetails = document.getElementById('meal-plan-day-details');
     elements.mealPlanSummary = document.getElementById('meal-plan-summary');
+    elements.mealPlanSummaryTitle = document.getElementById('meal-plan-summary-title');
     elements.mealPlanMacros = document.getElementById('meal-plan-macros');
     elements.mealPlanModeButtons = Array.from(
       document.querySelectorAll('[data-meal-plan-mode]'),
@@ -4117,6 +4118,27 @@
       year: 'numeric',
     });
 
+  const getOrdinalSuffix = (value) => {
+    const remainderTen = value % 10;
+    const remainderHundred = value % 100;
+    if (remainderTen === 1 && remainderHundred !== 11) return 'st';
+    if (remainderTen === 2 && remainderHundred !== 12) return 'nd';
+    if (remainderTen === 3 && remainderHundred !== 13) return 'rd';
+    return 'th';
+  };
+
+  const formatMealPlanSummaryHeading = (date, entryCount) => {
+    if (!(date instanceof Date) || Number.isNaN(date.valueOf())) {
+      return 'Daily Summary';
+    }
+    const monthLabel = date.toLocaleDateString(undefined, { month: 'long' });
+    const day = date.getDate();
+    const suffix = getOrdinalSuffix(day);
+    const total = Number.isFinite(entryCount) ? entryCount : 0;
+    const mealLabel = total === 1 ? 'Meal' : 'Meals';
+    return `${monthLabel} ${day}${suffix} Summary - ${total} ${mealLabel}`;
+  };
+
   const formatMealPlanMonthLabel = (date) =>
     date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
 
@@ -4627,7 +4649,7 @@
       allowAttendance: false,
       allowRemoval: false,
       showMeta: false,
-      showHeader: true,
+      showHeader: false,
       showEntries: false,
     });
     container.appendChild(content);
@@ -4753,11 +4775,18 @@
     if (!elements.mealPlanSummary || !elements.mealPlanMacros) {
       return;
     }
-    const familyMembers = ensureFamilySanitized();
     const macrosContainer = elements.mealPlanMacros;
     macrosContainer.innerHTML = '';
-    const macroSummary = calculateDailyMacroSummary(selectedIso);
+    const selectedDate = parseISODateString(selectedIso) || new Date();
     const entries = getMealPlanEntries(selectedIso);
+    if (elements.mealPlanSummaryTitle) {
+      elements.mealPlanSummaryTitle.textContent = formatMealPlanSummaryHeading(
+        selectedDate,
+        entries.length,
+      );
+    }
+    const familyMembers = ensureFamilySanitized();
+    const macroSummary = calculateDailyMacroSummary(selectedIso);
     const hasMacroData = entries.some((entry) => {
       const recipe = getRecipeForEntry(entry);
       return recipe && recipe.nutritionPerServing;
