@@ -616,7 +616,7 @@ select {
   font-size: 1.1rem;
   line-height: 1;
   color: currentColor;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
 }
 
 .favorite-filter:hover {
@@ -669,11 +669,25 @@ select {
   position: relative;
 }
 
+.pantry-only-filter:not(.pantry-only-filter--active):not([aria-pressed='true']) {
+  color: var(--color-gunmetal);
+  border-color: rgba(42, 52, 57, 0.45);
+  background: rgba(42, 52, 57, 0.08);
+}
+
+.pantry-only-filter:not(.pantry-only-filter--active):not([aria-pressed='true']):hover {
+  color: var(--color-gunmetal);
+  border-color: rgba(42, 52, 57, 0.6);
+  background: rgba(42, 52, 57, 0.12);
+}
+
 .pantry-only-filter__icon {
   font-size: 1.2rem;
   line-height: 1;
   color: currentColor;
-  transition: color 0.2s ease;
+  filter: grayscale(100%);
+  opacity: 0.8;
+  transition: color 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
 }
 
 .pantry-only-filter.pantry-only-filter--active,
@@ -688,6 +702,8 @@ select {
 .pantry-only-filter.pantry-only-filter--active .pantry-only-filter__icon,
 .pantry-only-filter[aria-pressed='true'] .pantry-only-filter__icon {
   color: var(--color-accent-secondary-contrast);
+  filter: none;
+  opacity: 1;
 }
 
 .reset-button__icon {
@@ -2460,6 +2476,7 @@ textarea:focus {
   background: var(--color-sepia-light);
   border: 1px solid var(--meal-plan-border, rgba(79, 42, 28, 0.24));
   color: var(--color-burnished-copper);
+  flex: 1 1 auto;
 }
 
 .meal-plan-summary__title {
