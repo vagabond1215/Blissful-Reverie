@@ -120,16 +120,23 @@
               </button>
               <button
                 type="button"
-                class="pantry-only-filter"
+                class="pantry-only-filter filter-action-button"
                 id="pantry-only-toggle"
                 aria-pressed="false"
                 aria-label="Pantry filter off: include all recipes"
                 title="Pantry filter off: include all recipes"
               >
                 <span class="pantry-only-filter__icon" aria-hidden="true">🧺</span>
-                <span class="pantry-only-filter__label">Pantry</span>
               </button>
-              <button type="button" class="reset-button" id="reset-filters">Reset</button>
+              <button
+                type="button"
+                class="reset-button filter-action-button"
+                id="reset-filters"
+                aria-label="Reset filters"
+                title="Reset filters"
+              >
+                <span class="reset-button__icon" aria-hidden="true">↻</span>
+              </button>
             </div>
           </div>
           <div class="recipe-family-filter" id="recipe-family-filter" hidden aria-hidden="true"></div>
@@ -300,6 +307,31 @@
           <div class="family-panel__list" id="family-member-list"></div>
           <button type="button" class="family-panel__add" id="family-add-member">Add family member</button>
         </div>
+      </section>
+    </div>
+    <div class="meal-plan-day-modal" id="meal-plan-day-modal" hidden>
+      <div class="meal-plan-day-modal__backdrop" id="meal-plan-day-modal-backdrop" aria-hidden="true"></div>
+      <section
+        class="meal-plan-day-modal__content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="meal-plan-day-modal-title"
+      >
+        <header class="meal-plan-day-modal__header">
+          <div class="meal-plan-day-modal__titles">
+            <h3 class="meal-plan-day-modal__title" id="meal-plan-day-modal-title"></h3>
+            <p class="meal-plan-day-modal__subtitle" id="meal-plan-day-modal-subtitle"></p>
+          </div>
+          <button
+            type="button"
+            class="meal-plan-day-modal__close"
+            id="meal-plan-day-modal-close"
+            aria-label="Close day overview"
+          >
+            ×
+          </button>
+        </header>
+        <div class="meal-plan-day-modal__body" id="meal-plan-day-modal-body"></div>
       </section>
     </div>
   </body>
