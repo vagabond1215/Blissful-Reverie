@@ -633,6 +633,53 @@ select {
   box-shadow: 0 18px 36px -24px rgba(217, 75, 165, 0.6);
 }
 
+.pantry-only-filter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-accent-secondary, rgba(107, 194, 125, 0.6));
+  background: var(--color-background);
+  color: var(--color-accent-secondary, #3fbd89);
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease, transform 0.2s ease;
+}
+
+.pantry-only-filter__icon {
+  font-size: 1.05rem;
+  line-height: 1;
+  color: currentColor;
+  transition: color 0.2s ease;
+}
+
+.pantry-only-filter:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px -24px var(--color-card-shadow-soft);
+}
+
+.pantry-only-filter:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.pantry-only-filter.pantry-only-filter--active,
+.pantry-only-filter[aria-pressed='true'] {
+  background: linear-gradient(135deg, #3ca370 0%, #6dd195 50%, #3fbd89 100%);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 18px 36px -24px rgba(63, 189, 137, 0.45);
+}
+
+.pantry-only-filter.pantry-only-filter--active .pantry-only-filter__icon,
+.pantry-only-filter[aria-pressed='true'] .pantry-only-filter__icon {
+  color: #ffffff;
+}
+
 .reset-button {
   background: var(--color-neutral-50, transparent);
   border: 1px solid var(--color-accent-secondary);
@@ -647,6 +694,85 @@ select {
   transform: translateY(-1px);
   box-shadow: 0 12px 25px -18px
     var(--color-accent-secondary-shadow, var(--color-card-shadow-soft));
+}
+
+.recipe-family-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  margin: 0.35rem 0 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-muted);
+  background: var(--color-panel, rgba(255, 255, 255, 0.75));
+  box-shadow: 0 14px 30px -26px var(--color-card-shadow-soft);
+  width: fit-content;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.recipe-family-filter[data-filter-active='true'] {
+  border-color: var(--color-accent-outline, rgba(68, 83, 214, 0.32));
+  box-shadow: 0 20px 40px -28px var(--color-accent-shadow, rgba(68, 83, 214, 0.32));
+}
+
+.recipe-family-filter__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.recipe-family-filter[data-filter-active='true'] .recipe-family-filter__label {
+  color: var(--color-text-emphasis);
+}
+
+.recipe-family-filter__list {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.recipe-family-filter__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  font-size: 1.3rem;
+  line-height: 1;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.recipe-family-filter__button--all {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  width: auto;
+  min-width: 2.6rem;
+  padding: 0.15rem 0.6rem;
+}
+
+.recipe-family-filter__button:hover {
+  background: var(--color-accent-softer, rgba(68, 83, 214, 0.12));
+}
+
+.recipe-family-filter__button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+.recipe-family-filter__button--active {
+  background: var(--color-accent-soft, rgba(68, 83, 214, 0.18));
+  border-color: var(--color-accent-outline, rgba(68, 83, 214, 0.32));
+  color: var(--color-text-emphasis);
+  box-shadow: 0 14px 30px -24px var(--color-accent-shadow, rgba(68, 83, 214, 0.45));
+}
+
+.recipe-family-filter__button--active.recipe-family-filter__button--all {
+  color: var(--color-text-emphasis);
 }
 
 .input-group {
@@ -933,6 +1059,18 @@ textarea:focus {
 
 .checkbox-option input {
   accent-color: var(--color-accent);
+}
+
+.checkbox-option--locked {
+  opacity: 0.85;
+}
+
+.checkbox-option--locked span {
+  color: var(--color-text-muted);
+}
+
+.checkbox-option--locked input {
+  cursor: not-allowed;
 }
 
 .pantry-form button,

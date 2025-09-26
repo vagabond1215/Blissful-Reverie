@@ -925,6 +925,8 @@
     allergies: [],
     equipment: [],
     favoritesOnly: false,
+    familyMembers: [],
+    pantryOnly: false,
   });
 
   const getDefaultPantryFilters = () => ({
@@ -949,7 +951,7 @@
     return Array.from(unique);
   };
 
-  const sanitizeMealFilters = (value) => {
+  const sanitizeMealFilters = (value, members = []) => {
     const defaults = getDefaultMealFilters();
     if (!value || typeof value !== 'object') {
       return defaults;
@@ -961,6 +963,8 @@
       allergies: toUniqueStringArray(value.allergies),
       equipment: toUniqueStringArray(value.equipment),
       favoritesOnly: Boolean(value.favoritesOnly),
+      familyMembers: sanitizeMealFilterFamilyMembers(value.familyMembers, members),
+      pantryOnly: Boolean(value.pantryOnly),
     };
   };
 
@@ -1131,6 +1135,27 @@
     return sanitized;
   };
 
+  const sanitizeMealFilterFamilyMembers = (value, members) => {
+    const availableIds = new Set(
+      (Array.isArray(members) ? members : [])
+        .map((member) => (member && member.id ? member.id : null))
+        .filter(Boolean),
+    );
+    if (!Array.isArray(value) || !availableIds.size) {
+      return [];
+    }
+    const unique = [];
+    value.forEach((entry) => {
+      if (typeof entry !== 'string') return;
+      const trimmed = entry.trim();
+      if (!trimmed || !availableIds.has(trimmed) || unique.includes(trimmed)) {
+        return;
+      }
+      unique.push(trimmed);
+    });
+    return unique;
+  };
+
   const sanitizeMealPlanMemberFilter = (value, members) => {
     const sourceMembers = Array.isArray(members)
       ? members
@@ -1218,6 +1243,12 @@
     const nextFilter = sanitizeMealPlanMemberFilter(state.mealPlanMemberFilter, sanitized);
     const previousFilterSerialized = JSON.stringify(state.mealPlanMemberFilter || []);
     const sanitizedFilterSerialized = JSON.stringify(nextFilter);
+    const previousMealFilterFamily = JSON.stringify(state.mealFilters?.familyMembers || []);
+    const nextMealFilterFamily = sanitizeMealFilterFamilyMembers(
+      state.mealFilters?.familyMembers,
+      sanitized,
+    );
+    const sanitizedMealFilterFamilySerialized = JSON.stringify(nextMealFilterFamily);
     const nextMacroSelection = sanitizeMealPlanMacroSelection(
       state.mealPlanMacroSelection,
       sanitized,
@@ -1226,9 +1257,13 @@
     state.familyMembers = sanitized;
     state.mealPlanMemberFilter = nextFilter;
     state.mealPlanMacroSelection = nextMacroSelection;
+    if (state.mealFilters) {
+      state.mealFilters.familyMembers = nextMealFilterFamily;
+    }
     if (
       sanitizedMembersSerialized !== previousMembersSerialized
       || sanitizedFilterSerialized !== previousFilterSerialized
+      || sanitizedMealFilterFamilySerialized !== previousMealFilterFamily
       || selectionChanged
     ) {
       persistAppState();
@@ -1278,9 +1313,6 @@
       if (AVAILABLE_VIEWS.includes(stored.activeView)) {
         result.activeView = stored.activeView;
       }
-      if (stored.mealFilters) {
-        result.mealFilters = sanitizeMealFilters(stored.mealFilters);
-      }
       if (stored.pantryFilters) {
         result.pantryFilters = sanitizePantryFilters(stored.pantryFilters);
       }
@@ -1291,6 +1323,11 @@
         result.mealPlanSelectedDate = stored.mealPlanSelectedDate;
       }
       result.familyMembers = sanitizeFamilyMembers(stored.familyMembers);
+      if (stored.mealFilters) {
+        result.mealFilters = sanitizeMealFilters(stored.mealFilters, result.familyMembers);
+      } else {
+        result.mealFilters = sanitizeMealFilters(result.mealFilters, result.familyMembers);
+      }
       result.mealPlanMemberFilter = sanitizeMealPlanMemberFilter(
         stored.mealPlanMemberFilter,
         result.familyMembers,
@@ -1312,26 +1349,28 @@
 
   const storedAppState = loadAppState();
 
+  const sanitizedFamilyMembers = sanitizeFamilyMembers(storedAppState.familyMembers);
+
   const state = {
     activeView: storedAppState.activeView,
-    mealFilters: sanitizeMealFilters(storedAppState.mealFilters),
+    mealFilters: sanitizeMealFilters(storedAppState.mealFilters, sanitizedFamilyMembers),
     pantryFilters: sanitizePantryFilters(storedAppState.pantryFilters),
     mealPlanViewMode: storedAppState.mealPlanViewMode,
     mealPlanSelectedDate: storedAppState.mealPlanSelectedDate,
     mealPlanMemberFilter: sanitizeMealPlanMemberFilter(
       storedAppState.mealPlanMemberFilter,
-      storedAppState.familyMembers,
+      sanitizedFamilyMembers,
     ),
     mealPlanMacroSelection: sanitizeMealPlanMacroSelection(
       storedAppState.mealPlanMacroSelection,
-      storedAppState.familyMembers,
+      sanitizedFamilyMembers,
     ),
     mealPlan: loadMealPlan(),
     servingOverrides: sanitizeServingOverrides(storedAppState.servingOverrides),
     notes: sanitizeNotes(storedAppState.notes),
     openNotes: sanitizeOpenNotes(storedAppState.openNotes),
     pantryInventory: sanitizePantryInventory(storedAppState.pantryInventory),
-    familyMembers: sanitizeFamilyMembers(storedAppState.familyMembers),
+    familyMembers: sanitizedFamilyMembers,
     themeMode: themePreferences.mode,
     themeSelections: { ...themePreferences.selections },
     measurementSystem: measurementPreference,
@@ -2524,6 +2563,11 @@
         allergies: toUniqueStringArray(mealFilters.allergies),
         equipment: toUniqueStringArray(mealFilters.equipment),
         favoritesOnly: Boolean(mealFilters.favoritesOnly),
+        familyMembers: sanitizeMealFilterFamilyMembers(
+          mealFilters.familyMembers,
+          state.familyMembers,
+        ),
+        pantryOnly: Boolean(mealFilters.pantryOnly),
       },
       pantryFilters: {
         search: typeof pantryFilters.search === 'string' ? pantryFilters.search : '',
@@ -3138,6 +3182,8 @@
     elements.filterSearch = document.getElementById('filter-search');
     elements.resetButton = document.getElementById('reset-filters');
     elements.favoriteFilterToggle = document.getElementById('favorite-filter');
+    elements.recipeFamilyFilter = document.getElementById('recipe-family-filter');
+    elements.pantryOnlyToggle = document.getElementById('pantry-only-toggle');
     elements.ingredientSection = document.getElementById('ingredient-section');
     elements.tagSection = document.getElementById('tag-section');
     elements.allergySection = document.getElementById('allergy-section');
@@ -3165,6 +3211,70 @@
     elements.familyAddButton = document.getElementById('family-add-member');
   };
 
+  const getMealFilterSelectedFamilyMemberIds = () => {
+    const selections = state.mealFilters?.familyMembers;
+    if (!Array.isArray(selections) || !selections.length) {
+      return [];
+    }
+    return selections.filter((id) => typeof id === 'string' && id);
+  };
+
+  const getRecipeFamilyFilterSelections = () => {
+    const availableMembers = Array.isArray(state.familyMembers) ? state.familyMembers : [];
+    const lookup = new Map();
+    availableMembers.forEach((member) => {
+      if (member && member.id) {
+        lookup.set(member.id, member);
+      }
+    });
+    const ids = getMealFilterSelectedFamilyMemberIds();
+    const members = [];
+    const allergies = new Set();
+    const diets = new Set();
+    ids.forEach((id) => {
+      const member = lookup.get(id);
+      if (!member) return;
+      members.push(member);
+      (Array.isArray(member.allergies) ? member.allergies : []).forEach((allergy) => {
+        const normalized = typeof allergy === 'string' ? allergy.trim() : '';
+        if (normalized) {
+          allergies.add(normalized);
+        }
+      });
+      (Array.isArray(member.diets) ? member.diets : []).forEach((diet) => {
+        const normalized = typeof diet === 'string' ? diet.trim() : '';
+        if (normalized) {
+          diets.add(normalized);
+        }
+      });
+    });
+    return { ids, members, allergies, diets };
+  };
+
+  const toggleMealFilterFamilyMember = (memberId) => {
+    if (typeof memberId !== 'string' || !memberId) {
+      return;
+    }
+    const current = new Set(getMealFilterSelectedFamilyMemberIds());
+    if (current.has(memberId)) {
+      current.delete(memberId);
+    } else {
+      current.add(memberId);
+    }
+    state.mealFilters.familyMembers = sanitizeMealFilterFamilyMembers(
+      Array.from(current),
+      state.familyMembers,
+    );
+    renderApp();
+  };
+
+  const clearMealFilterFamilyMembers = () => {
+    if (Array.isArray(state.mealFilters?.familyMembers) && state.mealFilters.familyMembers.length) {
+      state.mealFilters.familyMembers = [];
+      renderApp();
+    }
+  };
+
   const populateCheckboxGroup = (view, container, options, field, config) => {
     let spanClassName;
     let labelFormatter;
@@ -3181,6 +3291,9 @@
     if (!Array.isArray(filters[field])) {
       filters[field] = [];
     }
+    const familySelections =
+      view === 'meals' && field === 'allergies' ? getRecipeFamilyFilterSelections() : null;
+    const familyAllergies = familySelections ? familySelections.allergies : new Set();
     container.innerHTML = '';
     registry.clear();
     options.forEach((option) => {
@@ -3189,7 +3302,10 @@
       const input = document.createElement('input');
       input.type = 'checkbox';
       input.value = option;
-      input.checked = filters[field].includes(option);
+      const isFamilySelection =
+        view === 'meals' && field === 'allergies' && familyAllergies.has(option);
+      input.checked = filters[field].includes(option) || isFamilySelection;
+      input.disabled = isFamilySelection;
       input.addEventListener('change', () => {
         const current = new Set(filters[field]);
         if (input.checked) {
@@ -3200,6 +3316,15 @@
         filters[field] = Array.from(current);
         renderApp();
       });
+      if (isFamilySelection) {
+        label.classList.add('checkbox-option--locked');
+        label.dataset.familySelection = 'true';
+        input.dataset.familySelection = 'true';
+      } else {
+        label.classList.remove('checkbox-option--locked');
+        delete label.dataset.familySelection;
+        delete input.dataset.familySelection;
+      }
       label.appendChild(input);
       const span = document.createElement('span');
       if (spanClassName) {
@@ -3220,6 +3345,8 @@
     if (!Array.isArray(filters[field])) {
       filters[field] = [];
     }
+    const familySelections = view === 'meals' ? getRecipeFamilyFilterSelections() : null;
+    const familyDiets = familySelections ? familySelections.diets : new Set();
     tagGroupSummaryRegistry[view] = [];
     container.innerHTML = '';
     registry.clear();
@@ -3229,7 +3356,10 @@
       if (!group.options.length) return;
       const optionValues = group.options.map((option) => option.value);
       const selectedCount = optionValues.reduce(
-        (count, value) => (filters[field].includes(value) ? count + 1 : count),
+        (count, value) =>
+          filters[field].includes(value) || (familyDiets instanceof Set && familyDiets.has(value))
+            ? count + 1
+            : count,
         0,
       );
       const details = document.createElement('details');
@@ -3274,7 +3404,9 @@
         const input = document.createElement('input');
         input.type = 'checkbox';
         input.value = option.value;
-        input.checked = filters[field].includes(option.value);
+        const isFamilySelection = familyDiets instanceof Set && familyDiets.has(option.value);
+        input.checked = filters[field].includes(option.value) || isFamilySelection;
+        input.disabled = isFamilySelection;
         input.addEventListener('change', () => {
           const current = new Set(filters[field]);
           if (input.checked) {
@@ -3285,6 +3417,15 @@
           filters[field] = Array.from(current);
           renderApp();
         });
+        if (isFamilySelection) {
+          label.classList.add('checkbox-option--locked');
+          label.dataset.familySelection = 'true';
+          input.dataset.familySelection = 'true';
+        } else {
+          label.classList.remove('checkbox-option--locked');
+          delete label.dataset.familySelection;
+          delete input.dataset.familySelection;
+        }
         label.appendChild(input);
         const span = document.createElement('span');
         span.textContent = option.label;
@@ -3399,22 +3540,108 @@
         }
       }
 
-      container.appendChild(details);
+    container.appendChild(details);
     });
+  };
+
+  const renderRecipeFamilyFilter = () => {
+    const container = elements.recipeFamilyFilter;
+    if (!container) return;
+    const isMealsView = state.activeView === 'meals';
+    const members = ensureFamilySanitized();
+    if (!isMealsView || !members.length) {
+      container.hidden = true;
+      container.setAttribute('aria-hidden', 'true');
+      container.innerHTML = '';
+      delete container.dataset.filterActive;
+      return;
+    }
+    container.hidden = false;
+    container.removeAttribute('aria-hidden');
+    container.innerHTML = '';
+    const { ids } = getRecipeFamilyFilterSelections();
+    if (ids.length) {
+      container.dataset.filterActive = 'true';
+    } else {
+      delete container.dataset.filterActive;
+    }
+    const label = document.createElement('span');
+    label.className = 'recipe-family-filter__label';
+    label.textContent = 'Family';
+    container.appendChild(label);
+    const list = document.createElement('div');
+    list.className = 'recipe-family-filter__list';
+    list.setAttribute('role', 'group');
+    list.setAttribute('aria-label', 'Filter recipes by family member');
+    const hasSelection = ids.length > 0;
+    const allButton = document.createElement('button');
+    allButton.type = 'button';
+    allButton.className = 'recipe-family-filter__button recipe-family-filter__button--all';
+    if (!hasSelection) {
+      allButton.classList.add('recipe-family-filter__button--active');
+    }
+    allButton.textContent = 'All';
+    allButton.title = 'Show recipes for all family members';
+    allButton.setAttribute('aria-pressed', hasSelection ? 'false' : 'true');
+    allButton.addEventListener('click', () => {
+      clearMealFilterFamilyMembers();
+    });
+    list.appendChild(allButton);
+    const selectedSet = new Set(ids);
+    members.forEach((member) => {
+      if (!member || !member.id) {
+        return;
+      }
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'recipe-family-filter__button';
+      const isActive = selectedSet.has(member.id);
+      if (isActive) {
+        button.classList.add('recipe-family-filter__button--active');
+      }
+      button.textContent = member.icon || '👤';
+      const labelText = `Filter recipes for ${member.name}`;
+      button.title = labelText;
+      button.setAttribute('aria-label', isActive ? `${labelText} (active)` : labelText);
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      button.addEventListener('click', () => {
+        toggleMealFilterFamilyMember(member.id);
+      });
+      list.appendChild(button);
+    });
+    container.appendChild(list);
   };
 
   const configureFilterPanel = () => {
     const view = state.activeView;
     if (view === 'meal-plan') {
       configuredFilterView = view;
+      renderRecipeFamilyFilter();
+      if (elements.pantryOnlyToggle) {
+        elements.pantryOnlyToggle.hidden = true;
+        elements.pantryOnlyToggle.disabled = true;
+        elements.pantryOnlyToggle.setAttribute('aria-hidden', 'true');
+      }
       return;
     }
+    renderRecipeFamilyFilter();
     if (configuredFilterView === view) {
       syncFilterControls();
       return;
     }
     configuredFilterView = view;
     const isMealsView = view === 'meals';
+    if (elements.pantryOnlyToggle) {
+      if (isMealsView) {
+        elements.pantryOnlyToggle.hidden = false;
+        elements.pantryOnlyToggle.disabled = false;
+        elements.pantryOnlyToggle.removeAttribute('aria-hidden');
+      } else {
+        elements.pantryOnlyToggle.hidden = true;
+        elements.pantryOnlyToggle.disabled = true;
+        elements.pantryOnlyToggle.setAttribute('aria-hidden', 'true');
+      }
+    }
     if (elements.filterSearch) {
       const searchPlaceholder = isMealsView
         ? 'Search by name, description, or tag'
@@ -3492,9 +3719,12 @@
   const syncFilterControls = () => {
     if (!elements.filterSearch) return;
     const filters = getActiveFilters();
+    const isMealsView = state.activeView === 'meals';
+    const familySelections = isMealsView ? getRecipeFamilyFilterSelections() : null;
+    const familyAllergies = familySelections ? familySelections.allergies : new Set();
+    const familyDiets = familySelections ? familySelections.diets : new Set();
     elements.filterSearch.value = filters.search || '';
     if (elements.favoriteFilterToggle) {
-      const isMealsView = state.activeView === 'meals';
       const favoritesOnly = isMealsView && Boolean(filters.favoritesOnly);
       elements.favoriteFilterToggle.setAttribute('aria-pressed', favoritesOnly ? 'true' : 'false');
       elements.favoriteFilterToggle.classList.toggle('favorite-filter--active', favoritesOnly);
@@ -3521,12 +3751,50 @@
       elements.favoriteFilterToggle.setAttribute('title', titleText);
       elements.favoriteFilterToggle.setAttribute('aria-label', titleText);
     }
+    if (elements.pantryOnlyToggle) {
+      if (isMealsView) {
+        const pantryOnly = Boolean(filters.pantryOnly);
+        elements.pantryOnlyToggle.hidden = false;
+        elements.pantryOnlyToggle.disabled = false;
+        elements.pantryOnlyToggle.classList.toggle('pantry-only-filter--active', pantryOnly);
+        elements.pantryOnlyToggle.setAttribute('aria-pressed', pantryOnly ? 'true' : 'false');
+        const label = elements.pantryOnlyToggle.querySelector('.pantry-only-filter__label');
+        if (label) {
+          label.textContent = pantryOnly ? 'Pantry Ready Only' : 'Pantry Ready';
+        }
+        const title = pantryOnly
+          ? 'Showing only recipes that match your pantry inventory'
+          : 'Limit recipes to only those you can make from your pantry';
+        elements.pantryOnlyToggle.setAttribute('title', title);
+        elements.pantryOnlyToggle.setAttribute('aria-label', title);
+      } else {
+        elements.pantryOnlyToggle.hidden = true;
+        elements.pantryOnlyToggle.disabled = true;
+      }
+    }
     const registry = checkboxRegistry[state.activeView];
     if (!registry) return;
     Object.entries(registry).forEach(([field, map]) => {
       const selected = Array.isArray(filters[field]) ? filters[field] : [];
       map.forEach((input, option) => {
-        input.checked = selected.includes(option);
+        const isFamilySelection =
+          isMealsView
+          && ((field === 'allergies' && familyAllergies.has(option))
+            || (field === 'tags' && familyDiets.has(option)));
+        input.checked = selected.includes(option) || isFamilySelection;
+        input.disabled = Boolean(isFamilySelection);
+        const label = input.parentElement instanceof HTMLElement ? input.parentElement : null;
+        if (label && label.classList.contains('checkbox-option')) {
+          if (isFamilySelection) {
+            label.classList.add('checkbox-option--locked');
+            label.dataset.familySelection = 'true';
+            input.dataset.familySelection = 'true';
+          } else {
+            label.classList.remove('checkbox-option--locked');
+            delete label.dataset.familySelection;
+            delete input.dataset.familySelection;
+          }
+        }
       });
     });
     const summaryEntries = tagGroupSummaryRegistry[state.activeView];
@@ -3535,7 +3803,11 @@
         if (!entry) return;
         const selectedValues = Array.isArray(filters[entry.field]) ? filters[entry.field] : [];
         const selectedCount = entry.optionValues.reduce(
-          (count, value) => (selectedValues.includes(value) ? count + 1 : count),
+          (count, value) =>
+            selectedValues.includes(value)
+              || (isMealsView && entry.field === 'tags' && familyDiets.has(value))
+              ? count + 1
+              : count,
           0,
         );
         if (typeof entry.updateSelectionDisplay === 'function') {
@@ -4310,12 +4582,25 @@
     renderMealPlan();
   };
 
+  const canMakeRecipeFromPantry = (recipe) => {
+    if (!recipe || !recipe.id) {
+      return false;
+    }
+    const matchedSlugs = recipeIngredientMatches.get(recipe.id);
+    if (!(matchedSlugs instanceof Set) || matchedSlugs.size === 0) {
+      return false;
+    }
+    const inventory = state.pantryInventory || {};
+    return Array.from(matchedSlugs).every((slug) => Boolean(inventory[slug]));
+  };
+
   const matchesMealFilters = (recipe) => {
     const filters = state.mealFilters;
     const haystack = `${recipe.name} ${recipe.description} ${(recipe.tags || []).join(' ')} ${recipe.category}`.toLowerCase();
     if (filters.search && !haystack.includes(filters.search.toLowerCase())) {
       return false;
     }
+    const { allergies: familyAllergies, diets: familyDiets } = getRecipeFamilyFilterSelections();
     if (filters.ingredients.length) {
       const matchedIngredients = recipeIngredientMatches.get(recipe.id) || new Set();
       const hasAllSelected = filters.ingredients.every((slug) => matchedIngredients.has(slug));
@@ -4323,9 +4608,13 @@
         return false;
       }
     }
-    if (filters.tags.length) {
+    const requiredTags = new Set(Array.isArray(filters.tags) ? filters.tags : []);
+    if (familyDiets instanceof Set) {
+      familyDiets.forEach((diet) => requiredTags.add(diet));
+    }
+    if (requiredTags.size) {
       const recipeTags = Array.isArray(recipe.tags) ? recipe.tags : [];
-      const hasAllTagSelections = filters.tags.every((selected) => {
+      const hasAllTagSelections = Array.from(requiredTags).every((selected) => {
         const candidateSet = canonicalTagLookup.get(selected);
         const available = candidateSet instanceof Set ? Array.from(candidateSet) : [selected];
         return available.some((tag) => recipeTags.includes(tag));
@@ -4334,13 +4623,23 @@
         return false;
       }
     }
-    if (filters.allergies.length && (recipe.allergens || []).some((allergen) => filters.allergies.includes(allergen))) {
+    const disallowedAllergies = new Set(Array.isArray(filters.allergies) ? filters.allergies : []);
+    if (familyAllergies instanceof Set) {
+      familyAllergies.forEach((allergen) => disallowedAllergies.add(allergen));
+    }
+    if (
+      disallowedAllergies.size
+      && (recipe.allergens || []).some((allergen) => disallowedAllergies.has(allergen))
+    ) {
       return false;
     }
     if (filters.equipment.length && !filters.equipment.every((item) => (recipe.equipment || []).includes(item))) {
       return false;
     }
     if (filters.favoritesOnly && !state.favoriteRecipes.has(recipe.id)) {
+      return false;
+    }
+    if (filters.pantryOnly && !canMakeRecipeFromPantry(recipe)) {
       return false;
     }
     return true;
@@ -4967,6 +5266,14 @@
       elements.favoriteFilterToggle.addEventListener('click', () => {
         if (state.activeView !== 'meals') return;
         state.mealFilters.favoritesOnly = !state.mealFilters.favoritesOnly;
+        renderApp();
+      });
+    }
+
+    if (elements.pantryOnlyToggle) {
+      elements.pantryOnlyToggle.addEventListener('click', () => {
+        if (state.activeView !== 'meals') return;
+        state.mealFilters.pantryOnly = !state.mealFilters.pantryOnly;
         renderApp();
       });
     }

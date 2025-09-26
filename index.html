@@ -117,6 +117,15 @@
                 <span class="favorite-filter__icon" aria-hidden="true">♥</span>
                 <span class="favorite-filter__label">Favorites</span>
               </button>
+              <button
+                type="button"
+                class="pantry-only-filter"
+                id="pantry-only-toggle"
+                aria-pressed="false"
+              >
+                <span class="pantry-only-filter__icon" aria-hidden="true">🧺</span>
+                <span class="pantry-only-filter__label">Pantry Ready</span>
+              </button>
               <button type="button" class="reset-button" id="reset-filters">Reset</button>
               <span
                 class="filter-panel__count"
@@ -126,6 +135,7 @@
               >0</span>
             </div>
           </div>
+          <div class="recipe-family-filter" id="recipe-family-filter" hidden aria-hidden="true"></div>
           <div class="input-group input-group--search">
             <input
               type="search"
