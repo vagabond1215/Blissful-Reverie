@@ -113,26 +113,23 @@
                 class="favorite-filter"
                 id="favorite-filter"
                 aria-pressed="false"
+                aria-label="Filter by favorite recipes"
+                title="Filter by favorite recipes"
               >
                 <span class="favorite-filter__icon" aria-hidden="true">♥</span>
-                <span class="favorite-filter__label">Favorites</span>
               </button>
               <button
                 type="button"
                 class="pantry-only-filter"
                 id="pantry-only-toggle"
                 aria-pressed="false"
+                aria-label="Pantry filter off: include all recipes"
+                title="Pantry filter off: include all recipes"
               >
                 <span class="pantry-only-filter__icon" aria-hidden="true">🧺</span>
-                <span class="pantry-only-filter__label">Pantry Ready</span>
+                <span class="pantry-only-filter__label">Pantry</span>
               </button>
               <button type="button" class="reset-button" id="reset-filters">Reset</button>
-              <span
-                class="filter-panel__count"
-                id="meal-count"
-                aria-live="polite"
-                aria-label="0 recipes match your filters."
-              >0</span>
             </div>
           </div>
           <div class="recipe-family-filter" id="recipe-family-filter" hidden aria-hidden="true"></div>

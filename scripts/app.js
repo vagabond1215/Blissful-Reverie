@@ -3176,7 +3176,6 @@
     elements.mealPlanPrevButton = document.getElementById('meal-plan-prev');
     elements.mealPlanNextButton = document.getElementById('meal-plan-next');
     elements.mealGrid = document.getElementById('meal-grid');
-    elements.mealCount = document.getElementById('meal-count');
     elements.pantryGrid = document.getElementById('pantry-grid');
     elements.pantryCount = document.getElementById('pantry-count');
     elements.filterSearch = document.getElementById('filter-search');
@@ -3565,10 +3564,6 @@
     } else {
       delete container.dataset.filterActive;
     }
-    const label = document.createElement('span');
-    label.className = 'recipe-family-filter__label';
-    label.textContent = 'Family';
-    container.appendChild(label);
     const list = document.createElement('div');
     list.className = 'recipe-family-filter__list';
     list.setAttribute('role', 'group');
@@ -3728,19 +3723,7 @@
       const favoritesOnly = isMealsView && Boolean(filters.favoritesOnly);
       elements.favoriteFilterToggle.setAttribute('aria-pressed', favoritesOnly ? 'true' : 'false');
       elements.favoriteFilterToggle.classList.toggle('favorite-filter--active', favoritesOnly);
-      const labelEl = elements.favoriteFilterToggle.querySelector('.favorite-filter__label');
       const favoriteCount = state.favoriteRecipes.size;
-      if (labelEl) {
-        if (favoritesOnly) {
-          labelEl.textContent = favoriteCount
-            ? `${favoriteCount} favorite${favoriteCount === 1 ? '' : 's'}`
-            : 'No favorites';
-        } else if (favoriteCount) {
-          labelEl.textContent = `Favorites (${favoriteCount})`;
-        } else {
-          labelEl.textContent = 'Favorites';
-        }
-      }
       const titleText = favoritesOnly
         ? favoriteCount
           ? `Showing ${favoriteCount} favorite${favoriteCount === 1 ? '' : 's'}`
@@ -3760,11 +3743,11 @@
         elements.pantryOnlyToggle.setAttribute('aria-pressed', pantryOnly ? 'true' : 'false');
         const label = elements.pantryOnlyToggle.querySelector('.pantry-only-filter__label');
         if (label) {
-          label.textContent = pantryOnly ? 'Pantry Ready Only' : 'Pantry Ready';
+          label.textContent = 'Pantry';
         }
         const title = pantryOnly
-          ? 'Showing only recipes that match your pantry inventory'
-          : 'Limit recipes to only those you can make from your pantry';
+          ? 'Pantry filter on: showing only recipes you can make from your pantry'
+          : 'Pantry filter off: include all recipes';
         elements.pantryOnlyToggle.setAttribute('title', title);
         elements.pantryOnlyToggle.setAttribute('aria-label', title);
       } else {
@@ -5019,16 +5002,6 @@
   const renderMeals = () => {
     const filters = state.mealFilters;
     const filteredRecipes = recipes.filter((recipe) => matchesMealFilters(recipe));
-    const matchLabel = filters.favoritesOnly
-      ? filteredRecipes.length === 1
-        ? 'favorite recipe matches'
-        : 'favorite recipes match'
-      : filteredRecipes.length === 1
-        ? 'recipe matches'
-        : 'recipes match';
-    const matchesText = `${filteredRecipes.length} ${matchLabel} your filters.`;
-    elements.mealCount.textContent = String(filteredRecipes.length);
-    elements.mealCount.setAttribute('aria-label', matchesText);
     elements.mealGrid.innerHTML = '';
     if (filteredRecipes.length) {
       filteredRecipes.forEach((recipe) => {
