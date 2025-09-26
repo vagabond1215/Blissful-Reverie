@@ -3366,7 +3366,6 @@
     elements.mealPlanView = document.getElementById('meal-plan-view');
     elements.mealPlanCalendar = document.getElementById('meal-plan-calendar');
     elements.mealPlanSidebar = document.getElementById('meal-plan-sidebar');
-    elements.mealPlanDayDetails = document.getElementById('meal-plan-day-details');
     elements.mealPlanSummary = document.getElementById('meal-plan-summary');
     elements.mealPlanMacros = document.getElementById('meal-plan-macros');
     elements.mealPlanModeButtons = Array.from(
@@ -4612,19 +4611,6 @@
     return container;
   };
 
-  const renderMealPlanDayDetails = (selectedDate, selectedIso) => {
-    if (!elements.mealPlanDayDetails) return;
-    const container = elements.mealPlanDayDetails;
-    container.innerHTML = '';
-    const { container: content } = createMealPlanDayDetailsContent(selectedDate, selectedIso, {
-      allowAttendance: true,
-      allowRemoval: true,
-      showMeta: true,
-      showHeader: true,
-    });
-    container.appendChild(content);
-  };
-
   const renderMealPlanDayModal = (selectedDate, selectedIso) => {
     if (!dayModalState.body || !dayModalState.root) {
       return;
@@ -4654,7 +4640,6 @@
   const refreshMealPlanDaySections = () => {
     const currentIso = state.mealPlanSelectedDate;
     const currentDate = parseISODateString(currentIso) || new Date();
-    renderMealPlanDayDetails(currentDate, currentIso);
     renderMealPlanSummary(currentIso);
     if (dayModalState.isOpen) {
       renderMealPlanDayModal(currentDate, currentIso);
@@ -5664,11 +5649,6 @@
       elements.mealPlanNextButton.addEventListener('click', () => {
         adjustMealPlanSelection(1);
       });
-    }
-
-    if (elements.mealPlanDayDetails) {
-      elements.mealPlanDayDetails.addEventListener('click', handleMealPlanDayContainerClick);
-      elements.mealPlanDayDetails.addEventListener('change', handleMealPlanDayContainerChange);
     }
 
     if (dayModalState.body) {
