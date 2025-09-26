@@ -4597,6 +4597,55 @@
     return { container: wrapper, titleText, subtitleText, entryCount: entries.length };
   };
 
+  const ensureMealPlanSidebarDayContainer = () => {
+    if (
+      elements.mealPlanDayContainer instanceof HTMLElement
+      && elements.mealPlanSidebar?.contains(elements.mealPlanDayContainer)
+    ) {
+      return elements.mealPlanDayContainer;
+    }
+    if (!elements.mealPlanSidebar) {
+      return null;
+    }
+    const existing = elements.mealPlanSidebar.querySelector('[data-meal-plan-day-container]');
+    if (existing instanceof HTMLElement) {
+      elements.mealPlanDayContainer = existing;
+      return existing;
+    }
+    const container = document.createElement('section');
+    container.dataset.mealPlanDayContainer = 'true';
+    container.className = 'meal-plan-day-container';
+    container.setAttribute('role', 'region');
+    container.setAttribute('aria-live', 'polite');
+    container.setAttribute('aria-labelledby', 'meal-plan-day-heading');
+    if (elements.mealPlanSummary instanceof HTMLElement) {
+      elements.mealPlanSidebar.insertBefore(container, elements.mealPlanSummary);
+    } else {
+      elements.mealPlanSidebar.appendChild(container);
+    }
+    elements.mealPlanDayContainer = container;
+    return container;
+  };
+
+  const renderMealPlanDayDetails = (selectedDate, selectedIso) => {
+    const target = ensureMealPlanSidebarDayContainer();
+    if (!target) {
+      return;
+    }
+    target.innerHTML = '';
+    const headingId = 'meal-plan-day-heading';
+    const { container, entryCount } = createMealPlanDayDetailsContent(selectedDate, selectedIso, {
+      allowAttendance: true,
+      allowRemoval: true,
+      showMeta: true,
+      showHeader: true,
+      headingId,
+    });
+    target.setAttribute('aria-labelledby', headingId);
+    target.dataset.mealPlanDayEmpty = entryCount > 0 ? 'false' : 'true';
+    target.appendChild(container);
+  };
+
   const renderMealPlanDayView = (selectedIso) => {
     const container = document.createElement('div');
     container.className = 'meal-plan-calendar__day';
@@ -5627,6 +5676,12 @@
         }
       });
     });
+
+    const sidebarDayContainer = ensureMealPlanSidebarDayContainer();
+    if (sidebarDayContainer) {
+      sidebarDayContainer.addEventListener('click', handleMealPlanDayContainerClick);
+      sidebarDayContainer.addEventListener('change', handleMealPlanDayContainerChange);
+    }
 
     if (Array.isArray(elements.mealPlanModeButtons)) {
       elements.mealPlanModeButtons.forEach((button) => {
