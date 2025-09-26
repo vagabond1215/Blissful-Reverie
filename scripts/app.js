@@ -921,9 +921,13 @@
   const getDefaultMealFilters = () => ({
     search: '',
     ingredients: [],
+    ingredientsExcluded: [],
     tags: [],
+    tagsExcluded: [],
     allergies: [],
+    allergiesExcluded: [],
     equipment: [],
+    equipmentExcluded: [],
     favoritesOnly: false,
     familyMembers: [],
     pantryOnly: false,
@@ -951,17 +955,187 @@
     return Array.from(unique);
   };
 
+  const normalizeTriStatePair = (includeList, excludeList) => {
+    const includeSet = new Set(includeList);
+    const excludeSet = new Set();
+    excludeList.forEach((value) => {
+      if (includeSet.has(value)) {
+        includeSet.delete(value);
+      } else {
+        excludeSet.add(value);
+      }
+    });
+    return { include: Array.from(includeSet), exclude: Array.from(excludeSet) };
+  };
+
+  const TRI_STATE_FILTER_KEYS = {
+    ingredients: { include: 'ingredients', exclude: 'ingredientsExcluded' },
+    tags: { include: 'tags', exclude: 'tagsExcluded' },
+    allergies: { include: 'allergies', exclude: 'allergiesExcluded' },
+    equipment: { include: 'equipment', exclude: 'equipmentExcluded' },
+  };
+
+  const getTriStateConfig = (field) => TRI_STATE_FILTER_KEYS[field] || null;
+
+  const getTriStateState = (filters, field, value) => {
+    const config = getTriStateConfig(field);
+    if (!config) {
+      return filters[field] && Array.isArray(filters[field]) && filters[field].includes(value)
+        ? 'include'
+        : 'off';
+    }
+    const includeSet = new Set(Array.isArray(filters[config.include]) ? filters[config.include] : []);
+    if (includeSet.has(value)) {
+      return 'include';
+    }
+    const excludeSet = new Set(Array.isArray(filters[config.exclude]) ? filters[config.exclude] : []);
+    if (excludeSet.has(value)) {
+      return 'exclude';
+    }
+    return 'off';
+  };
+
+  const setTriStateState = (filters, field, value, state) => {
+    const config = getTriStateConfig(field);
+    if (!config) {
+      return;
+    }
+    if (!Array.isArray(filters[config.include])) {
+      filters[config.include] = [];
+    }
+    if (!Array.isArray(filters[config.exclude])) {
+      filters[config.exclude] = [];
+    }
+    const includeSet = new Set(filters[config.include]);
+    const excludeSet = new Set(filters[config.exclude]);
+    includeSet.delete(value);
+    excludeSet.delete(value);
+    if (state === 'include') {
+      includeSet.add(value);
+    } else if (state === 'exclude') {
+      excludeSet.add(value);
+    }
+    filters[config.include] = Array.from(includeSet);
+    filters[config.exclude] = Array.from(excludeSet);
+  };
+
+  const cycleTriStateState = (current) => {
+    if (current === 'include') {
+      return 'exclude';
+    }
+    if (current === 'exclude') {
+      return 'off';
+    }
+    return 'include';
+  };
+
+  const describeTriStateState = (state) => {
+    if (state === 'include') {
+      return 'included';
+    }
+    if (state === 'exclude') {
+      return 'excluded';
+    }
+    return 'not selected';
+  };
+
+  const updateTriStateButtonState = (button, state) => {
+    if (!(button instanceof HTMLElement)) {
+      return;
+    }
+    const normalizedState = state === 'include' || state === 'exclude' ? state : 'off';
+    button.dataset.filterState = normalizedState;
+    const ariaChecked = normalizedState === 'include' ? 'true' : normalizedState === 'exclude' ? 'mixed' : 'false';
+    button.setAttribute('aria-checked', ariaChecked);
+    const labelText = button.dataset.filterLabel || '';
+    const title = labelText ? `${labelText}: ${describeTriStateState(normalizedState)}` : describeTriStateState(normalizedState);
+    button.setAttribute('title', title);
+    button.setAttribute('aria-label', title);
+    const icon = button.querySelector('.filter-toggle__icon');
+    if (icon) {
+      if (normalizedState === 'include') {
+        icon.textContent = '✓';
+      } else if (normalizedState === 'exclude') {
+        icon.textContent = '✕';
+      } else {
+        icon.textContent = '';
+      }
+    }
+  };
+
+  const createTriStateButton = (option, labelText, field, filters, onChange) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'checkbox-option filter-toggle';
+    button.dataset.filterMode = 'tri';
+    button.dataset.filterField = field;
+    button.dataset.filterValue = option;
+    button.dataset.filterLabel = labelText;
+    button.setAttribute('role', 'checkbox');
+    button.setAttribute('aria-checked', 'false');
+    const icon = document.createElement('span');
+    icon.className = 'filter-toggle__icon';
+    button.appendChild(icon);
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'filter-toggle__label';
+    labelSpan.textContent = labelText;
+    button.appendChild(labelSpan);
+    button.addEventListener('click', () => {
+      if (button.disabled) {
+        return;
+      }
+      const current = button.dataset.filterState || 'off';
+      const next = cycleTriStateState(current);
+      setTriStateState(filters, field, option, next);
+      updateTriStateButtonState(button, next);
+      if (typeof onChange === 'function') {
+        onChange(next);
+      }
+    });
+    return button;
+  };
+
+  const getTriStateSets = (filters, field) => {
+    const config = getTriStateConfig(field);
+    if (!config) {
+      return { include: new Set(), exclude: new Set() };
+    }
+    const include = new Set(Array.isArray(filters[config.include]) ? filters[config.include] : []);
+    const exclude = new Set(Array.isArray(filters[config.exclude]) ? filters[config.exclude] : []);
+    return { include, exclude };
+  };
+
   const sanitizeMealFilters = (value, members = []) => {
     const defaults = getDefaultMealFilters();
     if (!value || typeof value !== 'object') {
       return defaults;
     }
+    const ingredientSelections = normalizeTriStatePair(
+      toUniqueStringArray(value.ingredients),
+      toUniqueStringArray(value.ingredientsExcluded),
+    );
+    const tagSelections = normalizeTriStatePair(
+      toUniqueStringArray(value.tags),
+      toUniqueStringArray(value.tagsExcluded),
+    );
+    const allergySelections = normalizeTriStatePair(
+      toUniqueStringArray(value.allergies),
+      toUniqueStringArray(value.allergiesExcluded),
+    );
+    const equipmentSelections = normalizeTriStatePair(
+      toUniqueStringArray(value.equipment),
+      toUniqueStringArray(value.equipmentExcluded),
+    );
     return {
       search: typeof value.search === 'string' ? value.search : defaults.search,
-      ingredients: toUniqueStringArray(value.ingredients),
-      tags: toUniqueStringArray(value.tags),
-      allergies: toUniqueStringArray(value.allergies),
-      equipment: toUniqueStringArray(value.equipment),
+      ingredients: ingredientSelections.include,
+      ingredientsExcluded: ingredientSelections.exclude,
+      tags: tagSelections.include,
+      tagsExcluded: tagSelections.exclude,
+      allergies: allergySelections.include,
+      allergiesExcluded: allergySelections.exclude,
+      equipment: equipmentSelections.include,
+      equipmentExcluded: equipmentSelections.exclude,
       favoritesOnly: Boolean(value.favoritesOnly),
       familyMembers: sanitizeMealFilterFamilyMembers(value.familyMembers, members),
       pantryOnly: Boolean(value.pantryOnly),
@@ -2570,9 +2744,13 @@
       mealFilters: {
         search: typeof mealFilters.search === 'string' ? mealFilters.search : '',
         ingredients: toUniqueStringArray(mealFilters.ingredients),
+        ingredientsExcluded: toUniqueStringArray(mealFilters.ingredientsExcluded),
         tags: toUniqueStringArray(mealFilters.tags),
+        tagsExcluded: toUniqueStringArray(mealFilters.tagsExcluded),
         allergies: toUniqueStringArray(mealFilters.allergies),
+        allergiesExcluded: toUniqueStringArray(mealFilters.allergiesExcluded),
         equipment: toUniqueStringArray(mealFilters.equipment),
+        equipmentExcluded: toUniqueStringArray(mealFilters.equipmentExcluded),
         favoritesOnly: Boolean(mealFilters.favoritesOnly),
         familyMembers: sanitizeMealFilterFamilyMembers(
           mealFilters.familyMembers,
@@ -3301,7 +3479,15 @@
     if (!registry) return;
     const filters =
       view === 'meals' ? ensureMealFilters() : state.pantryFilters || getDefaultPantryFilters();
-    if (!Array.isArray(filters[field])) {
+    const triStateConfig = view === 'meals' ? getTriStateConfig(field) : null;
+    if (triStateConfig) {
+      if (!Array.isArray(filters[triStateConfig.include])) {
+        filters[triStateConfig.include] = [];
+      }
+      if (!Array.isArray(filters[triStateConfig.exclude])) {
+        filters[triStateConfig.exclude] = [];
+      }
+    } else if (!Array.isArray(filters[field])) {
       filters[field] = [];
     }
     const familySelections =
@@ -3310,43 +3496,55 @@
     container.innerHTML = '';
     registry.clear();
     options.forEach((option) => {
-      const label = document.createElement('label');
-      label.className = 'checkbox-option';
-      const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.value = option;
-      const isFamilySelection =
-        view === 'meals' && field === 'allergies' && familyAllergies.has(option);
-      input.checked = filters[field].includes(option) || isFamilySelection;
-      input.disabled = isFamilySelection;
-      input.addEventListener('change', () => {
-        const current = new Set(filters[field]);
-        if (input.checked) {
-          current.add(option);
-        } else {
-          current.delete(option);
+      const displayLabel =
+        typeof labelFormatter === 'function' ? labelFormatter(option) : option;
+      if (triStateConfig) {
+        const button = createTriStateButton(option, displayLabel, field, filters, () => renderApp());
+        const labelSpan = button.querySelector('.filter-toggle__label');
+        if (spanClassName && labelSpan) {
+          labelSpan.classList.add(spanClassName);
         }
-        filters[field] = Array.from(current);
-        renderApp();
-      });
-      if (isFamilySelection) {
-        label.classList.add('checkbox-option--locked');
-        label.dataset.familySelection = 'true';
-        input.dataset.familySelection = 'true';
+        const isFamilySelection = familyAllergies instanceof Set && familyAllergies.has(option);
+        const defaultState = isFamilySelection ? 'exclude' : getTriStateState(filters, field, option);
+        updateTriStateButtonState(button, defaultState);
+        if (isFamilySelection) {
+          button.disabled = true;
+          button.classList.add('checkbox-option--locked');
+          button.dataset.familySelection = 'true';
+        } else {
+          button.disabled = false;
+          button.classList.remove('checkbox-option--locked');
+          delete button.dataset.familySelection;
+        }
+        container.appendChild(button);
+        registry.set(option, button);
       } else {
-        label.classList.remove('checkbox-option--locked');
-        delete label.dataset.familySelection;
-        delete input.dataset.familySelection;
+        const label = document.createElement('label');
+        label.className = 'checkbox-option';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = option;
+        input.checked = filters[field].includes(option);
+        input.addEventListener('change', () => {
+          const current = new Set(filters[field]);
+          if (input.checked) {
+            current.add(option);
+          } else {
+            current.delete(option);
+          }
+          filters[field] = Array.from(current);
+          renderApp();
+        });
+        label.appendChild(input);
+        const span = document.createElement('span');
+        if (spanClassName) {
+          span.className = spanClassName;
+        }
+        span.textContent = displayLabel;
+        label.appendChild(span);
+        container.appendChild(label);
+        registry.set(option, input);
       }
-      label.appendChild(input);
-      const span = document.createElement('span');
-      if (spanClassName) {
-        span.className = spanClassName;
-      }
-      span.textContent = typeof labelFormatter === 'function' ? labelFormatter(option) : option;
-      label.appendChild(span);
-      container.appendChild(label);
-      registry.set(option, input);
     });
   };
 
@@ -3356,7 +3554,15 @@
     if (!registry) return;
     const filters =
       view === 'meals' ? ensureMealFilters() : state.pantryFilters || getDefaultPantryFilters();
-    if (!Array.isArray(filters[field])) {
+    const triStateConfig = view === 'meals' ? getTriStateConfig(field) : null;
+    if (triStateConfig) {
+      if (!Array.isArray(filters[triStateConfig.include])) {
+        filters[triStateConfig.include] = [];
+      }
+      if (!Array.isArray(filters[triStateConfig.exclude])) {
+        filters[triStateConfig.exclude] = [];
+      }
+    } else if (!Array.isArray(filters[field])) {
       filters[field] = [];
     }
     const familySelections = view === 'meals' ? getRecipeFamilyFilterSelections() : null;
@@ -3369,13 +3575,25 @@
     groups.forEach((group, index) => {
       if (!group.options.length) return;
       const optionValues = group.options.map((option) => option.value);
-      const selectedCount = optionValues.reduce(
-        (count, value) =>
-          filters[field].includes(value) || (familyDiets instanceof Set && familyDiets.has(value))
-            ? count + 1
-            : count,
-        0,
-      );
+      let selectedCount = 0;
+      if (triStateConfig) {
+        const activeValues = new Set();
+        const { include, exclude } = getTriStateSets(filters, field);
+        optionValues.forEach((value) => {
+          if (include.has(value) || exclude.has(value) || (familyDiets instanceof Set && familyDiets.has(value))) {
+            activeValues.add(value);
+          }
+        });
+        selectedCount = activeValues.size;
+      } else {
+        selectedCount = optionValues.reduce(
+          (count, value) =>
+            filters[field].includes(value) || (familyDiets instanceof Set && familyDiets.has(value))
+              ? count + 1
+              : count,
+          0,
+        );
+      }
       const details = document.createElement('details');
       details.className = 'tag-group';
       const hasSelection = selectedCount > 0;
@@ -3413,39 +3631,57 @@
       details.addEventListener('toggle', applyExpandedState);
       applyExpandedState();
       group.options.forEach((option) => {
-        const label = document.createElement('label');
-        label.className = 'checkbox-option';
-        const input = document.createElement('input');
-        input.type = 'checkbox';
-        input.value = option.value;
-        const isFamilySelection = familyDiets instanceof Set && familyDiets.has(option.value);
-        input.checked = filters[field].includes(option.value) || isFamilySelection;
-        input.disabled = isFamilySelection;
-        input.addEventListener('change', () => {
-          const current = new Set(filters[field]);
-          if (input.checked) {
-            current.add(option.value);
+        if (triStateConfig) {
+          const button = createTriStateButton(option.value, option.label, field, filters, () => renderApp());
+          const isFamilySelection = familyDiets instanceof Set && familyDiets.has(option.value);
+          const defaultState = isFamilySelection ? 'include' : getTriStateState(filters, field, option.value);
+          updateTriStateButtonState(button, defaultState);
+          if (isFamilySelection) {
+            button.disabled = true;
+            button.classList.add('checkbox-option--locked');
+            button.dataset.familySelection = 'true';
           } else {
-            current.delete(option.value);
+            button.disabled = false;
+            button.classList.remove('checkbox-option--locked');
+            delete button.dataset.familySelection;
           }
-          filters[field] = Array.from(current);
-          renderApp();
-        });
-        if (isFamilySelection) {
-          label.classList.add('checkbox-option--locked');
-          label.dataset.familySelection = 'true';
-          input.dataset.familySelection = 'true';
+          optionGrid.appendChild(button);
+          registry.set(option.value, button);
         } else {
-          label.classList.remove('checkbox-option--locked');
-          delete label.dataset.familySelection;
-          delete input.dataset.familySelection;
+          const label = document.createElement('label');
+          label.className = 'checkbox-option';
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.value = option.value;
+          const isFamilySelection = familyDiets instanceof Set && familyDiets.has(option.value);
+          input.checked = filters[field].includes(option.value) || isFamilySelection;
+          input.disabled = isFamilySelection;
+          input.addEventListener('change', () => {
+            const current = new Set(filters[field]);
+            if (input.checked) {
+              current.add(option.value);
+            } else {
+              current.delete(option.value);
+            }
+            filters[field] = Array.from(current);
+            renderApp();
+          });
+          if (isFamilySelection) {
+            label.classList.add('checkbox-option--locked');
+            label.dataset.familySelection = 'true';
+            input.dataset.familySelection = 'true';
+          } else {
+            label.classList.remove('checkbox-option--locked');
+            delete label.dataset.familySelection;
+            delete input.dataset.familySelection;
+          }
+          label.appendChild(input);
+          const span = document.createElement('span');
+          span.textContent = option.label;
+          label.appendChild(span);
+          optionGrid.appendChild(label);
+          registry.set(option.value, input);
         }
-        label.appendChild(input);
-        const span = document.createElement('span');
-        span.textContent = option.label;
-        label.appendChild(span);
-        optionGrid.appendChild(label);
-        registry.set(option.value, input);
       });
       details.appendChild(optionGrid);
       container.appendChild(details);
@@ -3456,6 +3692,7 @@
         field,
         optionValues,
         updateSelectionDisplay,
+        triState: Boolean(triStateConfig),
       });
     });
   };
@@ -3467,6 +3704,9 @@
     const filters = ensureMealFilters();
     if (!Array.isArray(filters.ingredients)) {
       filters.ingredients = [];
+    }
+    if (!Array.isArray(filters.ingredientsExcluded)) {
+      filters.ingredientsExcluded = [];
     }
     container.innerHTML = '';
     registry.clear();
@@ -3483,28 +3723,11 @@
 
     const renderOption = (option, optionGrid) => {
       if (!option || !option.slug) return;
-      const label = document.createElement('label');
-      label.className = 'checkbox-option';
-      const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.value = option.slug;
-      input.checked = filters.ingredients.includes(option.slug);
-      input.addEventListener('change', () => {
-        const current = new Set(filters.ingredients);
-        if (input.checked) {
-          current.add(option.slug);
-        } else {
-          current.delete(option.slug);
-        }
-        filters.ingredients = Array.from(current);
-        renderApp();
-      });
-      label.appendChild(input);
-      const span = document.createElement('span');
-      span.textContent = option.label;
-      label.appendChild(span);
-      optionGrid.appendChild(label);
-      registry.set(option.slug, input);
+      const button = createTriStateButton(option.slug, option.label, 'ingredients', filters, () => renderApp());
+      const defaultState = getTriStateState(filters, 'ingredients', option.slug);
+      updateTriStateButtonState(button, defaultState);
+      optionGrid.appendChild(button);
+      registry.set(option.slug, button);
     };
 
     groups.forEach((group, index) => {
@@ -3512,7 +3735,8 @@
       if (!allOptions.length) return;
       const details = document.createElement('details');
       details.className = 'ingredient-group';
-      const hasSelection = allOptions.some((option) => filters.ingredients.includes(option.slug));
+      const { include, exclude } = getTriStateSets(filters, 'ingredients');
+      const hasSelection = allOptions.some((option) => include.has(option.slug) || exclude.has(option.slug));
       details.open = hasSelection || index < 2;
       const summary = document.createElement('summary');
       summary.className = 'ingredient-group__summary';
@@ -3773,24 +3997,40 @@
     const registry = checkboxRegistry[state.activeView];
     if (!registry) return;
     Object.entries(registry).forEach(([field, map]) => {
-      const selected = Array.isArray(filters[field]) ? filters[field] : [];
-      map.forEach((input, option) => {
+      map.forEach((control, option) => {
         const isFamilySelection =
           isMealsView
           && ((field === 'allergies' && familyAllergies.has(option))
             || (field === 'tags' && familyDiets.has(option)));
-        input.checked = selected.includes(option) || isFamilySelection;
-        input.disabled = Boolean(isFamilySelection);
-        const label = input.parentElement instanceof HTMLElement ? input.parentElement : null;
-        if (label && label.classList.contains('checkbox-option')) {
+        if (control instanceof HTMLButtonElement) {
+          let targetState = getTriStateState(filters, field, option);
           if (isFamilySelection) {
-            label.classList.add('checkbox-option--locked');
-            label.dataset.familySelection = 'true';
-            input.dataset.familySelection = 'true';
+            targetState = field === 'allergies' ? 'exclude' : 'include';
+          }
+          updateTriStateButtonState(control, targetState);
+          control.disabled = Boolean(isFamilySelection);
+          if (isFamilySelection) {
+            control.classList.add('checkbox-option--locked');
+            control.dataset.familySelection = 'true';
           } else {
-            label.classList.remove('checkbox-option--locked');
-            delete label.dataset.familySelection;
-            delete input.dataset.familySelection;
+            control.classList.remove('checkbox-option--locked');
+            delete control.dataset.familySelection;
+          }
+        } else if (control instanceof HTMLInputElement) {
+          const selected = Array.isArray(filters[field]) ? filters[field] : [];
+          control.checked = selected.includes(option) || isFamilySelection;
+          control.disabled = Boolean(isFamilySelection);
+          const label = control.parentElement instanceof HTMLElement ? control.parentElement : null;
+          if (label && label.classList.contains('checkbox-option')) {
+            if (isFamilySelection) {
+              label.classList.add('checkbox-option--locked');
+              label.dataset.familySelection = 'true';
+              control.dataset.familySelection = 'true';
+            } else {
+              label.classList.remove('checkbox-option--locked');
+              delete label.dataset.familySelection;
+              delete control.dataset.familySelection;
+            }
           }
         }
       });
@@ -3799,15 +4039,35 @@
     if (Array.isArray(summaryEntries)) {
       summaryEntries.forEach((entry) => {
         if (!entry) return;
-        const selectedValues = Array.isArray(filters[entry.field]) ? filters[entry.field] : [];
-        const selectedCount = entry.optionValues.reduce(
-          (count, value) =>
-            selectedValues.includes(value)
-              || (isMealsView && entry.field === 'tags' && familyDiets.has(value))
-              ? count + 1
-              : count,
-          0,
-        );
+        let selectedCount = 0;
+        if (entry.triState) {
+          const activeValues = new Set();
+          const { include, exclude } = getTriStateSets(filters, entry.field);
+          entry.optionValues.forEach((value) => {
+            if (include.has(value) || exclude.has(value)) {
+              activeValues.add(value);
+            }
+            if (
+              isMealsView
+              && entry.field === 'tags'
+              && familyDiets instanceof Set
+              && familyDiets.has(value)
+            ) {
+              activeValues.add(value);
+            }
+          });
+          selectedCount = activeValues.size;
+        } else {
+          const selectedValues = Array.isArray(filters[entry.field]) ? filters[entry.field] : [];
+          selectedCount = entry.optionValues.reduce(
+            (count, value) =>
+              selectedValues.includes(value)
+                || (isMealsView && entry.field === 'tags' && familyDiets.has(value))
+                ? count + 1
+                : count,
+            0,
+          );
+        }
         if (typeof entry.updateSelectionDisplay === 'function') {
           entry.updateSelectionDisplay(selectedCount);
         } else if (entry.countBadge && entry.summary) {
@@ -4599,20 +4859,31 @@
       return false;
     }
     const { allergies: familyAllergies, diets: familyDiets } = getRecipeFamilyFilterSelections();
-    if (filters.ingredients.length) {
+    const ingredientSelections = getTriStateSets(filters, 'ingredients');
+    if (ingredientSelections.include.size) {
       const matchedIngredients = recipeIngredientMatches.get(recipe.id) || new Set();
-      const hasAllSelected = filters.ingredients.every((slug) => matchedIngredients.has(slug));
+      const hasAllSelected = Array.from(ingredientSelections.include).every((slug) => matchedIngredients.has(slug));
       if (!hasAllSelected) {
         return false;
       }
     }
-    const requiredTags = new Set(Array.isArray(filters.tags) ? filters.tags : []);
-    if (familyDiets instanceof Set) {
-      familyDiets.forEach((diet) => requiredTags.add(diet));
+    if (ingredientSelections.exclude.size) {
+      const matchedIngredients = recipeIngredientMatches.get(recipe.id) || new Set();
+      const hasExcluded = Array.from(ingredientSelections.exclude).some((slug) => matchedIngredients.has(slug));
+      if (hasExcluded) {
+        return false;
+      }
     }
-    if (requiredTags.size) {
+    const tagSelections = getTriStateSets(filters, 'tags');
+    if (familyDiets instanceof Set) {
+      familyDiets.forEach((diet) => {
+        tagSelections.include.add(diet);
+        tagSelections.exclude.delete(diet);
+      });
+    }
+    if (tagSelections.include.size) {
       const recipeTags = Array.isArray(recipe.tags) ? recipe.tags : [];
-      const hasAllTagSelections = Array.from(requiredTags).every((selected) => {
+      const hasAllTagSelections = Array.from(tagSelections.include).every((selected) => {
         const candidateSet = canonicalTagLookup.get(selected);
         const available = candidateSet instanceof Set ? Array.from(candidateSet) : [selected];
         return available.some((tag) => recipeTags.includes(tag));
@@ -4621,18 +4892,50 @@
         return false;
       }
     }
-    const disallowedAllergies = new Set(Array.isArray(filters.allergies) ? filters.allergies : []);
+    if (tagSelections.exclude.size) {
+      const recipeTags = Array.isArray(recipe.tags) ? recipe.tags : [];
+      const hasExcludedTag = Array.from(tagSelections.exclude).some((selected) => {
+        const candidateSet = canonicalTagLookup.get(selected);
+        const available = candidateSet instanceof Set ? Array.from(candidateSet) : [selected];
+        return available.some((tag) => recipeTags.includes(tag));
+      });
+      if (hasExcludedTag) {
+        return false;
+      }
+    }
+    const allergySelections = getTriStateSets(filters, 'allergies');
     if (familyAllergies instanceof Set) {
-      familyAllergies.forEach((allergen) => disallowedAllergies.add(allergen));
+      familyAllergies.forEach((allergen) => {
+        allergySelections.exclude.add(allergen);
+        allergySelections.include.delete(allergen);
+      });
+    }
+    if (allergySelections.include.size) {
+      const recipeAllergens = Array.isArray(recipe.allergens) ? recipe.allergens : [];
+      const hasAllIncluded = Array.from(allergySelections.include).every((allergen) => recipeAllergens.includes(allergen));
+      if (!hasAllIncluded) {
+        return false;
+      }
     }
     if (
-      disallowedAllergies.size
-      && (recipe.allergens || []).some((allergen) => disallowedAllergies.has(allergen))
+      allergySelections.exclude.size
+      && (recipe.allergens || []).some((allergen) => allergySelections.exclude.has(allergen))
     ) {
       return false;
     }
-    if (filters.equipment.length && !filters.equipment.every((item) => (recipe.equipment || []).includes(item))) {
-      return false;
+    const equipmentSelections = getTriStateSets(filters, 'equipment');
+    const recipeEquipment = Array.isArray(recipe.equipment) ? recipe.equipment : [];
+    if (equipmentSelections.include.size) {
+      const hasAllEquipment = Array.from(equipmentSelections.include).every((item) => recipeEquipment.includes(item));
+      if (!hasAllEquipment) {
+        return false;
+      }
+    }
+    if (equipmentSelections.exclude.size) {
+      const hasExcludedEquipment = Array.from(equipmentSelections.exclude).some((item) => recipeEquipment.includes(item));
+      if (hasExcludedEquipment) {
+        return false;
+      }
     }
     if (filters.favoritesOnly && !state.favoriteRecipes.has(recipe.id)) {
       return false;
