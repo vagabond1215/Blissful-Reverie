@@ -2529,8 +2529,19 @@
   };
   let configuredFilterView = null;
 
+  const ensureMealFilters = () => {
+    const current = state.mealFilters;
+    const sanitized = sanitizeMealFilters(current, state.familyMembers);
+    if (!current || typeof current !== 'object') {
+      state.mealFilters = sanitized;
+      return state.mealFilters;
+    }
+    Object.assign(current, sanitized);
+    return current;
+  };
+
   const getActiveFilters = () =>
-    state.activeView === 'meals' ? state.mealFilters : state.pantryFilters;
+    state.activeView === 'meals' ? ensureMealFilters() : state.pantryFilters;
 
   const setDocumentThemeAttributes = (mode, theme) => {
     if (document.documentElement.dataset.mode !== mode) {
@@ -3260,7 +3271,8 @@
     } else {
       current.add(memberId);
     }
-    state.mealFilters.familyMembers = sanitizeMealFilterFamilyMembers(
+    const filters = ensureMealFilters();
+    filters.familyMembers = sanitizeMealFilterFamilyMembers(
       Array.from(current),
       state.familyMembers,
     );
@@ -3268,8 +3280,9 @@
   };
 
   const clearMealFilterFamilyMembers = () => {
-    if (Array.isArray(state.mealFilters?.familyMembers) && state.mealFilters.familyMembers.length) {
-      state.mealFilters.familyMembers = [];
+    const filters = ensureMealFilters();
+    if (Array.isArray(filters.familyMembers) && filters.familyMembers.length) {
+      filters.familyMembers = [];
       renderApp();
     }
   };
@@ -3286,7 +3299,8 @@
     if (!container) return;
     const registry = checkboxRegistry[view]?.[field];
     if (!registry) return;
-    const filters = view === 'meals' ? state.mealFilters : state.pantryFilters;
+    const filters =
+      view === 'meals' ? ensureMealFilters() : state.pantryFilters || getDefaultPantryFilters();
     if (!Array.isArray(filters[field])) {
       filters[field] = [];
     }
@@ -3340,7 +3354,8 @@
     if (!container) return;
     const registry = checkboxRegistry[view]?.[field];
     if (!registry) return;
-    const filters = view === 'meals' ? state.mealFilters : state.pantryFilters;
+    const filters =
+      view === 'meals' ? ensureMealFilters() : state.pantryFilters || getDefaultPantryFilters();
     if (!Array.isArray(filters[field])) {
       filters[field] = [];
     }
@@ -3449,7 +3464,7 @@
     if (!container) return;
     const registry = checkboxRegistry.meals?.ingredients;
     if (!registry) return;
-    const filters = state.mealFilters;
+    const filters = ensureMealFilters();
     if (!Array.isArray(filters.ingredients)) {
       filters.ingredients = [];
     }
@@ -4578,7 +4593,7 @@
   };
 
   const matchesMealFilters = (recipe) => {
-    const filters = state.mealFilters;
+    const filters = ensureMealFilters();
     const haystack = `${recipe.name} ${recipe.description} ${(recipe.tags || []).join(' ')} ${recipe.category}`.toLowerCase();
     if (filters.search && !haystack.includes(filters.search.toLowerCase())) {
       return false;
@@ -5000,7 +5015,10 @@
   };
 
   const renderMeals = () => {
-    const filters = state.mealFilters;
+    if (!elements.mealGrid) {
+      return;
+    }
+    const filters = ensureMealFilters();
     const filteredRecipes = recipes.filter((recipe) => matchesMealFilters(recipe));
     elements.mealGrid.innerHTML = '';
     if (filteredRecipes.length) {
@@ -5238,7 +5256,8 @@
     if (elements.favoriteFilterToggle) {
       elements.favoriteFilterToggle.addEventListener('click', () => {
         if (state.activeView !== 'meals') return;
-        state.mealFilters.favoritesOnly = !state.mealFilters.favoritesOnly;
+        const filters = ensureMealFilters();
+        filters.favoritesOnly = !filters.favoritesOnly;
         renderApp();
       });
     }
@@ -5246,7 +5265,8 @@
     if (elements.pantryOnlyToggle) {
       elements.pantryOnlyToggle.addEventListener('click', () => {
         if (state.activeView !== 'meals') return;
-        state.mealFilters.pantryOnly = !state.mealFilters.pantryOnly;
+        const filters = ensureMealFilters();
+        filters.pantryOnly = !filters.pantryOnly;
         renderApp();
       });
     }
