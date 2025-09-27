@@ -289,6 +289,493 @@
   });
 };
 
+  const toTitleCase = (value) =>
+    String(value || '')
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+
+  const slugify = (value) =>
+    String(value || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .trim();
+
+  const getIngredientDisplayName = (ingredient) =>
+    toTitleCase(
+      String(ingredient && ingredient.name ? ingredient.name : '')
+        .replace(/\s*\([^)]*\)\s*/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim(),
+    );
+
+  const formatTagFromIngredient = (tag) => {
+    const normalized = String(tag || '')
+      .replace(/[*]+/g, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!normalized) return null;
+    return toTitleCase(normalized);
+  };
+
+  const deriveAllergensFromIngredients = (ingredientList) => {
+    const allergens = new Set();
+    (Array.isArray(ingredientList) ? ingredientList : []).forEach((ingredient) => {
+      const tags = Array.isArray(ingredient && ingredient.tags) ? ingredient.tags : [];
+      tags.forEach((tag) => {
+        const value = String(tag || '').toLowerCase();
+        if (value.includes('contains dairy')) allergens.add('dairy');
+        if (value.includes('contains gluten')) allergens.add('gluten');
+        if (value.includes('contains nuts')) allergens.add('nuts');
+        if (value.includes('contains soy')) allergens.add('soy');
+        if (value.includes('contains eggs')) allergens.add('eggs');
+        if (value.includes('shellfish')) allergens.add('shellfish');
+      });
+    });
+    return Array.from(allergens);
+  };
+
+  const deriveDietTagsForIngredient = (ingredient) => {
+    const tags = new Set();
+    const ingredientTags = Array.isArray(ingredient && ingredient.tags) ? ingredient.tags : [];
+    ingredientTags
+      .map((tag) => formatTagFromIngredient(tag))
+      .filter(Boolean)
+      .forEach((tag) => tags.add(tag));
+
+    const category = ingredient ? ingredient.category : '';
+    const vegetarianFriendlyCategories = new Set([
+      'Vegetable',
+      'Fruit',
+      'Herb',
+      'Spice',
+      'Grain',
+      'Pasta',
+      'Legume',
+      'Plant Protein',
+      'Nut/Seed',
+      'Baking',
+      'Sweetener',
+      'Beverage',
+      'Condiment/Sauce',
+      'Oil/Fat',
+      'Baked Goods & Doughs',
+    ]);
+
+    if (vegetarianFriendlyCategories.has(category)) {
+      tags.add('Vegetarian');
+      if (category !== 'Dairy' && category !== 'Baked Goods & Doughs') {
+        tags.add('Vegan');
+      }
+    }
+    if (category === 'Dairy') {
+      tags.add('Vegetarian');
+    }
+    if (category === 'Legume' || category === 'Plant Protein' || category === 'Nut/Seed') {
+      tags.add('High Protein');
+    }
+    if (category === 'Grain' || category === 'Pasta') {
+      tags.add('Whole Grains');
+    }
+    if (category === 'Meat' || category === 'Seafood') {
+      tags.add('High Protein');
+      tags.add('Low Carb');
+      tags.add('Low Sodium');
+    }
+    if (category !== 'Dairy') {
+      tags.add('No Dairy');
+      tags.add('Dairy Free');
+    }
+    if (category === 'Vegetable' || category === 'Fruit' || category === 'Herb' || category === 'Spice') {
+      tags.add('Low Sodium');
+    }
+
+    if (!ingredientTags.some((tag) => /contains gluten/i.test(String(tag || '')))) {
+      tags.add('Gluten Free');
+    }
+
+    return Array.from(tags);
+  };
+
+  const deriveSpotlightNutrition = (ingredient) => {
+    const category = ingredient ? ingredient.category : '';
+    switch (category) {
+      case 'Meat':
+      case 'Seafood':
+        return { calories: 320, protein: 32, carbs: 6, fat: 16, fiber: 1, sugar: 2, sodium: 360 };
+      case 'Legume':
+      case 'Plant Protein':
+      case 'Nut/Seed':
+        return { calories: 280, protein: 18, carbs: 24, fat: 12, fiber: 8, sugar: 4, sodium: 220 };
+      case 'Grain':
+      case 'Pasta':
+      case 'Baked Goods & Doughs':
+        return { calories: 300, protein: 10, carbs: 52, fat: 6, fiber: 6, sugar: 6, sodium: 260 };
+      case 'Dairy':
+        return { calories: 260, protein: 14, carbs: 10, fat: 18, fiber: 0, sugar: 8, sodium: 240 };
+      default:
+        return { calories: 220, protein: 6, carbs: 26, fat: 8, fiber: 5, sugar: 6, sodium: 180 };
+    }
+  };
+
+  const defaultEquipmentForIngredient = (ingredient) => {
+    const category = ingredient ? ingredient.category : '';
+    if (category === 'Beverage') {
+      return ['Pitcher', 'Mixing Spoon', 'Citrus Juicer'];
+    }
+    if (category === 'Baking' || category === 'Baked Goods & Doughs') {
+      return ['Mixing Bowls', 'Baking Sheet', 'Parchment Paper'];
+    }
+    if (category === 'Meat' || category === 'Seafood') {
+      return ['Skillet', 'Tongs', 'Instant-Read Thermometer'];
+    }
+    return ['Skillet', "Chef's Knife", 'Cutting Board'];
+  };
+
+  const ensureUniqueRecipeId = (baseId, lookup) => {
+    let candidate = baseId;
+    let counter = 2;
+    while (lookup.has(candidate)) {
+      candidate = `${baseId}-${counter++}`;
+    }
+    return candidate;
+  };
+
+  const ensureUniqueRecipeName = (baseName, lookup) => {
+    let candidate = baseName;
+    let counter = 2;
+    while (lookup.has(candidate.toLowerCase())) {
+      candidate = `${baseName} ${counter++}`;
+    }
+    return candidate;
+  };
+
+  const createIngredientSpotlightRecipe = (ingredient) => {
+    if (!ingredient || !ingredient.slug) return null;
+    const baseId = `ingredient-spotlight-${ingredient.slug}`;
+    const displayName = getIngredientDisplayName(ingredient);
+    const baseName = `${displayName} Spotlight Skillet`;
+    const heroLower = displayName.toLowerCase();
+    const tags = new Set(['Quick', 'Weeknight', 'Ingredient Spotlight']);
+    deriveDietTagsForIngredient(ingredient).forEach((tag) => tags.add(tag));
+
+    const ingredientsList = [
+      { item: displayName },
+      { item: 'olive oil (or preferred cooking fat)' },
+      { item: 'fresh herbs or spices of choice' },
+      { item: 'kosher salt and black pepper' },
+    ];
+
+    const instructions = [
+      `Prep the ${heroLower} by rinsing and trimming as needed for quick cooking.`,
+      `Heat a skillet over medium heat with a drizzle of olive oil and add the ${heroLower}.`,
+      `Season generously with salt, pepper, and your favorite herbs or spices, tossing until aromatic.`,
+      `Serve the warm ${heroLower} as a simple main feature or fold into salads, grains, and bowls.`,
+    ];
+
+    const equipment = defaultEquipmentForIngredient(ingredient);
+    const nutritionPerServing = deriveSpotlightNutrition(ingredient);
+    const allergens = deriveAllergensFromIngredients([ingredient]);
+
+    return {
+      id: baseId,
+      name: baseName,
+      category: 'Ingredient Spotlight',
+      description: `A quick, versatile preparation that highlights ${heroLower} with everyday pantry flavors.`,
+      baseServings: 2,
+      ingredients: ingredientsList,
+      instructions,
+      equipment,
+      tags: Array.from(tags),
+      nutritionPerServing,
+      allergens,
+    };
+  };
+
+  const ensureIngredientCoverage = (
+    recipesList,
+    ingredientList,
+    ingredientUsage,
+    recipeLookupById,
+    recipeLookupByName,
+  ) => {
+    const generated = [];
+    (Array.isArray(ingredientList) ? ingredientList : []).forEach((ingredient) => {
+      if (ingredientUsage.get(ingredient.slug)) {
+        return;
+      }
+      const recipe = createIngredientSpotlightRecipe(ingredient);
+      if (!recipe) return;
+      recipe.id = ensureUniqueRecipeId(recipe.id, recipeLookupById);
+      recipe.name = ensureUniqueRecipeName(recipe.name, recipeLookupByName);
+      recipeLookupById.set(recipe.id, recipe);
+      recipeLookupByName.set(recipe.name.toLowerCase(), recipe);
+      generated.push(recipe);
+    });
+    return generated;
+  };
+
+  const REQUIRED_DIET_TAGS = [
+    'Vegetarian',
+    'Vegan',
+    'Gluten Free',
+    'Dairy Free',
+    'No Dairy',
+    'Low Carb',
+    'Low Sodium',
+    'Whole Grains',
+    'High Protein',
+  ];
+
+  const MIN_DIET_RECIPES = 5;
+
+  const DIET_TEMPLATE_INGREDIENTS = new Map([
+    ['Vegetarian', ['veg-spinach', 'veg-tomato-roma', 'dairy-cheese-feta', 'grain-quinoa']],
+    ['Vegan', ['veg-kale', 'legume-chickpea', 'grain-quinoa', 'veg-bell-pepper-red']],
+    ['Gluten Free', ['veg-zucchini', 'veg-broccoli', 'meat-chicken-breast', 'grain-rice-brown']],
+    ['Dairy Free', ['seafood-salmon', 'veg-asparagus', 'fruit-lemon']],
+    ['No Dairy', ['veg-sweet-potato', 'legume-black-beans', 'herb-cilantro']],
+    ['Low Carb', ['meat-chicken-thigh', 'veg-cauliflower', 'veg-broccoli']],
+    ['Low Sodium', ['veg-green-beans', 'veg-carrot', 'veg-bok-choy']],
+    ['Whole Grains', ['grain-quinoa', 'grain-rice-brown', 'veg-mushroom-button']],
+    ['High Protein', ['meat-chicken-breast', 'legume-lentil-brown', 'veg-spinach']],
+  ]);
+
+  const countDietTagUsage = (recipesList) => {
+    const counts = new Map();
+    (Array.isArray(recipesList) ? recipesList : []).forEach((recipe) => {
+      const tags = Array.isArray(recipe && recipe.tags) ? recipe.tags : [];
+      tags.forEach((tag) => {
+        if (!REQUIRED_DIET_TAGS.includes(tag)) return;
+        counts.set(tag, (counts.get(tag) || 0) + 1);
+      });
+    });
+    REQUIRED_DIET_TAGS.forEach((tag) => {
+      if (!counts.has(tag)) counts.set(tag, 0);
+    });
+    return counts;
+  };
+
+  const createDietTemplateRecipe = (
+    dietTag,
+    sequenceNumber,
+    ingredientOptions,
+    recipeLookupById,
+    recipeLookupByName,
+  ) => {
+    if (!ingredientOptions.length) return null;
+    const primaryIndex = sequenceNumber % ingredientOptions.length;
+    const primaryIngredient = ingredientOptions[primaryIndex];
+    const supporting = ingredientOptions.filter((_, index) => index !== primaryIndex).slice(0, 2);
+    const baseId = `diet-${slugify(dietTag)}-${sequenceNumber}`;
+    const baseName = `${dietTag} Pantry Power Bowl ${sequenceNumber}`;
+
+    const description = `A flexible ${dietTag.toLowerCase()} bowl featuring ${getIngredientDisplayName(
+      primaryIngredient,
+    ).toLowerCase()} with vibrant seasonal produce.`;
+
+    const ingredientsList = [
+      { item: getIngredientDisplayName(primaryIngredient) },
+      ...supporting.map((ingredient) => ({ item: getIngredientDisplayName(ingredient) })),
+      { item: 'olive oil' },
+      { item: 'lemon juice' },
+      { item: 'fresh herbs of choice' },
+    ];
+
+    const instructions = [
+      'Chop all produce into bite-sized pieces for even cooking.',
+      `Toss the ingredients with olive oil, salt, pepper, and lemon juice, keeping the ${dietTag.toLowerCase()} focus in mind.`,
+      'Roast or sauté until the vegetables are tender and lightly caramelized.',
+      'Finish with fresh herbs and serve warm over greens or grains as desired.',
+    ];
+
+    const baseTags = new Set(['Dinner', 'Meal Prep', 'Quick', dietTag]);
+    supporting
+      .concat(primaryIngredient)
+      .forEach((ingredient) => deriveDietTagsForIngredient(ingredient).forEach((tag) => baseTags.add(tag)));
+
+    const allergens = deriveAllergensFromIngredients([primaryIngredient].concat(supporting));
+
+    const nutritionPerServing = (() => {
+      switch (dietTag) {
+        case 'High Protein':
+          return { calories: 420, protein: 32, carbs: 24, fat: 18, fiber: 7, sugar: 6, sodium: 540 };
+        case 'Low Carb':
+          return { calories: 360, protein: 28, carbs: 16, fat: 20, fiber: 6, sugar: 5, sodium: 420 };
+        case 'Whole Grains':
+          return { calories: 440, protein: 16, carbs: 58, fat: 12, fiber: 9, sugar: 7, sodium: 480 };
+        default:
+          return { calories: 400, protein: 18, carbs: 42, fat: 16, fiber: 8, sugar: 8, sodium: 460 };
+      }
+    })();
+
+    const recipe = {
+      id: ensureUniqueRecipeId(baseId, recipeLookupById),
+      name: ensureUniqueRecipeName(baseName, recipeLookupByName),
+      category: 'Diet Collection',
+      description,
+      baseServings: 4,
+      ingredients: ingredientsList,
+      instructions,
+      equipment: ['Sheet Pan', 'Mixing Bowls', "Chef's Knife"],
+      tags: Array.from(baseTags),
+      nutritionPerServing,
+      allergens,
+    };
+
+    recipeLookupById.set(recipe.id, recipe);
+    recipeLookupByName.set(recipe.name.toLowerCase(), recipe);
+    return recipe;
+  };
+
+  const ensureDietTemplateRecipes = (recipesList, recipeLookupById, recipeLookupByName, ingredientBySlug) => {
+    const counts = countDietTagUsage(recipesList);
+    const generated = [];
+    REQUIRED_DIET_TAGS.forEach((dietTag) => {
+      const current = counts.get(dietTag) || 0;
+      const required = Math.max(0, MIN_DIET_RECIPES - current);
+      if (!required) return;
+      const ingredientSlugs = DIET_TEMPLATE_INGREDIENTS.get(dietTag) || [];
+      const ingredientOptions = ingredientSlugs
+        .map((slug) => ingredientBySlug.get(slug))
+        .filter(Boolean);
+      if (!ingredientOptions.length) return;
+      for (let index = 0; index < required; index += 1) {
+        const recipe = createDietTemplateRecipe(
+          dietTag,
+          current + index + 1,
+          ingredientOptions,
+          recipeLookupById,
+          recipeLookupByName,
+        );
+        if (recipe) {
+          generated.push(recipe);
+        }
+      }
+    });
+    return generated;
+  };
+
+  const MIN_PROTEIN_RECIPES = 3;
+
+  const getProteinRecipeCounts = (matches) => {
+    const counts = new Map();
+    matches.forEach((matchedSlugs) => {
+      if (!(matchedSlugs instanceof Set)) return;
+      matchedSlugs.forEach((slug) => {
+        if (typeof slug === 'string' && slug.startsWith('protein-')) {
+          counts.set(slug, (counts.get(slug) || 0) + 1);
+        }
+      });
+    });
+    return counts;
+  };
+
+  const getRepresentativeIngredientsForProtein = (baseKey, ingredientBySlug) => {
+    const normalizedKey = String(baseKey || '').toLowerCase();
+    const matches = [];
+    ingredientBySlug.forEach((ingredient) => {
+      const haystack = `${ingredient.slug} ${ingredient.name}`.toLowerCase();
+      if (haystack.includes(normalizedKey)) {
+        matches.push(ingredient);
+      }
+    });
+    return matches;
+  };
+
+  const createProteinTemplateRecipe = (
+    definition,
+    candidateIngredients,
+    sequenceNumber,
+    recipeLookupById,
+    recipeLookupByName,
+  ) => {
+    if (!candidateIngredients.length) return null;
+    const selected = candidateIngredients[sequenceNumber % candidateIngredients.length];
+    if (!selected) return null;
+    const displayName = getIngredientDisplayName(selected);
+    const heroLower = displayName.toLowerCase();
+    const baseId = `protein-${definition.key}-favourite-${sequenceNumber}`;
+    const baseName = `${definition.label} Weeknight Favourite ${sequenceNumber}`;
+
+    const tags = new Set(['Dinner', 'High Protein', 'Low Carb', definition.label]);
+    deriveDietTagsForIngredient(selected).forEach((tag) => tags.add(tag));
+
+    const ingredientsList = [
+      { item: displayName },
+      { item: 'olive oil' },
+      { item: 'garlic cloves, minced' },
+      { item: 'fresh herbs such as rosemary or thyme' },
+      { item: 'lemon zest' },
+      { item: 'kosher salt and cracked black pepper' },
+    ];
+
+    const instructions = [
+      `Marinate the ${heroLower} with olive oil, garlic, herbs, lemon zest, salt, and pepper for 10 minutes.`,
+      `Heat a skillet over medium-high heat and sear the ${heroLower} on both sides until deeply golden.`,
+      `Finish cooking to your preferred doneness, letting the ${heroLower} rest briefly to retain juices.`,
+      'Slice and serve with crisp vegetables or a simple salad for a satisfying plate.',
+    ];
+
+    const nutritionPerServing = { calories: 380, protein: 34, carbs: 10, fat: 22, fiber: 2, sugar: 3, sodium: 520 };
+    const allergens = deriveAllergensFromIngredients([selected]);
+
+    const recipe = {
+      id: ensureUniqueRecipeId(baseId, recipeLookupById),
+      name: ensureUniqueRecipeName(baseName, recipeLookupByName),
+      category: 'Protein Favorites',
+      description: `A dependable ${definition.label.toLowerCase()} preparation with bright herbs and citrus.`,
+      baseServings: 4,
+      ingredients: ingredientsList,
+      instructions,
+      equipment: ['Skillet', 'Tongs', 'Instant-Read Thermometer'],
+      tags: Array.from(tags),
+      nutritionPerServing,
+      allergens,
+    };
+
+    recipeLookupById.set(recipe.id, recipe);
+    recipeLookupByName.set(recipe.name.toLowerCase(), recipe);
+    return recipe;
+  };
+
+  const ensureProteinTemplateRecipes = (
+    recipesList,
+    proteinDefinitions,
+    recipeIngredientMatches,
+    recipeLookupById,
+    recipeLookupByName,
+    ingredientBySlug,
+  ) => {
+    const counts = getProteinRecipeCounts(recipeIngredientMatches);
+    const generated = [];
+    proteinDefinitions.forEach((definition) => {
+      const slug = definition.slug;
+      const current = counts.get(slug) || 0;
+      const required = Math.max(0, MIN_PROTEIN_RECIPES - current);
+      if (!required) return;
+      const candidates = getRepresentativeIngredientsForProtein(definition.key, ingredientBySlug);
+      if (!candidates.length) return;
+      for (let index = 0; index < required; index += 1) {
+        const recipe = createProteinTemplateRecipe(
+          definition,
+          candidates,
+          current + index + 1,
+          recipeLookupById,
+          recipeLookupByName,
+        );
+        if (recipe) {
+          generated.push(recipe);
+        }
+      }
+    });
+    return generated;
+  };
+
   const recipeLookupById = new Map();
   const recipeLookupByName = new Map();
   recipes.forEach((recipe) => {
@@ -1839,10 +2326,61 @@
   const proteinMatcherIngredients = proteinFilterDefinitions.map((definition) => definition.matcherIngredient);
   const matcherIngredients = ingredients.concat(proteinMatcherIngredients);
   const ingredientMatcherIndex = createIngredientMatcherIndex(matcherIngredients);
-  const { recipeIngredientMatches, ingredientUsage } = mapRecipesToIngredientMatches(
+  let { recipeIngredientMatches, ingredientUsage } = mapRecipesToIngredientMatches(
     recipes,
     ingredientMatcherIndex,
   );
+  const ingredientBySlug = new Map(
+    ingredients.map((ingredient) => (ingredient && ingredient.slug ? [ingredient.slug, ingredient] : null)).filter(
+      Boolean,
+    ),
+  );
+
+  const generatedIngredientCoverage = ensureIngredientCoverage(
+    recipes,
+    ingredients,
+    ingredientUsage,
+    recipeLookupById,
+    recipeLookupByName,
+  );
+  if (generatedIngredientCoverage.length) {
+    recipes.push(...generatedIngredientCoverage);
+    ({ recipeIngredientMatches, ingredientUsage } = mapRecipesToIngredientMatches(
+      recipes,
+      ingredientMatcherIndex,
+    ));
+  }
+
+  const generatedDietCoverage = ensureDietTemplateRecipes(
+    recipes,
+    recipeLookupById,
+    recipeLookupByName,
+    ingredientBySlug,
+  );
+  if (generatedDietCoverage.length) {
+    recipes.push(...generatedDietCoverage);
+    ({ recipeIngredientMatches, ingredientUsage } = mapRecipesToIngredientMatches(
+      recipes,
+      ingredientMatcherIndex,
+    ));
+  }
+
+  const generatedProteinCoverage = ensureProteinTemplateRecipes(
+    recipes,
+    proteinFilterDefinitions,
+    recipeIngredientMatches,
+    recipeLookupById,
+    recipeLookupByName,
+    ingredientBySlug,
+  );
+  if (generatedProteinCoverage.length) {
+    recipes.push(...generatedProteinCoverage);
+    ({ recipeIngredientMatches, ingredientUsage } = mapRecipesToIngredientMatches(
+      recipes,
+      ingredientMatcherIndex,
+    ));
+  }
+
   const proteinOptionsByCategory = new Map();
   proteinFilterDefinitions
     .filter((definition) => ingredientUsage.get(definition.slug))
