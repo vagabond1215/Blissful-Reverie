@@ -9,6 +9,7 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'pasta-macaroni', name: 'Macaroni', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
   { slug: 'pasta-egg-noodles', name: 'Egg Noodles', category: 'Pasta', tags: ['Contains Gluten', 'Contains Eggs', 'Vegetarian'] },
   { slug: 'pasta-rice-noodles', name: 'Rice Noodles', category: 'Pasta', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'pasta-chickpea', name: 'Chickpea Pasta', category: 'Pasta', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'pasta-soba-buckwheat', name: 'Soba (Buckwheat)', category: 'Pasta', tags: ['May Contain Gluten', 'Vegetarian'] }, // many soba blends include wheat
   { slug: 'pasta-gluten-free-blend', name: 'Gluten-Free Pasta (corn/rice/quinoa)', category: 'Pasta', tags: ['Gluten-Free', 'Vegetarian'] },
   { slug: 'pasta-farfalle', name: 'Farfalle', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
@@ -36,6 +37,56 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'dairy-cheese-feta', name: 'Feta Cheese', category: 'Dairy', tags: ['Contains Dairy', 'Vegetarian'] },
   { slug: 'dairy-cheese-monterey-jack', name: 'Monterey Jack Cheese', category: 'Dairy', tags: ['Contains Dairy', 'Vegetarian'] },
   { slug: 'dairy-cheese-queso-fresco', name: 'Queso Fresco', category: 'Dairy', tags: ['Contains Dairy', 'Vegetarian'] },
+
+  // Dairy Alternatives
+  {
+    slug: 'alt-milk-almond',
+    name: 'Almond Milk',
+    category: 'Dairy Alternative',
+    tags: ['Dairy-Free', 'Vegetarian', 'Vegan', 'Contains Nuts'],
+  },
+  {
+    slug: 'alt-milk-oat',
+    name: 'Oat Milk',
+    category: 'Dairy Alternative',
+    tags: ['Dairy-Free', 'Vegetarian', 'Vegan'],
+  },
+  {
+    slug: 'alt-milk-soy',
+    name: 'Soy Milk',
+    category: 'Dairy Alternative',
+    tags: ['Dairy-Free', 'Vegetarian', 'Vegan', 'Contains Soy'],
+  },
+  {
+    slug: 'alt-milk-pea',
+    name: 'Pea Milk',
+    category: 'Dairy Alternative',
+    tags: ['Dairy-Free', 'Vegetarian', 'Vegan'],
+  },
+  {
+    slug: 'alt-butter-vegan',
+    name: 'Vegan Butter',
+    category: 'Dairy Alternative',
+    tags: ['Dairy-Free', 'Vegetarian', 'Vegan'],
+  },
+  {
+    slug: 'alt-cheese-vegan',
+    name: 'Vegan Cheese Shreds',
+    category: 'Dairy Alternative',
+    tags: ['Dairy-Free', 'Vegetarian', 'Vegan'],
+  },
+  {
+    slug: 'alt-yogurt-coconut',
+    name: 'Coconut Yogurt',
+    category: 'Dairy Alternative',
+    tags: ['Dairy-Free', 'Vegetarian', 'Vegan'],
+  },
+  {
+    slug: 'alt-cream-cashew',
+    name: 'Cashew Cream',
+    category: 'Dairy Alternative',
+    tags: ['Dairy-Free', 'Vegetarian', 'Vegan', 'Contains Nuts'],
+  },
 
   // Meat (raw single-ingredient; suitability tags are general)
   { slug: 'meat-beef-ground-85', name: 'Ground Beef (85% Lean)', category: 'Meat', tags: ['Halal-Friendly', 'Kosher-Friendly', 'Paleo'] },
@@ -250,6 +301,50 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'baking-cocoa-powder', name: 'Cocoa Powder', category: 'Baking', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'baking-cornstarch', name: 'Cornstarch', category: 'Baking', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Low-FODMAP'] },
   { slug: 'baking-egg', name: 'Eggs', category: 'Baking', tags: ['Contains Eggs'] },
+
+  // Baking Alternatives
+  {
+    slug: 'alt-egg-flax',
+    name: 'Flax Egg (1 tbsp ground flax + water)',
+    category: 'Baking Alternative',
+    tags: ['Egg-Free', 'Vegetarian', 'Vegan'],
+  },
+  {
+    slug: 'alt-egg-chia',
+    name: 'Chia Egg',
+    category: 'Baking Alternative',
+    tags: ['Egg-Free', 'Vegetarian', 'Vegan'],
+  },
+  {
+    slug: 'alt-egg-applesauce',
+    name: 'Unsweetened Applesauce (Egg Substitute)',
+    category: 'Baking Alternative',
+    tags: ['Egg-Free', 'Vegetarian', 'Vegan'],
+  },
+  {
+    slug: 'alt-egg-aquafaba',
+    name: 'Aquafaba (Whipped Chickpea Brine)',
+    category: 'Baking Alternative',
+    tags: ['Egg-Free', 'Vegetarian', 'Vegan', 'Legume'],
+  },
+  {
+    slug: 'alt-flour-almond',
+    name: 'Almond Flour',
+    category: 'Baking Alternative',
+    tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Contains Nuts'],
+  },
+  {
+    slug: 'alt-flour-coconut',
+    name: 'Coconut Flour',
+    category: 'Baking Alternative',
+    tags: ['Gluten-Free', 'Vegetarian', 'Vegan'],
+  },
+  {
+    slug: 'alt-flour-cassava',
+    name: 'Cassava Flour',
+    category: 'Baking Alternative',
+    tags: ['Gluten-Free', 'Vegetarian', 'Vegan'],
+  },
   { slug: 'baking-yeast-active-dry', name: 'Yeast (Active Dry)', category: 'Baking', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'baking-vanilla-extract', name: 'Vanilla Extract', category: 'Baking', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'baking-chocolate-chips', name: 'Chocolate Chips', category: 'Baking', tags: ['Contains Dairy', 'Vegetarian'] }, // many contain dairy
@@ -268,6 +363,12 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'condiment-dijon-mustard', name: 'Dijon Mustard', category: 'Condiment/Sauce', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan'] },
   { slug: 'condiment-ketchup', name: 'Ketchup', category: 'Condiment/Sauce', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan'] },
   { slug: 'condiment-mayonnaise', name: 'Mayonnaise', category: 'Condiment/Sauce', tags: ['Contains Eggs', 'Gluten-Free*', 'Vegetarian'] },
+  {
+    slug: 'condiment-coconut-aminos',
+    name: 'Coconut Aminos',
+    category: 'Condiment/Sauce',
+    tags: ['Gluten-Free', 'Soy-Free', 'Vegetarian', 'Vegan'],
+  },
   { slug: 'condiment-soy-sauce', name: 'Soy Sauce', category: 'Condiment/Sauce', tags: ['Contains Soy', 'Contains Gluten', 'Vegetarian', 'Vegan'] },
   { slug: 'condiment-tamari-gf', name: 'Tamari (GF)', category: 'Condiment/Sauce', tags: ['Gluten-Free', 'Contains Soy', 'Vegetarian', 'Vegan'] },
   { slug: 'condiment-sriracha', name: 'Sriracha', category: 'Condiment/Sauce', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan', 'Nightshade'] },
@@ -546,5 +647,13 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'veg-kabocha', name: 'Kabocha Squash', category: 'Vegetable', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'veg-celeriac', name: 'Celery Root', category: 'Vegetable', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'veg-jicama', name: 'Jicama', category: 'Vegetable', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'veg-hearts-of-palm', name: 'Hearts of Palm', category: 'Vegetable', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'veg-cauliflower-rice', name: 'Riced Cauliflower', category: 'Vegetable', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'veg-mustard-greens', name: 'Mustard Greens', category: 'Vegetable', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  {
+    slug: 'fruit-jackfruit-young',
+    name: 'Young Jackfruit (Canned)',
+    category: 'Fruit',
+    tags: ['Gluten-Free', 'Vegetarian', 'Vegan'],
+  },
 ];

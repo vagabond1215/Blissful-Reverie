@@ -1915,8 +1915,12 @@
   const measurementPreference = loadMeasurementPreference();
 
   const FAVORITES_STORAGE_KEY = 'blissful-favorites';
+  const PANTRY_FAVORITES_STORAGE_KEY = 'blissful-pantry-favorites';
 
   const recipeIdSet = new Set(recipes.map((recipe) => recipe.id));
+  const ingredientSlugSet = new Set(
+    ingredients.map((ingredient) => (ingredient && ingredient.slug ? ingredient.slug : null)).filter(Boolean),
+  );
 
   const loadFavoriteRecipeIds = () => {
     try {
@@ -1939,6 +1943,27 @@
 
   const favoriteRecipeIds = loadFavoriteRecipeIds();
 
+  const loadFavoritePantrySlugs = () => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(PANTRY_FAVORITES_STORAGE_KEY));
+      if (!Array.isArray(stored)) {
+        return [];
+      }
+      const filtered = new Set();
+      stored.forEach((slug) => {
+        if (ingredientSlugSet.has(slug)) {
+          filtered.add(slug);
+        }
+      });
+      return Array.from(filtered);
+    } catch (error) {
+      console.warn('Unable to read favorite pantry items.', error);
+      return [];
+    }
+  };
+
+  const favoritePantrySlugs = loadFavoritePantrySlugs();
+
   const getDefaultMealFilters = () => ({
     search: '',
     ingredients: [],
@@ -1952,6 +1977,7 @@
     favoritesOnly: false,
     familyMembers: [],
     pantryOnly: false,
+    substitutionsAllowed: false,
   });
 
   const getDefaultPantryFilters = () => ({
@@ -2160,6 +2186,7 @@
       favoritesOnly: Boolean(value.favoritesOnly),
       familyMembers: sanitizeMealFilterFamilyMembers(value.familyMembers, members),
       pantryOnly: Boolean(value.pantryOnly),
+      substitutionsAllowed: Boolean(value.substitutionsAllowed),
     };
   };
 
@@ -2570,6 +2597,7 @@
     themeSelections: { ...themePreferences.selections },
     measurementSystem: measurementPreference,
     favoriteRecipes: new Set(favoriteRecipeIds),
+    favoritePantryItems: new Set(favoritePantrySlugs),
   };
 
   const equipmentOptions = Array.from(
@@ -2847,8 +2875,8 @@
     { id: 'vegetables', label: 'Vegetables', categories: ['Vegetable'] },
     { id: 'fruits', label: 'Fruits', categories: ['Fruit'] },
     { id: 'pasta-grains', label: 'Pasta & Grains', categories: ['Pasta', 'Grain'] },
-    { id: 'dairy-eggs', label: 'Dairy & Eggs', categories: ['Dairy'] },
-    { id: 'baking', label: 'Baking Essentials', categories: ['Baking'] },
+    { id: 'dairy-eggs', label: 'Dairy & Eggs', categories: ['Dairy', 'Dairy Alternative'] },
+    { id: 'baking', label: 'Baking Essentials', categories: ['Baking', 'Baking Alternative'] },
     { id: 'herbs-spices', label: 'Herbs & Spices', categories: ['Herb', 'Spice'] },
     { id: 'nuts-seeds', label: 'Nuts & Seeds', categories: ['Nut/Seed'] },
     { id: 'oils-condiments', label: 'Oils & Condiments', categories: ['Oil/Fat', 'Condiment/Sauce'] },
@@ -2869,6 +2897,178 @@
       Boolean,
     ),
   );
+
+  const SUBSTITUTION_DEFINITIONS = [
+    {
+      id: 'dairy-milk-alternatives',
+      label: 'Milk & Dairy-Free Alternatives',
+      primary: ['dairy-milk-whole', 'dairy-milk-2', 'dairy-milk-skim', 'dairy-lactose-free-milk', 'dairy-goat-milk'],
+      alternatives: ['bev-coconut-milk', 'alt-milk-almond', 'alt-milk-oat', 'alt-milk-soy', 'alt-milk-pea'],
+      bidirectional: true,
+    },
+    {
+      id: 'dairy-butter-alternatives',
+      label: 'Butter & Plant Fats',
+      primary: ['dairy-butter-unsalted', 'dairy-butter-salted', 'dairy-ghee'],
+      alternatives: ['alt-butter-vegan', 'oil-coconut', 'oil-olive-extra-virgin', 'oil-avocado'],
+      bidirectional: true,
+    },
+    {
+      id: 'dairy-cream-alternatives',
+      label: 'Cream & Dairy-Free Alternatives',
+      primary: ['dairy-cream-heavy', 'dairy-cream-sour', 'dairy-half-and-half', 'dairy-yogurt-plain', 'dairy-yogurt-greek'],
+      alternatives: ['alt-cream-cashew', 'alt-yogurt-coconut', 'bev-coconut-milk'],
+      bidirectional: true,
+    },
+    {
+      id: 'dairy-cheese-alternatives',
+      label: 'Cheese & Vegan Alternatives',
+      primary: [
+        'dairy-cheese-cheddar',
+        'dairy-cheese-mozzarella',
+        'dairy-cheese-parmesan',
+        'dairy-cheese-ricotta',
+        'dairy-cheese-feta',
+        'dairy-cheese-monterey-jack',
+        'dairy-cheese-queso-fresco',
+      ],
+      alternatives: ['alt-cheese-vegan', 'alt-cream-cashew'],
+      bidirectional: true,
+    },
+    {
+      id: 'egg-alternatives',
+      label: 'Egg Substitutions',
+      primary: ['baking-egg'],
+      alternatives: ['alt-egg-flax', 'alt-egg-chia', 'alt-egg-applesauce', 'alt-egg-aquafaba'],
+    },
+    {
+      id: 'flour-alternatives',
+      label: 'Flour & Gluten-Free Alternatives',
+      primary: ['grain-wheat-flour-ap'],
+      alternatives: ['alt-flour-almond', 'alt-flour-coconut', 'alt-flour-cassava', 'grain-quinoa', 'grain-rice-basmati', 'grain-rice-brown', 'grain-oats-gf', 'veg-cauliflower-rice'],
+    },
+    {
+      id: 'pasta-alternatives',
+      label: 'Pasta & Grain Alternatives',
+      primary: [
+        'pasta-spaghetti',
+        'pasta-penne',
+        'pasta-fusilli',
+        'pasta-linguine',
+        'pasta-macaroni',
+        'pasta-egg-noodles',
+        'pasta-farfalle',
+        'pasta-lasagna-noodles',
+        'pasta-orzo',
+        'pasta-campanelle',
+        'pasta-bucatini',
+        'pasta-tagliatelle',
+        'pasta-gemelli',
+        'pasta-cavatappi',
+        'pasta-ditalini',
+        'pasta-rice-noodles',
+        'pasta-gluten-free-blend',
+        'pasta-chickpea',
+        'noodle-glass',
+        'noodle-udon',
+        'noodle-somen',
+      ],
+      alternatives: ['grain-quinoa', 'veg-cauliflower-rice', 'grain-rice-basmati', 'grain-rice-brown'],
+    },
+    {
+      id: 'soy-sauce-alternatives',
+      label: 'Soy Sauce Alternatives',
+      primary: ['condiment-soy-sauce', 'condiment-tamari-gf'],
+      alternatives: ['condiment-coconut-aminos', 'condiment-worcestershire'],
+    },
+    {
+      id: 'nut-seed-spreads',
+      label: 'Nut & Seed Spreads',
+      primary: ['nut-peanut', 'legume-peanut', 'nuts-cashew-butter', 'nuts-hazelnut-butter'],
+      alternatives: ['nuts-sunflower-butter', 'condiment-sunflower-seed-butter', 'seed-sunflower', 'seed-flax', 'seed-chia', 'nut-almond'],
+      bidirectional: true,
+    },
+    {
+      id: 'shellfish-alternatives',
+      label: 'Shellfish Alternatives',
+      primary: [
+        'seafood-shrimp',
+        'seafood-scallops',
+        'seafood-mussels',
+        'seafood-crab',
+        'seafood-lobster',
+        'seafood-clams',
+        'seafood-calamari',
+        'seafood-octopus',
+      ],
+      alternatives: ['seafood-cod', 'seafood-salmon', 'veg-hearts-of-palm', 'fruit-jackfruit-young', 'legume-chickpea'],
+    },
+    {
+      id: 'fish-alternatives',
+      label: 'Fish Alternatives',
+      primary: [
+        'seafood-salmon',
+        'seafood-tuna',
+        'seafood-halibut',
+        'seafood-tilapia',
+        'seafood-cod',
+        'seafood-arctic-char',
+        'seafood-rainbow-trout',
+        'seafood-barramundi',
+        'seafood-swordfish',
+        'seafood-monkfish',
+      ],
+      alternatives: ['veg-hearts-of-palm', 'fruit-jackfruit-young', 'legume-chickpea'],
+    },
+    {
+      id: 'soy-protein-alternatives',
+      label: 'Soy Proteins & Alternatives',
+      primary: ['legume-tofu-extra-firm', 'legume-tempeh', 'legume-textured-vegetable-protein'],
+      alternatives: ['legume-chickpea', 'legume-black-beans', 'fruit-jackfruit-young', 'veg-hearts-of-palm'],
+    },
+  ];
+
+  const substitutionGraph = (() => {
+    const graph = new Map();
+    SUBSTITUTION_DEFINITIONS.forEach(({ label, primary, alternatives, bidirectional }) => {
+      const validPrimary = (Array.isArray(primary) ? primary : [])
+        .map((slug) => (ingredientBySlug.has(slug) ? slug : null))
+        .filter(Boolean);
+      const validAlternatives = (Array.isArray(alternatives) ? alternatives : [])
+        .map((slug) => (ingredientBySlug.has(slug) ? slug : null))
+        .filter(Boolean);
+      if (!validPrimary.length || (validPrimary.length + validAlternatives.length) < 2) {
+        return;
+      }
+      const membersForPrimary = new Set([...validPrimary, ...validAlternatives]);
+      validPrimary.forEach((slug) => {
+        let entry = graph.get(slug);
+        if (!entry) {
+          entry = { label, members: new Set() };
+          graph.set(slug, entry);
+        }
+        membersForPrimary.forEach((member) => entry.members.add(member));
+        if (!entry.label && label) {
+          entry.label = label;
+        }
+      });
+      if (bidirectional && validAlternatives.length) {
+        const membersForAlternatives = new Set([...validAlternatives, ...validPrimary]);
+        validAlternatives.forEach((slug) => {
+          let entry = graph.get(slug);
+          if (!entry) {
+            entry = { label, members: new Set() };
+            graph.set(slug, entry);
+          }
+          membersForAlternatives.forEach((member) => entry.members.add(member));
+          if (!entry.label && label) {
+            entry.label = label;
+          }
+        });
+      }
+    });
+    return graph;
+  })();
 
   const generatedIngredientCoverage = ensureIngredientCoverage(
     recipes,
@@ -3831,6 +4031,7 @@
   let lastPersistedTheme = null;
   let lastPersistedMeasurement = null;
   let lastPersistedFavorites = JSON.stringify(favoriteRecipeIds);
+  let lastPersistedPantryFavorites = JSON.stringify(favoritePantrySlugs);
   let lastPersistedMealPlan = JSON.stringify(state.mealPlan);
   let lastPersistedAppState = null;
 
@@ -3855,6 +4056,7 @@
           state.familyMembers,
         ),
         pantryOnly: Boolean(mealFilters.pantryOnly),
+        substitutionsAllowed: Boolean(mealFilters.substitutionsAllowed),
       },
       pantryFilters: {
         search: typeof pantryFilters.search === 'string' ? pantryFilters.search : '',
@@ -3964,6 +4166,19 @@
       lastPersistedFavorites = serialized;
     } catch (error) {
       console.warn('Unable to persist favorite recipes.', error);
+    }
+  };
+
+  const persistFavoritePantrySlugs = () => {
+    const serialized = JSON.stringify(Array.from(state.favoritePantryItems));
+    if (serialized === lastPersistedPantryFavorites) {
+      return;
+    }
+    try {
+      localStorage.setItem(PANTRY_FAVORITES_STORAGE_KEY, serialized);
+      lastPersistedPantryFavorites = serialized;
+    } catch (error) {
+      console.warn('Unable to persist favorite pantry items.', error);
     }
   };
 
@@ -4471,6 +4686,7 @@
     elements.favoriteFilterToggle = document.getElementById('favorite-filter');
     elements.recipeFamilyFilter = document.getElementById('recipe-family-filter');
     elements.pantryOnlyToggle = document.getElementById('pantry-only-toggle');
+    elements.substitutionToggle = document.getElementById('substitution-toggle');
     elements.ingredientSection = document.getElementById('ingredient-section');
     elements.tagSection = document.getElementById('tag-section');
     elements.allergySection = document.getElementById('allergy-section');
@@ -4987,6 +5203,17 @@
         elements.pantryOnlyToggle.setAttribute('aria-hidden', 'true');
       }
     }
+    if (elements.substitutionToggle) {
+      if (isMealsView) {
+        elements.substitutionToggle.hidden = false;
+        elements.substitutionToggle.disabled = false;
+        elements.substitutionToggle.removeAttribute('aria-hidden');
+      } else {
+        elements.substitutionToggle.hidden = true;
+        elements.substitutionToggle.disabled = true;
+        elements.substitutionToggle.setAttribute('aria-hidden', 'true');
+      }
+    }
     if (elements.filterSearch) {
       const searchPlaceholder = isMealsView
         ? 'Search by name, description, or tag'
@@ -5103,6 +5330,26 @@
       } else {
         elements.pantryOnlyToggle.hidden = true;
         elements.pantryOnlyToggle.disabled = true;
+      }
+    }
+    if (elements.substitutionToggle) {
+      if (isMealsView) {
+        const substitutionsAllowed = Boolean(filters.substitutionsAllowed);
+        elements.substitutionToggle.hidden = false;
+        elements.substitutionToggle.disabled = false;
+        elements.substitutionToggle.classList.toggle(
+          'substitution-toggle--active',
+          substitutionsAllowed,
+        );
+        elements.substitutionToggle.setAttribute('aria-pressed', substitutionsAllowed ? 'true' : 'false');
+        const substitutionTitle = substitutionsAllowed
+          ? 'Substitutions on: recipes may use pantry-friendly alternatives'
+          : 'Substitutions off: recipes must match pantry exactly';
+        elements.substitutionToggle.setAttribute('title', substitutionTitle);
+        elements.substitutionToggle.setAttribute('aria-label', substitutionTitle);
+      } else {
+        elements.substitutionToggle.hidden = true;
+        elements.substitutionToggle.disabled = true;
       }
     }
     const registry = checkboxRegistry[state.activeView];
@@ -6129,16 +6376,56 @@
     renderMealPlan();
   };
 
+  const evaluatePantryMatch = (recipe, { allowSubstitutions = false } = {}) => {
+    const result = { satisfied: false, missing: [], substitutions: [] };
+    if (!recipe || !recipe.id) {
+      return result;
+    }
+    const matchedSlugs = recipeIngredientMatches.get(recipe.id);
+    if (!(matchedSlugs instanceof Set) || matchedSlugs.size === 0) {
+      return result;
+    }
+    const inventory = state.pantryInventory || {};
+    const missing = [];
+    const substitutions = [];
+    matchedSlugs.forEach((slug) => {
+      if (inventory[slug]) {
+        return;
+      }
+      if (allowSubstitutions) {
+        const family = substitutionGraph.get(slug);
+        if (family && family.members instanceof Set) {
+          const alternativeSlug = Array.from(family.members).find((candidate) => {
+            if (candidate === slug) {
+              return false;
+            }
+            return Boolean(inventory[candidate]);
+          });
+          if (alternativeSlug) {
+            substitutions.push({
+              requiredSlug: slug,
+              substituteSlug: alternativeSlug,
+              required: ingredientBySlug.get(slug) || { name: slug },
+              substitute: ingredientBySlug.get(alternativeSlug) || { name: alternativeSlug },
+              familyLabel: family.label,
+            });
+            return;
+          }
+        }
+      }
+      missing.push(slug);
+    });
+    return { satisfied: missing.length === 0, missing, substitutions };
+  };
+
   const canMakeRecipeFromPantry = (recipe) => {
     if (!recipe || !recipe.id) {
       return false;
     }
-    const matchedSlugs = recipeIngredientMatches.get(recipe.id);
-    if (!(matchedSlugs instanceof Set) || matchedSlugs.size === 0) {
-      return false;
-    }
-    const inventory = state.pantryInventory || {};
-    return Array.from(matchedSlugs).every((slug) => Boolean(inventory[slug]));
+    const filters = ensureMealFilters();
+    const allowSubstitutions = Boolean(filters.substitutionsAllowed);
+    const evaluation = evaluatePantryMatch(recipe, { allowSubstitutions });
+    return evaluation.satisfied;
   };
 
   const matchesMealFilters = (recipe) => {
@@ -6237,6 +6524,8 @@
 
   const isRecipeFavorite = (recipeId) => state.favoriteRecipes.has(recipeId);
 
+  const isPantryFavorite = (slug) => state.favoritePantryItems.has(slug);
+
   const toggleFavoriteRecipe = (recipeId) => {
     if (!recipeId) return;
     if (state.favoriteRecipes.has(recipeId)) {
@@ -6248,9 +6537,33 @@
     renderApp();
   };
 
+  const togglePantryFavorite = (slug) => {
+    if (typeof slug !== 'string' || !slug) {
+      return;
+    }
+    const favorites = state.favoritePantryItems;
+    if (favorites.has(slug)) {
+      favorites.delete(slug);
+    } else if (ingredientSlugSet.has(slug)) {
+      favorites.add(slug);
+    }
+    persistFavoritePantrySlugs();
+    if (state.activeView === 'pantry') {
+      renderPantry();
+    } else {
+      renderApp();
+    }
+  };
+
   const createMealCard = (recipe) => {
     const card = document.createElement('article');
     card.className = 'meal-card';
+
+    const filters = ensureMealFilters();
+    const substitutionsAllowed = Boolean(filters.substitutionsAllowed);
+    const pantryEvaluation = substitutionsAllowed
+      ? evaluatePantryMatch(recipe, { allowSubstitutions: true })
+      : null;
 
     const favorite = isRecipeFavorite(recipe.id);
     if (favorite) {
@@ -6387,6 +6700,28 @@
     const ingredientHeading = document.createElement('h4');
     ingredientHeading.textContent = 'Ingredients';
     ingredientSection.appendChild(ingredientHeading);
+    if (substitutionsAllowed && pantryEvaluation && pantryEvaluation.substitutions.length) {
+      const substitutionNotice = document.createElement('div');
+      substitutionNotice.className = 'meal-card__substitution-notice';
+      const substitutionTitle = document.createElement('span');
+      substitutionTitle.className = 'meal-card__substitution-title';
+      substitutionTitle.textContent =
+        pantryEvaluation.substitutions.length === 1 ? 'Using a substitute' : 'Using substitutes';
+      substitutionNotice.appendChild(substitutionTitle);
+      const substitutionList = document.createElement('ul');
+      substitutionList.className = 'meal-card__substitution-list';
+      pantryEvaluation.substitutions.forEach((entry) => {
+        if (!entry) return;
+        const item = document.createElement('li');
+        const requiredName = entry.required?.name || entry.requiredSlug || 'Required ingredient';
+        const substituteName = entry.substitute?.name || entry.substituteSlug || 'Alternative';
+        const labelPrefix = entry.familyLabel ? `${entry.familyLabel}: ` : '';
+        item.textContent = `${labelPrefix}${requiredName} → ${substituteName}`;
+        substitutionList.appendChild(item);
+      });
+      substitutionNotice.appendChild(substitutionList);
+      ingredientSection.appendChild(substitutionNotice);
+    }
     const ingredientList = document.createElement('ul');
     ingredientList.className = 'ingredient-list';
     recipe.ingredients.forEach((ingredient) => {
@@ -6534,6 +6869,10 @@
     card.className = 'pantry-card';
 
     const entry = getPantryEntry(ingredient.slug);
+    const favorite = isPantryFavorite(ingredient.slug);
+    if (favorite) {
+      card.classList.add('pantry-card--favorite');
+    }
 
     const details = document.createElement('div');
     details.className = 'pantry-card__details';
@@ -6545,6 +6884,28 @@
     title.className = 'pantry-card__name';
     title.textContent = ingredient.name;
     header.appendChild(title);
+
+    const headerActions = document.createElement('div');
+    headerActions.className = 'pantry-card__header-actions';
+
+    const favoriteButton = document.createElement('button');
+    favoriteButton.type = 'button';
+    favoriteButton.className = 'pantry-card__favorite-button';
+    favoriteButton.innerHTML = '<span aria-hidden="true">♥</span>';
+    const favoriteLabel = favorite
+      ? `Remove ${ingredient.name} from favorite pantry items`
+      : `Mark ${ingredient.name} as a favorite pantry item`;
+    favoriteButton.setAttribute('aria-label', favoriteLabel);
+    favoriteButton.title = favoriteLabel;
+    favoriteButton.setAttribute('aria-pressed', favorite ? 'true' : 'false');
+    if (favorite) {
+      favoriteButton.classList.add('pantry-card__favorite-button--active');
+    }
+    favoriteButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      togglePantryFavorite(ingredient.slug);
+    });
+    headerActions.appendChild(favoriteButton);
 
     const inlineControls = document.createElement('div');
     inlineControls.className = 'pantry-card__inline-controls';
@@ -6586,8 +6947,8 @@
     unitInput.addEventListener('input', handleUnitChange);
     unitInput.addEventListener('change', handleUnitChange);
     inlineControls.appendChild(unitInput);
-
-    header.appendChild(inlineControls);
+    headerActions.appendChild(inlineControls);
+    header.appendChild(headerActions);
     details.appendChild(header);
 
     if (Array.isArray(ingredient.tags) && ingredient.tags.length) {
@@ -6641,6 +7002,7 @@
     if (!elements.pantryGrid || !elements.pantryCount) return;
     const { search, categories, tags, allergens } = state.pantryFilters;
     const query = search.trim().toLowerCase();
+    const favorites = state.favoritePantryItems instanceof Set ? state.favoritePantryItems : new Set();
     const filteredItems = ingredients
       .filter((ingredient) => {
         const ingredientTags = Array.isArray(ingredient.tags) ? ingredient.tags : [];
@@ -6656,6 +7018,9 @@
         const rankA = categoryRanks.get(a.category) ?? 0;
         const rankB = categoryRanks.get(b.category) ?? 0;
         if (rankA !== rankB) return rankA - rankB;
+        const favoriteA = favorites.has(a.slug) ? 1 : 0;
+        const favoriteB = favorites.has(b.slug) ? 1 : 0;
+        if (favoriteA !== favoriteB) return favoriteB - favoriteA;
         return a.name.localeCompare(b.name);
       });
 
@@ -6844,6 +7209,15 @@
         if (state.activeView !== 'meals') return;
         const filters = ensureMealFilters();
         filters.pantryOnly = !filters.pantryOnly;
+        renderApp();
+      });
+    }
+
+    if (elements.substitutionToggle) {
+      elements.substitutionToggle.addEventListener('click', () => {
+        if (state.activeView !== 'meals') return;
+        const filters = ensureMealFilters();
+        filters.substitutionsAllowed = !filters.substitutionsAllowed;
         renderApp();
       });
     }
