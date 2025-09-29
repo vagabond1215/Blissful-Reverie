@@ -662,6 +662,268 @@
 
   const MIN_PROTEIN_RECIPES = 3;
 
+  const MIN_MENU_RECIPES = 3;
+  const MIN_REGIONAL_RECIPES = 4;
+
+  const MENU_TEMPLATE_DEFINITIONS = [
+    {
+      key: 'garden-brunch',
+      name: 'Garden Brunch Menu',
+      focus: 'Brunch',
+      mealTag: 'Brunch',
+      heroIngredient: 'baking-egg',
+      description:
+        'A breezy weekend spread celebrating market vegetables, bright herbs, and a sparkling refresher.',
+      courses: [
+        {
+          label: 'Main',
+          ingredientSlugs: ['baking-egg', 'veg-spinach', 'veg-bell-pepper-red', 'herb-basil'],
+        },
+        {
+          label: 'Side Salad',
+          ingredientSlugs: ['grain-quinoa', 'veg-asparagus', 'fruit-lemon', 'oil-olive-extra-virgin'],
+        },
+        {
+          label: 'Sweet Finish',
+          ingredientSlugs: ['fruit-strawberry', 'dairy-yogurt-greek', 'sweetener-honey'],
+        },
+        {
+          label: 'Refreshment',
+          ingredientSlugs: ['bev-sparkling-water', 'fruit-lemon', 'herb-mint'],
+        },
+      ],
+      tags: ['Entertaining', 'Vegetarian Friendly'],
+      baseServings: 6,
+      nutritionPerServing: {
+        calories: 640,
+        protein: 32,
+        carbs: 68,
+        fat: 24,
+        fiber: 11,
+        sugar: 18,
+        sodium: 720,
+      },
+    },
+    {
+      key: 'cozy-harvest-supper',
+      name: 'Cozy Harvest Supper Menu',
+      focus: 'Dinner',
+      mealTag: 'Dinner',
+      heroIngredient: 'meat-beef-steak-ribeye',
+      description:
+        'An autumnal supper anchored by seared beef, roasted roots, and maple-brushed greens.',
+      courses: [
+        {
+          label: 'Main',
+          ingredientSlugs: ['meat-beef-steak-ribeye', 'herb-rosemary', 'oil-olive-extra-virgin'],
+        },
+        {
+          label: 'Roasted Vegetables',
+          ingredientSlugs: ['veg-sweet-potato', 'veg-brussels-sprouts', 'sweetener-maple-syrup'],
+        },
+        {
+          label: 'Comforting Grain',
+          ingredientSlugs: ['grain-rice-brown', 'dairy-butter-unsalted', 'herb-thyme'],
+        },
+        {
+          label: 'Table Garnish',
+          ingredientSlugs: ['herb-parsley', 'fruit-orange'],
+        },
+      ],
+      tags: ['Entertaining', 'Comfort Food'],
+      baseServings: 6,
+      nutritionPerServing: {
+        calories: 780,
+        protein: 38,
+        carbs: 64,
+        fat: 36,
+        fiber: 9,
+        sugar: 17,
+        sodium: 810,
+      },
+    },
+    {
+      key: 'global-street-feast',
+      name: 'Global Street Feast Menu',
+      focus: 'Dinner',
+      mealTag: 'Dinner',
+      heroIngredient: 'meat-chicken-thigh',
+      description:
+        'A shareable menu inspired by bustling street markets with grilled chicken, smoky legumes, and bold sauces.',
+      courses: [
+        {
+          label: 'Charred Skewers',
+          ingredientSlugs: ['meat-chicken-thigh', 'herb-cilantro', 'fruit-lime', 'oil-olive-extra-virgin'],
+        },
+        {
+          label: 'Warm Sides',
+          ingredientSlugs: ['legume-chickpea', 'grain-rice-basmati', 'veg-bell-pepper-red'],
+        },
+        {
+          label: 'Sauce Bar',
+          ingredientSlugs: ['condiment-peanut-satay', 'fruit-lime', 'herb-parsley'],
+        },
+        {
+          label: 'Crunchy Finish',
+          ingredientSlugs: ['seed-sesame', 'veg-cucumber'],
+        },
+      ],
+      tags: ['Entertaining', 'High Protein', 'Global'],
+      baseServings: 6,
+      nutritionPerServing: {
+        calories: 710,
+        protein: 40,
+        carbs: 62,
+        fat: 28,
+        fiber: 12,
+        sugar: 16,
+        sodium: 760,
+      },
+    },
+    {
+      key: 'summer-picnic-spread',
+      name: 'Summer Picnic Spread',
+      focus: 'Lunch',
+      mealTag: 'Lunch',
+      heroIngredient: 'meat-chicken-breast',
+      description:
+        'A chill picnic basket lineup with citrusy grilled chicken, crisp produce, and cooling sips.',
+      courses: [
+        {
+          label: 'Grill Basket',
+          ingredientSlugs: ['meat-chicken-breast', 'veg-corn', 'fruit-lime'],
+        },
+        {
+          label: 'Chilled Salad',
+          ingredientSlugs: ['veg-cucumber', 'fruit-watermelon', 'herb-mint'],
+        },
+        {
+          label: 'Snack Board',
+          ingredientSlugs: ['nut-almond', 'veg-carrot', 'dairy-cheese-feta'],
+        },
+        {
+          label: 'Coolers',
+          ingredientSlugs: ['bev-sparkling-water', 'sweetener-honey', 'fruit-lemon'],
+        },
+      ],
+      tags: ['Entertaining', 'Outdoor', 'Meal Prep'],
+      baseServings: 6,
+      nutritionPerServing: {
+        calories: 600,
+        protein: 34,
+        carbs: 58,
+        fat: 22,
+        fiber: 9,
+        sugar: 19,
+        sodium: 650,
+      },
+    },
+  ];
+
+  const REGIONAL_TEMPLATE_DEFINITIONS = [
+    {
+      key: 'mediterranean-market',
+      name: 'Mediterranean Market Platter',
+      region: 'Mediterranean',
+      heroIngredient: 'veg-eggplant',
+      supportingIngredients: [
+        'veg-zucchini',
+        'herb-oregano',
+        'dairy-cheese-feta',
+        'fruit-lemon',
+        'oil-olive-extra-virgin',
+      ],
+      accompaniments: ['grain-farro', 'herb-basil'],
+      tags: ['Regional', 'Mediterranean', 'Vegetarian'],
+      description:
+        'Charred eggplant and zucchini layered with briny feta, warm farro, and citrus olive oil.',
+      nutritionPerServing: {
+        calories: 520,
+        protein: 18,
+        carbs: 54,
+        fat: 26,
+        fiber: 11,
+        sugar: 12,
+        sodium: 740,
+      },
+    },
+    {
+      key: 'andes-campfire',
+      name: 'Andean Campfire Bowl',
+      region: 'Latin American',
+      heroIngredient: 'legume-black-beans',
+      supportingIngredients: [
+        'veg-sweet-potato',
+        'grain-quinoa',
+        'veg-bell-pepper-red',
+        'fruit-lime',
+        'herb-cilantro',
+      ],
+      accompaniments: ['fruit-avocado', 'veg-corn'],
+      tags: ['Regional', 'Latin American', 'Vegan'],
+      description: 'Smoky beans and roasted tubers with quinoa, lime, and crisp vegetables.',
+      nutritionPerServing: {
+        calories: 480,
+        protein: 20,
+        carbs: 62,
+        fat: 14,
+        fiber: 13,
+        sugar: 11,
+        sodium: 600,
+      },
+    },
+    {
+      key: 'spice-route-lentils',
+      name: 'Spice Route Lentil Supper',
+      region: 'South Asian',
+      heroIngredient: 'legume-lentil-red',
+      supportingIngredients: [
+        'veg-cauliflower',
+        'veg-carrot',
+        'spice-garam-masala',
+        'herb-curry-leaves',
+        'oil-coconut',
+      ],
+      accompaniments: ['grain-rice-basmati', 'herb-mint'],
+      tags: ['Regional', 'South Asian', 'Vegetarian'],
+      description: 'Silky red lentils simmered with garam masala, coconut oil, and fragrant curry leaves.',
+      nutritionPerServing: {
+        calories: 460,
+        protein: 22,
+        carbs: 58,
+        fat: 12,
+        fiber: 14,
+        sugar: 10,
+        sodium: 580,
+      },
+    },
+    {
+      key: 'pacific-harvest',
+      name: 'Pacific Harvest Salmon Set',
+      region: 'Pacific Rim',
+      heroIngredient: 'seafood-salmon',
+      supportingIngredients: [
+        'veg-bok-choy',
+        'veg-carrot',
+        'veg-scallion',
+        'spice-ginger-ground',
+        'oil-sesame',
+      ],
+      accompaniments: ['grain-rice-brown', 'seed-sesame', 'fruit-lime'],
+      tags: ['Regional', 'Pacific Rim', 'Seafood'],
+      description: 'Seared salmon with sesame vegetables, gingered rice, and citrus finish.',
+      nutritionPerServing: {
+        calories: 540,
+        protein: 34,
+        carbs: 44,
+        fat: 20,
+        fiber: 6,
+        sugar: 8,
+        sodium: 640,
+      },
+    },
+  ];
+
   const getProteinRecipeCounts = (matches) => {
     const counts = new Map();
     matches.forEach((matchedSlugs) => {
@@ -773,6 +1035,278 @@
         }
       }
     });
+    return generated;
+  };
+
+  const countRecipesMatchingKeyword = (recipesList, keyword) => {
+    const normalizedKeyword = String(keyword || '').toLowerCase();
+    if (!normalizedKeyword) return 0;
+    return (Array.isArray(recipesList) ? recipesList : []).reduce((count, recipe) => {
+      if (!recipe || typeof recipe !== 'object') {
+        return count;
+      }
+      const category = String(recipe.category || '').toLowerCase();
+      if (category.includes(normalizedKeyword)) {
+        return count + 1;
+      }
+      const tags = Array.isArray(recipe.tags) ? recipe.tags : [];
+      if (
+        tags.some((tag) => String(tag || '').toLowerCase().includes(normalizedKeyword))
+      ) {
+        return count + 1;
+      }
+      return count;
+    }, 0);
+  };
+
+  const resolveIngredientList = (slugs, ingredientBySlug) =>
+    (Array.isArray(slugs) ? slugs : [])
+      .map((slug) => ingredientBySlug.get(slug))
+      .filter(Boolean);
+
+  const createMenuTemplateRecipe = (
+    definition,
+    recipeLookupById,
+    recipeLookupByName,
+    ingredientBySlug,
+  ) => {
+    if (!definition) return null;
+    const courses = Array.isArray(definition.courses) ? definition.courses : [];
+    const resolvedCourses = courses.map((course) => ({
+      label: course.label || 'Course',
+      ingredients: resolveIngredientList(course.ingredientSlugs, ingredientBySlug),
+    }));
+
+    const allIngredients = resolvedCourses.flatMap((course) => course.ingredients);
+    if (!allIngredients.length) {
+      return null;
+    }
+
+    const heroIngredientSlug =
+      definition.heroIngredient || (courses[0] && courses[0].ingredientSlugs
+        ? courses[0].ingredientSlugs[0]
+        : null);
+    const heroIngredient = heroIngredientSlug
+      ? ingredientBySlug.get(heroIngredientSlug)
+      : allIngredients[0];
+    const heroName = heroIngredient
+      ? getIngredientDisplayName(heroIngredient)
+      : definition.name;
+    const heroLower = String(heroName || '').toLowerCase();
+
+    const ingredientsList = resolvedCourses.map((course) => {
+      const names = course.ingredients.map((ingredient) => getIngredientDisplayName(ingredient));
+      const details = names.length ? `${course.label}: ${names.join(', ')}` : course.label;
+      return { item: details };
+    });
+
+    const instructions = [
+      `Organize mise en place for the ${heroLower} centerpiece and supporting courses.`,
+    ];
+    resolvedCourses.forEach((course) => {
+      const names = course.ingredients.map((ingredient) => getIngredientDisplayName(ingredient));
+      const labelLower = String(course.label || '').toLowerCase();
+      if (names.length) {
+        instructions.push(`Prepare the ${labelLower} featuring ${names.join(', ')}.`);
+      } else {
+        instructions.push(`Prepare the ${labelLower}.`);
+      }
+    });
+    instructions.push('Plate everything family-style and garnish just before serving.');
+
+    const tags = new Set(['Menu']);
+    if (definition.focus) {
+      tags.add(definition.focus);
+    }
+    if (definition.mealTag) {
+      tags.add(definition.mealTag);
+    }
+    if (Array.isArray(definition.tags)) {
+      definition.tags.forEach((tag) => {
+        if (tag) tags.add(tag);
+      });
+    }
+    allIngredients.forEach((ingredient) => {
+      deriveDietTagsForIngredient(ingredient).forEach((tag) => tags.add(tag));
+    });
+
+    const allergens = deriveAllergensFromIngredients(allIngredients);
+    const nutrition = definition.nutritionPerServing || {
+      calories: 650,
+      protein: 30,
+      carbs: 66,
+      fat: 24,
+      fiber: 10,
+      sugar: 16,
+      sodium: 700,
+    };
+
+    const baseId = `menu-${slugify(definition.key || definition.name || heroName)}`;
+    const baseName = definition.name || `${heroName} Menu`;
+
+    const recipe = {
+      id: ensureUniqueRecipeId(baseId, recipeLookupById),
+      name: ensureUniqueRecipeName(baseName, recipeLookupByName),
+      category: 'Menu Collection',
+      description:
+        definition.description ||
+        `A composed menu highlighting ${heroLower} with complementary sides and sips.`,
+      baseServings: definition.baseServings || 6,
+      ingredients: ingredientsList,
+      instructions,
+      equipment: ['Serving Platters', 'Mixing Bowls', "Chef's Knife"],
+      tags: Array.from(tags),
+      nutritionPerServing: nutrition,
+      allergens,
+    };
+
+    recipeLookupById.set(recipe.id, recipe);
+    recipeLookupByName.set(recipe.name.toLowerCase(), recipe);
+    return recipe;
+  };
+
+  const createRegionalTemplateRecipe = (
+    definition,
+    recipeLookupById,
+    recipeLookupByName,
+    ingredientBySlug,
+  ) => {
+    if (!definition) return null;
+    const heroIngredient = ingredientBySlug.get(definition.heroIngredient);
+    if (!heroIngredient) {
+      return null;
+    }
+    const supporting = resolveIngredientList(definition.supportingIngredients, ingredientBySlug);
+    const accompaniments = resolveIngredientList(definition.accompaniments, ingredientBySlug);
+    const allIngredients = [heroIngredient]
+      .concat(supporting)
+      .concat(accompaniments)
+      .filter(Boolean);
+
+    const heroName = getIngredientDisplayName(heroIngredient);
+    const heroLower = heroName.toLowerCase();
+    const supportingNames = supporting.map((ingredient) => getIngredientDisplayName(ingredient));
+    const accompanimentNames = accompaniments.map((ingredient) => getIngredientDisplayName(ingredient));
+
+    const ingredientsList = allIngredients.map((ingredient) => ({
+      item: getIngredientDisplayName(ingredient),
+    }));
+    if (accompanimentNames.length) {
+      ingredientsList.push({ item: `To serve: ${accompanimentNames.join(', ')}` });
+    }
+
+    const marinadeHighlights = supportingNames.slice(0, 2);
+    const finishingHighlights = supportingNames.slice(2);
+
+    const instructions = [
+      marinadeHighlights.length
+        ? `Marinate the ${heroLower} with ${marinadeHighlights.join(', ')} for a ${definition.region} profile.`
+        : `Season the ${heroLower} generously for a ${definition.region} profile.`,
+      finishingHighlights.length
+        ? `Cook until the ${heroLower} is tender, then fold in ${finishingHighlights.join(', ')} for texture.`
+        : `Cook until the ${heroLower} is tender and aromatic.`,
+      accompanimentNames.length
+        ? `Serve over ${accompanimentNames.join(', ')} and finish with fresh herbs.`
+        : 'Plate immediately and garnish with fresh herbs.',
+      'Share family-style to highlight the regional inspiration.',
+    ];
+
+    const tags = new Set(['Regional']);
+    if (definition.region) {
+      tags.add(definition.region);
+    }
+    if (Array.isArray(definition.tags)) {
+      definition.tags.forEach((tag) => {
+        if (tag) tags.add(tag);
+      });
+    }
+    allIngredients.forEach((ingredient) => {
+      deriveDietTagsForIngredient(ingredient).forEach((tag) => tags.add(tag));
+    });
+
+    const allergens = deriveAllergensFromIngredients(allIngredients);
+    const nutrition = definition.nutritionPerServing || {
+      calories: 500,
+      protein: 24,
+      carbs: 56,
+      fat: 18,
+      fiber: 10,
+      sugar: 9,
+      sodium: 620,
+    };
+
+    const baseId = `regional-${slugify(definition.key || definition.name || definition.region)}`;
+    const baseName = definition.name || `${definition.region} Feature`;
+
+    const recipe = {
+      id: ensureUniqueRecipeId(baseId, recipeLookupById),
+      name: ensureUniqueRecipeName(baseName, recipeLookupByName),
+      category: 'Regional Collection',
+      description:
+        definition.description ||
+        `A ${definition.region.toLowerCase()} inspired plate built around ${heroLower}.`,
+      baseServings: definition.baseServings || 4,
+      ingredients: ingredientsList,
+      instructions,
+      equipment: ['Skillet', 'Dutch Oven', 'Serving Platter'],
+      tags: Array.from(tags),
+      nutritionPerServing: nutrition,
+      allergens,
+    };
+
+    recipeLookupById.set(recipe.id, recipe);
+    recipeLookupByName.set(recipe.name.toLowerCase(), recipe);
+    return recipe;
+  };
+
+  const ensureMenuRegionalTemplateRecipes = (
+    recipesList,
+    recipeLookupById,
+    recipeLookupByName,
+    ingredientBySlug,
+  ) => {
+    const generated = [];
+
+    const menuCount = countRecipesMatchingKeyword(recipesList, 'menu');
+    const requiredMenu = Math.max(0, MIN_MENU_RECIPES - menuCount);
+    if (requiredMenu > 0) {
+      const availableDefinitions = MENU_TEMPLATE_DEFINITIONS.filter((definition) => {
+        const baseId = `menu-${slugify(definition.key || definition.name)}`;
+        return !recipeLookupById.has(baseId);
+      });
+      for (let index = 0; index < requiredMenu && index < availableDefinitions.length; index += 1) {
+        const recipe = createMenuTemplateRecipe(
+          availableDefinitions[index],
+          recipeLookupById,
+          recipeLookupByName,
+          ingredientBySlug,
+        );
+        if (recipe) {
+          generated.push(recipe);
+        }
+      }
+    }
+
+    const regionalCount = countRecipesMatchingKeyword(recipesList, 'regional');
+    const requiredRegional = Math.max(0, MIN_REGIONAL_RECIPES - regionalCount);
+    if (requiredRegional > 0) {
+      const availableRegional = REGIONAL_TEMPLATE_DEFINITIONS.filter((definition) => {
+        const baseId = `regional-${slugify(definition.key || definition.name || definition.region)}`;
+        return !recipeLookupById.has(baseId);
+      });
+      for (let index = 0; index < requiredRegional && index < availableRegional.length; index += 1) {
+        const recipe = createRegionalTemplateRecipe(
+          availableRegional[index],
+          recipeLookupById,
+          recipeLookupByName,
+          ingredientBySlug,
+        );
+        if (recipe) {
+          generated.push(recipe);
+        }
+      }
+    }
+
     return generated;
   };
 
@@ -2375,6 +2909,20 @@
   );
   if (generatedProteinCoverage.length) {
     recipes.push(...generatedProteinCoverage);
+    ({ recipeIngredientMatches, ingredientUsage } = mapRecipesToIngredientMatches(
+      recipes,
+      ingredientMatcherIndex,
+    ));
+  }
+
+  const generatedMenuRegionalCoverage = ensureMenuRegionalTemplateRecipes(
+    recipes,
+    recipeLookupById,
+    recipeLookupByName,
+    ingredientBySlug,
+  );
+  if (generatedMenuRegionalCoverage.length) {
+    recipes.push(...generatedMenuRegionalCoverage);
     ({ recipeIngredientMatches, ingredientUsage } = mapRecipesToIngredientMatches(
       recipes,
       ingredientMatcherIndex,
