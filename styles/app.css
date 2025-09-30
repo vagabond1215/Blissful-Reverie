@@ -2857,9 +2857,60 @@ textarea:focus {
   background: rgba(255, 255, 255, 0.6);
 }
 
+.meal-plan-calendar__cell--today {
+  border-color: var(--color-accent);
+  box-shadow: 0 22px 48px -28px var(--color-accent-shadow);
+  background-image: linear-gradient(
+    135deg,
+    rgba(68, 83, 214, 0.12),
+    rgba(68, 83, 214, 0.18)
+  );
+}
+
+.meal-plan-calendar__cell--today .meal-plan-calendar__date-number {
+  color: var(--color-accent-strong);
+  font-weight: 700;
+}
+
+.meal-plan-calendar__cell--past {
+  color: var(--color-text-muted);
+}
+
+.meal-plan-calendar__cell--past:not(.meal-plan-calendar__cell--holiday) {
+  border-color: rgba(68, 83, 214, 0.12);
+}
+
+.meal-plan-calendar__cell--past .meal-plan-calendar__entry {
+  background: rgba(68, 83, 214, 0.08);
+}
+
 .meal-plan-calendar__cell--selected {
   border-color: var(--color-accent-border);
   box-shadow: 0 20px 42px -26px var(--color-accent-shadow);
+}
+
+.meal-plan-calendar__cell--selected:not(.meal-plan-calendar__cell--today) {
+  box-shadow: 0 0 0 2px var(--color-surface, #ffffff),
+    0 0 0 4px var(--color-accent-outline),
+    0 20px 42px -26px var(--color-accent-shadow);
+}
+
+.meal-plan-calendar__cell--today.meal-plan-calendar__cell--selected {
+  border-color: var(--color-accent);
+  box-shadow: 0 22px 48px -28px var(--color-accent-shadow);
+}
+
+.meal-plan-calendar__cell--selected.meal-plan-calendar__cell--holiday:not(
+    .meal-plan-calendar__cell--today
+  ) {
+  box-shadow: 0 0 0 2px var(--color-surface, #ffffff),
+    0 0 0 4px var(--color-accent-secondary-outline, var(--color-accent-outline)),
+    0 22px 44px -28px var(--color-accent-secondary-shadow, var(--color-card-shadow-soft));
+}
+
+.meal-plan-calendar__cell--selected-outline {
+  outline: 2px solid var(--color-accent-outline);
+  outline-offset: 3px;
 }
 
 .meal-plan-calendar__cell--has-entries::after {
