@@ -390,6 +390,13 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'condiment-ranch-dressing', name: 'Ranch Dressing', category: 'Condiment/Sauce', tags: ['Contains Dairy', 'Contains Eggs', 'Gluten-Free*'] },
   { slug: 'condiment-hummus', name: 'Hummus', category: 'Condiment/Sauce', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'condiment-capers', name: 'Capers', category: 'Condiment/Sauce', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'sauce-classic-roux', name: 'Classic Roux (Butter & Flour)', category: 'Condiment/Sauce', tags: ['Contains Gluten', 'Contains Dairy', 'Vegetarian'] },
+  { slug: 'sauce-alfredo', name: 'Creamy Alfredo Sauce', category: 'Condiment/Sauce', tags: ['Contains Dairy', 'Vegetarian'] },
+  { slug: 'sauce-marinara', name: 'Marinara Sauce', category: 'Condiment/Sauce', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Nightshade'] },
+  { slug: 'sauce-bechamel', name: 'Béchamel Sauce', category: 'Condiment/Sauce', tags: ['Contains Gluten', 'Contains Dairy', 'Vegetarian'] },
+  { slug: 'sauce-vodka', name: 'Vodka Sauce', category: 'Condiment/Sauce', tags: ['Contains Dairy', 'Vegetarian'] },
+  { slug: 'sauce-pesto-genovese', name: 'Basil Pesto Sauce', category: 'Condiment/Sauce', tags: ['Gluten-Free', 'Vegetarian', 'Contains Nuts'] },
+  { slug: 'sauce-arrabbiata', name: 'Spicy Arrabbiata Sauce', category: 'Condiment/Sauce', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Nightshade'] },
 
   // Beverages (common cooking uses: deglazing, marinades)
   { slug: 'bev-chicken-stock', name: 'Chicken Stock', category: 'Beverage', tags: ['Gluten-Free*', 'Stock'] },
@@ -419,6 +426,13 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'baked-pretzel-dough', name: 'Pretzel Dough', category: 'Baked Goods & Doughs', tags: ['Contains Gluten', 'Vegetarian'] },
   { slug: 'baked-arepa-dough', name: 'Arepa Dough', category: 'Baked Goods & Doughs', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'baked-soda-bread', name: 'Soda Bread Loaf', category: 'Baked Goods & Doughs', tags: ['Contains Gluten', 'Vegetarian'] },
+  { slug: 'baked-phyllo-dough', name: 'Phyllo Dough Sheets', category: 'Baked Goods & Doughs', tags: ['Contains Gluten', 'Vegetarian'] },
+  { slug: 'baked-puff-pastry', name: 'Puff Pastry Sheets', category: 'Baked Goods & Doughs', tags: ['Contains Gluten', 'Contains Dairy', 'Vegetarian'] },
+  { slug: 'baked-fresh-pasta-dough', name: 'Fresh Pasta Dough', category: 'Baked Goods & Doughs', tags: ['Contains Gluten', 'Contains Eggs', 'Vegetarian'] },
+  { slug: 'baked-whole-wheat-pizza-dough', name: 'Whole Wheat Pizza Dough', category: 'Baked Goods & Doughs', tags: ['Contains Gluten', 'Vegetarian'] },
+  { slug: 'baked-gluten-free-pizza-dough', name: 'Gluten-Free Pizza Dough', category: 'Baked Goods & Doughs', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'baked-empanada-dough', name: 'Empanada Dough Discs', category: 'Baked Goods & Doughs', tags: ['Contains Gluten', 'Vegetarian'] },
+  { slug: 'baked-dumpling-wrappers', name: 'Dumpling Wrappers', category: 'Baked Goods & Doughs', tags: ['Contains Gluten', 'Vegetarian'] },
   { slug: 'baked-bao-dough', name: 'Bao Dough', category: 'Baked Goods & Doughs', tags: ['Contains Gluten', 'Vegetarian'] },
 
   // Beverages & Mixers (non-stock)
