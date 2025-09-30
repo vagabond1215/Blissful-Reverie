@@ -5711,6 +5711,8 @@
 
   const createMealPlanCalendarCell = (date, options = {}) => {
     const iso = toISODateString(date);
+    const today = getStartOfDay(new Date());
+    const todayIso = toISODateString(today);
     const sourceEntries = Array.isArray(options.entries)
       ? options.entries
       : getMealPlanEntries(iso);
@@ -5721,10 +5723,23 @@
     if (options.isCurrentMonth === false) {
       button.classList.add('meal-plan-calendar__cell--muted');
     }
+    const isToday = iso === todayIso;
     const isSelected = iso === state.mealPlanSelectedDate;
+    const isPast = date < today;
+    if (isToday) {
+      button.classList.add('meal-plan-calendar__cell--today');
+    }
     if (isSelected) {
       button.classList.add('meal-plan-calendar__cell--selected');
       button.setAttribute('aria-current', 'date');
+    } else if (isToday) {
+      button.setAttribute('aria-current', 'date');
+    }
+    if (isPast && !isToday && !isSelected) {
+      button.classList.add('meal-plan-calendar__cell--past');
+    }
+    if (isSelected && !isToday) {
+      button.classList.add('meal-plan-calendar__cell--selected-outline');
     }
     if (entries.length) {
       button.classList.add('meal-plan-calendar__cell--has-entries');
