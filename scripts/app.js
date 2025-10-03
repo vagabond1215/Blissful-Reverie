@@ -38,7 +38,7 @@
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(' ');
 
-  const PROTEIN_CATEGORY_SET = new Set(['Meat', 'Seafood']);
+  const PROTEIN_CATEGORY_SET = new Set(['Meat', 'Seafood', 'Meat & Poultry']);
   const PROTEIN_SECTION_PRIORITY = new Map([
     ['Meat', 0],
     ['Fish', 1],
@@ -3107,19 +3107,100 @@
   const pantryAllergenOptions = ingredientTagsSorted.filter((tag) => allergenTagPattern.test(tag));
   const pantryTagOptions = ingredientTagsSorted.filter((tag) => !allergenTagPattern.test(tag));
 
+  const LEGUME_CATEGORY_SET = new Set(['Legume', 'Plant Protein', 'Legumes & Pulses']);
+  const GRAIN_CATEGORY_SET = new Set(['Grain', 'Grains & Cereals']);
+  const NUT_SEED_CATEGORY_SET = new Set(['Nut/Seed', 'Nuts & Seeds']);
+  const DAIRY_CATEGORY_SET = new Set(['Dairy', 'Dairy Alternative', 'Cheese', 'Dairy & Refrigerated']);
+  const HERB_SPICE_CATEGORY_SET = new Set(['Herb', 'Spice', 'Herbs & Aromatics']);
+  const OIL_CONDIMENT_CATEGORY_SET = new Set([
+    'Oil/Fat',
+    'Oils & Fats',
+    'Condiment/Sauce',
+    'Condiments & Spreads',
+    'Fermented & Pickled',
+  ]);
+  const BAKING_CATEGORY_SET = new Set(['Baking', 'Baking Alternative', 'Baked Goods & Doughs', 'Sweetener']);
+  const BROTH_KEYWORD_PATTERN = /\b(broth|stock|bouillon)\b/i;
+  const NOODLE_KEYWORD_PATTERN = /\b(pasta|noodle|lasagna|linguine|spaghetti|fusilli|penne|orzo)\b/i;
+
+  const hasKeyword = (value, pattern) => pattern.test(String(value || ''));
+  const ingredientHasKeyword = (ingredient, pattern) =>
+    hasKeyword(ingredient && ingredient.name, pattern) || hasKeyword(ingredient && ingredient.slug, pattern);
+  const ingredientHasTag = (ingredient, pattern) =>
+    (Array.isArray(ingredient && ingredient.tags) ? ingredient.tags : []).some((tag) => hasKeyword(tag, pattern));
+
+  const isBrothOrStockIngredient = (ingredient) =>
+    ingredient && ingredient.category === 'Beverage' &&
+    (ingredientHasKeyword(ingredient, BROTH_KEYWORD_PATTERN) || ingredientHasTag(ingredient, BROTH_KEYWORD_PATTERN));
+
+  const isPastaDough = (ingredient) =>
+    ingredient && ingredient.category === 'Baked Goods & Doughs' && ingredientHasKeyword(ingredient, NOODLE_KEYWORD_PATTERN);
+
+  const isEggIngredient = (ingredient) => String(ingredient && ingredient.slug ? ingredient.slug : '') === 'baking-egg';
+
   const INGREDIENT_FILTER_GROUPS = [
-    { id: 'protein', label: 'Protein', categories: ['Meat', 'Seafood'] },
-    { id: 'legumes', label: 'Legumes and Plant Proteins', categories: ['Legume', 'Plant Protein'] },
-    { id: 'vegetables', label: 'Vegetables', categories: ['Vegetable'] },
-    { id: 'fruits', label: 'Fruits', categories: ['Fruit'] },
-    { id: 'pasta-grains', label: 'Pasta & Grains', categories: ['Pasta', 'Grain'] },
-    { id: 'dairy-eggs', label: 'Dairy & Eggs', categories: ['Dairy', 'Dairy Alternative'] },
-    { id: 'baking', label: 'Baking Essentials', categories: ['Baking', 'Baking Alternative'] },
-    { id: 'herbs-spices', label: 'Herbs & Spices', categories: ['Herb', 'Spice'] },
-    { id: 'nuts-seeds', label: 'Nuts & Seeds', categories: ['Nut/Seed'] },
-    { id: 'oils-condiments', label: 'Oils & Condiments', categories: ['Oil/Fat', 'Condiment/Sauce'] },
-    { id: 'sweeteners', label: 'Sweeteners', categories: ['Sweetener'] },
-    { id: 'broths-beverages', label: 'Broths & Beverages', categories: ['Beverage'] },
+    { id: 'protein', label: 'Protein', categories: ['Meat', 'Seafood', 'Meat & Poultry'] },
+    {
+      id: 'legumes',
+      label: 'Legumes',
+      match: (ingredient) => ingredient && LEGUME_CATEGORY_SET.has(ingredient.category),
+    },
+    {
+      id: 'grains',
+      label: 'Grains',
+      match: (ingredient) => ingredient && GRAIN_CATEGORY_SET.has(ingredient.category),
+    },
+    {
+      id: 'nuts-seeds',
+      label: 'Nuts & Seeds',
+      match: (ingredient) => ingredient && NUT_SEED_CATEGORY_SET.has(ingredient.category),
+    },
+    {
+      id: 'pasta',
+      label: 'Pasta',
+      match: (ingredient) =>
+        ingredient &&
+        (ingredient.category === 'Pasta' || ingredient.category === 'Baked Goods & Doughs') &&
+        (ingredient.category === 'Pasta' || isPastaDough(ingredient)),
+    },
+    {
+      id: 'dairy-eggs',
+      label: 'Dairy & Eggs',
+      match: (ingredient) =>
+        ingredient && (DAIRY_CATEGORY_SET.has(ingredient.category) || isEggIngredient(ingredient)),
+    },
+    {
+      id: 'broth-stock',
+      label: 'Broth & Stock',
+      match: (ingredient) => isBrothOrStockIngredient(ingredient),
+    },
+    {
+      id: 'herbs-spices',
+      label: 'Herbs & Spices',
+      match: (ingredient) => ingredient && HERB_SPICE_CATEGORY_SET.has(ingredient.category),
+    },
+    {
+      id: 'oil-condiments',
+      label: 'Oil & Condiments',
+      match: (ingredient) => ingredient && OIL_CONDIMENT_CATEGORY_SET.has(ingredient.category),
+    },
+    {
+      id: 'baking-goods',
+      label: 'Baking Goods',
+      match: (ingredient) =>
+        ingredient &&
+        BAKING_CATEGORY_SET.has(ingredient.category) &&
+        !isEggIngredient(ingredient) &&
+        !isPastaDough(ingredient),
+    },
+    {
+      id: 'drinks-juices',
+      label: 'Drinks & Juices',
+      match: (ingredient) =>
+        ingredient &&
+        ((ingredient.category === 'Beverage' && !isBrothOrStockIngredient(ingredient)) ||
+          ingredient.category === 'Beverages & Mixers'),
+    },
   ];
 
   const proteinFilterDefinitions = createProteinBaseDefinitions(ingredients);
@@ -3389,11 +3470,13 @@
     if (group.id === 'protein') {
       return { id: group.id, label: group.label, sections: proteinFilterSections };
     }
+    const matcher =
+      typeof group.match === 'function'
+        ? (ingredient) => group.match(ingredient)
+        : (ingredient) =>
+            Array.isArray(group.categories) && group.categories.includes(ingredient.category);
     const options = ingredients
-      .filter(
-        (ingredient) =>
-          group.categories.includes(ingredient.category) && ingredientUsage.get(ingredient.slug),
-      )
+      .filter((ingredient) => matcher(ingredient) && ingredientUsage.get(ingredient.slug))
       .map((ingredient) => ({ slug: ingredient.slug, label: ingredient.name }))
       .sort((a, b) => a.label.localeCompare(b.label));
     return { id: group.id, label: group.label, options };
