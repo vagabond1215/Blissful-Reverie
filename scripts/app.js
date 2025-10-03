@@ -4671,6 +4671,8 @@
     elements.mealPlanSummary = document.getElementById('meal-plan-summary');
     elements.mealPlanSummaryTitle = document.getElementById('meal-plan-summary-title');
     elements.mealPlanMacros = document.getElementById('meal-plan-macros');
+    elements.mealPlanViewHeader = document.querySelector('.meal-plan-view__header');
+    elements.mealPlanViewLayout = document.querySelector('.meal-plan-view__layout');
     elements.mealPlanModeButtons = Array.from(
       document.querySelectorAll('[data-meal-plan-mode]'),
     );
@@ -6318,6 +6320,92 @@
     elements.mealPlanPeriod.textContent = label;
   };
 
+  const isLandscapeViewport = () => {
+    const width = window.innerWidth || document.documentElement?.clientWidth || 0;
+    const height = window.innerHeight || document.documentElement?.clientHeight || 0;
+    if (width >= 1024) {
+      return true;
+    }
+    if (!width || !height) {
+      return false;
+    }
+    return width > height;
+  };
+
+  const resetMealPlanLayoutHeight = () => {
+    if (!elements.mealPlanView) {
+      return;
+    }
+    elements.mealPlanView.classList.remove('meal-plan-view--auto-height');
+    elements.mealPlanView.style.removeProperty('--meal-plan-view-height');
+    elements.mealPlanView.style.removeProperty('--meal-plan-layout-height');
+  };
+
+  let pendingMealPlanLayoutUpdate = false;
+
+  const updateMealPlanLayoutHeight = () => {
+    if (!elements.mealPlanView || !elements.mealPlanViewLayout) {
+      return;
+    }
+    if (state.activeView !== 'meal-plan' || !isLandscapeViewport()) {
+      resetMealPlanLayoutHeight();
+      return;
+    }
+
+    const viewportHeight = window.innerHeight || document.documentElement?.clientHeight || 0;
+    if (!viewportHeight) {
+      resetMealPlanLayoutHeight();
+      return;
+    }
+
+    const viewRect = elements.mealPlanView.getBoundingClientRect();
+    const bottomSpacing = 16;
+    const availableHeight = viewportHeight - viewRect.top - bottomSpacing;
+    if (availableHeight <= 0) {
+      resetMealPlanLayoutHeight();
+      return;
+    }
+
+    const viewStyles = window.getComputedStyle(elements.mealPlanView);
+    const paddingTop = Number.parseFloat(viewStyles.paddingTop) || 0;
+    const paddingBottom = Number.parseFloat(viewStyles.paddingBottom) || 0;
+    const gap = Number.parseFloat(viewStyles.rowGap || viewStyles.gap) || 0;
+    const headerHeight = elements.mealPlanViewHeader
+      ? elements.mealPlanViewHeader.getBoundingClientRect().height
+      : 0;
+
+    const layoutHeight = availableHeight - paddingTop - paddingBottom - gap - headerHeight;
+    if (layoutHeight <= 0) {
+      resetMealPlanLayoutHeight();
+      return;
+    }
+
+    const resolvedLayoutHeight = Math.max(layoutHeight, 0);
+    const resolvedViewHeight =
+      resolvedLayoutHeight + paddingTop + paddingBottom + gap + headerHeight;
+
+    elements.mealPlanView.classList.add('meal-plan-view--auto-height');
+    elements.mealPlanView.style.setProperty(
+      '--meal-plan-view-height',
+      `${Math.round(resolvedViewHeight)}px`,
+    );
+    elements.mealPlanView.style.setProperty(
+      '--meal-plan-layout-height',
+      `${Math.round(resolvedLayoutHeight)}px`,
+    );
+  };
+
+  const scheduleMealPlanLayoutUpdate = () => {
+    if (pendingMealPlanLayoutUpdate) {
+      return;
+    }
+    pendingMealPlanLayoutUpdate = true;
+    window.requestAnimationFrame(() => {
+      pendingMealPlanLayoutUpdate = false;
+      updateMealPlanLayoutHeight();
+    });
+  };
+
   const renderMealPlanCalendar = (selectedDate, selectedIso) => {
     if (!elements.mealPlanCalendar) return;
     elements.mealPlanCalendar.innerHTML = '';
@@ -6357,6 +6445,7 @@
     } else if (dayModalState.isOpen) {
       renderMealPlanDayModal(selectedDate, selectedIso);
     }
+    scheduleMealPlanLayoutUpdate();
   };
 
   const setMealPlanViewMode = (mode) => {
@@ -7118,6 +7207,7 @@
         elements.filterPanel.removeAttribute('aria-hidden');
       }
     }
+    scheduleMealPlanLayoutUpdate();
   };
 
   const renderApp = () => {
@@ -7348,6 +7438,21 @@
           }
         });
       });
+    }
+
+    window.addEventListener('resize', scheduleMealPlanLayoutUpdate);
+    try {
+      const orientationQuery = window.matchMedia('(orientation: landscape)');
+      if (orientationQuery) {
+        const listener = scheduleMealPlanLayoutUpdate;
+        if (typeof orientationQuery.addEventListener === 'function') {
+          orientationQuery.addEventListener('change', listener);
+        } else if (typeof orientationQuery.addListener === 'function') {
+          orientationQuery.addListener(listener);
+        }
+      }
+    } catch (error) {
+      // Orientation queries may not be supported in all environments; ignore errors.
     }
   };
 

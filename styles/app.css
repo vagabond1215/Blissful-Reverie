@@ -1657,6 +1657,24 @@ textarea:focus {
   border-radius: 18px;
   border: 1px solid var(--color-accent-outline, var(--color-border-muted));
   box-shadow: 0 24px 48px -28px var(--color-card-shadow);
+  --meal-plan-view-height: auto;
+  --meal-plan-layout-height: auto;
+}
+
+.meal-plan-view--auto-height {
+  max-height: none;
+  height: var(--meal-plan-view-height);
+}
+
+.meal-plan-view--auto-height .meal-plan-view__layout {
+  height: var(--meal-plan-layout-height);
+  max-height: var(--meal-plan-layout-height);
+}
+
+.meal-plan-view--auto-height .meal-plan-calendar,
+.meal-plan-view--auto-height .meal-plan-sidebar {
+  height: 100%;
+  max-height: 100%;
 }
 
 .meal-plan-view__header {
