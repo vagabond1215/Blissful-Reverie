@@ -1623,32 +1623,6 @@
 
   const themePreferences = loadThemePreferences();
 
-  const loadHolidayThemePreferences = () => {
-    const fallback = { enabled: false, holidays: HOLIDAY_DEFAULT_SELECTIONS.slice() };
-    try {
-      const storedRaw = localStorage.getItem(HOLIDAY_THEME_STORAGE_KEY);
-      if (!storedRaw) {
-        lastPersistedHolidayThemes = null;
-        return fallback;
-      }
-      const stored = JSON.parse(storedRaw);
-      if (!stored || typeof stored !== 'object') {
-        return fallback;
-      }
-      const enabled = stored.enabled === true;
-      const holidays = Array.isArray(stored.holidays)
-        ? stored.holidays.filter((id) => holidayDefinitionLookup.has(id))
-        : fallback.holidays.slice();
-      lastPersistedHolidayThemes = storedRaw;
-      return { enabled, holidays };
-    } catch (error) {
-      console.warn('Unable to read holiday theme preferences.', error);
-      return fallback;
-    }
-  };
-
-  const holidayThemePreferences = loadHolidayThemePreferences();
-
   const loadMeasurementPreference = () => {
     try {
       const stored = localStorage.getItem(MEASUREMENT_STORAGE_KEY);
@@ -1787,6 +1761,32 @@
     HOLIDAY_DEFINITIONS.map((definition) => [definition.id, definition]),
   );
   const HOLIDAY_DEFAULT_SELECTIONS = HOLIDAY_DEFINITIONS.map((definition) => definition.id);
+
+  const loadHolidayThemePreferences = () => {
+    const fallback = { enabled: false, holidays: HOLIDAY_DEFAULT_SELECTIONS.slice() };
+    try {
+      const storedRaw = localStorage.getItem(HOLIDAY_THEME_STORAGE_KEY);
+      if (!storedRaw) {
+        lastPersistedHolidayThemes = null;
+        return fallback;
+      }
+      const stored = JSON.parse(storedRaw);
+      if (!stored || typeof stored !== 'object') {
+        return fallback;
+      }
+      const enabled = stored.enabled === true;
+      const holidays = Array.isArray(stored.holidays)
+        ? stored.holidays.filter((id) => holidayDefinitionLookup.has(id))
+        : fallback.holidays.slice();
+      lastPersistedHolidayThemes = storedRaw;
+      return { enabled, holidays };
+    } catch (error) {
+      console.warn('Unable to read holiday theme preferences.', error);
+      return fallback;
+    }
+  };
+
+  const holidayThemePreferences = loadHolidayThemePreferences();
 
   const HOLIDAY_THEME_OVERRIDES = {
     'new-years-day': { light: 'citrine', dark: 'nebula', sepia: 'copper' },
