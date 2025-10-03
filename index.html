@@ -9,41 +9,40 @@
   </head>
   <body>
     <div class="app-shell">
-      <header class="app-header">
-        <div class="app-header__inner">
+      <button
+        type="button"
+        class="nav-chip__toggle"
+        id="primary-nav-toggle"
+        aria-label="Toggle primary menu"
+        aria-expanded="false"
+        aria-controls="primary-nav"
+      >
+        <span class="nav-chip__toggle-icon" aria-hidden="true">☰</span>
+        <span class="nav-chip__toggle-label">Menu</span>
+      </button>
+      <nav class="nav-chip" id="primary-nav" aria-label="Primary">
+        <div class="nav-chip__group view-toggle">
           <button
             type="button"
-            class="nav-chip__toggle"
-            id="primary-nav-toggle"
-            aria-label="Toggle primary menu"
-            aria-expanded="false"
-            aria-controls="primary-nav"
+            class="view-toggle__button view-toggle__button--active"
+            data-view-target="meals"
           >
-            <span class="nav-chip__toggle-icon" aria-hidden="true">☰</span>
-            <span class="nav-chip__toggle-label">Menu</span>
+            Recipes
           </button>
-          <nav class="nav-chip view-toggle" id="primary-nav" aria-label="Primary">
-            <button
-              type="button"
-              class="view-toggle__button view-toggle__button--active"
-              data-view-target="meals"
-            >
-              Recipes
-            </button>
-            <button type="button" class="view-toggle__button" data-view-target="kitchen">
-              Kitchen
-            </button>
-            <button type="button" class="view-toggle__button" data-view-target="pantry">
-              Pantry
-            </button>
-            <button type="button" class="view-toggle__button" data-view-target="meal-plan">
-              Meal Plan
-            </button>
-            <button type="button" class="view-toggle__button family-button" id="family-button">
-              Family
-            </button>
-          </nav>
-          <details class="settings-panel" id="settings-panel">
+          <button type="button" class="view-toggle__button" data-view-target="kitchen">
+            Kitchen
+          </button>
+          <button type="button" class="view-toggle__button" data-view-target="pantry">
+            Pantry
+          </button>
+          <button type="button" class="view-toggle__button" data-view-target="meal-plan">
+            Meal Plan
+          </button>
+          <button type="button" class="view-toggle__button family-button" id="family-button">
+            Family
+          </button>
+        </div>
+        <details class="settings-panel nav-chip__settings" id="settings-panel">
                   <summary
                     class="settings-panel__summary"
                     aria-label="Display and unit settings"
@@ -243,9 +242,8 @@
                       </div>
                     </div>
                   </div>
-          </details>
-        </div>
-      </header>
+        </details>
+      </nav>
       <main class="layout" id="app-layout">
         <aside class="filter-panel" id="filter-panel">
           <div class="panel-header panel-header--actions-only">
