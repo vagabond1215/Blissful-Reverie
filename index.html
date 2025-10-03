@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-mode="light" data-theme="serene">
+<html lang="en" data-mode="light">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
@@ -77,14 +77,90 @@
                           <button type="button" class="mode-toggle__button" data-mode="dark" aria-pressed="false">
                             Dark
                           </button>
-                          <button type="button" class="mode-toggle__button" data-mode="sepia" aria-pressed="false">
-                            Sepia
-                          </button>
                         </div>
                       </div>
                       <div class="theme-toolbar__group">
                         <span class="theme-toolbar__label">Palette</span>
-                        <div class="theme-toolbar__options theme-toolbar__options--themes" id="theme-options"></div>
+                        <div class="theme-toolbar__palette" id="theme-palette">
+                          <div class="theme-color-control">
+                            <span class="theme-color-control__label" id="theme-color-label-background"
+                              >Background</span
+                            >
+                            <div class="theme-color-control__inputs">
+                              <input
+                                type="color"
+                                class="theme-color-control__picker"
+                                data-color-role="background"
+                                aria-labelledby="theme-color-label-background"
+                              />
+                              <input
+                                type="text"
+                                class="theme-color-control__value"
+                                data-color-role="background"
+                                aria-labelledby="theme-color-label-background"
+                                placeholder="#RRGGBB"
+                                spellcheck="false"
+                                autocapitalize="off"
+                                autocomplete="off"
+                                inputmode="text"
+                                maxlength="7"
+                                pattern="^#?[0-9A-Fa-f]{3,6}$"
+                              />
+                            </div>
+                          </div>
+                          <div class="theme-color-control">
+                            <span class="theme-color-control__label" id="theme-color-label-primary"
+                              >Primary</span
+                            >
+                            <div class="theme-color-control__inputs">
+                              <input
+                                type="color"
+                                class="theme-color-control__picker"
+                                data-color-role="main"
+                                aria-labelledby="theme-color-label-primary"
+                              />
+                              <input
+                                type="text"
+                                class="theme-color-control__value"
+                                data-color-role="main"
+                                aria-labelledby="theme-color-label-primary"
+                                placeholder="#RRGGBB"
+                                spellcheck="false"
+                                autocapitalize="off"
+                                autocomplete="off"
+                                inputmode="text"
+                                maxlength="7"
+                                pattern="^#?[0-9A-Fa-f]{3,6}$"
+                              />
+                            </div>
+                          </div>
+                          <div class="theme-color-control">
+                            <span class="theme-color-control__label" id="theme-color-label-accent"
+                              >Accent</span
+                            >
+                            <div class="theme-color-control__inputs">
+                              <input
+                                type="color"
+                                class="theme-color-control__picker"
+                                data-color-role="accent"
+                                aria-labelledby="theme-color-label-accent"
+                              />
+                              <input
+                                type="text"
+                                class="theme-color-control__value"
+                                data-color-role="accent"
+                                aria-labelledby="theme-color-label-accent"
+                                placeholder="#RRGGBB"
+                                spellcheck="false"
+                                autocapitalize="off"
+                                autocomplete="off"
+                                inputmode="text"
+                                maxlength="7"
+                                pattern="^#?[0-9A-Fa-f]{3,6}$"
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                       <div class="theme-toolbar__group theme-toolbar__group--holiday">
                         <div class="theme-toolbar__holiday-row">

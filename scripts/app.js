@@ -1332,98 +1332,202 @@
   const THEME_STORAGE_KEY = 'blissful-theme';
   const HOLIDAY_THEME_STORAGE_KEY = 'blissful-holiday-themes';
   let lastPersistedHolidayThemes = null;
-  const THEME_OPTIONS = {
-    light: [
-      {
-        id: 'serene',
-        label: 'Serene',
-        preview: 'linear-gradient(135deg, #4453d6, #f59e0b)',
-      },
-      {
-        id: 'sunrise',
-        label: 'Sunrise',
-        preview: 'linear-gradient(135deg, #f97316, #0ea5e9)',
-      },
-      {
-        id: 'meadow',
-        label: 'Meadow',
-        preview: 'linear-gradient(135deg, #2f855a, #6366f1)',
-      },
-      {
-        id: 'mist',
-        label: 'Misty Morning',
-        preview: 'linear-gradient(135deg, #38bdf8, #a855f7)',
-      },
-      {
-        id: 'blossom',
-        label: 'Blossom',
-        preview: 'linear-gradient(135deg, #ec4899, #22d3ee)',
-      },
-      {
-        id: 'citrine',
-        label: 'Citrine Glow',
-        preview: 'linear-gradient(135deg, #facc15, #3b82f6)',
-      },
-    ],
-    dark: [
-      {
-        id: 'midnight',
-        label: 'Midnight',
-        preview: 'linear-gradient(135deg, #2f6df0, #f472b6)',
-      },
-      {
-        id: 'nebula',
-        label: 'Nebula',
-        preview: 'linear-gradient(135deg, #a855f7, #22d3ee)',
-      },
-      {
-        id: 'forest',
-        label: 'Forest',
-        preview: 'linear-gradient(135deg, #34d399, #fbbf24)',
-      },
-      {
-        id: 'ember',
-        label: 'Ember',
-        preview: 'linear-gradient(135deg, #f97316, #2563eb)',
-      },
-      {
-        id: 'abyss',
-        label: 'Abyss',
-        preview: 'linear-gradient(135deg, #14b8a6, #8b5cf6)',
-      },
-      {
-        id: 'velvet',
-        label: 'Velvet Night',
-        preview: 'linear-gradient(135deg, #f472b6, #14b8a6)',
-      },
-    ],
-    sepia: [
-      {
-        id: 'classic',
-        label: 'Classic Sepia',
-        preview: 'linear-gradient(135deg, #b7791f, #2f855a)',
-      },
-      {
-        id: 'copper',
-        label: 'Copper Glow',
-        preview: 'linear-gradient(135deg, #c26a3d, #0f766e)',
-      },
-      {
-        id: 'umber',
-        label: 'Deep Umber',
-        preview: 'linear-gradient(135deg, #8a4b2a, #3b82f6)',
-      },
-    ],
-  };
-
-  const DEFAULT_THEME_SELECTIONS = {
-    light: 'serene',
-    dark: 'midnight',
-    sepia: 'classic',
+  const DEFAULT_THEME_PALETTES = {
+    light: {
+      background: '#F5F8FF',
+      main: '#3B82F6',
+      accent: '#22D3EE',
+    },
+    dark: {
+      background: '#0F172A',
+      main: '#60A5FA',
+      accent: '#38BDF8',
+    },
   };
 
   const DEFAULT_MODE = 'light';
-  const AVAILABLE_MODES = Object.keys(THEME_OPTIONS);
+  const AVAILABLE_MODES = Object.keys(DEFAULT_THEME_PALETTES);
+  let lastPersistedTheme = null;
+
+  const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+  const clamp01 = (value) => clamp(value, 0, 1);
+
+  const normalizeHexColor = (value) => {
+    if (typeof value !== 'string') {
+      return null;
+    }
+    let hex = value.trim();
+    if (!hex) {
+      return null;
+    }
+    if (!hex.startsWith('#')) {
+      hex = `#${hex}`;
+    }
+    const match = hex.match(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/);
+    if (!match) {
+      return null;
+    }
+    if (hex.length === 4) {
+      hex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+    }
+    return hex.toUpperCase();
+  };
+
+  const componentToHex = (component) => Math.round(clamp(component, 0, 255)).toString(16).padStart(2, '0');
+
+  const rgbToHex = ({ r, g, b }) => `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`.toUpperCase();
+
+  const hexToRgb = (value) => {
+    const normalized = normalizeHexColor(value);
+    if (!normalized) {
+      return null;
+    }
+    const r = parseInt(normalized.slice(1, 3), 16);
+    const g = parseInt(normalized.slice(3, 5), 16);
+    const b = parseInt(normalized.slice(5, 7), 16);
+    return { r, g, b, hex: normalized };
+  };
+
+  const rgbToHsl = ({ r, g, b }) => {
+    const rNorm = r / 255;
+    const gNorm = g / 255;
+    const bNorm = b / 255;
+    const max = Math.max(rNorm, gNorm, bNorm);
+    const min = Math.min(rNorm, gNorm, bNorm);
+    let h = 0;
+    let s = 0;
+    const l = (max + min) / 2;
+    if (max !== min) {
+      const delta = max - min;
+      s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+      switch (max) {
+        case rNorm:
+          h = (gNorm - bNorm) / delta + (gNorm < bNorm ? 6 : 0);
+          break;
+        case gNorm:
+          h = (bNorm - rNorm) / delta + 2;
+          break;
+        default:
+          h = (rNorm - gNorm) / delta + 4;
+          break;
+      }
+      h /= 6;
+    }
+    return { h, s, l };
+  };
+
+  const hueToRgb = (p, q, t) => {
+    let tt = t;
+    if (tt < 0) tt += 1;
+    if (tt > 1) tt -= 1;
+    if (tt < 1 / 6) return p + (q - p) * 6 * tt;
+    if (tt < 1 / 2) return q;
+    if (tt < 2 / 3) return p + (q - p) * (2 / 3 - tt) * 6;
+    return p;
+  };
+
+  const hslToRgb = ({ h, s, l }) => {
+    const saturation = clamp01(s);
+    const lightness = clamp01(l);
+    if (saturation === 0) {
+      const value = Math.round(lightness * 255);
+      return { r: value, g: value, b: value };
+    }
+    const q = lightness < 0.5 ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation;
+    const p = 2 * lightness - q;
+    const r = Math.round(hueToRgb(p, q, h + 1 / 3) * 255);
+    const g = Math.round(hueToRgb(p, q, h) * 255);
+    const b = Math.round(hueToRgb(p, q, h - 1 / 3) * 255);
+    return { r, g, b };
+  };
+
+  const adjustLightness = (rgb, amount) => {
+    const hsl = rgbToHsl(rgb);
+    return hslToRgb({ h: hsl.h, s: hsl.s, l: clamp01(hsl.l + amount) });
+  };
+
+  const adjustSaturation = (rgb, amount) => {
+    const hsl = rgbToHsl(rgb);
+    return hslToRgb({ h: hsl.h, s: clamp01(hsl.s + amount), l: hsl.l });
+  };
+
+  const mixColors = (a, b, amount) => {
+    const t = clamp01(amount);
+    return {
+      r: Math.round(a.r + (b.r - a.r) * t),
+      g: Math.round(a.g + (b.g - a.g) * t),
+      b: Math.round(a.b + (b.b - a.b) * t),
+    };
+  };
+
+  const toRgba = (rgb, alpha) => `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${Math.round(clamp01(alpha) * 1000) / 1000})`;
+
+  const relativeLuminance = ({ r, g, b }) => {
+    const transform = (channel) => {
+      const value = channel / 255;
+      return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+    };
+    const rLin = transform(r);
+    const gLin = transform(g);
+    const bLin = transform(b);
+    return 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
+  };
+
+  const contrastRatio = (foreground, background) => {
+    const lumA = relativeLuminance(foreground);
+    const lumB = relativeLuminance(background);
+    const light = Math.max(lumA, lumB);
+    const dark = Math.min(lumA, lumB);
+    return (light + 0.05) / (dark + 0.05);
+  };
+
+  const getReadableTextColor = (background, candidates) => {
+    const palette = Array.isArray(candidates)
+      ? candidates
+      : ['#0F172A', '#111827', '#F8FAFC', '#F1F5F9'];
+    let best = palette[0];
+    let bestContrast = -Infinity;
+    palette.forEach((candidate) => {
+      const candidateRgb = hexToRgb(candidate);
+      if (!candidateRgb) {
+        return;
+      }
+      const contrast = contrastRatio(candidateRgb, background);
+      if (contrast > bestContrast) {
+        bestContrast = contrast;
+        best = candidateRgb.hex;
+      }
+    });
+    return best;
+  };
+
+  const alphaColor = (hex, alpha) => {
+    const rgb = hexToRgb(hex);
+    if (!rgb) {
+      return `rgba(0, 0, 0, ${clamp01(alpha)})`;
+    }
+    return toRgba(rgb, alpha);
+  };
+
+  const sanitizeThemePalette = (palette, mode) => {
+    const defaults = DEFAULT_THEME_PALETTES[mode] || DEFAULT_THEME_PALETTES.light;
+    return {
+      background: normalizeHexColor(palette?.background) || defaults.background,
+      main: normalizeHexColor(palette?.main) || defaults.main,
+      accent: normalizeHexColor(palette?.accent) || defaults.accent,
+    };
+  };
+
+  const sanitizeThemePalettes = (palettes) => {
+    const result = {};
+    AVAILABLE_MODES.forEach((mode) => {
+      result[mode] = sanitizeThemePalette(palettes?.[mode], mode);
+    });
+    return result;
+  };
+
+  const WHITE_RGB = hexToRgb('#FFFFFF');
+  const BLACK_RGB = hexToRgb('#020617');
 
   const MEASUREMENT_STORAGE_KEY = 'blissful-measurement';
   const MEASUREMENT_SYSTEMS = ['imperial', 'metric'];
@@ -1595,28 +1699,26 @@
 
   const loadThemePreferences = () => {
     const fallbackMode = resolveFallbackMode();
-    const fallback = { mode: fallbackMode, selections: { ...DEFAULT_THEME_SELECTIONS } };
+    const fallbackPalettes = sanitizeThemePalettes(DEFAULT_THEME_PALETTES);
+    const fallback = { mode: fallbackMode, palettes: fallbackPalettes };
     try {
-      const stored = JSON.parse(localStorage.getItem(THEME_STORAGE_KEY));
+      const storedRaw = localStorage.getItem(THEME_STORAGE_KEY);
+      if (!storedRaw) {
+        lastPersistedTheme = null;
+        return fallback;
+      }
+      const stored = JSON.parse(storedRaw);
       if (!stored || typeof stored !== 'object') {
+        lastPersistedTheme = null;
         return fallback;
       }
       const mode = AVAILABLE_MODES.includes(stored.mode) ? stored.mode : fallbackMode;
-      const selections = { ...DEFAULT_THEME_SELECTIONS, ...(stored.selections || {}) };
-      AVAILABLE_MODES.forEach((key) => {
-        const options = Array.isArray(THEME_OPTIONS[key]) ? THEME_OPTIONS[key] : [];
-        if (!options.length) return;
-        if (!options.some((option) => option.id === selections[key])) {
-          const fallbackSelection =
-            DEFAULT_THEME_SELECTIONS[key] || (options[0] ? options[0].id : undefined);
-          if (fallbackSelection) {
-            selections[key] = fallbackSelection;
-          }
-        }
-      });
-      return { mode, selections };
+      const palettes = sanitizeThemePalettes(stored.palettes);
+      lastPersistedTheme = JSON.stringify({ mode, palettes });
+      return { mode, palettes };
     } catch (error) {
       console.warn('Unable to read saved theme preferences.', error);
+      lastPersistedTheme = null;
       return fallback;
     }
   };
@@ -1788,22 +1890,53 @@
 
   const holidayThemePreferences = loadHolidayThemePreferences();
 
+  const SHARED_THEME_PRESETS = {
+    calm: {
+      light: DEFAULT_THEME_PALETTES.light,
+      dark: DEFAULT_THEME_PALETTES.dark,
+    },
+    sunset: {
+      light: {
+        background: '#FFF7ED',
+        main: '#F97316',
+        accent: '#EC4899',
+      },
+      dark: {
+        background: '#1C1917',
+        main: '#FB923C',
+        accent: '#F472B6',
+      },
+    },
+    forest: {
+      light: {
+        background: '#F0FDF4',
+        main: '#22C55E',
+        accent: '#0EA5E9',
+      },
+      dark: {
+        background: '#022C22',
+        main: '#34D399',
+        accent: '#FACC15',
+      },
+    },
+  };
+
   const HOLIDAY_THEME_OVERRIDES = {
-    'new-years-day': { light: 'citrine', dark: 'nebula', sepia: 'copper' },
-    'martin-luther-king-jr-day': { light: 'mist', dark: 'midnight', sepia: 'classic' },
-    'valentines-day': { light: 'blossom', dark: 'velvet', sepia: 'copper' },
-    'presidents-day': { light: 'serene', dark: 'midnight', sepia: 'classic' },
-    'st-patricks-day': { light: 'meadow', dark: 'forest', sepia: 'umber' },
-    'mothers-day': { light: 'blossom', dark: 'velvet', sepia: 'classic' },
-    'memorial-day': { light: 'sunrise', dark: 'ember', sepia: 'copper' },
-    'juneteenth': { light: 'sunrise', dark: 'ember', sepia: 'copper' },
-    'independence-day': { light: 'citrine', dark: 'nebula', sepia: 'copper' },
-    'labor-day': { light: 'meadow', dark: 'forest', sepia: 'classic' },
-    'halloween': { light: 'sunrise', dark: 'abyss', sepia: 'umber' },
-    'thanksgiving-day': { light: 'meadow', dark: 'forest', sepia: 'umber' },
-    'christmas-eve': { light: 'mist', dark: 'abyss', sepia: 'classic' },
-    'christmas-day': { light: 'mist', dark: 'abyss', sepia: 'classic' },
-    'new-years-eve': { light: 'citrine', dark: 'nebula', sepia: 'copper' },
+    'new-years-day': 'calm',
+    'martin-luther-king-jr-day': 'calm',
+    'valentines-day': 'sunset',
+    'presidents-day': 'calm',
+    'st-patricks-day': 'forest',
+    'mothers-day': 'sunset',
+    'memorial-day': 'calm',
+    'juneteenth': 'sunset',
+    'independence-day': 'calm',
+    'labor-day': 'forest',
+    halloween: 'sunset',
+    'thanksgiving-day': 'forest',
+    'christmas-eve': 'calm',
+    'christmas-day': 'calm',
+    'new-years-eve': 'calm',
   };
 
   const holidayCache = new Map();
@@ -2667,7 +2800,7 @@
     pantryInventory: sanitizePantryInventory(storedAppState.pantryInventory),
     familyMembers: sanitizedFamilyMembers,
     themeMode: themePreferences.mode,
-    themeSelections: { ...themePreferences.selections },
+    themePalettes: sanitizeThemePalettes(themePreferences.palettes),
     holidayThemesEnabled: holidayThemePreferences.enabled,
     holidayThemeAllowList: new Set(holidayThemePreferences.holidays),
     measurementSystem: measurementPreference,
@@ -4172,17 +4305,11 @@
     return state.pantryFilters;
   };
 
-  const setDocumentThemeAttributes = (mode, theme) => {
+  const setDocumentThemeAttributes = (mode) => {
     if (document.documentElement.dataset.mode !== mode) {
       document.documentElement.dataset.mode = mode;
     }
-    if (theme) {
-      if (document.documentElement.dataset.theme !== theme) {
-        document.documentElement.dataset.theme = theme;
-      }
-    } else {
-      delete document.documentElement.dataset.theme;
-    }
+    delete document.documentElement.dataset.theme;
   };
 
   const ensureHolidayThemeAllowList = () => {
@@ -4197,25 +4324,29 @@
     return list;
   };
 
-  const resolveHolidayThemeId = (holidayId, mode) => {
+  const resolveHolidayPalette = (holidayId, mode) => {
     const override = HOLIDAY_THEME_OVERRIDES[holidayId];
-    if (override) {
-      if (typeof override === 'string') {
-        return override;
-      }
+    if (!override) {
+      return null;
+    }
+    if (typeof override === 'object' && !Array.isArray(override)) {
       if (override[mode]) {
-        return override[mode];
+        return sanitizeThemePalette(override[mode], mode);
       }
       if (override.default) {
-        return override.default;
+        return sanitizeThemePalette(override.default, mode);
       }
     }
-    const fallback = DEFAULT_THEME_SELECTIONS[mode];
-    if (fallback) {
-      return fallback;
+    if (typeof override === 'string') {
+      const preset = SHARED_THEME_PRESETS[override];
+      if (preset) {
+        const palette = preset[mode] || preset.default;
+        if (palette) {
+          return sanitizeThemePalette(palette, mode);
+        }
+      }
     }
-    const options = Array.isArray(THEME_OPTIONS[mode]) ? THEME_OPTIONS[mode] : [];
-    return options.length ? options[0].id : null;
+    return null;
   };
 
   const getActiveHolidayThemeOverride = (date = new Date()) => {
@@ -4234,11 +4365,11 @@
     if (!activeHoliday) {
       return null;
     }
-    const themeId = resolveHolidayThemeId(activeHoliday.id, state.themeMode);
-    if (!themeId) {
+    const palette = resolveHolidayPalette(activeHoliday.id, state.themeMode);
+    if (!palette) {
       return null;
     }
-    return { id: activeHoliday.id, label: activeHoliday.label, theme: themeId };
+    return { id: activeHoliday.id, label: activeHoliday.label, palette };
   };
 
   const applyHolidayThemeDataset = (override) => {
@@ -4266,7 +4397,7 @@
       if (override) {
         status.hidden = false;
         status.dataset.holidayActive = 'true';
-        status.textContent = `${override.label} palette is active today.`;
+        status.textContent = `${override.label} colors are active today.`;
         return;
       }
       delete status.dataset.holidayActive;
@@ -4578,7 +4709,6 @@
     });
   };
 
-  let lastPersistedTheme = null;
   let lastPersistedMeasurement = null;
   let lastPersistedFavorites = JSON.stringify(favoriteRecipeIds);
   let lastPersistedPantryFavorites = JSON.stringify(favoritePantrySlugs);
@@ -4733,26 +4863,262 @@
     }
   };
 
-  const applyColorTheme = (shouldPersist = true) => {
-    const mode = state.themeMode;
-    const options = THEME_OPTIONS[mode] || [];
-    const fallback = DEFAULT_THEME_SELECTIONS[mode] || (options[0] ? options[0].id : undefined);
-    const currentSelection = state.themeSelections[mode];
-    const activeTheme = options.some((option) => option.id === currentSelection)
-      ? currentSelection
-      : fallback;
-    const selectionChanged = activeTheme !== currentSelection;
-    if (selectionChanged) {
-      state.themeSelections[mode] = activeTheme;
+  const getThemePaletteForMode = (mode) => {
+    const resolvedMode = AVAILABLE_MODES.includes(mode) ? mode : resolveFallbackMode();
+    if (!state.themePalettes || typeof state.themePalettes !== 'object') {
+      state.themePalettes = {};
     }
+    const existing = state.themePalettes[resolvedMode];
+    const sanitized = sanitizeThemePalette(existing, resolvedMode);
+    state.themePalettes[resolvedMode] = sanitized;
+    return sanitized;
+  };
+
+  const generateThemeTokens = (mode, palette) => {
+    const sanitized = sanitizeThemePalette(palette, mode);
+    const fallback = DEFAULT_THEME_PALETTES[mode] || DEFAULT_THEME_PALETTES.light;
+    const background = hexToRgb(sanitized.background) || hexToRgb(fallback.background);
+    const main = hexToRgb(sanitized.main) || hexToRgb(fallback.main);
+    const accent = hexToRgb(sanitized.accent) || hexToRgb(fallback.accent);
+    const white = WHITE_RGB || hexToRgb('#FFFFFF');
+    const black = BLACK_RGB || hexToRgb('#020617');
+
+    const backgroundHex = background.hex;
+    const mainHex = main.hex;
+    const accentHex = accent.hex;
+
+    const textPrimaryHex = getReadableTextColor(background, [
+      '#0F172A',
+      '#111827',
+      '#020617',
+      '#F8FAFC',
+    ]);
+    const textPrimary = hexToRgb(textPrimaryHex);
+    const textStrongHex = textPrimaryHex;
+    const textSecondaryHex = rgbToHex(
+      mixColors(textPrimary, background, mode === 'light' ? 0.35 : 0.32),
+    );
+    const textTertiaryHex = rgbToHex(
+      mixColors(textPrimary, background, mode === 'light' ? 0.55 : 0.48),
+    );
+    const textMutedColor = mixColors(textPrimary, background, mode === 'light' ? 0.45 : 0.5);
+    const textSoftColor = mixColors(textPrimary, background, mode === 'light' ? 0.6 : 0.58);
+    const textBadgeHex = rgbToHex(
+      mixColors(textPrimary, background, mode === 'light' ? 0.2 : 0.28),
+    );
+    const textInstructionHex = rgbToHex(
+      mixColors(textPrimary, background, mode === 'light' ? 0.24 : 0.3),
+    );
+
+    const surface = mixColors(background, white, mode === 'light' ? 0.9 : 0.18);
+    const surfaceElevated = mixColors(background, white, mode === 'light' ? 0.96 : 0.28);
+    const surfaceHex = rgbToHex(surface);
+    const surfaceElevatedHex = rgbToHex(surfaceElevated);
+    const layoutBackgroundHex = rgbToHex(
+      mixColors(background, white, mode === 'light' ? 0.75 : 0.22),
+    );
+    const surfaceTextHex = getReadableTextColor(surfaceElevated, [
+      '#0F172A',
+      '#111827',
+      '#F8FAFC',
+      '#F1F5F9',
+    ]);
+
+    const gradientStartHex = rgbToHex(
+      mixColors(background, white, mode === 'light' ? 0.12 : 0.2),
+    );
+    const gradientMidHex = rgbToHex(
+      mixColors(background, white, mode === 'light' ? 0.3 : 0.12),
+    );
+    const gradientEndHex = rgbToHex(
+      mixColors(background, mode === 'light' ? white : black, mode === 'light' ? 0.55 : 0.4),
+    );
+
+    const accentStrong = adjustLightness(adjustSaturation(main, 0.05), mode === 'light' ? -0.18 : -0.08);
+    const accentStrongHex = rgbToHex(accentStrong);
+    const accentSecondaryStrong = adjustLightness(adjustSaturation(accent, 0.05), mode === 'light' ? -0.16 : -0.08);
+    const accentSecondaryStrongHex = rgbToHex(accentSecondaryStrong);
+    const accentInverseHex = getReadableTextColor(accent, [
+      '#F8FAFC',
+      '#F1F5F9',
+      '#0F172A',
+      '#020617',
+    ]);
+    const accentContrastHex = getReadableTextColor(main, [
+      '#F8FAFC',
+      '#F1F5F9',
+      '#0F172A',
+      '#020617',
+    ]);
+
+    const borderColor = mixColors(main, background, mode === 'light' ? 0.45 : 0.3);
+    const borderStrongColor = mixColors(main, textPrimary, mode === 'light' ? 0.4 : 0.35);
+    const borderMutedColor = mixColors(background, white, mode === 'light' ? 0.68 : 0.35);
+
+    const headerShadowColor = mixColors(textPrimary, black, mode === 'light' ? 0.45 : 0.2);
+    const cardShadowColor = mixColors(main, black, mode === 'light' ? 0.25 : 0.55);
+    const cardShadowMutedColor = mixColors(main, black, mode === 'light' ? 0.18 : 0.48);
+    const cardShadowSoftColor = mixColors(accent, main, 0.4);
+
+    const neutral50Hex = rgbToHex(mixColors(background, textPrimary, mode === 'light' ? 0.08 : 0.16));
+    const neutral100Hex = rgbToHex(mixColors(background, textPrimary, mode === 'light' ? 0.14 : 0.22));
+    const neutral200Hex = rgbToHex(mixColors(background, textPrimary, mode === 'light' ? 0.24 : 0.28));
+    const neutral400Hex = rgbToHex(mixColors(background, textPrimary, mode === 'light' ? 0.4 : 0.42));
+    const neutral600Hex = rgbToHex(mixColors(background, textPrimary, mode === 'light' ? 0.55 : 0.55));
+
+    const codeBackgroundHex = rgbToHex(
+      mixColors(surfaceElevated, textPrimary, mode === 'light' ? 0.08 : 0.35),
+    );
+    const mealPlanSnackHex = rgbToHex(mixColors(main, accent, 0.5));
+    const mealPlanSurfaceValue = mode === 'light' ? '#FFFFFF' : toRgba(surfaceElevated, 0.92);
+
+    const inactiveBlend = mixColors(main, accent, 0.5);
+    const inactiveGradient = `linear-gradient(135deg, ${alphaColor(mainHex, mode === 'light' ? 0.65 : 0.58)}, ${alphaColor(accentHex, mode === 'light' ? 0.65 : 0.6)})`;
+    const activeGradient = `linear-gradient(135deg, ${mainHex}, ${accentHex})`;
+    const inactiveTextHex = getReadableTextColor(inactiveBlend, [
+      '#F8FAFC',
+      '#F1F5F9',
+      '#0F172A',
+    ]);
+    const activeTextHex = getReadableTextColor(inactiveBlend, [
+      '#F8FAFC',
+      '#F1F5F9',
+      '#0F172A',
+    ]);
+
+    const elevatedGradient = `linear-gradient(158deg, ${alphaColor(accentHex, mode === 'light' ? 0.16 : 0.22)}, ${surfaceElevatedHex})`;
+    const sectionGradient = `linear-gradient(155deg, ${alphaColor(mainHex, mode === 'light' ? 0.12 : 0.2)}, ${alphaColor(accentHex, mode === 'light' ? 0.16 : 0.24)})`;
+
+    return {
+      '--theme-background': backgroundHex,
+      '--theme-main': mainHex,
+      '--theme-accent': accentHex,
+      '--color-background': backgroundHex,
+      '--body-gradient-start': gradientStartHex,
+      '--body-gradient-mid': gradientMidHex,
+      '--body-gradient-end': gradientEndHex,
+      '--color-layout-background': layoutBackgroundHex,
+      '--color-header-background': toRgba(surfaceElevated, mode === 'light' ? 0.92 : 0.88),
+      '--color-header-shadow': alphaColor(rgbToHex(headerShadowColor), mode === 'light' ? 0.25 : 0.65),
+      '--color-surface': surfaceHex,
+      '--color-surface-elevated': surfaceElevatedHex,
+      '--color-surface-soft': alphaColor(mainHex, mode === 'light' ? 0.12 : 0.2),
+      '--color-surface-highlight': alphaColor(accentHex, mode === 'light' ? 0.18 : 0.26),
+      '--color-card-shadow': alphaColor(rgbToHex(cardShadowColor), mode === 'light' ? 0.24 : 0.6),
+      '--color-card-shadow-muted': alphaColor(rgbToHex(cardShadowMutedColor), mode === 'light' ? 0.18 : 0.5),
+      '--color-card-shadow-soft': alphaColor(rgbToHex(cardShadowSoftColor), mode === 'light' ? 0.2 : 0.34),
+      '--color-border': alphaColor(rgbToHex(borderColor), mode === 'light' ? 0.45 : 0.38),
+      '--color-border-strong': alphaColor(
+        rgbToHex(borderStrongColor),
+        mode === 'light' ? 0.55 : 0.6,
+      ),
+      '--color-border-muted': alphaColor(rgbToHex(borderMutedColor), mode === 'light' ? 0.68 : 0.55),
+      '--color-inline-tag-background': alphaColor(accentHex, mode === 'light' ? 0.2 : 0.26),
+      '--color-inline-tag-text': accentInverseHex,
+      '--color-code-background': codeBackgroundHex,
+      '--color-neutral-50': neutral50Hex,
+      '--color-neutral-100': neutral100Hex,
+      '--color-neutral-200': neutral200Hex,
+      '--color-neutral-400': neutral400Hex,
+      '--color-neutral-600': neutral600Hex,
+      '--color-neutral-soft': alphaColor(textPrimaryHex, mode === 'light' ? 0.08 : 0.24),
+      '--color-text-primary': textPrimaryHex,
+      '--color-text-strong': textStrongHex,
+      '--color-text-secondary': textSecondaryHex,
+      '--color-text-tertiary': textTertiaryHex,
+      '--color-text-muted': toRgba(textMutedColor, mode === 'light' ? 0.85 : 0.78),
+      '--color-text-badge': textBadgeHex,
+      '--color-text-soft': toRgba(textSoftColor, mode === 'light' ? 0.7 : 0.68),
+      '--color-text-instruction': textInstructionHex,
+      '--color-text-inline': mainHex,
+      '--color-tag-text': mainHex,
+      '--color-text-inverse': accentContrastHex,
+      '--color-gunmetal': textStrongHex,
+      '--color-text-emphasis': textPrimaryHex,
+      '--color-accent': mainHex,
+      '--color-accent-strong': accentStrongHex,
+      '--color-accent-soft': alphaColor(mainHex, mode === 'light' ? 0.18 : 0.28),
+      '--color-accent-softer': alphaColor(mainHex, mode === 'light' ? 0.12 : 0.22),
+      '--color-accent-outline': alphaColor(mainHex, mode === 'light' ? 0.3 : 0.45),
+      '--color-accent-border': alphaColor(mainHex, mode === 'light' ? 0.38 : 0.5),
+      '--color-accent-shadow': alphaColor(
+        rgbToHex(mixColors(main, black, mode === 'light' ? 0.4 : 0.35)),
+        mode === 'light' ? 0.32 : 0.45,
+      ),
+      '--color-accent-shadow-strong': alphaColor(mainHex, mode === 'light' ? 0.42 : 0.5),
+      '--color-accent-contrast': accentContrastHex,
+      '--color-accent-secondary': accentHex,
+      '--color-accent-secondary-strong': accentSecondaryStrongHex,
+      '--color-accent-secondary-soft': alphaColor(accentHex, mode === 'light' ? 0.22 : 0.32),
+      '--color-accent-secondary-outline': alphaColor(accentHex, mode === 'light' ? 0.3 : 0.45),
+      '--color-accent-secondary-contrast': accentInverseHex,
+      '--color-accent-secondary-shadow': alphaColor(
+        rgbToHex(mixColors(accent, black, mode === 'light' ? 0.35 : 0.3)),
+        mode === 'light' ? 0.32 : 0.42,
+      ),
+      '--color-burnished-copper': mainHex,
+      '--color-burnished-copper-soft': accentStrongHex,
+      '--color-burnished-copper-border': alphaColor(mainHex, mode === 'light' ? 0.25 : 0.38),
+      '--color-burnished-copper-shadow': alphaColor(
+        rgbToHex(cardShadowColor),
+        mode === 'light' ? 0.35 : 0.5,
+      ),
+      '--gradient-accent': `linear-gradient(135deg, ${mainHex}, ${accentStrongHex})`,
+      '--gradient-accent-secondary': `linear-gradient(135deg, ${accentHex}, ${accentSecondaryStrongHex})`,
+      '--gradient-burnished-copper': `linear-gradient(140deg, ${accentStrongHex}, ${mainHex})`,
+      '--meal-plan-type-meal': mainHex,
+      '--meal-plan-type-drink': accentHex,
+      '--meal-plan-type-snack': mealPlanSnackHex,
+      '--meal-plan-type-text': surfaceTextHex,
+      '--meal-plan-border': alphaColor(mainHex, mode === 'light' ? 0.24 : 0.32),
+      '--meal-plan-surface': mealPlanSurfaceValue,
+      '--view-toggle-inactive-gradient': inactiveGradient,
+      '--view-toggle-inactive-border': alphaColor(mainHex, mode === 'light' ? 0.5 : 0.45),
+      '--view-toggle-inactive-text': inactiveTextHex,
+      '--view-toggle-hover-glow': `0 0 16px ${alphaColor(accentHex, mode === 'light' ? 0.35 : 0.45)}`,
+      '--view-toggle-active-gradient': activeGradient,
+      '--view-toggle-active-text': activeTextHex,
+      '--surface-elevated-gradient': elevatedGradient,
+      '--surface-panel-gradient': elevatedGradient,
+      '--surface-section-gradient': sectionGradient,
+      '--surface-card-gradient': elevatedGradient,
+      '--color-focus-ring': alphaColor(mainHex, mode === 'light' ? 0.28 : 0.4),
+      '--color-header-foreground': surfaceTextHex,
+    };
+  };
+
+  const applyThemeTokens = (tokens) => {
+    const root = document.documentElement;
+    Object.entries(tokens).forEach(([property, value]) => {
+      root.style.setProperty(property, value);
+    });
+  };
+
+  const getSerializedThemeState = () =>
+    JSON.stringify({ mode: state.themeMode, palettes: sanitizeThemePalettes(state.themePalettes) });
+
+  const applyColorTheme = (shouldPersist = true) => {
+    const mode = AVAILABLE_MODES.includes(state.themeMode) ? state.themeMode : resolveFallbackMode();
+    if (state.themeMode !== mode) {
+      state.themeMode = mode;
+    }
+    const basePalette = getThemePaletteForMode(mode);
     const holidayOverride = getActiveHolidayThemeOverride();
-    const themeToApply = holidayOverride?.theme || activeTheme;
-    setDocumentThemeAttributes(mode, themeToApply);
+    const paletteToApply = holidayOverride?.palette
+      ? sanitizeThemePalette(holidayOverride.palette, mode)
+      : basePalette;
+    const tokens = generateThemeTokens(mode, paletteToApply);
+    applyThemeTokens(tokens);
+    setDocumentThemeAttributes(mode);
     applyHolidayThemeDataset(holidayOverride);
     renderHolidayThemeStatus();
-    if (!shouldPersist && !selectionChanged) return;
-    const serialized = JSON.stringify({ mode, selections: { ...state.themeSelections } });
-    if (serialized === lastPersistedTheme) return;
+    if (!shouldPersist) {
+      return;
+    }
+    const serialized = getSerializedThemeState();
+    if (serialized === lastPersistedTheme) {
+      return;
+    }
     try {
       localStorage.setItem(THEME_STORAGE_KEY, serialized);
       lastPersistedTheme = serialized;
@@ -4771,56 +5137,61 @@
     });
   };
 
-  const renderThemeOptions = () => {
-    if (!elements.themeOptions) return;
-    const currentMode = state.themeMode;
-    const options = THEME_OPTIONS[currentMode] || [];
-    const activeTheme = state.themeSelections[currentMode];
-    elements.themeOptions.innerHTML = '';
-    options.forEach((option) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'theme-option';
-      button.style.setProperty('--theme-preview-color', option.preview);
-      const isActive = option.id === activeTheme;
-      if (isActive) {
-        button.classList.add('theme-option--active');
-        button.setAttribute('aria-pressed', 'true');
-      } else {
-        button.setAttribute('aria-pressed', 'false');
+  const renderThemePaletteControls = () => {
+    if (!elements.themePaletteControls) {
+      return;
+    }
+    const palette = getThemePaletteForMode(state.themeMode);
+    const assignValue = (input) => {
+      if (!(input instanceof HTMLInputElement)) {
+        return;
       }
-      button.dataset.themeOption = option.id;
-      button.textContent = option.label;
-      button.addEventListener('click', () => {
-        if (state.themeSelections[currentMode] === option.id) return;
-        state.themeSelections[currentMode] = option.id;
-        applyColorTheme();
-        renderThemeOptions();
-      });
-      elements.themeOptions.appendChild(button);
-    });
+      const role = input.dataset.colorRole;
+      if (!role || !(role in palette)) {
+        return;
+      }
+      if (input.type === 'color') {
+        input.value = palette[role];
+      } else {
+        input.value = palette[role];
+      }
+    };
+    if (Array.isArray(elements.themePaletteColorInputs)) {
+      elements.themePaletteColorInputs.forEach(assignValue);
+    }
+    if (Array.isArray(elements.themePaletteTextInputs)) {
+      elements.themePaletteTextInputs.forEach(assignValue);
+    }
+  };
+
+  const updateThemePaletteValue = (role, value) => {
+    if (!role) {
+      return false;
+    }
+    const normalized = normalizeHexColor(value);
+    if (!normalized) {
+      return false;
+    }
+    const current = getThemePaletteForMode(state.themeMode);
+    if (current[role] === normalized) {
+      return false;
+    }
+    state.themePalettes[state.themeMode] = { ...current, [role]: normalized };
+    return true;
   };
 
   const setThemeMode = (mode) => {
-    const options = Array.isArray(THEME_OPTIONS[mode]) ? THEME_OPTIONS[mode] : [];
-    if (!options.length || state.themeMode === mode) return;
+    if (!AVAILABLE_MODES.includes(mode) || state.themeMode === mode) return;
     state.themeMode = mode;
-    if (!options.some((option) => option.id === state.themeSelections[mode])) {
-      const fallbackSelection =
-        DEFAULT_THEME_SELECTIONS[mode] || (options[0] ? options[0].id : undefined);
-      if (fallbackSelection) {
-        state.themeSelections[mode] = fallbackSelection;
-      }
-    }
+    renderThemePaletteControls();
     applyColorTheme();
     updateModeButtons();
-    renderThemeOptions();
   };
 
   const initThemeControls = () => {
-    applyColorTheme();
+    renderThemePaletteControls();
+    applyColorTheme(false);
     updateModeButtons();
-    renderThemeOptions();
     updateHolidayThemeToggle();
   };
 
@@ -5262,7 +5633,13 @@
     elements.tagOptions = document.getElementById('tag-options');
     elements.allergyOptions = document.getElementById('allergy-options');
     elements.equipmentOptions = document.getElementById('equipment-options');
-    elements.themeOptions = document.getElementById('theme-options');
+    elements.themePaletteControls = document.getElementById('theme-palette');
+    elements.themePaletteColorInputs = Array.from(
+      document.querySelectorAll('#theme-palette .theme-color-control__picker'),
+    );
+    elements.themePaletteTextInputs = Array.from(
+      document.querySelectorAll('#theme-palette .theme-color-control__value'),
+    );
     elements.holidayThemeToggle = document.getElementById('holiday-theme-toggle');
     elements.holidayThemeSettings = document.getElementById('holiday-theme-settings');
     elements.holidayThemeStatus = document.getElementById('holiday-theme-status');
@@ -8155,6 +8532,46 @@
           if (mode) {
             setThemeMode(mode);
           }
+        });
+      });
+    }
+
+    if (Array.isArray(elements.themePaletteColorInputs)) {
+      elements.themePaletteColorInputs.forEach((input) => {
+        input.addEventListener('input', (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLInputElement)) {
+            return;
+          }
+          const role = target.dataset.colorRole;
+          if (!role) {
+            return;
+          }
+          const changed = updateThemePaletteValue(role, target.value);
+          if (changed) {
+            applyColorTheme();
+          }
+          renderThemePaletteControls();
+        });
+      });
+    }
+
+    if (Array.isArray(elements.themePaletteTextInputs)) {
+      elements.themePaletteTextInputs.forEach((input) => {
+        input.addEventListener('change', (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLInputElement)) {
+            return;
+          }
+          const role = target.dataset.colorRole;
+          if (!role) {
+            return;
+          }
+          const changed = updateThemePaletteValue(role, target.value);
+          if (changed) {
+            applyColorTheme();
+          }
+          renderThemePaletteControls();
         });
       });
     }
