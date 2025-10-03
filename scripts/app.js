@@ -1433,7 +1433,7 @@
   const MEAL_PLAN_STORAGE_KEY = 'blissful-meal-plan';
   const MEAL_PLAN_VIEW_MODES = ['day', 'week', 'month'];
   const DEFAULT_MEAL_PLAN_MODE = 'month';
-  const AVAILABLE_VIEWS = ['meals', 'pantry', 'meal-plan'];
+  const AVAILABLE_VIEWS = ['meals', 'kitchen', 'pantry', 'meal-plan'];
   const MEAL_PLAN_ENTRY_TYPES = [
     { value: 'meal', label: 'Meal' },
     { value: 'drink', label: 'Drink' },
@@ -2041,6 +2041,10 @@
     allergens: [],
   });
 
+  const getDefaultKitchenFilters = () => ({
+    search: '',
+  });
+
   const toUniqueStringArray = (value) => {
     if (!Array.isArray(value)) {
       return [];
@@ -2254,6 +2258,16 @@
       categories: toUniqueStringArray(value.categories),
       tags: toUniqueStringArray(value.tags),
       allergens: toUniqueStringArray(value.allergens),
+    };
+  };
+
+  const sanitizeKitchenFilters = (value) => {
+    const defaults = getDefaultKitchenFilters();
+    if (!value || typeof value !== 'object') {
+      return defaults;
+    }
+    return {
+      search: typeof value.search === 'string' ? value.search : defaults.search,
     };
   };
 
@@ -2570,6 +2584,7 @@
       activeView: 'meals',
       mealFilters: getDefaultMealFilters(),
       pantryFilters: getDefaultPantryFilters(),
+      kitchenFilters: getDefaultKitchenFilters(),
       mealPlanViewMode: DEFAULT_MEAL_PLAN_MODE,
       mealPlanSelectedDate: getTodayIsoDate(),
       mealPlanMemberFilter: [],
@@ -2591,6 +2606,9 @@
       }
       if (stored.pantryFilters) {
         result.pantryFilters = sanitizePantryFilters(stored.pantryFilters);
+      }
+      if (stored.kitchenFilters) {
+        result.kitchenFilters = sanitizeKitchenFilters(stored.kitchenFilters);
       }
       if (MEAL_PLAN_VIEW_MODES.includes(stored.mealPlanViewMode)) {
         result.mealPlanViewMode = stored.mealPlanViewMode;
@@ -2631,6 +2649,7 @@
     activeView: storedAppState.activeView,
     mealFilters: sanitizeMealFilters(storedAppState.mealFilters, sanitizedFamilyMembers),
     pantryFilters: sanitizePantryFilters(storedAppState.pantryFilters),
+    kitchenFilters: sanitizeKitchenFilters(storedAppState.kitchenFilters),
     mealPlanViewMode: storedAppState.mealPlanViewMode,
     mealPlanSelectedDate: storedAppState.mealPlanSelectedDate,
     mealPlanMemberFilter: sanitizeMealPlanMemberFilter(
@@ -2661,6 +2680,36 @@
       recipes.flatMap((recipe) => Array.isArray(recipe.equipment) ? recipe.equipment : []),
     ),
   ).sort((a, b) => a.localeCompare(b));
+
+  const equipmentEntries = new Map();
+  recipes.forEach((recipe) => {
+    const recipeEquipment = Array.isArray(recipe.equipment) ? recipe.equipment : [];
+    recipeEquipment.forEach((raw) => {
+      const normalized = String(raw || '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (!normalized) {
+        return;
+      }
+      const key = normalized.toLowerCase();
+      const displayName = toTitleCase(normalized);
+      const entry = equipmentEntries.get(key);
+      if (entry) {
+        entry.count += 1;
+      } else {
+        equipmentEntries.set(key, {
+          id: slugify(normalized),
+          name: displayName,
+          count: 1,
+          searchText: `${displayName.toLowerCase()} ${slugify(normalized).replace(/-/g, ' ')}`,
+        });
+      }
+    });
+  });
+
+  const kitchenItems = Array.from(equipmentEntries.values()).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
 
   const TAG_SYNONYM_DEFINITIONS = [
     { canonical: 'Autumn / Fall', tags: ['Autumn', 'Fall'] },
@@ -3306,11 +3355,13 @@
       tags: new Map(),
       allergens: new Map(),
     },
+    kitchen: {},
   };
 
   const tagGroupSummaryRegistry = {
     meals: [],
     pantry: [],
+    kitchen: [],
   };
 
   const elements = {};
@@ -4068,6 +4119,27 @@
   };
   let configuredFilterView = null;
 
+  let primaryNavExpanded = false;
+
+  const setPrimaryNavExpanded = (expanded) => {
+    primaryNavExpanded = Boolean(expanded);
+    if (elements.primaryNav) {
+      elements.primaryNav.classList.toggle('nav-chip--open', primaryNavExpanded);
+    }
+    if (elements.primaryNavToggle) {
+      elements.primaryNavToggle.setAttribute('aria-expanded', primaryNavExpanded ? 'true' : 'false');
+      elements.primaryNavToggle.classList.toggle('nav-chip__toggle--active', primaryNavExpanded);
+    }
+  };
+
+  const closePrimaryNav = () => {
+    setPrimaryNavExpanded(false);
+  };
+
+  const togglePrimaryNav = () => {
+    setPrimaryNavExpanded(!primaryNavExpanded);
+  };
+
   const ensureMealFilters = () => {
     const current = state.mealFilters;
     const sanitized = sanitizeMealFilters(current, state.familyMembers);
@@ -4079,8 +4151,26 @@
     return current;
   };
 
-  const getActiveFilters = () =>
-    state.activeView === 'meals' ? ensureMealFilters() : state.pantryFilters;
+  const ensureKitchenFilters = () => {
+    const current = state.kitchenFilters;
+    const sanitized = sanitizeKitchenFilters(current);
+    if (!current || typeof current !== 'object') {
+      state.kitchenFilters = sanitized;
+      return state.kitchenFilters;
+    }
+    Object.assign(current, sanitized);
+    return current;
+  };
+
+  const getActiveFilters = () => {
+    if (state.activeView === 'meals') {
+      return ensureMealFilters();
+    }
+    if (state.activeView === 'kitchen') {
+      return ensureKitchenFilters();
+    }
+    return state.pantryFilters;
+  };
 
   const setDocumentThemeAttributes = (mode, theme) => {
     if (document.documentElement.dataset.mode !== mode) {
@@ -4524,6 +4614,7 @@
         tags: toUniqueStringArray(pantryFilters.tags),
         allergens: toUniqueStringArray(pantryFilters.allergens),
       },
+      kitchenFilters: sanitizeKitchenFilters(state.kitchenFilters),
       mealPlanViewMode: MEAL_PLAN_VIEW_MODES.includes(state.mealPlanViewMode)
         ? state.mealPlanViewMode
         : DEFAULT_MEAL_PLAN_MODE,
@@ -5125,9 +5216,12 @@
 
   const cacheElements = () => {
     elements.viewToggleButtons = Array.from(document.querySelectorAll('[data-view-target]'));
+    elements.primaryNav = document.getElementById('primary-nav');
+    elements.primaryNavToggle = document.getElementById('primary-nav-toggle');
     elements.appLayout = document.getElementById('app-layout');
     elements.filterPanel = document.getElementById('filter-panel');
     elements.mealView = document.getElementById('meal-view');
+    elements.kitchenView = document.getElementById('kitchen-view');
     elements.pantryView = document.getElementById('pantry-view');
     elements.mealPlanView = document.getElementById('meal-plan-view');
     elements.mealPlanCalendar = document.getElementById('meal-plan-calendar');
@@ -5146,6 +5240,8 @@
     elements.mealPlanPrevButton = document.getElementById('meal-plan-prev');
     elements.mealPlanNextButton = document.getElementById('meal-plan-next');
     elements.mealGrid = document.getElementById('meal-grid');
+    elements.kitchenGrid = document.getElementById('kitchen-grid');
+    elements.kitchenCount = document.getElementById('kitchen-count');
     elements.pantryGrid = document.getElementById('pantry-grid');
     elements.pantryCount = document.getElementById('pantry-count');
     elements.filterSearch = document.getElementById('filter-search');
@@ -5665,6 +5761,8 @@
     }
     configuredFilterView = view;
     const isMealsView = view === 'meals';
+    const isKitchenView = view === 'kitchen';
+    const isPantryView = view === 'pantry';
     if (elements.pantryOnlyToggle) {
       if (isMealsView) {
         elements.pantryOnlyToggle.hidden = false;
@@ -5690,22 +5788,38 @@
     if (elements.filterSearch) {
       const searchPlaceholder = isMealsView
         ? 'Search by name, description, or tag'
-        : 'Search by ingredient name, slug, or tag';
+        : isKitchenView
+          ? 'Search equipment by name'
+          : 'Search by ingredient name, slug, or tag';
+      const searchLabel = isMealsView
+        ? 'Search recipes'
+        : isKitchenView
+          ? 'Search kitchen equipment'
+          : 'Search pantry';
       elements.filterSearch.placeholder = searchPlaceholder;
-      elements.filterSearch.setAttribute(
-        'aria-label',
-        isMealsView ? 'Search recipes' : 'Search pantry',
-      );
+      elements.filterSearch.setAttribute('aria-label', searchLabel);
     }
 
     if (elements.ingredientSummary) {
-      elements.ingredientSummary.textContent = isMealsView ? 'Ingredients' : 'Categories';
+      if (isMealsView) {
+        elements.ingredientSummary.textContent = 'Ingredients';
+      } else if (isPantryView) {
+        elements.ingredientSummary.textContent = 'Categories';
+      } else {
+        elements.ingredientSummary.textContent = '';
+      }
     }
     if (elements.tagSummary) {
-      elements.tagSummary.textContent = 'Tags';
+      elements.tagSummary.textContent = isKitchenView ? '' : 'Tags';
     }
     if (elements.allergySummary) {
-      elements.allergySummary.textContent = isMealsView ? 'Allergies to Avoid' : 'Allergen Tags';
+      if (isMealsView) {
+        elements.allergySummary.textContent = 'Allergies to Avoid';
+      } else if (isPantryView) {
+        elements.allergySummary.textContent = 'Allergen Tags';
+      } else {
+        elements.allergySummary.textContent = '';
+      }
     }
     if (elements.equipmentSummary) {
       elements.equipmentSummary.textContent = isMealsView ? 'Equipment' : '';
@@ -5713,6 +5827,16 @@
 
     if (elements.equipmentSection) {
       elements.equipmentSection.hidden = !isMealsView;
+    }
+
+    if (elements.ingredientSection) {
+      elements.ingredientSection.hidden = !isMealsView && !isPantryView;
+    }
+    if (elements.tagSection) {
+      elements.tagSection.hidden = !isMealsView && !isPantryView;
+    }
+    if (elements.allergySection) {
+      elements.allergySection.hidden = !isMealsView && !isPantryView;
     }
 
     if (elements.favoriteFilterToggle) {
@@ -5734,7 +5858,7 @@
         labelFormatter: formatAllergenLabel,
       });
       populateCheckboxGroup('meals', elements.equipmentOptions, equipmentOptions, 'equipment');
-    } else {
+    } else if (isPantryView) {
       if (elements.ingredientOptions) {
         elements.ingredientOptions.classList.remove('ingredient-groups');
         elements.ingredientOptions.classList.add('checkbox-grid');
@@ -5755,6 +5879,20 @@
       );
       if (elements.equipmentOptions) {
         elements.equipmentOptions.innerHTML = '';
+      }
+    } else {
+      if (elements.ingredientOptions) {
+        elements.ingredientOptions.innerHTML = '';
+        elements.ingredientOptions.classList.remove('ingredient-groups');
+        elements.ingredientOptions.classList.remove('checkbox-grid');
+      }
+      if (elements.tagOptions) {
+        elements.tagOptions.innerHTML = '';
+        elements.tagOptions.classList.remove('tag-groups');
+        elements.tagOptions.classList.remove('checkbox-grid');
+      }
+      if (elements.allergyOptions) {
+        elements.allergyOptions.innerHTML = '';
       }
     }
 
@@ -7542,6 +7680,30 @@
     return card;
   };
 
+  const createKitchenCard = (item) => {
+    const card = document.createElement('article');
+    card.className = 'pantry-card kitchen-card';
+
+    const header = document.createElement('header');
+    header.className = 'pantry-card__header';
+
+    const title = document.createElement('h3');
+    title.className = 'pantry-card__name';
+    title.textContent = item.name;
+    header.appendChild(title);
+
+    card.appendChild(header);
+
+    const usage = document.createElement('p');
+    usage.className = 'kitchen-card__usage';
+    const count = Number(item.count) || 0;
+    usage.textContent =
+      count === 1 ? 'Used in 1 recipe' : `Used in ${count.toLocaleString()} recipes`;
+    card.appendChild(usage);
+
+    return card;
+  };
+
   const renderMeals = () => {
     if (!elements.mealGrid) {
       return;
@@ -7571,6 +7733,67 @@
       empty.appendChild(paragraph);
       elements.mealGrid.appendChild(empty);
     }
+  };
+
+  const renderKitchen = () => {
+    if (!elements.kitchenGrid || !elements.kitchenCount) {
+      return;
+    }
+    const filters = ensureKitchenFilters();
+    const query = filters.search.trim().toLowerCase();
+    const filteredItems = kitchenItems.filter((item) => {
+      if (!query) {
+        return true;
+      }
+      return item.searchText.includes(query);
+    });
+
+    elements.kitchenCount.textContent = filteredItems.length;
+    elements.kitchenGrid.innerHTML = '';
+
+    if (!filteredItems.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      const heading = document.createElement('h3');
+      heading.textContent = 'No kitchen tools found';
+      const paragraph = document.createElement('p');
+      paragraph.textContent = 'Try refining your search or explore recipes for more equipment ideas.';
+      empty.appendChild(heading);
+      empty.appendChild(paragraph);
+      elements.kitchenGrid.appendChild(empty);
+      return;
+    }
+
+    const groups = [];
+    filteredItems.forEach((item) => {
+      const initial = item.name.charAt(0).toUpperCase();
+      const label = initial && /[A-Z]/.test(initial) ? initial : '#';
+      const previous = groups[groups.length - 1];
+      if (!previous || previous.label !== label) {
+        groups.push({ label, items: [item] });
+      } else {
+        previous.items.push(item);
+      }
+    });
+
+    groups.forEach((group) => {
+      const section = document.createElement('section');
+      section.className = 'pantry-category';
+
+      const heading = document.createElement('h3');
+      heading.className = 'pantry-category__title';
+      heading.textContent = group.label === '#' ? 'Other' : group.label;
+      section.appendChild(heading);
+
+      const list = document.createElement('div');
+      list.className = 'pantry-category__list';
+      group.items.forEach((item) => {
+        list.appendChild(createKitchenCard(item));
+      });
+      section.appendChild(list);
+
+      elements.kitchenGrid.appendChild(section);
+    });
   };
 
   const renderPantry = () => {
@@ -7658,6 +7881,9 @@
     if (elements.mealView) {
       elements.mealView.hidden = state.activeView !== 'meals';
     }
+    if (elements.kitchenView) {
+      elements.kitchenView.hidden = state.activeView !== 'kitchen';
+    }
     if (elements.pantryView) {
       elements.pantryView.hidden = state.activeView !== 'pantry';
     }
@@ -7678,6 +7904,7 @@
         elements.filterPanel.removeAttribute('aria-hidden');
       }
     }
+    closePrimaryNav();
     scheduleMealPlanLayoutUpdate();
   };
 
@@ -7686,6 +7913,8 @@
     configureFilterPanel();
     if (state.activeView === 'meals') {
       renderMeals();
+    } else if (state.activeView === 'kitchen') {
+      renderKitchen();
     } else if (state.activeView === 'pantry') {
       renderPantry();
     } else {
@@ -7703,8 +7932,35 @@
           state.activeView = target;
           configuredFilterView = null;
           renderApp();
+          closePrimaryNav();
         }
       });
+    });
+
+    if (elements.primaryNavToggle) {
+      elements.primaryNavToggle.addEventListener('click', () => {
+        togglePrimaryNav();
+      });
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closePrimaryNav();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!primaryNavExpanded) {
+        return;
+      }
+      const target = event.target;
+      if (
+        (elements.primaryNav && elements.primaryNav.contains(target))
+        || (elements.primaryNavToggle && elements.primaryNavToggle.contains(target))
+      ) {
+        return;
+      }
+      closePrimaryNav();
     });
 
     if (Array.isArray(elements.mealPlanModeButtons)) {
@@ -7764,8 +8020,10 @@
       elements.resetButton.addEventListener('click', () => {
         if (state.activeView === 'meals') {
           state.mealFilters = getDefaultMealFilters();
-        } else {
+        } else if (state.activeView === 'pantry') {
           state.pantryFilters = getDefaultPantryFilters();
+        } else if (state.activeView === 'kitchen') {
+          state.kitchenFilters = getDefaultKitchenFilters();
         }
         renderApp();
       });
@@ -7800,6 +8058,7 @@
 
     if (elements.familyButton) {
       elements.familyButton.addEventListener('click', () => {
+        closePrimaryNav();
         if (elements.familyPanel?.dataset.open === 'true') {
           closeFamilyPanel();
         } else {
