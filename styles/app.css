@@ -26,13 +26,16 @@
   --color-layout-background: #e2e8f0;
 
   --theme-background: #f5f8ff;
-  --theme-main: #3b82f6;
-  --theme-accent: #22d3ee;
+  --theme-primary: #3b82f6;
+  --theme-accent-1: #22d3ee;
+  --theme-accent-2: #f97316;
+  --theme-main: var(--theme-primary);
+  --theme-accent: var(--theme-accent-1);
 
   --color-surface: #ffffff;
   --color-surface-elevated: #ffffff;
   --color-surface-soft: rgba(59, 130, 246, 0.08);
-  --color-surface-highlight: rgba(34, 211, 238, 0.18);
+  --color-surface-highlight: rgba(59, 130, 246, 0.14);
   --color-header-background: rgba(255, 255, 255, 0.92);
 
   --color-header-shadow: rgba(15, 23, 42, 0.25);
@@ -44,8 +47,8 @@
   --color-border-strong: rgba(71, 85, 105, 0.5);
   --color-border-muted: rgba(203, 213, 225, 0.65);
   --color-code-background: #e2e8f0;
-  --color-inline-tag-background: rgba(148, 163, 184, 0.3);
-  --color-inline-tag-text: #1f2937;
+  --color-inline-tag-background: rgba(34, 211, 238, 0.18);
+  --color-inline-tag-text: #0f172a;
 
   --color-neutral-50: #eef2ff;
   --color-neutral-100: #e0e7ff;
@@ -54,74 +57,119 @@
   --color-neutral-600: #4f46e5;
   --color-neutral-soft: rgba(15, 23, 42, 0.08);
 
-  --color-accent: #3b82f6;
-  --color-accent-strong: #1d4ed8;
-  --color-accent-soft: rgba(59, 130, 246, 0.18);
-  --color-accent-softer: rgba(59, 130, 246, 0.12);
-  --color-accent-outline: rgba(59, 130, 246, 0.24);
-  --color-accent-border: rgba(59, 130, 246, 0.35);
-  --color-accent-shadow: rgba(15, 23, 42, 0.24);
-  --color-accent-shadow-strong: rgba(59, 130, 246, 0.38);
-  --color-accent-contrast: #f8fafc;
+  --color-primary: #3b82f6;
+  --color-primary-strong: #1d4ed8;
+  --color-primary-soft: rgba(59, 130, 246, 0.18);
+  --color-primary-softer: rgba(59, 130, 246, 0.12);
+  --color-primary-outline: rgba(59, 130, 246, 0.24);
+  --color-primary-border: rgba(59, 130, 246, 0.35);
+  --color-primary-shadow: rgba(15, 23, 42, 0.24);
+  --color-primary-shadow-strong: rgba(59, 130, 246, 0.38);
+  --color-primary-contrast: #f8fafc;
 
-  --color-accent-secondary: #22d3ee;
-  --color-accent-secondary-strong: #0ea5e9;
-  --color-accent-secondary-soft: rgba(34, 211, 238, 0.2);
-  --color-accent-secondary-outline: rgba(34, 211, 238, 0.3);
-  --color-accent-secondary-contrast: #083344;
-  --color-accent-secondary-shadow: rgba(8, 145, 178, 0.28);
+  --color-accent-1: #22d3ee;
+  --color-accent-1-strong: #0ea5e9;
+  --color-accent-1-soft: rgba(34, 211, 238, 0.2);
+  --color-accent-1-softer: rgba(34, 211, 238, 0.12);
+  --color-accent-1-outline: rgba(34, 211, 238, 0.3);
+  --color-accent-1-border: rgba(34, 211, 238, 0.4);
+  --color-accent-1-shadow: rgba(8, 145, 178, 0.28);
+  --color-accent-1-contrast: #083344;
 
-  --gradient-accent: linear-gradient(135deg, var(--color-accent), var(--color-accent-strong));
+  --color-accent-2: #f97316;
+  --color-accent-2-strong: #ea580c;
+  --color-accent-2-soft: rgba(249, 115, 22, 0.2);
+  --color-accent-2-softer: rgba(249, 115, 22, 0.12);
+  --color-accent-2-outline: rgba(249, 115, 22, 0.3);
+  --color-accent-2-border: rgba(249, 115, 22, 0.4);
+  --color-accent-2-shadow: rgba(155, 65, 8, 0.35);
+  --color-accent-2-contrast: #fff7ed;
+
+  --color-accent: var(--color-primary);
+  --color-accent-strong: var(--color-primary-strong);
+  --color-accent-soft: var(--color-primary-soft);
+  --color-accent-softer: var(--color-primary-softer);
+  --color-accent-outline: var(--color-primary-outline);
+  --color-accent-border: var(--color-primary-border);
+  --color-accent-shadow: var(--color-primary-shadow);
+  --color-accent-shadow-strong: var(--color-primary-shadow-strong);
+  --color-accent-contrast: var(--color-primary-contrast);
+
+  --color-accent-secondary: var(--color-accent-1);
+  --color-accent-secondary-strong: var(--color-accent-1-strong);
+  --color-accent-secondary-soft: var(--color-accent-1-soft);
+  --color-accent-secondary-outline: var(--color-accent-1-outline);
+  --color-accent-secondary-contrast: var(--color-accent-1-contrast);
+  --color-accent-secondary-shadow: var(--color-accent-1-shadow);
+
+  --color-accent-tertiary: var(--color-accent-2);
+  --color-accent-tertiary-strong: var(--color-accent-2-strong);
+  --color-accent-tertiary-soft: var(--color-accent-2-soft);
+  --color-accent-tertiary-outline: var(--color-accent-2-outline);
+  --color-accent-tertiary-contrast: var(--color-accent-2-contrast);
+  --color-accent-tertiary-shadow: var(--color-accent-2-shadow);
+
+  --gradient-primary: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
+  --gradient-accent: var(--gradient-primary);
   --gradient-accent-secondary: linear-gradient(
     135deg,
     var(--color-accent-secondary),
     var(--color-accent-secondary-strong)
   );
+  --gradient-accent-tertiary: linear-gradient(
+    135deg,
+    var(--color-accent-tertiary),
+    var(--color-accent-tertiary-strong)
+  );
 
-  --color-burnished-copper: var(--color-accent);
-  --color-burnished-copper-soft: var(--color-accent-strong);
+  --color-burnished-copper: var(--color-primary);
+  --color-burnished-copper-soft: var(--color-primary-strong);
   --gradient-burnished-copper: linear-gradient(
     140deg,
-    var(--color-accent-strong),
-    var(--color-accent)
+    var(--color-primary-strong),
+    var(--color-primary)
   );
   --color-burnished-copper-border: rgba(59, 130, 246, 0.25);
   --color-burnished-copper-shadow: rgba(15, 23, 42, 0.35);
 
-  --meal-plan-type-meal: var(--color-accent);
+  --meal-plan-type-meal: var(--color-primary);
   --meal-plan-type-drink: var(--color-accent-secondary);
-  --meal-plan-type-snack: #10b981;
+  --meal-plan-type-snack: var(--color-accent-tertiary);
   --meal-plan-type-text: var(--color-text-inverse);
   --meal-plan-border: rgba(59, 130, 246, 0.2);
   --meal-plan-surface: #ffffff;
 
   --view-toggle-inactive-gradient: linear-gradient(
     135deg,
-    rgba(59, 130, 246, 0.65),
-    rgba(22, 163, 74, 0.65)
+    rgba(34, 211, 238, 0.55),
+    rgba(249, 115, 22, 0.55)
   );
-  --view-toggle-inactive-border: rgba(59, 130, 246, 0.5);
-  --view-toggle-inactive-text: #f0f9ff;
-  --view-toggle-hover-glow: 0 0 16px rgba(34, 211, 238, 0.35);
+  --view-toggle-inactive-border: rgba(34, 211, 238, 0.45);
+  --view-toggle-inactive-text: #0b1120;
+  --view-toggle-hover-glow: 0 0 16px rgba(183, 109, 130, 0.35);
   --view-toggle-active-gradient: linear-gradient(
     135deg,
-    var(--color-accent),
-    var(--color-accent-secondary)
+    var(--color-accent-secondary),
+    var(--color-accent-tertiary)
   );
-  --view-toggle-active-text: var(--color-text-inverse);
+  --view-toggle-active-text: var(--color-accent-secondary-contrast);
 
   --surface-elevated-gradient: linear-gradient(
     158deg,
-    rgba(34, 211, 238, 0.16),
+    rgba(59, 130, 246, 0.16),
     var(--color-surface-elevated)
   );
   --surface-panel-gradient: var(--surface-elevated-gradient);
   --surface-section-gradient: linear-gradient(
     155deg,
     rgba(59, 130, 246, 0.12),
-    var(--color-surface-soft)
+    rgba(59, 130, 246, 0.05)
   );
-  --surface-card-gradient: var(--surface-elevated-gradient);
+  --surface-card-gradient: linear-gradient(
+    160deg,
+    rgba(59, 130, 246, 0.16),
+    rgba(59, 130, 246, 0.04)
+  );
 
   --color-danger: #ef4444;
   --color-danger-soft: rgba(239, 68, 68, 0.16);
@@ -312,20 +360,24 @@ select {
   color: var(--view-toggle-active-text, var(--color-accent-contrast));
 }
 
+
 .nav-chip .family-button {
   font-weight: 600;
+  color: var(--color-accent-tertiary-strong, var(--color-accent-secondary));
 }
 
 .family-button {
   border: none;
   background: transparent;
-  color: inherit;
+  color: var(--color-accent-tertiary, currentColor);
   cursor: pointer;
+  transition: color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .family-button:hover,
 .family-button:focus-visible {
   outline: none;
+  color: var(--color-accent-tertiary-strong, var(--color-accent-tertiary));
 }
 
 @media (max-width: 62.5rem) {
@@ -345,8 +397,7 @@ select {
 }
 
 .family-button:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  box-shadow: 0 0 0 3px var(--color-accent-tertiary-outline, var(--color-focus-ring));
 }
 
 .menu-column .view-toggle {
@@ -741,24 +792,20 @@ select {
   flex-direction: column;
   gap: 1.4rem;
   padding: 1.5rem;
-  background: var(--view-toggle-inactive-gradient);
-  border-color: rgba(244, 247, 229, 0.35);
+  background: var(--surface-panel-gradient);
+  border-color: var(--color-accent-outline, var(--color-border-muted));
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-  color: var(--view-toggle-inactive-text, #f4f7e5);
-  --color-text-emphasis: var(--view-toggle-inactive-text, #f4f7e5);
-  --color-text-tertiary: rgba(244, 247, 229, 0.78);
-  --color-text-muted: rgba(244, 247, 229, 0.75);
-  --color-text-soft: rgba(244, 247, 229, 0.65);
-  --color-text-badge: rgba(244, 247, 229, 0.92);
-  --color-inline-tag-text: rgba(244, 247, 229, 0.9);
-  --color-accent-outline: rgba(244, 247, 229, 0.28);
-  --color-border-muted: rgba(244, 247, 229, 0.22);
-  --color-accent-border: rgba(244, 247, 229, 0.42);
-  --surface-section-gradient: var(--color-background);
-  --filter-section-background: var(--color-background);
-  --filter-section-border: var(--color-accent-border, rgba(244, 247, 229, 0.45));
-  --filter-section-shadow: rgba(20, 33, 61, 0.24);
+  color: var(--color-text-emphasis);
+  --color-text-emphasis: var(--color-text-strong);
+  --color-text-tertiary: var(--color-text-tertiary);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-soft: var(--color-text-soft);
+  --color-text-badge: var(--color-text-badge);
+  --color-inline-tag-text: var(--color-inline-tag-text);
+  --filter-section-background: var(--surface-section-gradient);
+  --filter-section-border: var(--color-border);
+  --filter-section-shadow: var(--color-card-shadow-soft);
 }
 
 .pantry-view,
@@ -1446,8 +1493,8 @@ textarea:focus {
 }
 
 .meal-card {
-  background: var(--view-toggle-inactive-gradient);
-  border: 1px solid rgba(244, 247, 229, 0.32);
+  background: var(--surface-section-gradient);
+  border: 1px solid var(--color-accent-outline, var(--color-border-muted));
   border-radius: 18px;
   box-shadow: 0 24px 48px -28px var(--color-card-shadow-soft);
   display: flex;
@@ -1455,17 +1502,17 @@ textarea:focus {
   gap: 1.2rem;
   padding: 1.4rem 1.6rem;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
-  color: var(--view-toggle-inactive-text, #f4f7e5);
-  --color-text-emphasis: var(--view-toggle-inactive-text, #f4f7e5);
-  --color-text-muted: rgba(244, 247, 229, 0.78);
-  --color-text-soft: rgba(244, 247, 229, 0.65);
-  --color-text-badge: rgba(244, 247, 229, 0.92);
-  --color-text-instruction: rgba(244, 247, 229, 0.88);
-  --color-border-muted: rgba(244, 247, 229, 0.25);
-  --meal-section-background: var(--gradient-burnished-copper);
-  --meal-section-border: var(--color-burnished-copper-border);
-  --meal-section-shadow-color: var(--color-burnished-copper-shadow);
-  --serving-control-color: var(--color-accent-contrast, #ffffff);
+  color: var(--color-text-emphasis);
+  --color-text-emphasis: var(--color-text-strong);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-soft: var(--color-text-soft);
+  --color-text-badge: var(--color-text-badge);
+  --color-text-instruction: var(--color-text-instruction);
+  --color-border-muted: var(--color-border-muted);
+  --meal-section-background: var(--surface-card-gradient);
+  --meal-section-border: var(--color-border);
+  --meal-section-shadow-color: var(--color-card-shadow-soft);
+  --serving-control-color: var(--color-primary-contrast, #ffffff);
 }
 
 .meal-card:hover {
