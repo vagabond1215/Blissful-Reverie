@@ -38,7 +38,12 @@
           <button type="button" class="view-toggle__button" data-view-target="meal-plan">
             Meal Plan
           </button>
-          <button type="button" class="view-toggle__button family-button" id="family-button">
+          <button
+            type="button"
+            class="view-toggle__button"
+            data-view-target="family"
+            id="family-button"
+          >
             Family
           </button>
         </div>
@@ -339,14 +344,18 @@
           <header class="pantry-view__header">
             <div>
               <h2>Kitchen</h2>
-              <p>Keep track of cookware, appliances, and tools available in your kitchen.</p>
+              <p>Mark the equipment you have on hand to plan recipes with confidence.</p>
             </div>
-            <div class="pantry-view__summary">
+            <div class="pantry-view__summary kitchen-view__summary">
               <span id="kitchen-count">0</span>
-              <p>items ready for cooking</p>
+              <p>items in your kitchen</p>
             </div>
           </header>
-          <div class="pantry-grid kitchen-grid" id="kitchen-grid"></div>
+          <p class="kitchen-view__intro">
+            Check off the cookware, appliances, and tools you own. We'll remember your selections for
+            next time.
+          </p>
+          <ul class="kitchen-list" id="kitchen-list"></ul>
         </section>
         <section class="pantry-view" id="pantry-view" hidden>
           <header class="pantry-view__header">
@@ -428,6 +437,26 @@
             </aside>
           </div>
         </section>
+        <section class="family-view" id="family-view" hidden aria-labelledby="family-view-title">
+          <header class="family-view__header">
+            <div class="family-view__header-text">
+              <h2 class="family-panel__title" id="family-view-title">Family</h2>
+              <p class="family-view__description">
+                Manage the people you cook for to tailor filters, substitutions, and meal plans.
+              </p>
+            </div>
+            <button type="button" class="family-panel__add family-view__add" id="family-add-member">
+              Add family member
+            </button>
+          </header>
+          <div class="family-view__body">
+            <p class="family-panel__intro">
+              Add the people you cook for regularly, including allergies, diets, targets, and icons for quick
+              planning.
+            </p>
+            <div class="family-panel__list" id="family-member-list"></div>
+          </div>
+        </section>
       </main>
       <datalist id="pantry-unit-options">
         <option value="each"></option>
@@ -453,30 +482,6 @@
     <script src="data/recipes.js" defer></script>
     <script src="scripts/ingredient-matching.js" defer></script>
     <script src="scripts/app.js" defer></script>
-    <div class="family-panel" id="family-panel" hidden>
-      <div class="family-panel__backdrop" id="family-panel-backdrop" aria-hidden="true"></div>
-      <section
-        class="family-panel__content"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="family-panel-title"
-      >
-        <header class="family-panel__header">
-          <h2 class="family-panel__title" id="family-panel-title">Family</h2>
-          <button type="button" class="family-panel__close" id="family-panel-close" aria-label="Close family panel">
-            Close
-          </button>
-        </header>
-        <div class="family-panel__body">
-          <p class="family-panel__intro">
-            Add the people you cook for regularly, including allergies, diets, targets, and icons for
-            quick planning.
-          </p>
-          <div class="family-panel__list" id="family-member-list"></div>
-          <button type="button" class="family-panel__add" id="family-add-member">Add family member</button>
-        </div>
-      </section>
-    </div>
     <div class="meal-plan-day-modal" id="meal-plan-day-modal" hidden>
       <div class="meal-plan-day-modal__backdrop" id="meal-plan-day-modal-backdrop" aria-hidden="true"></div>
       <section
