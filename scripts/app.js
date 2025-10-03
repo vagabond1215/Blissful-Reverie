@@ -1335,13 +1335,15 @@
   const DEFAULT_THEME_PALETTES = {
     light: {
       background: '#F5F8FF',
-      main: '#3B82F6',
-      accent: '#22D3EE',
+      primary: '#3B82F6',
+      accent1: '#22D3EE',
+      accent2: '#F97316',
     },
     dark: {
       background: '#0F172A',
-      main: '#60A5FA',
-      accent: '#38BDF8',
+      primary: '#60A5FA',
+      accent1: '#38BDF8',
+      accent2: '#FB923C',
     },
   };
 
@@ -1511,11 +1513,20 @@
 
   const sanitizeThemePalette = (palette, mode) => {
     const defaults = DEFAULT_THEME_PALETTES[mode] || DEFAULT_THEME_PALETTES.light;
-    return {
-      background: normalizeHexColor(palette?.background) || defaults.background,
-      main: normalizeHexColor(palette?.main) || defaults.main,
-      accent: normalizeHexColor(palette?.accent) || defaults.accent,
-    };
+    const background = normalizeHexColor(palette?.background) || defaults.background;
+    const primary =
+      normalizeHexColor(palette?.primary)
+      || normalizeHexColor(palette?.main)
+      || defaults.primary;
+    const accent1 =
+      normalizeHexColor(palette?.accent1)
+      || normalizeHexColor(palette?.accent)
+      || defaults.accent1;
+    const accent2 =
+      normalizeHexColor(palette?.accent2)
+      || normalizeHexColor(palette?.accentSecondary)
+      || defaults.accent2;
+    return { background, primary, accent1, accent2 };
   };
 
   const sanitizeThemePalettes = (palettes) => {
@@ -4961,14 +4972,16 @@
     const sanitized = sanitizeThemePalette(palette, mode);
     const fallback = DEFAULT_THEME_PALETTES[mode] || DEFAULT_THEME_PALETTES.light;
     const background = hexToRgb(sanitized.background) || hexToRgb(fallback.background);
-    const main = hexToRgb(sanitized.main) || hexToRgb(fallback.main);
-    const accent = hexToRgb(sanitized.accent) || hexToRgb(fallback.accent);
+    const primary = hexToRgb(sanitized.primary) || hexToRgb(fallback.primary);
+    const accent1 = hexToRgb(sanitized.accent1) || hexToRgb(fallback.accent1);
+    const accent2 = hexToRgb(sanitized.accent2) || hexToRgb(fallback.accent2);
     const white = WHITE_RGB || hexToRgb('#FFFFFF');
     const black = BLACK_RGB || hexToRgb('#020617');
 
     const backgroundHex = background.hex;
-    const mainHex = main.hex;
-    const accentHex = accent.hex;
+    const primaryHex = primary.hex;
+    const accent1Hex = accent1.hex;
+    const accent2Hex = accent2.hex;
 
     const textPrimaryHex = getReadableTextColor(background, [
       '#0F172A',
@@ -5017,31 +5030,48 @@
       mixColors(background, mode === 'light' ? white : black, mode === 'light' ? 0.55 : 0.4),
     );
 
-    const accentStrong = adjustLightness(adjustSaturation(main, 0.05), mode === 'light' ? -0.18 : -0.08);
-    const accentStrongHex = rgbToHex(accentStrong);
-    const accentSecondaryStrong = adjustLightness(adjustSaturation(accent, 0.05), mode === 'light' ? -0.16 : -0.08);
-    const accentSecondaryStrongHex = rgbToHex(accentSecondaryStrong);
-    const accentInverseHex = getReadableTextColor(accent, [
+    const primaryStrong = adjustLightness(
+      adjustSaturation(primary, 0.05),
+      mode === 'light' ? -0.18 : -0.08,
+    );
+    const primaryStrongHex = rgbToHex(primaryStrong);
+    const primaryContrastHex = getReadableTextColor(primary, [
       '#F8FAFC',
       '#F1F5F9',
       '#0F172A',
       '#020617',
     ]);
-    const accentContrastHex = getReadableTextColor(main, [
+    const accent1Strong = adjustLightness(
+      adjustSaturation(accent1, 0.05),
+      mode === 'light' ? -0.16 : -0.08,
+    );
+    const accent1StrongHex = rgbToHex(accent1Strong);
+    const accent1ContrastHex = getReadableTextColor(accent1, [
+      '#F8FAFC',
+      '#F1F5F9',
+      '#0F172A',
+      '#020617',
+    ]);
+    const accent2Strong = adjustLightness(
+      adjustSaturation(accent2, 0.05),
+      mode === 'light' ? -0.16 : -0.08,
+    );
+    const accent2StrongHex = rgbToHex(accent2Strong);
+    const accent2ContrastHex = getReadableTextColor(accent2, [
       '#F8FAFC',
       '#F1F5F9',
       '#0F172A',
       '#020617',
     ]);
 
-    const borderColor = mixColors(main, background, mode === 'light' ? 0.45 : 0.3);
-    const borderStrongColor = mixColors(main, textPrimary, mode === 'light' ? 0.4 : 0.35);
+    const borderColor = mixColors(primary, background, mode === 'light' ? 0.45 : 0.3);
+    const borderStrongColor = mixColors(primary, textPrimary, mode === 'light' ? 0.4 : 0.35);
     const borderMutedColor = mixColors(background, white, mode === 'light' ? 0.68 : 0.35);
 
     const headerShadowColor = mixColors(textPrimary, black, mode === 'light' ? 0.45 : 0.2);
-    const cardShadowColor = mixColors(main, black, mode === 'light' ? 0.25 : 0.55);
-    const cardShadowMutedColor = mixColors(main, black, mode === 'light' ? 0.18 : 0.48);
-    const cardShadowSoftColor = mixColors(accent, main, 0.4);
+    const cardShadowColor = mixColors(primary, black, mode === 'light' ? 0.25 : 0.55);
+    const cardShadowMutedColor = mixColors(primary, black, mode === 'light' ? 0.18 : 0.48);
+    const cardShadowSoftColor = mixColors(primary, black, mode === 'light' ? 0.32 : 0.4);
 
     const neutral50Hex = rgbToHex(mixColors(background, textPrimary, mode === 'light' ? 0.08 : 0.16));
     const neutral100Hex = rgbToHex(mixColors(background, textPrimary, mode === 'light' ? 0.14 : 0.22));
@@ -5052,30 +5082,39 @@
     const codeBackgroundHex = rgbToHex(
       mixColors(surfaceElevated, textPrimary, mode === 'light' ? 0.08 : 0.35),
     );
-    const mealPlanSnackHex = rgbToHex(mixColors(main, accent, 0.5));
     const mealPlanSurfaceValue = mode === 'light' ? '#FFFFFF' : toRgba(surfaceElevated, 0.92);
 
-    const inactiveBlend = mixColors(main, accent, 0.5);
-    const inactiveGradient = `linear-gradient(135deg, ${alphaColor(mainHex, mode === 'light' ? 0.65 : 0.58)}, ${alphaColor(accentHex, mode === 'light' ? 0.65 : 0.6)})`;
-    const activeGradient = `linear-gradient(135deg, ${mainHex}, ${accentHex})`;
-    const inactiveTextHex = getReadableTextColor(inactiveBlend, [
+    const accentBlend = mixColors(accent1, accent2, 0.5);
+    const accentBlendHex = rgbToHex(accentBlend);
+    const inactiveGradient = `linear-gradient(135deg, ${alphaColor(
+      accent1Hex,
+      mode === 'light' ? 0.55 : 0.5,
+    )}, ${alphaColor(accent2Hex, mode === 'light' ? 0.55 : 0.5)})`;
+    const activeGradient = `linear-gradient(135deg, ${accent1Hex}, ${accent2Hex})`;
+    const inactiveTextHex = getReadableTextColor(accentBlend, [
       '#F8FAFC',
       '#F1F5F9',
       '#0F172A',
     ]);
-    const activeTextHex = getReadableTextColor(inactiveBlend, [
-      '#F8FAFC',
-      '#F1F5F9',
-      '#0F172A',
-    ]);
+    const activeTextHex = inactiveTextHex;
 
-    const elevatedGradient = `linear-gradient(158deg, ${alphaColor(accentHex, mode === 'light' ? 0.16 : 0.22)}, ${surfaceElevatedHex})`;
-    const sectionGradient = `linear-gradient(155deg, ${alphaColor(mainHex, mode === 'light' ? 0.12 : 0.2)}, ${alphaColor(accentHex, mode === 'light' ? 0.16 : 0.24)})`;
+    const primaryGlassStrong = alphaColor(primaryHex, mode === 'light' ? 0.16 : 0.26);
+    const primaryGlassSoft = alphaColor(primaryHex, mode === 'light' ? 0.1 : 0.18);
+    const primaryGlassSofter = alphaColor(primaryHex, mode === 'light' ? 0.06 : 0.14);
+    const elevatedGradient = `linear-gradient(158deg, ${primaryGlassStrong}, ${surfaceElevatedHex})`;
+    const sectionGradient = `linear-gradient(155deg, ${primaryGlassSoft}, ${primaryGlassSofter})`;
+    const cardGradient = `linear-gradient(160deg, ${primaryGlassStrong}, ${alphaColor(
+      primaryHex,
+      mode === 'light' ? 0.04 : 0.12,
+    )})`;
 
     return {
       '--theme-background': backgroundHex,
-      '--theme-main': mainHex,
-      '--theme-accent': accentHex,
+      '--theme-main': primaryHex,
+      '--theme-primary': primaryHex,
+      '--theme-accent': accent1Hex,
+      '--theme-accent-1': accent1Hex,
+      '--theme-accent-2': accent2Hex,
       '--color-background': backgroundHex,
       '--body-gradient-start': gradientStartHex,
       '--body-gradient-mid': gradientMidHex,
@@ -5085,19 +5124,16 @@
       '--color-header-shadow': alphaColor(rgbToHex(headerShadowColor), mode === 'light' ? 0.25 : 0.65),
       '--color-surface': surfaceHex,
       '--color-surface-elevated': surfaceElevatedHex,
-      '--color-surface-soft': alphaColor(mainHex, mode === 'light' ? 0.12 : 0.2),
-      '--color-surface-highlight': alphaColor(accentHex, mode === 'light' ? 0.18 : 0.26),
+      '--color-surface-soft': alphaColor(primaryHex, mode === 'light' ? 0.1 : 0.18),
+      '--color-surface-highlight': alphaColor(primaryHex, mode === 'light' ? 0.18 : 0.26),
       '--color-card-shadow': alphaColor(rgbToHex(cardShadowColor), mode === 'light' ? 0.24 : 0.6),
       '--color-card-shadow-muted': alphaColor(rgbToHex(cardShadowMutedColor), mode === 'light' ? 0.18 : 0.5),
       '--color-card-shadow-soft': alphaColor(rgbToHex(cardShadowSoftColor), mode === 'light' ? 0.2 : 0.34),
       '--color-border': alphaColor(rgbToHex(borderColor), mode === 'light' ? 0.45 : 0.38),
-      '--color-border-strong': alphaColor(
-        rgbToHex(borderStrongColor),
-        mode === 'light' ? 0.55 : 0.6,
-      ),
+      '--color-border-strong': alphaColor(rgbToHex(borderStrongColor), mode === 'light' ? 0.55 : 0.6),
       '--color-border-muted': alphaColor(rgbToHex(borderMutedColor), mode === 'light' ? 0.68 : 0.55),
-      '--color-inline-tag-background': alphaColor(accentHex, mode === 'light' ? 0.2 : 0.26),
-      '--color-inline-tag-text': accentInverseHex,
+      '--color-inline-tag-background': alphaColor(accent1Hex, mode === 'light' ? 0.2 : 0.26),
+      '--color-inline-tag-text': accent1ContrastHex,
       '--color-code-background': codeBackgroundHex,
       '--color-neutral-50': neutral50Hex,
       '--color-neutral-100': neutral100Hex,
@@ -5113,59 +5149,69 @@
       '--color-text-badge': textBadgeHex,
       '--color-text-soft': toRgba(textSoftColor, mode === 'light' ? 0.7 : 0.68),
       '--color-text-instruction': textInstructionHex,
-      '--color-text-inline': mainHex,
-      '--color-tag-text': mainHex,
-      '--color-text-inverse': accentContrastHex,
+      '--color-text-inline': accent1Hex,
+      '--color-tag-text': accent1Hex,
+      '--color-text-inverse': primaryContrastHex,
       '--color-gunmetal': textStrongHex,
       '--color-text-emphasis': textPrimaryHex,
-      '--color-accent': mainHex,
-      '--color-accent-strong': accentStrongHex,
-      '--color-accent-soft': alphaColor(mainHex, mode === 'light' ? 0.18 : 0.28),
-      '--color-accent-softer': alphaColor(mainHex, mode === 'light' ? 0.12 : 0.22),
-      '--color-accent-outline': alphaColor(mainHex, mode === 'light' ? 0.3 : 0.45),
-      '--color-accent-border': alphaColor(mainHex, mode === 'light' ? 0.38 : 0.5),
+      '--color-accent': primaryHex,
+      '--color-accent-strong': primaryStrongHex,
+      '--color-accent-soft': alphaColor(primaryHex, mode === 'light' ? 0.18 : 0.28),
+      '--color-accent-softer': alphaColor(primaryHex, mode === 'light' ? 0.12 : 0.22),
+      '--color-accent-outline': alphaColor(primaryHex, mode === 'light' ? 0.3 : 0.45),
+      '--color-accent-border': alphaColor(primaryHex, mode === 'light' ? 0.38 : 0.5),
       '--color-accent-shadow': alphaColor(
-        rgbToHex(mixColors(main, black, mode === 'light' ? 0.4 : 0.35)),
+        rgbToHex(mixColors(primary, black, mode === 'light' ? 0.4 : 0.35)),
         mode === 'light' ? 0.32 : 0.45,
       ),
-      '--color-accent-shadow-strong': alphaColor(mainHex, mode === 'light' ? 0.42 : 0.5),
-      '--color-accent-contrast': accentContrastHex,
-      '--color-accent-secondary': accentHex,
-      '--color-accent-secondary-strong': accentSecondaryStrongHex,
-      '--color-accent-secondary-soft': alphaColor(accentHex, mode === 'light' ? 0.22 : 0.32),
-      '--color-accent-secondary-outline': alphaColor(accentHex, mode === 'light' ? 0.3 : 0.45),
-      '--color-accent-secondary-contrast': accentInverseHex,
+      '--color-accent-shadow-strong': alphaColor(primaryHex, mode === 'light' ? 0.42 : 0.5),
+      '--color-accent-contrast': primaryContrastHex,
+      '--color-accent-secondary': accent1Hex,
+      '--color-accent-secondary-strong': accent1StrongHex,
+      '--color-accent-secondary-soft': alphaColor(accent1Hex, mode === 'light' ? 0.22 : 0.32),
+      '--color-accent-secondary-outline': alphaColor(accent1Hex, mode === 'light' ? 0.3 : 0.45),
+      '--color-accent-secondary-contrast': accent1ContrastHex,
       '--color-accent-secondary-shadow': alphaColor(
-        rgbToHex(mixColors(accent, black, mode === 'light' ? 0.35 : 0.3)),
+        rgbToHex(mixColors(accent1, black, mode === 'light' ? 0.35 : 0.3)),
         mode === 'light' ? 0.32 : 0.42,
       ),
-      '--color-burnished-copper': mainHex,
-      '--color-burnished-copper-soft': accentStrongHex,
-      '--color-burnished-copper-border': alphaColor(mainHex, mode === 'light' ? 0.25 : 0.38),
+      '--color-accent-tertiary': accent2Hex,
+      '--color-accent-tertiary-strong': accent2StrongHex,
+      '--color-accent-tertiary-soft': alphaColor(accent2Hex, mode === 'light' ? 0.22 : 0.32),
+      '--color-accent-tertiary-outline': alphaColor(accent2Hex, mode === 'light' ? 0.32 : 0.45),
+      '--color-accent-tertiary-contrast': accent2ContrastHex,
+      '--color-accent-tertiary-shadow': alphaColor(
+        rgbToHex(mixColors(accent2, black, mode === 'light' ? 0.35 : 0.32)),
+        mode === 'light' ? 0.32 : 0.44,
+      ),
+      '--color-burnished-copper': primaryHex,
+      '--color-burnished-copper-soft': primaryStrongHex,
+      '--color-burnished-copper-border': alphaColor(primaryHex, mode === 'light' ? 0.25 : 0.38),
       '--color-burnished-copper-shadow': alphaColor(
         rgbToHex(cardShadowColor),
         mode === 'light' ? 0.35 : 0.5,
       ),
-      '--gradient-accent': `linear-gradient(135deg, ${mainHex}, ${accentStrongHex})`,
-      '--gradient-accent-secondary': `linear-gradient(135deg, ${accentHex}, ${accentSecondaryStrongHex})`,
-      '--gradient-burnished-copper': `linear-gradient(140deg, ${accentStrongHex}, ${mainHex})`,
-      '--meal-plan-type-meal': mainHex,
-      '--meal-plan-type-drink': accentHex,
-      '--meal-plan-type-snack': mealPlanSnackHex,
+      '--gradient-accent': `linear-gradient(135deg, ${primaryHex}, ${primaryStrongHex})`,
+      '--gradient-accent-secondary': `linear-gradient(135deg, ${accent1Hex}, ${accent1StrongHex})`,
+      '--gradient-accent-tertiary': `linear-gradient(135deg, ${accent2Hex}, ${accent2StrongHex})`,
+      '--gradient-burnished-copper': `linear-gradient(140deg, ${primaryStrongHex}, ${primaryHex})`,
+      '--meal-plan-type-meal': primaryHex,
+      '--meal-plan-type-drink': accent1Hex,
+      '--meal-plan-type-snack': accent2Hex,
       '--meal-plan-type-text': surfaceTextHex,
-      '--meal-plan-border': alphaColor(mainHex, mode === 'light' ? 0.24 : 0.32),
+      '--meal-plan-border': alphaColor(primaryHex, mode === 'light' ? 0.24 : 0.32),
       '--meal-plan-surface': mealPlanSurfaceValue,
       '--view-toggle-inactive-gradient': inactiveGradient,
-      '--view-toggle-inactive-border': alphaColor(mainHex, mode === 'light' ? 0.5 : 0.45),
+      '--view-toggle-inactive-border': alphaColor(accent1Hex, mode === 'light' ? 0.45 : 0.4),
       '--view-toggle-inactive-text': inactiveTextHex,
-      '--view-toggle-hover-glow': `0 0 16px ${alphaColor(accentHex, mode === 'light' ? 0.35 : 0.45)}`,
+      '--view-toggle-hover-glow': `0 0 16px ${alphaColor(accentBlendHex, mode === 'light' ? 0.35 : 0.45)}`,
       '--view-toggle-active-gradient': activeGradient,
       '--view-toggle-active-text': activeTextHex,
       '--surface-elevated-gradient': elevatedGradient,
       '--surface-panel-gradient': elevatedGradient,
       '--surface-section-gradient': sectionGradient,
-      '--surface-card-gradient': elevatedGradient,
-      '--color-focus-ring': alphaColor(mainHex, mode === 'light' ? 0.28 : 0.4),
+      '--surface-card-gradient': cardGradient,
+      '--color-focus-ring': alphaColor(accent1Hex, mode === 'light' ? 0.28 : 0.4),
       '--color-header-foreground': surfaceTextHex,
     };
   };
