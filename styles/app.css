@@ -4,86 +4,126 @@
 
 :root {
   color-scheme: light;
-  --color-background: #f5f8ff;
-  --body-gradient-start: #f7faff;
-  --body-gradient-mid: #e3ecff;
-  --body-gradient-end: #ccd9ff;
 
-  --color-text-primary: #0f172a;
-  --color-text-strong: #0b1120;
-  --color-text-secondary: #1f2937;
-  --color-text-tertiary: #334155;
-  --color-text-muted: rgba(51, 65, 85, 0.85);
-  --color-text-badge: #1f2937;
-  --color-text-soft: rgba(71, 85, 105, 0.7);
-  --color-text-instruction: #1f2937;
-  --color-text-inline: #1d4ed8;
-  --color-tag-text: #1d4ed8;
-  --color-text-inverse: #f8fafc;
-  --color-gunmetal: #1f2937;
-  --color-text-emphasis: #111827;
+  /* Base palette tokens */
+  --brand: hsl(346.36 56.41% 30.59%);
+  --accent-1: hsl(45.45 35.11% 63.14%);
+  --accent-2: hsl(147.27 10.68% 59.61%);
+  --neutral: hsl(210 5.26% 7.45%);
 
-  --color-layout-background: #e2e8f0;
+  /* Layered surfaces */
+  --bg: hsl(225 25% 96.86%);
+  --surface-1: hsl(0 0% 100%);
+  --surface-2: hsl(217.5 30.77% 94.9%);
+  --surface-3: hsl(216 28.3% 89.61%);
 
-  --theme-background: #f5f8ff;
-  --theme-primary: #3b82f6;
-  --theme-accent-1: #22d3ee;
-  --theme-accent-2: #f97316;
+  /* Text tokens */
+  --text: hsl(216.52 29.11% 15.49%);
+  --text-muted: hsl(217.06 18.09% 36.86%);
+  --text-inverse: hsl(210 40% 98.04%);
+
+  /* State tokens */
+  --success: hsl(147.41 49.09% 32.35%);
+  --warning: hsl(34.29 76.36% 43.14%);
+  --danger: hsl(352.22 43.2% 49.02%);
+  --info: hsl(209.55 60% 43.14%);
+
+  /* Derived background tokens */
+  --color-background: var(--bg);
+  --body-gradient-start: color-mix(in srgb, var(--bg) 82%, var(--surface-2) 18%);
+  --body-gradient-mid: color-mix(in srgb, var(--bg) 68%, var(--surface-2) 32%);
+  --body-gradient-end: color-mix(in srgb, var(--bg) 52%, var(--surface-3) 48%);
+  --color-layout-background: color-mix(in srgb, var(--surface-3) 65%, var(--surface-1) 35%);
+  --color-panel: color-mix(in srgb, var(--surface-1) 88%, transparent);
+
+  /* Text mapping */
+  --color-text-primary: var(--text);
+  --color-text-strong: color-mix(in srgb, var(--text) 94%, var(--neutral) 6%);
+  --color-text-secondary: color-mix(in srgb, var(--text) 72%, var(--surface-2) 28%);
+  --color-text-tertiary: color-mix(in srgb, var(--text) 62%, var(--surface-3) 38%);
+  --color-text-muted: color-mix(in srgb, var(--text-muted) 78%, transparent);
+  --color-text-soft: color-mix(in srgb, var(--text-muted) 55%, var(--surface-2) 45%);
+  --color-text-instruction: color-mix(in srgb, var(--text) 70%, var(--surface-2) 30%);
+  --color-text-inline: var(--accent-1);
+  --color-tag-text: var(--accent-1);
+  --color-text-inverse: var(--text-inverse);
+  --color-text-badge: color-mix(in srgb, var(--text) 68%, var(--surface-3) 32%);
+  --color-text-emphasis: var(--text);
+  --color-gunmetal: var(--text);
+
+  /* Surface tokens */
+  --color-surface: var(--surface-1);
+  --color-surface-elevated: var(--surface-2);
+  --color-surface-soft: color-mix(in srgb, var(--brand) 14%, transparent);
+  --color-surface-highlight: color-mix(in srgb, var(--accent-1) 18%, transparent);
+  --surface-hover-subtle: color-mix(in srgb, var(--text) 8%, var(--surface-1));
+  --surface-hover-strong: color-mix(in srgb, var(--text) 12%, var(--surface-2));
+  --surface-overlay: color-mix(in srgb, var(--surface-1) 72%, transparent);
+  --surface-overlay-soft: color-mix(in srgb, var(--surface-1) 78%, transparent);
+  --surface-overlay-strong: color-mix(in srgb, var(--surface-1) 88%, transparent);
+  --surface-overlay-heavy: color-mix(in srgb, var(--surface-1) 94%, transparent);
+  --overlay-backdrop: color-mix(in srgb, var(--neutral) 48%, transparent);
+  --overlay-backdrop-strong: color-mix(in srgb, var(--neutral) 58%, transparent);
+  --color-header-background: color-mix(in srgb, var(--surface-2) 92%, transparent 8%);
+  --color-header-shadow: color-mix(in srgb, var(--neutral) 28%, transparent);
+  --color-card-shadow: color-mix(in srgb, var(--neutral) 22%, transparent);
+  --color-card-shadow-muted: color-mix(in srgb, var(--neutral) 16%, transparent);
+  --color-card-shadow-soft: color-mix(in srgb, var(--accent-1) 18%, transparent);
+
+  /* Border tokens */
+  --color-border: color-mix(in srgb, var(--text) 12%, var(--surface-2));
+  --color-border-strong: color-mix(in srgb, var(--text) 20%, var(--surface-1));
+  --color-border-muted: color-mix(in srgb, var(--text) 10%, var(--surface-3));
+  --color-border-soft: color-mix(in srgb, var(--text) 6%, var(--surface-2));
+
+  /* Neutral ramp */
+  --color-neutral-50: color-mix(in srgb, var(--surface-1) 88%, var(--text) 12%);
+  --color-neutral-100: color-mix(in srgb, var(--surface-1) 80%, var(--text) 20%);
+  --color-neutral-200: color-mix(in srgb, var(--surface-2) 72%, var(--text) 28%);
+  --color-neutral-400: color-mix(in srgb, var(--surface-3) 58%, var(--text) 42%);
+  --color-neutral-600: color-mix(in srgb, var(--surface-3) 42%, var(--text) 58%);
+  --color-neutral-soft: color-mix(in srgb, var(--text) 16%, transparent);
+
+  /* Code & tags */
+  --color-code-background: color-mix(in srgb, var(--surface-2) 85%, var(--surface-3) 15%);
+  --color-inline-tag-background: color-mix(in srgb, var(--accent-1) 24%, transparent);
+  --color-inline-tag-text: color-mix(in srgb, var(--text) 92%, var(--text-inverse) 8%);
+
+  /* Accent mapping */
+  --theme-background: var(--bg);
+  --theme-primary: var(--brand);
+  --theme-accent-1: var(--accent-1);
+  --theme-accent-2: var(--accent-2);
   --theme-main: var(--theme-primary);
   --theme-accent: var(--theme-accent-1);
 
-  --color-surface: #ffffff;
-  --color-surface-elevated: #ffffff;
-  --color-surface-soft: rgba(59, 130, 246, 0.08);
-  --color-surface-highlight: rgba(59, 130, 246, 0.14);
-  --color-header-background: rgba(255, 255, 255, 0.92);
+  --color-primary: var(--brand);
+  --color-primary-strong: color-mix(in srgb, var(--brand) 88%, var(--neutral) 12%);
+  --color-primary-soft: color-mix(in srgb, var(--brand) 20%, transparent);
+  --color-primary-softer: color-mix(in srgb, var(--brand) 12%, transparent);
+  --color-primary-outline: color-mix(in srgb, var(--brand) 36%, transparent);
+  --color-primary-border: color-mix(in srgb, var(--brand) 30%, var(--surface-2));
+  --color-primary-shadow: color-mix(in srgb, var(--brand) 35%, var(--neutral));
+  --color-primary-shadow-strong: color-mix(in srgb, var(--brand) 44%, var(--neutral));
+  --color-primary-contrast: var(--text-inverse);
 
-  --color-header-shadow: rgba(15, 23, 42, 0.25);
-  --color-card-shadow: rgba(15, 23, 42, 0.12);
-  --color-card-shadow-muted: rgba(15, 23, 42, 0.08);
-  --color-card-shadow-soft: rgba(59, 130, 246, 0.16);
+  --color-accent-1: var(--accent-1);
+  --color-accent-1-strong: color-mix(in srgb, var(--accent-1) 90%, var(--brand) 10%);
+  --color-accent-1-soft: color-mix(in srgb, var(--accent-1) 22%, transparent);
+  --color-accent-1-softer: color-mix(in srgb, var(--accent-1) 14%, transparent);
+  --color-accent-1-outline: color-mix(in srgb, var(--accent-1) 34%, transparent);
+  --color-accent-1-border: color-mix(in srgb, var(--accent-1) 30%, var(--surface-2));
+  --color-accent-1-shadow: color-mix(in srgb, var(--accent-1) 36%, var(--neutral));
+  --color-accent-1-contrast: color-mix(in srgb, var(--text-inverse) 88%, var(--text) 12%);
 
-  --color-border: rgba(148, 163, 184, 0.6);
-  --color-border-strong: rgba(71, 85, 105, 0.5);
-  --color-border-muted: rgba(203, 213, 225, 0.65);
-  --color-code-background: #e2e8f0;
-  --color-inline-tag-background: rgba(34, 211, 238, 0.18);
-  --color-inline-tag-text: #0f172a;
-
-  --color-neutral-50: #eef2ff;
-  --color-neutral-100: #e0e7ff;
-  --color-neutral-200: #c7d2fe;
-  --color-neutral-400: #818cf8;
-  --color-neutral-600: #4f46e5;
-  --color-neutral-soft: rgba(15, 23, 42, 0.08);
-
-  --color-primary: #3b82f6;
-  --color-primary-strong: #1d4ed8;
-  --color-primary-soft: rgba(59, 130, 246, 0.18);
-  --color-primary-softer: rgba(59, 130, 246, 0.12);
-  --color-primary-outline: rgba(59, 130, 246, 0.24);
-  --color-primary-border: rgba(59, 130, 246, 0.35);
-  --color-primary-shadow: rgba(15, 23, 42, 0.24);
-  --color-primary-shadow-strong: rgba(59, 130, 246, 0.38);
-  --color-primary-contrast: #f8fafc;
-
-  --color-accent-1: #22d3ee;
-  --color-accent-1-strong: #0ea5e9;
-  --color-accent-1-soft: rgba(34, 211, 238, 0.2);
-  --color-accent-1-softer: rgba(34, 211, 238, 0.12);
-  --color-accent-1-outline: rgba(34, 211, 238, 0.3);
-  --color-accent-1-border: rgba(34, 211, 238, 0.4);
-  --color-accent-1-shadow: rgba(8, 145, 178, 0.28);
-  --color-accent-1-contrast: #083344;
-
-  --color-accent-2: #f97316;
-  --color-accent-2-strong: #ea580c;
-  --color-accent-2-soft: rgba(249, 115, 22, 0.2);
-  --color-accent-2-softer: rgba(249, 115, 22, 0.12);
-  --color-accent-2-outline: rgba(249, 115, 22, 0.3);
-  --color-accent-2-border: rgba(249, 115, 22, 0.4);
-  --color-accent-2-shadow: rgba(155, 65, 8, 0.35);
-  --color-accent-2-contrast: #fff7ed;
+  --color-accent-2: var(--accent-2);
+  --color-accent-2-strong: color-mix(in srgb, var(--accent-2) 90%, var(--brand) 10%);
+  --color-accent-2-soft: color-mix(in srgb, var(--accent-2) 22%, transparent);
+  --color-accent-2-softer: color-mix(in srgb, var(--accent-2) 14%, transparent);
+  --color-accent-2-outline: color-mix(in srgb, var(--accent-2) 34%, transparent);
+  --color-accent-2-border: color-mix(in srgb, var(--accent-2) 30%, var(--surface-2));
+  --color-accent-2-shadow: color-mix(in srgb, var(--accent-2) 34%, var(--neutral));
+  --color-accent-2-contrast: color-mix(in srgb, var(--text-inverse) 86%, var(--text) 14%);
 
   --color-accent: var(--color-primary);
   --color-accent-strong: var(--color-primary-strong);
@@ -95,113 +135,150 @@
   --color-accent-shadow-strong: var(--color-primary-shadow-strong);
   --color-accent-contrast: var(--color-primary-contrast);
 
-  --color-accent-secondary: var(--color-accent-1);
+  --color-accent-secondary: var(--accent-1);
   --color-accent-secondary-strong: var(--color-accent-1-strong);
   --color-accent-secondary-soft: var(--color-accent-1-soft);
   --color-accent-secondary-outline: var(--color-accent-1-outline);
   --color-accent-secondary-contrast: var(--color-accent-1-contrast);
   --color-accent-secondary-shadow: var(--color-accent-1-shadow);
+  --color-accent-secondary-border: var(--color-accent-1-border);
 
-  --color-accent-tertiary: var(--color-accent-2);
+  --color-accent-tertiary: var(--accent-2);
   --color-accent-tertiary-strong: var(--color-accent-2-strong);
   --color-accent-tertiary-soft: var(--color-accent-2-soft);
   --color-accent-tertiary-outline: var(--color-accent-2-outline);
   --color-accent-tertiary-contrast: var(--color-accent-2-contrast);
   --color-accent-tertiary-shadow: var(--color-accent-2-shadow);
+  --color-accent-tertiary-border: var(--color-accent-2-border);
 
+  /* Gradients */
   --gradient-primary: linear-gradient(
     135deg,
-    rgba(59, 130, 246, 0.9),
-    rgba(29, 78, 216, 0.95)
+    color-mix(in srgb, var(--brand) 92%, transparent),
+    color-mix(in srgb, var(--brand) 68%, var(--accent-1) 32%)
   );
   --gradient-accent: linear-gradient(
     135deg,
-    rgba(34, 211, 238, 0.92),
-    rgba(14, 165, 233, 0.95)
+    color-mix(in srgb, var(--accent-1) 92%, transparent),
+    color-mix(in srgb, var(--accent-2) 88%, transparent)
   );
   --gradient-accent-secondary: linear-gradient(
     135deg,
-    var(--color-accent-secondary),
-    var(--color-accent-secondary-strong)
+    color-mix(in srgb, var(--accent-1) 90%, transparent),
+    color-mix(in srgb, var(--accent-1) 70%, var(--brand) 30%)
   );
   --gradient-accent-tertiary: linear-gradient(
     135deg,
-    var(--color-accent-tertiary),
-    var(--color-accent-tertiary-strong)
+    color-mix(in srgb, var(--accent-2) 90%, transparent),
+    color-mix(in srgb, var(--accent-2) 68%, var(--brand) 32%)
   );
 
-  --color-burnished-copper: var(--color-primary);
-  --color-burnished-copper-soft: var(--color-primary-strong);
+  /* Specialty accents */
+  --color-burnished-copper: var(--brand);
+  --color-burnished-copper-soft: color-mix(in srgb, var(--brand) 78%, var(--accent-1) 22%);
   --gradient-burnished-copper: linear-gradient(
     140deg,
-    var(--color-primary-strong),
-    var(--color-primary)
+    color-mix(in srgb, var(--brand) 88%, transparent),
+    var(--brand)
   );
-  --color-burnished-copper-border: rgba(59, 130, 246, 0.25);
-  --color-burnished-copper-shadow: rgba(15, 23, 42, 0.35);
+  --color-burnished-copper-border: color-mix(in srgb, var(--brand) 28%, transparent);
+  --color-burnished-copper-shadow: color-mix(in srgb, var(--neutral) 38%, transparent);
 
-  --meal-plan-type-meal: var(--color-primary);
-  --meal-plan-type-drink: var(--color-accent-secondary);
-  --meal-plan-type-snack: var(--color-accent-tertiary);
-  --meal-plan-type-text: var(--color-text-inverse);
-  --meal-plan-border: rgba(59, 130, 246, 0.2);
-  --meal-plan-surface: #ffffff;
-
-  --view-toggle-inactive-gradient: linear-gradient(
-    135deg,
-    rgba(34, 211, 238, 0.24),
-    rgba(34, 211, 238, 0.12)
-  );
-  --view-toggle-inactive-border: rgba(34, 211, 238, 0.35);
-  --view-toggle-inactive-text: #0b1120;
-  --view-toggle-hover-glow: 0 0 16px rgba(34, 211, 238, 0.45);
-  --view-toggle-active-gradient: linear-gradient(
-    135deg,
-    rgba(34, 211, 238, 0.9),
-    rgba(14, 165, 233, 0.95)
-  );
-  --view-toggle-active-text: var(--color-accent-secondary-contrast);
-
+  /* Glass surfaces */
   --surface-glass-background: linear-gradient(
     160deg,
-    rgba(245, 248, 255, 0.88),
-    rgba(224, 231, 255, 0.72)
+    color-mix(in srgb, var(--surface-2) 94%, transparent),
+    color-mix(in srgb, var(--surface-3) 88%, transparent)
   );
   --surface-glass-background-strong: linear-gradient(
     160deg,
-    rgba(228, 235, 255, 0.92),
-    rgba(204, 216, 255, 0.78)
+    color-mix(in srgb, var(--surface-2) 90%, transparent),
+    color-mix(in srgb, var(--surface-3) 82%, transparent)
   );
   --surface-glass-primary: linear-gradient(
     158deg,
-    rgba(59, 130, 246, 0.2),
-    rgba(59, 130, 246, 0.08)
+    color-mix(in srgb, var(--brand) 24%, transparent),
+    color-mix(in srgb, var(--brand) 10%, transparent)
   );
   --surface-glass-primary-soft: linear-gradient(
     160deg,
-    rgba(59, 130, 246, 0.14),
-    rgba(59, 130, 246, 0.06)
+    color-mix(in srgb, var(--brand) 18%, transparent),
+    color-mix(in srgb, var(--brand) 8%, transparent)
   );
   --surface-glass-accent-1: linear-gradient(
     160deg,
-    rgba(34, 211, 238, 0.22),
-    rgba(34, 211, 238, 0.12)
+    color-mix(in srgb, var(--accent-1) 26%, transparent),
+    color-mix(in srgb, var(--accent-1) 12%, transparent)
   );
   --surface-glass-accent-2: linear-gradient(
     160deg,
-    rgba(249, 115, 22, 0.22),
-    rgba(249, 115, 22, 0.12)
+    color-mix(in srgb, var(--accent-2) 26%, transparent),
+    color-mix(in srgb, var(--accent-2) 12%, transparent)
+  );
+  --surface-elevated-gradient: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--brand) 18%, transparent),
+    var(--surface-2)
+  );
+  --surface-panel-gradient: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--accent-1) 16%, transparent),
+    var(--surface-2)
+  );
+  --surface-section-gradient: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--accent-1) 12%, transparent),
+    color-mix(in srgb, var(--accent-2) 10%, transparent)
+  );
+  --surface-card-gradient: linear-gradient(
+    158deg,
+    color-mix(in srgb, var(--brand) 18%, transparent),
+    color-mix(in srgb, var(--brand) 6%, transparent)
   );
 
-  --surface-elevated-gradient: var(--surface-glass-background-strong);
-  --surface-panel-gradient: var(--surface-glass-background);
-  --surface-section-gradient: var(--surface-glass-primary);
-  --surface-card-gradient: var(--surface-glass-primary-soft);
+  /* Interactions */
+  --view-toggle-inactive-gradient: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-1) 26%, transparent),
+    color-mix(in srgb, var(--accent-2) 26%, transparent)
+  );
+  --view-toggle-inactive-border: color-mix(in srgb, var(--accent-1) 32%, transparent);
+  --view-toggle-inactive-text: color-mix(in srgb, var(--text) 82%, var(--text-inverse) 18%);
+  --view-toggle-hover-glow: 0 0 16px color-mix(in srgb, var(--accent-1) 38%, transparent);
+  --view-toggle-active-gradient: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-1) 92%, transparent),
+    color-mix(in srgb, var(--accent-2) 90%, transparent)
+  );
+  --view-toggle-active-text: var(--text-inverse);
 
-  --color-danger: #ef4444;
-  --color-danger-soft: rgba(239, 68, 68, 0.16);
+  /* Meal plan tokens */
+  --meal-plan-type-meal: var(--brand);
+  --meal-plan-type-drink: var(--accent-1);
+  --meal-plan-type-snack: var(--accent-2);
+  --meal-plan-type-text: var(--text-inverse);
+  --meal-plan-border: color-mix(in srgb, var(--brand) 22%, transparent);
+  --meal-plan-surface: color-mix(in srgb, var(--surface-1) 94%, transparent 6%);
+  --meal-plan-layout-height: auto;
+  --meal-plan-view-height: auto;
 
-  --color-focus-ring: rgba(59, 130, 246, 0.28);
+  /* Recipe & filter sections */
+  --filter-section-background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  --filter-section-border: color-mix(in srgb, var(--text) 10%, var(--surface-2));
+  --filter-section-shadow: var(--color-card-shadow-soft);
+  --meal-section-background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+  --meal-section-border: var(--color-border-muted);
+  --meal-section-shadow-color: color-mix(in srgb, var(--neutral) 26%, transparent);
+  --serving-control-color: var(--accent-1);
+
+  /* Utility spacing tokens */
+  --meal-card-width: 20rem;
+  --meal-grid-gap: 1.5rem;
+
+  /* Status tokens */
+  --color-danger: var(--danger);
+  --color-danger-soft: color-mix(in srgb, var(--danger) 24%, transparent);
+  --color-focus-ring: color-mix(in srgb, var(--accent-1) 45%, transparent);
 
   font-family: 'Inter', 'Segoe UI', sans-serif;
   line-height: 1.6;
@@ -211,6 +288,56 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@supports (color: color-mix(in srgb, black, white)) {
+  :root {
+    --bg: color-mix(in srgb, var(--neutral) 6%, white 94%);
+    --surface-1: color-mix(in srgb, var(--neutral) 4%, white 96%);
+    --surface-2: color-mix(in srgb, var(--neutral) 8%, white 92%);
+    --surface-3: color-mix(in srgb, var(--neutral) 16%, white 84%);
+  }
+
+  :root[data-theme='dark'] {
+    --bg: color-mix(in srgb, var(--neutral) 88%, var(--text) 12%);
+    --surface-1: color-mix(in srgb, var(--neutral) 84%, var(--text) 16%);
+    --surface-2: color-mix(in srgb, var(--neutral) 78%, var(--text) 22%);
+    --surface-3: color-mix(in srgb, var(--neutral) 70%, var(--text) 30%);
+  }
+}
+
+@supports (color: oklch(0 0 0)) {
+  :root {
+    --brand: oklch(0.6105 0.108 1.38deg);
+    --accent-1: oklch(0.8861 0.0405 93.95deg);
+    --accent-2: oklch(0.8494 0.0171 163.15deg);
+    --neutral: oklch(0.4196 0.0043 247.35deg);
+
+    --bg: oklch(0.9881 0.002 271.32deg);
+    --surface-1: oklch(1 0 0deg);
+    --surface-2: oklch(0.981 0.0034 260.86deg);
+    --surface-3: oklch(0.961 0.0065 258.11deg);
+
+    --text: oklch(0.5208 0.0317 255.19deg);
+    --text-muted: oklch(0.7031 0.0265 257.65deg);
+    --text-inverse: oklch(0.993 0.0016 249.31deg);
+
+    --success: oklch(0.7274 0.0878 163.04deg);
+    --warning: oklch(0.8014 0.1221 85.16deg);
+    --danger: oklch(0.7309 0.0911 8.67deg);
+    --info: oklch(0.7317 0.0861 238.57deg);
+  }
+
+  :root[data-theme='dark'] {
+    --bg: oklch(0.42 0.0228 264.5deg);
+    --surface-1: oklch(0.459 0.0277 261.03deg);
+    --surface-2: oklch(0.513 0.0293 259.61deg);
+    --surface-3: oklch(0.5729 0.03 256.45deg);
+
+    --text: oklch(0.9768 0.0066 264.29deg);
+    --text-muted: oklch(0.885 0.0178 259.89deg);
+    --text-inverse: oklch(0.4396 0.0299 260.55deg);
+  }
 }
 
 a {
@@ -271,10 +398,10 @@ select {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: var(--color-panel, rgba(255, 255, 255, 0.85));
+  background: var(--color-panel);
   border-radius: 999px;
   box-shadow: 0 20px 42px -28px var(--color-card-shadow-soft);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--color-border-soft);
   padding: 0.25rem 0.45rem;
   overflow: visible;
   backdrop-filter: blur(14px);
@@ -306,8 +433,8 @@ select {
   gap: 0.5rem;
   padding: 0.55rem 0.95rem;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  background: var(--color-panel, rgba(255, 255, 255, 0.9));
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-panel);
   color: var(--color-text-strong);
   font-weight: 600;
   cursor: pointer;
@@ -322,7 +449,7 @@ select {
   transform: translateY(-1px);
   outline: none;
   box-shadow: 0 20px 44px -26px var(--color-card-shadow-soft);
-  border-color: rgba(255, 255, 255, 0.85);
+  border-color: var(--color-border);
 }
 
 .nav-chip__toggle-icon {
@@ -332,7 +459,7 @@ select {
 
 .nav-chip__toggle--active {
   background: var(--gradient-accent);
-  color: var(--color-accent-contrast, #ffffff);
+  color: var(--color-accent-contrast);
   border-color: transparent;
 }
 
@@ -360,7 +487,7 @@ select {
   bottom: 22%;
   left: 0;
   width: 1px;
-  background: var(--color-border-muted, rgba(42, 52, 57, 0.14));
+  background: var(--color-border-muted);
 }
 
 .nav-chip .view-toggle__button:hover,
@@ -368,7 +495,7 @@ select {
   transform: none;
   box-shadow: none;
   outline: none;
-  background: rgba(42, 52, 57, 0.08);
+  background: var(--surface-hover-subtle);
 }
 
 .nav-chip .view-toggle__button--active {
@@ -439,17 +566,17 @@ select {
   cursor: pointer;
   color: var(
     --view-toggle-inactive-text,
-    var(--color-accent-secondary, var(--color-accent))
+    var(--color-accent-secondary)
   );
   border-radius: 999px;
   border: 1px solid
     var(
       --view-toggle-inactive-border,
-      var(--color-accent-secondary-outline, var(--color-border))
+      var(--color-accent-secondary-outline)
     );
   background: var(--view-toggle-inactive-gradient);
   box-shadow: 0 6px 18px -16px
-    var(--color-accent-secondary-shadow, rgba(8, 145, 178, 0.35));
+    var(--color-accent-secondary-shadow);
   transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.25s ease,
     color 0.25s ease, border-color 0.25s ease;
 }
@@ -461,9 +588,9 @@ select {
 .settings-panel__summary:hover {
   transform: translateY(-1px);
   box-shadow:
-    var(--view-toggle-hover-glow, 0 0 16px rgba(233, 204, 138, 0.45)),
+    var(--view-toggle-hover-glow),
     0 12px 25px -18px
-      var(--color-accent-secondary-shadow, rgba(8, 145, 178, 0.35));
+      var(--color-accent-secondary-shadow);
 }
 
 .settings-panel__summary:focus-visible {
@@ -476,7 +603,7 @@ select {
   color: var(--view-toggle-active-text, var(--color-accent-contrast));
   border-color: var(--color-accent-secondary);
   box-shadow: 0 18px 32px -20px
-    var(--color-accent-shadow-strong, rgba(8, 145, 178, 0.45));
+    var(--color-accent-shadow-strong);
 }
 
 
@@ -599,7 +726,7 @@ select {
 
 .theme-toolbar__group--holiday {
   padding-top: 0.25rem;
-  border-top: 1px solid var(--color-border-soft, var(--color-border));
+  border-top: 1px solid var(--color-border-soft);
 }
 
 .theme-toolbar__holiday-row {
@@ -671,7 +798,7 @@ select {
 }
 
 .holiday-theme-toggle__status[data-holiday-active='true'] {
-  color: var(--color-accent-strong, var(--color-accent));
+  color: var(--color-accent-strong);
   font-weight: 600;
 }
 
@@ -769,7 +896,7 @@ select {
 
 .theme-color-control__value:focus {
   outline: none;
-  border-color: var(--color-accent-border, var(--color-border));
+  border-color: var(--color-accent-border);
   box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
@@ -796,7 +923,7 @@ select {
   --filter-section-background: var(--surface-glass-background-strong);
   --filter-section-border: var(--color-primary-border);
   background: var(--surface-panel-gradient);
-  border: 1px solid var(--color-primary-border, var(--color-border-muted));
+  border: 1px solid var(--color-primary-border);
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   color: var(--color-text-emphasis);
@@ -883,7 +1010,7 @@ select {
   color: var(--color-accent-secondary-contrast);
   border-color: var(--color-accent-secondary);
   box-shadow: 0 12px 25px -18px
-    var(--color-accent-secondary-shadow, var(--color-card-shadow-soft));
+    var(--color-accent-secondary-shadow);
 }
 
 .favorite-filter.favorite-filter--active .favorite-filter__icon,
@@ -900,9 +1027,9 @@ select {
   height: 2.55rem;
   padding: 0;
   border-radius: 50%;
-  border: 1px solid var(--color-accent-secondary-border, rgba(34, 211, 238, 0.32));
-  background: var(--color-accent-secondary-soft, rgba(34, 211, 238, 0.18));
-  color: var(--color-accent-secondary-strong, var(--color-accent-secondary));
+  border: 1px solid var(--color-accent-secondary-border);
+  background: var(--color-accent-secondary-soft);
+  color: var(--color-accent-secondary-strong);
   line-height: 1;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease,
@@ -912,7 +1039,7 @@ select {
 .filter-action-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 25px -18px
-    var(--color-accent-secondary-shadow, var(--color-card-shadow-soft));
+    var(--color-accent-secondary-shadow);
   background: var(--surface-glass-accent-1);
   border-color: var(--color-accent-secondary);
   color: var(--color-accent-secondary-contrast);
@@ -929,9 +1056,9 @@ select {
 
 .pantry-only-filter:not(.pantry-only-filter--active):not([aria-pressed='true']),
 .substitution-toggle:not(.substitution-toggle--active):not([aria-pressed='true']) {
-  color: var(--color-accent-tertiary-strong, var(--color-accent-tertiary));
-  border-color: var(--color-accent-tertiary-outline, var(--color-accent-outline));
-  background: var(--color-accent-tertiary-soft, rgba(249, 115, 22, 0.18));
+  color: var(--color-accent-tertiary-strong);
+  border-color: var(--color-accent-tertiary-outline);
+  background: var(--color-accent-tertiary-soft);
 }
 
 .pantry-only-filter:not(.pantry-only-filter--active):not([aria-pressed='true']):hover,
@@ -976,7 +1103,7 @@ select {
   color: var(--color-accent-tertiary-contrast);
   border-color: var(--color-accent-tertiary);
   box-shadow: 0 12px 25px -18px
-    var(--color-accent-tertiary-shadow, var(--color-card-shadow-soft));
+    var(--color-accent-tertiary-shadow);
 }
 
 .pantry-only-filter.pantry-only-filter--active .pantry-only-filter__icon,
@@ -992,7 +1119,7 @@ select {
   color: var(--color-accent-tertiary-contrast);
   border-color: var(--color-accent-tertiary);
   box-shadow: 0 12px 25px -18px
-    var(--color-accent-tertiary-shadow, var(--color-card-shadow-soft));
+    var(--color-accent-tertiary-shadow);
 }
 
 .substitution-toggle.substitution-toggle--active .substitution-toggle__icon,
@@ -1014,15 +1141,15 @@ select {
   margin: 0.35rem 0 0.65rem;
   border-radius: 999px;
   border: 1px solid var(--color-border-muted);
-  background: var(--color-panel, rgba(255, 255, 255, 0.75));
+  background: var(--color-panel);
   box-shadow: 0 14px 30px -26px var(--color-card-shadow-soft);
   width: fit-content;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .recipe-family-filter[data-filter-active='true'] {
-  border-color: var(--color-accent-outline, rgba(68, 83, 214, 0.32));
-  box-shadow: 0 20px 40px -28px var(--color-accent-shadow, rgba(68, 83, 214, 0.32));
+  border-color: var(--color-accent-outline);
+  box-shadow: 0 20px 40px -28px var(--color-accent-shadow);
 }
 
 .recipe-family-filter__list {
@@ -1056,7 +1183,7 @@ select {
 }
 
 .recipe-family-filter__button:hover {
-  background: var(--color-accent-softer, rgba(68, 83, 214, 0.12));
+  background: var(--color-accent-softer);
 }
 
 .recipe-family-filter__button:focus-visible {
@@ -1065,10 +1192,10 @@ select {
 }
 
 .recipe-family-filter__button--active {
-  background: var(--color-accent-soft, rgba(68, 83, 214, 0.18));
-  border-color: var(--color-accent-outline, rgba(68, 83, 214, 0.32));
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-outline);
   color: var(--color-text-emphasis);
-  box-shadow: 0 14px 30px -24px var(--color-accent-shadow, rgba(68, 83, 214, 0.45));
+  box-shadow: 0 14px 30px -24px var(--color-accent-shadow);
 }
 
 .recipe-family-filter__button--active.recipe-family-filter__button--all {
@@ -1082,10 +1209,10 @@ select {
 }
 
 .input-group input {
-  border: 1px solid var(--color-neutral-200, var(--color-border));
+  border: 1px solid var(--color-neutral-200);
   border-radius: 12px;
   padding: 0.6rem 0.75rem;
-  background: var(--color-neutral-50, #ffffff);
+  background: var(--color-neutral-50);
   color: var(--color-text-strong);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
@@ -1101,7 +1228,7 @@ textarea:focus {
   border: 1px solid
     var(
       --filter-section-border,
-      var(--color-accent-outline, var(--color-border-muted))
+      var(--color-accent-outline)
     );
   border-radius: 16px;
   padding: 0.85rem 1rem;
@@ -1116,7 +1243,7 @@ textarea:focus {
 }
 
 .filter-section[open] {
-  border-color: var(--filter-section-border, var(--color-accent-border, var(--color-border)));
+  border-color: var(--filter-section-border, var(--color-accent-border));
   box-shadow: 0 18px 36px -26px
     var(--filter-section-shadow, var(--color-card-shadow-soft));
   background: var(--filter-section-background, var(--surface-section-gradient));
@@ -1132,7 +1259,7 @@ textarea:focus {
   gap: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-accent-strong, var(--color-accent));
+  color: var(--color-accent-strong);
   text-transform: none;
 }
 
@@ -1184,7 +1311,7 @@ textarea:focus {
 }
 
 .tag-group {
-  border: 1px solid var(--color-accent-outline, var(--color-border-muted));
+  border: 1px solid var(--color-accent-outline);
   border-radius: 14px;
   padding: 0.2rem 0.4rem 0.6rem;
   background: var(--color-background);
@@ -1196,7 +1323,7 @@ textarea:focus {
 }
 
 .tag-group[open] {
-  border-color: var(--color-accent-border, var(--color-border));
+  border-color: var(--color-accent-border);
   box-shadow: 0 14px 30px -26px var(--color-card-shadow-soft);
   background: var(--color-background);
 }
@@ -1212,7 +1339,7 @@ textarea:focus {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-accent-secondary-strong, var(--color-accent));
+  color: var(--color-accent-secondary-strong);
   cursor: pointer;
   padding: 0.35rem 0.4rem;
 }
@@ -1228,8 +1355,8 @@ textarea:focus {
   align-items: center;
   padding: 0.1rem 0.4rem;
   border-radius: 999px;
-  background: var(--color-accent-secondary-soft, var(--color-accent-soft));
-  color: var(--color-accent-secondary-strong, var(--color-text-tertiary));
+  background: var(--color-accent-secondary-soft);
+  color: var(--color-accent-secondary-strong);
   font-size: 0.7rem;
   font-weight: 600;
   text-transform: none;
@@ -1270,7 +1397,7 @@ textarea:focus {
 }
 
 .ingredient-group {
-  border: 1px solid var(--color-accent-outline, var(--color-border-muted));
+  border: 1px solid var(--color-accent-outline);
   border-radius: 14px;
   background: var(--color-background);
   color: var(--color-text-strong);
@@ -1282,7 +1409,7 @@ textarea:focus {
 }
 
 .ingredient-group[open] {
-  border-color: var(--color-accent-border, var(--color-border));
+  border-color: var(--color-accent-border);
   box-shadow: 0 16px 34px -26px var(--color-card-shadow-soft);
   background: var(--color-background);
 }
@@ -1296,7 +1423,7 @@ textarea:focus {
   gap: 0.5rem;
   font-size: 0.92rem;
   font-weight: 600;
-  color: var(--color-accent-secondary, var(--color-text-emphasis));
+  color: var(--color-accent-secondary);
   cursor: pointer;
   padding: 0.35rem 0.4rem;
 }
@@ -1371,7 +1498,7 @@ textarea:focus {
 }
 
 .checkbox-option.filter-toggle:focus-visible {
-  outline: 2px solid var(--color-accent-outline, var(--color-border-strong));
+  outline: 2px solid var(--color-accent-outline);
   outline-offset: 2px;
 }
 
@@ -1400,9 +1527,9 @@ textarea:focus {
 }
 
 .filter-toggle[data-filter-state='include'] .filter-toggle__icon {
-  background: var(--color-accent-soft, var(--color-accent));
-  border-color: var(--color-accent, #7c3aed);
-  color: var(--color-accent-contrast, #ffffff);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent-contrast);
 }
 
 .filter-toggle[data-filter-state='exclude'] .filter-toggle__icon {
@@ -1422,7 +1549,7 @@ textarea:focus {
 }
 
 .filter-toggle[data-filter-state='include'].checkbox-option--locked .filter-toggle__icon {
-  color: var(--color-accent-contrast, #ffffff);
+  color: var(--color-accent-contrast);
 }
 
 .filter-toggle[data-filter-state='exclude'].checkbox-option--locked .filter-toggle__icon {
@@ -1512,7 +1639,7 @@ textarea:focus {
   border: 1px solid
     var(
       --color-accent-secondary-border,
-      var(--color-accent-border, var(--color-border-muted))
+      var(--color-accent-border)
     );
   border-radius: 18px;
   box-shadow: 0 28px 52px -28px var(--color-primary-shadow);
@@ -1523,21 +1650,35 @@ textarea:focus {
   transition: box-shadow 0.2s ease, transform 0.2s ease;
   color: var(--color-primary-contrast);
   --color-text-emphasis: var(--color-primary-contrast);
-  --color-text-muted: rgba(248, 250, 252, 0.82);
-  --color-text-soft: rgba(248, 250, 252, 0.72);
+  --color-text-muted: color-mix(
+    in srgb,
+    var(--color-primary-contrast) 82%,
+    transparent
+  );
+  --color-text-soft: color-mix(
+    in srgb,
+    var(--color-primary-contrast) 72%,
+    transparent
+  );
   --color-text-badge: var(--color-primary-contrast);
-  --color-text-instruction: rgba(248, 250, 252, 0.9);
-  --color-border-muted: rgba(255, 255, 255, 0.35);
-  --meal-section-background: rgba(255, 255, 255, 0.12);
-  --meal-section-border: var(
-    --color-accent-secondary-border,
-    rgba(34, 211, 238, 0.4)
+  --color-text-instruction: color-mix(
+    in srgb,
+    var(--color-primary-contrast) 90%,
+    transparent
   );
-  --meal-section-shadow-color: var(
-    --color-accent-secondary-shadow,
-    rgba(8, 145, 178, 0.35)
+  --color-border-muted: color-mix(
+    in srgb,
+    var(--color-primary-contrast) 35%,
+    transparent
   );
-  --serving-control-color: var(--color-primary-contrast, #ffffff);
+  --meal-section-background: color-mix(
+    in srgb,
+    var(--color-primary-contrast) 12%,
+    transparent
+  );
+  --meal-section-border: var(--color-accent-secondary-border);
+  --meal-section-shadow-color: var(--color-accent-secondary-shadow);
+  --serving-control-color: var(--color-primary-contrast);
 }
 
 .meal-card:hover {
@@ -1546,9 +1687,9 @@ textarea:focus {
 }
 
 .meal-card--favorite {
-  border-color: var(--color-accent-tertiary-border, rgba(249, 115, 22, 0.45));
+  border-color: var(--color-accent-tertiary-border);
   box-shadow: 0 34px 62px -26px
-    var(--color-accent-tertiary-shadow, var(--color-primary-shadow));
+    var(--color-accent-tertiary-shadow);
 }
 
 .meal-card__header,
@@ -1584,14 +1725,10 @@ textarea:focus {
 
 .meal-card__schedule-button {
   appearance: none;
-  border: 1px solid
-    var(
-      --color-accent-secondary-border,
-      rgba(34, 211, 238, 0.4)
-    );
+  border: 1px solid var(--color-accent-secondary-border);
   border-radius: 999px;
-  background: var(--color-accent-secondary-soft, rgba(34, 211, 238, 0.2));
-  color: var(--color-accent-secondary-contrast, #083344);
+  background: var(--color-accent-secondary-soft);
+  color: var(--color-accent-secondary-contrast);
   padding: 0.35rem 0.7rem;
   display: inline-flex;
   align-items: center;
@@ -1608,7 +1745,7 @@ textarea:focus {
 .meal-card__schedule-button:hover {
   transform: translateY(-1px);
   background: var(--color-accent-secondary);
-  color: var(--color-accent-secondary-contrast, #ffffff);
+  color: var(--color-accent-secondary-contrast);
   border-color: transparent;
   box-shadow: 0 14px 28px -18px var(--color-accent-secondary-shadow);
 }
@@ -1620,14 +1757,10 @@ textarea:focus {
 
 .meal-card__favorite-button {
   appearance: none;
-  border: 1px solid
-    var(
-      --color-accent-tertiary-border,
-      rgba(249, 115, 22, 0.4)
-    );
+  border: 1px solid var(--color-accent-tertiary-border);
   border-radius: 999px;
-  background: var(--color-accent-tertiary-soft, rgba(249, 115, 22, 0.2));
-  color: var(--color-accent-tertiary-strong, #ea580c);
+  background: var(--color-accent-tertiary-soft);
+  color: var(--color-accent-tertiary-strong);
   padding: 0.3rem 0.85rem;
   font-size: 1.1rem;
   line-height: 1;
@@ -1645,7 +1778,7 @@ textarea:focus {
   transform: translateY(-1px);
   box-shadow: 0 16px 32px -24px var(--color-accent-tertiary-shadow);
   background: var(--color-accent-tertiary);
-  color: var(--color-accent-tertiary-contrast, #fff7ed);
+  color: var(--color-accent-tertiary-contrast);
   border-color: transparent;
 }
 
@@ -1657,7 +1790,7 @@ textarea:focus {
 .meal-card__favorite-button--active,
 .meal-card__favorite-button[aria-pressed='true'] {
   background: var(--gradient-accent-tertiary);
-  color: var(--color-accent-tertiary-contrast, #fff7ed);
+  color: var(--color-accent-tertiary-contrast);
   border-color: transparent;
   box-shadow: 0 20px 40px -24px var(--color-accent-tertiary-shadow);
 }
@@ -1673,9 +1806,9 @@ textarea:focus {
   margin: 0.35rem 0 0.75rem;
   padding: 0.6rem 0.75rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--surface-overlay-soft);
   border: 1px solid
-    var(--color-accent-secondary-border, rgba(34, 211, 238, 0.4));
+    var(--color-accent-secondary-border);
   color: var(--color-primary-contrast);
   display: flex;
   flex-direction: column;
@@ -1696,7 +1829,11 @@ textarea:focus {
   display: grid;
   gap: 0.25rem;
   font-size: 0.85rem;
-  color: rgba(248, 250, 252, 0.78);
+  color: color-mix(
+    in srgb,
+    var(--color-primary-contrast) 78%,
+    transparent
+  );
 }
 
 .meal-card__substitution-list li {
@@ -1721,16 +1858,15 @@ textarea:focus {
   padding: 0.2rem 0.65rem;
   border-radius: 999px;
   background: var(--gradient-accent-secondary);
-  color: var(--color-accent-secondary-contrast, var(--color-text-badge));
-  border: 1px solid var(--color-accent-secondary-outline, transparent);
-  box-shadow: 0 8px 18px -14px
-    var(--color-accent-secondary-shadow, transparent);
+  color: var(--color-accent-secondary-contrast);
+  border: 1px solid var(--color-accent-secondary-outline);
+  box-shadow: 0 8px 18px -14px var(--color-accent-secondary-shadow);
   font-size: 0.82rem;
 }
 
 .badge-soft {
-  background: var(--color-neutral-100, var(--color-neutral-soft));
-  color: var(--color-neutral-600, var(--color-text-inline));
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-600);
 }
 
 .serving-controls {
@@ -1739,7 +1875,7 @@ textarea:focus {
   align-items: center;
   gap: 0.35rem;
   min-width: 110px;
-  color: var(--serving-control-color, var(--color-accent-contrast, #ffffff));
+  color: var(--serving-control-color);
 }
 
 .serving-controls__chevron {
@@ -1763,7 +1899,7 @@ textarea:focus {
 }
 
 .serving-controls__chevron:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.65);
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -1863,11 +1999,11 @@ textarea:focus {
 
 .meal-card__footer textarea {
   min-height: 90px;
-  border: 1px solid var(--color-neutral-200, var(--color-border));
+  border: 1px solid var(--color-neutral-200);
   border-radius: 12px;
   padding: 0.75rem;
   resize: vertical;
-  background: var(--color-neutral-50, #ffffff);
+  background: var(--color-neutral-50);
   color: var(--color-text-strong);
 }
 
@@ -1946,7 +2082,7 @@ textarea:focus {
 }
 
 .kitchen-list__item + .kitchen-list__item {
-  border-top: 1px solid var(--color-border-muted, rgba(42, 52, 57, 0.14));
+  border-top: 1px solid var(--color-border-muted);
 }
 
 .kitchen-list__label {
@@ -1965,7 +2101,7 @@ textarea:focus {
 .kitchen-list__checkbox {
   width: 1.15rem;
   height: 1.15rem;
-  accent-color: var(--color-accent, var(--color-primary));
+  accent-color: var(--color-accent);
   flex-shrink: 0;
   margin-top: 0.15rem;
 }
@@ -1985,7 +2121,7 @@ textarea:focus {
 
 .kitchen-list__label[data-owned='true'] .kitchen-list__name {
   font-weight: 600;
-  color: var(--color-accent, var(--color-primary));
+  color: var(--color-accent);
 }
 
 .kitchen-list__label[data-owned='true'] .kitchen-list__usage {
@@ -2008,7 +2144,7 @@ textarea:focus {
   --surface-panel-gradient: var(--surface-glass-primary-soft);
   background: var(--surface-panel-gradient);
   border-radius: 18px;
-  border: 1px solid var(--color-primary-border, var(--color-border-muted));
+  border: 1px solid var(--color-primary-border);
   box-shadow: 0 24px 48px -28px var(--color-card-shadow);
   --meal-plan-view-height: auto;
   --meal-plan-layout-height: auto;
@@ -2062,7 +2198,7 @@ textarea:focus {
   gap: 1rem;
   padding: 0.4rem 1rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.68);
+  background: var(--surface-overlay);
   border: 1px solid var(--color-border-muted);
   box-shadow: 0 16px 34px -26px var(--color-card-shadow-soft);
   min-width: 0;
@@ -2075,7 +2211,7 @@ textarea:focus {
   gap: 0.5rem;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  background: var(--meal-plan-surface, rgba(255, 255, 255, 0.68));
+  background: var(--meal-plan-surface);
   border: 1px solid var(--color-border-muted);
   box-shadow: 0 16px 34px -26px var(--color-card-shadow-soft);
   flex: 0 1 auto;
@@ -2110,7 +2246,7 @@ textarea:focus {
 }
 
 .meal-plan-family-filter__button:hover {
-  background: var(--color-accent-softer, rgba(68, 83, 214, 0.12));
+  background: var(--color-accent-softer);
 }
 
 .meal-plan-family-filter__button:focus-visible {
@@ -2119,9 +2255,9 @@ textarea:focus {
 }
 
 .meal-plan-family-filter__button--active {
-  background: var(--color-accent-soft, rgba(68, 83, 214, 0.18));
-  border-color: var(--color-accent-outline, rgba(68, 83, 214, 0.32));
-  box-shadow: 0 10px 22px -18px var(--color-accent-shadow, rgba(68, 83, 214, 0.7));
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-outline);
+  box-shadow: 0 10px 22px -18px var(--color-accent-shadow);
 }
 
 .meal-plan-family-filter[data-filter-active='true'] .meal-plan-family-filter__label {
@@ -2152,7 +2288,7 @@ textarea:focus {
   place-items: center;
   font-size: 1.25rem;
   background: var(--gradient-accent-secondary);
-  color: var(--color-accent-secondary-contrast, #2b1a0f);
+  color: var(--color-accent-secondary-contrast);
   cursor: pointer;
   box-shadow: 0 12px 28px -20px var(--color-accent-secondary-shadow);
   transition: transform 120ms ease, box-shadow 120ms ease;
@@ -2188,7 +2324,7 @@ textarea:focus {
   padding: 1rem;
   border-radius: 18px;
   background: var(--surface-section-gradient);
-  border: 1px solid var(--meal-plan-border, var(--color-border-muted));
+  border: 1px solid var(--meal-plan-border);
   box-shadow: 0 18px 32px -24px var(--color-card-shadow-soft);
   display: flex;
   flex-direction: column;
@@ -2206,7 +2342,7 @@ textarea:focus {
   padding: 1.25rem 1.5rem;
   border-radius: 18px;
   background: var(--meal-plan-surface);
-  border: 1px solid var(--meal-plan-border, var(--color-border-muted));
+  border: 1px solid var(--meal-plan-border);
   box-shadow: 0 18px 34px -24px var(--color-card-shadow-soft);
   max-height: 100%;
   overflow-y: auto;
@@ -2246,7 +2382,7 @@ textarea:focus {
 .meal-plan-empty {
   padding: 1.25rem 1rem;
   border-radius: 14px;
-  background: rgba(68, 83, 214, 0.08);
+  background: var(--color-primary-softer);
   color: var(--color-text-soft);
   font-style: italic;
   text-align: center;
@@ -2259,8 +2395,8 @@ textarea:focus {
   align-items: stretch;
   padding: 0.6rem 0.75rem;
   border-radius: 14px;
-  background: var(--meal-plan-surface, var(--color-surface));
-  border: 1px solid var(--meal-plan-border, rgba(59, 130, 246, 0.18));
+  background: var(--meal-plan-surface);
+  border: 1px solid var(--meal-plan-border);
   color: var(--color-text-secondary);
 }
 
@@ -2337,7 +2473,7 @@ textarea:focus {
 }
 
 .meal-plan-entry__remove:hover {
-  background: rgba(185, 28, 28, 0.08);
+  background: var(--color-danger-soft);
 }
 
 .meal-plan-entry__remove:focus-visible {
@@ -2352,7 +2488,7 @@ textarea:focus {
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: rgba(12, 22, 9, 0.45);
+  background: var(--overlay-backdrop);
   backdrop-filter: blur(4px);
   z-index: 1000;
 }
@@ -2363,7 +2499,7 @@ textarea:focus {
 
 .schedule-dialog__panel {
   width: min(100%, 360px);
-  background: var(--color-header-background, rgba(255, 255, 255, 0.96));
+  background: var(--color-header-background);
   border-radius: 18px;
   border: 1px solid var(--color-border-muted);
   box-shadow: 0 32px 64px -28px var(--color-card-shadow);
@@ -2400,7 +2536,7 @@ textarea:focus {
   padding: 0.6rem 0.75rem;
   border-radius: 10px;
   border: 1px solid var(--color-border-muted);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--surface-overlay-strong);
   color: var(--color-text-emphasis);
   font-size: 0.95rem;
 }
@@ -2418,7 +2554,7 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--surface-overlay-strong);
 }
 
 .schedule-dialog__fieldset legend {
@@ -2439,8 +2575,8 @@ textarea:focus {
   gap: 0.35rem;
   padding: 0.55rem 0.65rem;
   border-radius: 12px;
-  border: 1px solid rgba(68, 83, 214, 0.25);
-  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--color-accent-outline);
+  background: var(--surface-overlay-strong);
   color: var(--color-text-strong);
   cursor: pointer;
   min-width: 3.25rem;
@@ -2448,13 +2584,13 @@ textarea:focus {
 }
 
 .schedule-dialog__member:hover {
-  border-color: rgba(68, 83, 214, 0.45);
+  border-color: var(--color-accent);
 }
 
 .schedule-dialog__member--active {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(68, 83, 214, 0.16);
-  background: rgba(68, 83, 214, 0.14);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  background: var(--color-accent-soft);
 }
 
 .schedule-dialog__member-icon {
@@ -2489,8 +2625,8 @@ textarea:focus {
 .schedule-dialog__guest-input {
   padding: 0.65rem 0.75rem;
   border-radius: 12px;
-  border: 1px solid rgba(68, 83, 214, 0.25);
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-accent-outline);
+  background: var(--surface-overlay);
   color: var(--color-text-strong);
   font-weight: 600;
   transition: border-color 120ms ease, box-shadow 120ms ease;
@@ -2499,7 +2635,7 @@ textarea:focus {
 .schedule-dialog__guest-input:focus {
   outline: none;
   border-color: var(--color-accent-border);
-  box-shadow: 0 0 0 3px rgba(68, 83, 214, 0.18);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .schedule-dialog__button {
@@ -2508,7 +2644,7 @@ textarea:focus {
   font-weight: 600;
   cursor: pointer;
   border: 1px solid var(--color-border-muted);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--surface-overlay-strong);
   color: var(--color-text-emphasis);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease,
     color 0.2s ease;
@@ -2521,13 +2657,13 @@ textarea:focus {
 
 .schedule-dialog__button--primary {
   background: var(--gradient-accent);
-  color: var(--color-accent-contrast, #fff);
+  color: var(--color-accent-contrast);
   border-color: var(--color-accent-secondary);
 }
 
 .schedule-dialog__button--primary:hover {
   box-shadow: 0 18px 36px -24px
-    var(--color-accent-secondary-shadow, rgba(8, 145, 178, 0.45));
+    var(--color-accent-secondary-shadow);
 }
 
 .schedule-dialog__button:focus-visible {
@@ -2610,8 +2746,8 @@ textarea:focus {
 .family-panel__add {
   padding: 0.6rem 1.1rem;
   border-radius: 999px;
-  border: 1px solid var(--view-toggle-inactive-border, rgba(125, 147, 65, 0.45));
-  background: rgba(68, 83, 214, 0.12);
+  border: 1px solid var(--view-toggle-inactive-border);
+  background: var(--color-accent-soft);
   color: var(--color-text-emphasis);
   font-weight: 600;
   cursor: pointer;
@@ -2628,7 +2764,7 @@ textarea:focus {
 
 .family-panel__add:hover {
   transform: translateY(-1px);
-  background: rgba(68, 83, 214, 0.18);
+  background: var(--color-accent);
   box-shadow: 0 12px 24px -18px var(--color-card-shadow-soft);
 }
 
@@ -2654,7 +2790,7 @@ textarea:focus {
 .meal-plan-day-modal__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.55);
+  background: var(--overlay-backdrop-strong);
   backdrop-filter: blur(4px);
 }
 
@@ -2668,8 +2804,8 @@ textarea:focus {
   max-height: 85vh;
   padding: 1.5rem 1.75rem 1.75rem;
   border-radius: 22px;
-  background: var(--meal-plan-surface, var(--color-surface));
-  border: 1px solid var(--meal-plan-border, rgba(59, 130, 246, 0.18));
+  background: var(--meal-plan-surface);
+  border: 1px solid var(--meal-plan-border);
   box-shadow: 0 32px 60px -28px var(--color-card-shadow-soft);
 }
 
@@ -2714,7 +2850,7 @@ textarea:focus {
 
 .meal-plan-day-modal__close:hover {
   color: var(--color-text-emphasis);
-  background: rgba(15, 23, 42, 0.08);
+  background: var(--surface-hover-subtle);
 }
 
 .meal-plan-day-modal__close:focus-visible {
@@ -2732,8 +2868,8 @@ textarea:focus {
 }
 
 .family-member-card {
-  background: rgba(255, 255, 255, 0.98);
-  border: 1px solid rgba(68, 83, 214, 0.18);
+  background: var(--surface-overlay-heavy);
+  border: 1px solid var(--color-border-muted);
   border-radius: 16px;
   padding: 1rem 1.25rem;
   display: flex;
@@ -2757,8 +2893,8 @@ textarea:focus {
   align-items: center;
   justify-content: center;
   font-size: 1.8rem;
-  border: 1px solid rgba(68, 83, 214, 0.18);
-  background: rgba(68, 83, 214, 0.08);
+  border: 1px solid var(--color-accent-outline);
+  background: var(--color-accent-soft);
 }
 
 .family-member-card__name {
@@ -2766,7 +2902,7 @@ textarea:focus {
   padding: 0.6rem 0.8rem;
   border-radius: 12px;
   border: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface-overlay-heavy);
   font-weight: 600;
   color: var(--color-text-strong);
 }
@@ -2788,12 +2924,12 @@ textarea:focus {
 }
 
 .family-member-card__remove:hover {
-  background: rgba(185, 28, 28, 0.12);
+  background: var(--color-danger-soft);
 }
 
 .family-member-card__remove:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 30%, transparent);
 }
 
 .family-member-card__fields {
@@ -2834,7 +2970,7 @@ textarea:focus {
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
   border: 1px solid var(--color-border-muted);
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--surface-overlay-heavy);
   color: var(--color-text-secondary);
   font-size: 0.8rem;
   font-weight: 600;
@@ -2867,11 +3003,11 @@ textarea:focus {
   background: var(--view-toggle-active-gradient, var(--gradient-accent));
   color: var(--view-toggle-active-text, var(--color-accent-contrast));
   border-color: transparent;
-  box-shadow: var(--view-toggle-hover-glow, 0 0 16px rgba(233, 204, 138, 0.45));
+  box-shadow: var(--view-toggle-hover-glow);
 }
 
 .family-toggle--active:hover {
-  box-shadow: var(--view-toggle-hover-glow, 0 0 16px rgba(233, 204, 138, 0.45));
+  box-shadow: var(--view-toggle-hover-glow);
 }
 
 .family-member-card__field input:not(.family-toggle__checkbox),
@@ -2880,7 +3016,7 @@ textarea:focus {
   padding: 0.55rem 0.7rem;
   border-radius: 10px;
   border: 1px solid var(--color-border-muted);
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--surface-overlay-strong);
   color: var(--color-text-strong);
   font: inherit;
 }
@@ -2898,8 +3034,8 @@ textarea:focus {
   gap: 1rem;
   padding: 1.25rem 1rem 1rem;
   border-radius: 16px;
-  background: var(--meal-plan-surface, var(--color-surface));
-  border: 1px solid var(--meal-plan-border, rgba(59, 130, 246, 0.18));
+  background: var(--meal-plan-surface);
+  border: 1px solid var(--meal-plan-border);
   color: var(--color-text-secondary);
   flex: 1 1 auto;
 }
@@ -2967,7 +3103,7 @@ textarea:focus {
   padding: 0.75rem;
   border-radius: 12px;
   background: var(--color-surface-soft);
-  border: 1px solid var(--meal-plan-border, rgba(59, 130, 246, 0.18));
+  border: 1px solid var(--meal-plan-border);
 }
 
 .meal-plan-summary__group-icon {
@@ -3010,9 +3146,13 @@ textarea:focus {
   gap: 0.2rem;
   padding: 0.6rem 0.7rem;
   border-radius: 10px;
-  background: var(--color-surface-highlight, var(--color-surface-soft));
+  background: var(--color-surface-highlight);
   color: var(--color-text-secondary);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 0 color-mix(
+      in srgb,
+      var(--text) 6%,
+      var(--surface-1)
+    );
 }
 
 .meal-plan-summary__stat dt {
@@ -3078,21 +3218,21 @@ textarea:focus {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 12px;
-  border: 1px solid rgba(68, 83, 214, 0.25);
-  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--color-accent-outline);
+  background: var(--surface-overlay-strong);
   font-size: 1.35rem;
   cursor: pointer;
   transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
 }
 
 .meal-plan-entry__member:hover {
-  border-color: rgba(68, 83, 214, 0.45);
+  border-color: var(--color-accent);
 }
 
 .meal-plan-entry__member--active {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(68, 83, 214, 0.16);
-  background: rgba(68, 83, 214, 0.14);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  background: var(--color-accent-soft);
 }
 
 .meal-plan-entry__no-members {
@@ -3120,7 +3260,7 @@ textarea:focus {
   padding: 0.45rem 0.5rem;
   border-radius: 10px;
   border: 1px solid var(--color-border-muted);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--surface-overlay-strong);
   color: var(--color-text-strong);
   font-size: 0.9rem;
 }
@@ -3128,7 +3268,7 @@ textarea:focus {
 .meal-plan-entry__guest-input:focus {
   outline: none;
   border-color: var(--color-accent-border);
-  box-shadow: 0 0 0 3px rgba(68, 83, 214, 0.14);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 
@@ -3184,7 +3324,7 @@ textarea:focus {
   align-items: stretch;
   height: 100%;
   border-radius: 16px;
-  border: 1px solid rgba(68, 83, 214, 0.16);
+  border: 1px solid var(--meal-plan-border);
   background: var(--meal-plan-surface);
   color: inherit;
   text-align: left;
@@ -3210,7 +3350,7 @@ textarea:focus {
 
 .meal-plan-calendar__cell--muted {
   opacity: 0.6;
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--surface-overlay);
 }
 
 .meal-plan-calendar__cell--today {
@@ -3218,8 +3358,8 @@ textarea:focus {
   box-shadow: 0 22px 48px -28px var(--color-accent-shadow);
   background-image: linear-gradient(
     135deg,
-    rgba(68, 83, 214, 0.12),
-    rgba(68, 83, 214, 0.18)
+    color-mix(in srgb, var(--color-accent) 12%, transparent),
+    color-mix(in srgb, var(--color-accent) 18%, transparent)
   );
 }
 
@@ -3233,11 +3373,11 @@ textarea:focus {
 }
 
 .meal-plan-calendar__cell--past:not(.meal-plan-calendar__cell--holiday) {
-  border-color: rgba(68, 83, 214, 0.12);
+  border-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
 }
 
 .meal-plan-calendar__cell--past .meal-plan-calendar__entry {
-  background: rgba(68, 83, 214, 0.08);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
 }
 
 .meal-plan-calendar__cell--selected {
@@ -3246,7 +3386,7 @@ textarea:focus {
 }
 
 .meal-plan-calendar__cell--selected:not(.meal-plan-calendar__cell--today) {
-  box-shadow: 0 0 0 2px var(--color-surface, #ffffff),
+  box-shadow: 0 0 0 2px var(--color-surface),
     0 0 0 4px var(--color-accent-outline),
     0 20px 42px -26px var(--color-accent-shadow);
 }
@@ -3259,9 +3399,9 @@ textarea:focus {
 .meal-plan-calendar__cell--selected.meal-plan-calendar__cell--holiday:not(
     .meal-plan-calendar__cell--today
   ) {
-  box-shadow: 0 0 0 2px var(--color-surface, #ffffff),
-    0 0 0 4px var(--color-accent-secondary-outline, var(--color-accent-outline)),
-    0 22px 44px -28px var(--color-accent-secondary-shadow, var(--color-card-shadow-soft));
+  box-shadow: 0 0 0 2px var(--color-surface),
+    0 0 0 4px var(--color-accent-secondary-outline),
+    0 22px 44px -28px var(--color-accent-secondary-shadow);
 }
 
 .meal-plan-calendar__cell--selected-outline {
@@ -3304,13 +3444,13 @@ textarea:focus {
   font-weight: 600;
   letter-spacing: 0.01em;
   text-transform: uppercase;
-  color: var(--color-accent-secondary-strong, var(--color-accent-strong));
-  background: var(--color-accent-secondary-soft, var(--color-accent-softer));
+  color: var(--color-accent-secondary-strong);
+  background: var(--color-accent-secondary-soft);
 }
 
 .meal-plan-calendar__cell--holiday {
-  border-color: var(--color-accent-secondary-outline, var(--color-accent-outline));
-  box-shadow: 0 22px 44px -28px var(--color-accent-secondary-shadow, var(--color-card-shadow-soft));
+  border-color: var(--color-accent-secondary-outline);
+  box-shadow: 0 22px 44px -28px var(--color-accent-secondary-shadow);
 }
 
 .meal-plan-calendar__entries {
@@ -3326,7 +3466,7 @@ textarea:focus {
   font-size: 0.85rem;
   padding: 0.4rem 0.5rem;
   border-radius: 10px;
-  background: rgba(68, 83, 214, 0.12);
+  background: var(--color-accent-softer);
   color: var(--color-text-secondary);
 }
 
@@ -3394,15 +3534,15 @@ textarea:focus {
   width: min(100%, 640px);
   padding: 1.25rem;
   border-radius: 18px;
-  border: 1px solid rgba(68, 83, 214, 0.16);
-  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--meal-plan-border);
+  background: var(--meal-plan-surface);
   box-shadow: 0 18px 32px -26px var(--color-card-shadow-soft);
 }
 
 .meal-plan-day-modal__body .meal-plan-day {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--meal-plan-surface);
   border-radius: 18px;
-  border: 1px solid rgba(68, 83, 214, 0.16);
+  border: 1px solid var(--meal-plan-border);
   padding: 1.25rem;
   box-shadow: 0 18px 32px -26px var(--color-card-shadow-soft);
 }
@@ -3520,7 +3660,7 @@ textarea:focus {
 .pantry-card__favorite-button--active,
 .pantry-card__favorite-button[aria-pressed='true'] {
   background: var(--gradient-accent);
-  color: var(--color-accent-contrast, #ffffff);
+  color: var(--color-accent-contrast);
   border-color: transparent;
   box-shadow: 0 16px 32px -20px var(--color-accent-shadow);
 }
@@ -3528,7 +3668,7 @@ textarea:focus {
 .pantry-card--favorite {
   border-color: var(--color-accent-border);
   box-shadow: 0 18px 36px -26px
-    var(--color-accent-shadow, rgba(34, 211, 238, 0.35));
+    var(--color-accent-shadow);
 }
 
 .pantry-card__inline-input {
@@ -3672,21 +3812,18 @@ textarea:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid
-    var(
-      --view-toggle-inactive-border,
-      var(--color-accent-secondary-outline, var(--color-border))
-    );
+  border: 1px solid var(--view-toggle-inactive-border);
   border-radius: 999px;
   padding: 0.45rem 1.15rem;
   background: var(--view-toggle-inactive-gradient);
-  color: var(
-    --view-toggle-inactive-text,
-    var(--color-accent-secondary, var(--color-accent))
-  );
+  color: var(--view-toggle-inactive-text);
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 6px 18px -16px rgba(12, 22, 9, 0.55);
+  box-shadow: 0 6px 18px -16px color-mix(
+      in srgb,
+      var(--neutral) 42%,
+      transparent
+    );
   transition:
     transform 0.2s ease,
     box-shadow 0.25s ease,
@@ -3698,9 +3835,9 @@ textarea:focus {
 .view-toggle__button:hover {
   transform: translateY(-1px);
   box-shadow:
-    var(--view-toggle-hover-glow, 0 0 16px rgba(34, 211, 238, 0.45)),
+    var(--view-toggle-hover-glow),
     0 12px 25px -18px
-      var(--color-accent-secondary-shadow, rgba(8, 145, 178, 0.35));
+      var(--color-accent-secondary-shadow);
 }
 
 .view-toggle__button--active {
@@ -3712,89 +3849,57 @@ textarea:focus {
 
 .view-toggle__button--active:hover {
   box-shadow:
-    var(--view-toggle-hover-glow, 0 0 16px rgba(233, 204, 138, 0.45)),
+    var(--view-toggle-hover-glow),
     0 18px 35px -20px var(--color-accent-shadow-strong);
 }
 
 
-:root[data-mode='dark'] {
+:root[data-theme='dark'] {
   color-scheme: dark;
-  --color-layout-background: #0b1220;
 
-  --color-text-primary: #f8fafc;
-  --color-text-strong: #f8fafc;
-  --color-text-secondary: #cbd5f5;
-  --color-text-tertiary: rgba(203, 213, 225, 0.86);
-  --color-text-muted: rgba(148, 163, 184, 0.78);
-  --color-text-badge: #e2e8f0;
-  --color-text-soft: rgba(148, 163, 184, 0.68);
-  --color-text-instruction: rgba(203, 213, 225, 0.85);
-  --color-text-inline: #cbd5f5;
-  --color-tag-text: #cbd5f5;
-  --color-text-emphasis: #f8fafc;
+  --bg: hsl(222 23.81% 8.24%);
+  --surface-1: hsl(220 27.27% 10.78%);
+  --surface-2: hsl(219 26.32% 14.9%);
+  --surface-3: hsl(216.92 25% 20.39%);
 
-  --color-surface: #111827;
-  --color-surface-elevated: #1f2937;
-  --color-surface-soft: rgba(148, 163, 184, 0.12);
-  --color-surface-highlight: rgba(148, 163, 184, 0.18);
-  --color-header-background: rgba(17, 24, 39, 0.9);
-  --color-header-shadow: rgba(2, 6, 23, 0.7);
+  --text: hsl(220 51.72% 94.31%);
+  --text-muted: hsl(217.71 24.14% 71.57%);
+  --text-inverse: hsl(220 30.61% 9.61%);
 
-  --color-border: rgba(148, 163, 184, 0.4);
-  --color-border-strong: rgba(148, 163, 184, 0.6);
-  --color-border-muted: rgba(51, 65, 85, 0.55);
-  --color-inline-tag-background: rgba(148, 163, 184, 0.2);
-  --color-inline-tag-text: #f8fafc;
-  --color-code-background: rgba(30, 41, 59, 0.85);
-  --color-neutral-50: rgba(148, 163, 184, 0.14);
-  --color-neutral-100: rgba(148, 163, 184, 0.2);
-  --color-neutral-200: rgba(148, 163, 184, 0.28);
-  --color-neutral-400: rgba(148, 163, 184, 0.4);
-  --color-neutral-600: rgba(148, 163, 184, 0.55);
-  --color-neutral-soft: rgba(148, 163, 184, 0.25);
-
-  --color-card-shadow: rgba(2, 6, 23, 0.65);
-  --color-card-shadow-muted: rgba(2, 6, 23, 0.5);
-  --color-card-shadow-soft: rgba(148, 163, 184, 0.3);
-
-  --color-danger: #f87171;
-  --color-danger-soft: rgba(248, 113, 113, 0.25);
-  --color-focus-ring: rgba(96, 165, 250, 0.45);
-
-  --meal-plan-border: rgba(96, 165, 250, 0.3);
-  --meal-plan-surface: rgba(17, 24, 39, 0.92);
-
-  --surface-glass-background: linear-gradient(
-    160deg,
-    rgba(15, 23, 42, 0.92),
-    rgba(15, 23, 42, 0.78)
-  );
-  --surface-glass-background-strong: linear-gradient(
-    160deg,
-    rgba(11, 17, 32, 0.94),
-    rgba(11, 17, 32, 0.82)
-  );
-  --surface-glass-primary: linear-gradient(
-    158deg,
-    rgba(59, 130, 246, 0.2),
-    rgba(59, 130, 246, 0.12)
-  );
-  --surface-glass-primary-soft: linear-gradient(
-    160deg,
-    rgba(59, 130, 246, 0.16),
-    rgba(59, 130, 246, 0.1)
-  );
-  --surface-glass-accent-1: linear-gradient(
-    160deg,
-    rgba(34, 211, 238, 0.24),
-    rgba(34, 211, 238, 0.14)
-  );
-  --surface-glass-accent-2: linear-gradient(
-    160deg,
-    rgba(249, 115, 22, 0.28),
-    rgba(249, 115, 22, 0.16)
-  );
+  --color-panel: color-mix(in srgb, var(--surface-2) 74%, transparent);
+  --color-border: color-mix(in srgb, var(--text) 18%, var(--surface-2));
+  --color-border-strong: color-mix(in srgb, var(--text) 28%, var(--surface-1));
+  --color-border-muted: color-mix(in srgb, var(--text) 12%, var(--surface-3));
+  --color-border-soft: color-mix(in srgb, var(--text) 10%, var(--surface-2));
+  --color-header-background: color-mix(in srgb, var(--surface-2) 88%, transparent 12%);
+  --color-header-shadow: color-mix(in srgb, var(--neutral) 42%, transparent);
+  --color-card-shadow: color-mix(in srgb, var(--neutral) 48%, transparent);
+  --color-card-shadow-muted: color-mix(in srgb, var(--neutral) 38%, transparent);
+  --color-card-shadow-soft: color-mix(in srgb, var(--accent-1) 32%, transparent);
+  --color-inline-tag-background: color-mix(in srgb, var(--accent-1) 28%, transparent);
+  --color-inline-tag-text: color-mix(in srgb, var(--text) 90%, var(--text-inverse) 10%);
+  --color-neutral-50: color-mix(in srgb, var(--surface-1) 24%, var(--text) 76%);
+  --color-neutral-100: color-mix(in srgb, var(--surface-2) 32%, var(--text) 68%);
+  --color-neutral-200: color-mix(in srgb, var(--surface-2) 42%, var(--text) 58%);
+  --color-neutral-400: color-mix(in srgb, var(--surface-3) 52%, var(--text) 48%);
+  --color-neutral-600: color-mix(in srgb, var(--surface-3) 62%, var(--text) 38%);
+  --color-neutral-soft: color-mix(in srgb, var(--text) 22%, transparent);
+  --color-code-background: color-mix(in srgb, var(--surface-2) 70%, var(--surface-3) 30%);
+  --color-text-badge: color-mix(in srgb, var(--text) 75%, var(--surface-3) 25%);
+  --color-surface-soft: color-mix(in srgb, var(--brand) 18%, transparent);
+  --color-surface-highlight: color-mix(in srgb, var(--accent-1) 20%, transparent);
+  --color-focus-ring: color-mix(in srgb, var(--accent-1) 60%, transparent);
+  --color-danger-soft: color-mix(in srgb, var(--danger) 30%, transparent);
+  --view-toggle-inactive-text: color-mix(in srgb, var(--text) 88%, var(--text-inverse) 12%);
+  --view-toggle-hover-glow: 0 0 16px color-mix(in srgb, var(--accent-1) 45%, transparent);
+  --meal-plan-surface: color-mix(in srgb, var(--surface-1) 88%, transparent 12%);
+  --filter-section-background: color-mix(in srgb, var(--surface-1) 82%, transparent);
+  --filter-section-border: color-mix(in srgb, var(--text) 16%, var(--surface-2));
+  --meal-section-background: color-mix(in srgb, var(--surface-2) 86%, transparent);
+  --meal-section-shadow-color: color-mix(in srgb, var(--neutral) 35%, transparent);
 }
+
+
 
 .holiday-theme-dialog {
   position: fixed;
@@ -3816,7 +3921,7 @@ textarea:focus {
 .holiday-theme-dialog__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.38);
+  background: var(--overlay-backdrop);
   backdrop-filter: blur(2px);
 }
 
@@ -3871,7 +3976,7 @@ textarea:focus {
 
 .holiday-theme-dialog__item[data-checked='true'] {
   border-color: var(--color-accent);
-  background: var(--color-surface-highlight, var(--color-surface-soft));
+  background: var(--color-surface-highlight);
 }
 
 .holiday-theme-dialog__checkbox {
