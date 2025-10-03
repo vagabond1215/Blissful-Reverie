@@ -1330,6 +1330,8 @@
   }
 
   const THEME_STORAGE_KEY = 'blissful-theme';
+  const HOLIDAY_THEME_STORAGE_KEY = 'blissful-holiday-themes';
+  let lastPersistedHolidayThemes = null;
   const THEME_OPTIONS = {
     light: [
       {
@@ -1621,6 +1623,32 @@
 
   const themePreferences = loadThemePreferences();
 
+  const loadHolidayThemePreferences = () => {
+    const fallback = { enabled: false, holidays: HOLIDAY_DEFAULT_SELECTIONS.slice() };
+    try {
+      const storedRaw = localStorage.getItem(HOLIDAY_THEME_STORAGE_KEY);
+      if (!storedRaw) {
+        lastPersistedHolidayThemes = null;
+        return fallback;
+      }
+      const stored = JSON.parse(storedRaw);
+      if (!stored || typeof stored !== 'object') {
+        return fallback;
+      }
+      const enabled = stored.enabled === true;
+      const holidays = Array.isArray(stored.holidays)
+        ? stored.holidays.filter((id) => holidayDefinitionLookup.has(id))
+        : fallback.holidays.slice();
+      lastPersistedHolidayThemes = storedRaw;
+      return { enabled, holidays };
+    } catch (error) {
+      console.warn('Unable to read holiday theme preferences.', error);
+      return fallback;
+    }
+  };
+
+  const holidayThemePreferences = loadHolidayThemePreferences();
+
   const loadMeasurementPreference = () => {
     try {
       const stored = localStorage.getItem(MEASUREMENT_STORAGE_KEY);
@@ -1755,9 +1783,32 @@
     { id: 'new-years-eve', label: "New Year's Eve", getDate: (year) => new Date(year, 11, 31) },
   ];
 
+  const holidayDefinitionLookup = new Map(
+    HOLIDAY_DEFINITIONS.map((definition) => [definition.id, definition]),
+  );
+  const HOLIDAY_DEFAULT_SELECTIONS = HOLIDAY_DEFINITIONS.map((definition) => definition.id);
+
+  const HOLIDAY_THEME_OVERRIDES = {
+    'new-years-day': { light: 'citrine', dark: 'nebula', sepia: 'copper' },
+    'martin-luther-king-jr-day': { light: 'mist', dark: 'midnight', sepia: 'classic' },
+    'valentines-day': { light: 'blossom', dark: 'velvet', sepia: 'copper' },
+    'presidents-day': { light: 'serene', dark: 'midnight', sepia: 'classic' },
+    'st-patricks-day': { light: 'meadow', dark: 'forest', sepia: 'umber' },
+    'mothers-day': { light: 'blossom', dark: 'velvet', sepia: 'classic' },
+    'memorial-day': { light: 'sunrise', dark: 'ember', sepia: 'copper' },
+    'juneteenth': { light: 'sunrise', dark: 'ember', sepia: 'copper' },
+    'independence-day': { light: 'citrine', dark: 'nebula', sepia: 'copper' },
+    'labor-day': { light: 'meadow', dark: 'forest', sepia: 'classic' },
+    'halloween': { light: 'sunrise', dark: 'abyss', sepia: 'umber' },
+    'thanksgiving-day': { light: 'meadow', dark: 'forest', sepia: 'umber' },
+    'christmas-eve': { light: 'mist', dark: 'abyss', sepia: 'classic' },
+    'christmas-day': { light: 'mist', dark: 'abyss', sepia: 'classic' },
+    'new-years-eve': { light: 'citrine', dark: 'nebula', sepia: 'copper' },
+  };
+
   const holidayCache = new Map();
 
-  const getHolidayLabelsForDate = (date) => {
+  const getHolidaysForDate = (date) => {
     if (!(date instanceof Date)) {
       return [];
     }
@@ -1776,16 +1827,19 @@
         if (!iso) {
           return;
         }
-        const labels = yearMap.get(iso) || [];
-        labels.push(definition.label);
-        yearMap.set(iso, labels);
+        const entries = yearMap.get(iso) || [];
+        entries.push(definition);
+        yearMap.set(iso, entries);
       });
       holidayCache.set(year, yearMap);
     }
     const iso = toISODateString(date);
-    const labels = holidayCache.get(year).get(iso);
-    return Array.isArray(labels) ? labels.slice() : [];
+    const entries = holidayCache.get(year).get(iso);
+    return Array.isArray(entries) ? entries.slice() : [];
   };
+
+  const getHolidayLabelsForDate = (date) =>
+    getHolidaysForDate(date).map((holiday) => holiday.label);
 
   const getStartOfWeek = (date) => {
     const start = getStartOfDay(date);
@@ -2595,6 +2649,8 @@
     familyMembers: sanitizedFamilyMembers,
     themeMode: themePreferences.mode,
     themeSelections: { ...themePreferences.selections },
+    holidayThemesEnabled: holidayThemePreferences.enabled,
+    holidayThemeAllowList: new Set(holidayThemePreferences.holidays),
     measurementSystem: measurementPreference,
     favoriteRecipes: new Set(favoriteRecipeIds),
     favoritePantryItems: new Set(favoritePantrySlugs),
@@ -3258,6 +3314,17 @@
   };
 
   const elements = {};
+
+  const holidayThemeDialogState = {
+    root: null,
+    panel: null,
+    list: null,
+    checkboxes: new Map(),
+    previousFocus: null,
+    backdrop: null,
+    cancelButton: null,
+    saveButton: null,
+  };
 
   const scheduleDialogState = {
     root: null,
@@ -4028,6 +4095,399 @@
     }
   };
 
+  const ensureHolidayThemeAllowList = () => {
+    if (state.holidayThemeAllowList instanceof Set) {
+      return state.holidayThemeAllowList;
+    }
+    const values = Array.isArray(state.holidayThemeAllowList)
+      ? state.holidayThemeAllowList.filter((id) => holidayDefinitionLookup.has(id))
+      : [];
+    const list = new Set(values);
+    state.holidayThemeAllowList = list;
+    return list;
+  };
+
+  const resolveHolidayThemeId = (holidayId, mode) => {
+    const override = HOLIDAY_THEME_OVERRIDES[holidayId];
+    if (override) {
+      if (typeof override === 'string') {
+        return override;
+      }
+      if (override[mode]) {
+        return override[mode];
+      }
+      if (override.default) {
+        return override.default;
+      }
+    }
+    const fallback = DEFAULT_THEME_SELECTIONS[mode];
+    if (fallback) {
+      return fallback;
+    }
+    const options = Array.isArray(THEME_OPTIONS[mode]) ? THEME_OPTIONS[mode] : [];
+    return options.length ? options[0].id : null;
+  };
+
+  const getActiveHolidayThemeOverride = (date = new Date()) => {
+    if (!state.holidayThemesEnabled) {
+      return null;
+    }
+    const allowList = ensureHolidayThemeAllowList();
+    if (!(allowList instanceof Set) || allowList.size === 0) {
+      return null;
+    }
+    const holidaysToday = getHolidaysForDate(date);
+    if (!holidaysToday.length) {
+      return null;
+    }
+    const activeHoliday = holidaysToday.find((holiday) => allowList.has(holiday.id));
+    if (!activeHoliday) {
+      return null;
+    }
+    const themeId = resolveHolidayThemeId(activeHoliday.id, state.themeMode);
+    if (!themeId) {
+      return null;
+    }
+    return { id: activeHoliday.id, label: activeHoliday.label, theme: themeId };
+  };
+
+  const applyHolidayThemeDataset = (override) => {
+    if (override && override.id) {
+      document.documentElement.dataset.holidayTheme = override.id;
+      document.documentElement.setAttribute(
+        'data-holiday-theme-label',
+        override.label || '',
+      );
+    } else {
+      delete document.documentElement.dataset.holidayTheme;
+      document.documentElement.removeAttribute('data-holiday-theme-label');
+    }
+  };
+
+  const renderHolidayThemeStatus = () => {
+    if (!elements.holidayThemeStatus) {
+      return;
+    }
+    const status = elements.holidayThemeStatus;
+    const allowList = ensureHolidayThemeAllowList();
+    const isEnabled = Boolean(state.holidayThemesEnabled);
+    if (isEnabled) {
+      const override = getActiveHolidayThemeOverride();
+      if (override) {
+        status.hidden = false;
+        status.dataset.holidayActive = 'true';
+        status.textContent = `${override.label} palette is active today.`;
+        return;
+      }
+      delete status.dataset.holidayActive;
+      if (allowList.size) {
+        status.hidden = false;
+        status.textContent =
+          allowList.size === 1
+            ? 'Themes will switch on your selected holiday.'
+            : `Themes will switch on ${allowList.size} selected holidays.`;
+      } else {
+        status.hidden = false;
+        status.textContent = 'Select at least one holiday to enable automatic themes.';
+      }
+      return;
+    }
+    delete status.dataset.holidayActive;
+    if (allowList.size) {
+      status.hidden = false;
+      status.textContent =
+        allowList.size === 1
+          ? '1 holiday is ready for automatic themes.'
+          : `${allowList.size} holidays are ready for automatic themes.`;
+    } else {
+      status.hidden = true;
+      status.textContent = '';
+    }
+  };
+
+  const updateHolidayThemeToggle = () => {
+    if (elements.holidayThemeToggle) {
+      elements.holidayThemeToggle.checked = Boolean(state.holidayThemesEnabled);
+    }
+  };
+
+  const persistHolidayThemePreferences = () => {
+    const allowList = Array.from(ensureHolidayThemeAllowList());
+    const payload = {
+      enabled: Boolean(state.holidayThemesEnabled),
+      holidays: allowList,
+    };
+    const serialized = JSON.stringify(payload);
+    if (serialized === lastPersistedHolidayThemes) {
+      return;
+    }
+    try {
+      localStorage.setItem(HOLIDAY_THEME_STORAGE_KEY, serialized);
+      lastPersistedHolidayThemes = serialized;
+    } catch (error) {
+      console.warn('Unable to persist holiday theme preferences.', error);
+    }
+  };
+
+  const getHolidayThemeDialogFocusableElements = () => {
+    if (!holidayThemeDialogState.panel) {
+      return [];
+    }
+    const selectors =
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    return Array.from(holidayThemeDialogState.panel.querySelectorAll(selectors)).filter(
+      (element) =>
+        element instanceof HTMLElement
+        && !element.hasAttribute('disabled')
+        && element.getAttribute('aria-hidden') !== 'true',
+    );
+  };
+
+  const closeHolidayThemeDialog = ({ restoreFocus = false } = {}) => {
+    if (!holidayThemeDialogState.root) {
+      return;
+    }
+    holidayThemeDialogState.root.hidden = true;
+    holidayThemeDialogState.root.removeAttribute('data-open');
+    if (elements.holidayThemeSettings) {
+      elements.holidayThemeSettings.setAttribute('aria-expanded', 'false');
+    }
+    if (restoreFocus && holidayThemeDialogState.previousFocus) {
+      try {
+        holidayThemeDialogState.previousFocus.focus();
+      } catch (error) {
+        // Focus restoration is best-effort.
+      }
+    }
+    holidayThemeDialogState.previousFocus = null;
+  };
+
+  const handleHolidayThemeDialogKeydown = (event) => {
+    if (!holidayThemeDialogState.root || holidayThemeDialogState.root.dataset.open !== 'true') {
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeHolidayThemeDialog({ restoreFocus: true });
+      return;
+    }
+    if (event.key !== 'Tab') {
+      return;
+    }
+    const focusable = getHolidayThemeDialogFocusableElements();
+    if (!focusable.length) {
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+    if (event.shiftKey) {
+      if (!active || active === first) {
+        event.preventDefault();
+        last.focus();
+      }
+    } else if (active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
+  const syncHolidayThemeDialogSelections = () => {
+    const allowList = ensureHolidayThemeAllowList();
+    holidayThemeDialogState.checkboxes.forEach((checkbox, id) => {
+      if (!(checkbox instanceof HTMLInputElement)) {
+        return;
+      }
+      const isChecked = allowList.has(id);
+      checkbox.checked = isChecked;
+      const item = checkbox.closest('.holiday-theme-dialog__item');
+      if (item) {
+        if (isChecked) {
+          item.dataset.checked = 'true';
+        } else {
+          delete item.dataset.checked;
+        }
+      }
+    });
+  };
+
+  const ensureHolidayThemeDialog = () => {
+    if (holidayThemeDialogState.root) {
+      return holidayThemeDialogState;
+    }
+    const root = document.createElement('div');
+    root.className = 'holiday-theme-dialog';
+    root.id = 'holiday-theme-dialog';
+    root.hidden = true;
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'holiday-theme-dialog__backdrop';
+
+    const panel = document.createElement('form');
+    panel.className = 'holiday-theme-dialog__panel';
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
+    panel.setAttribute('aria-labelledby', 'holiday-theme-dialog-title');
+    panel.setAttribute('aria-describedby', 'holiday-theme-dialog-description');
+    panel.tabIndex = -1;
+
+    const title = document.createElement('h2');
+    title.className = 'holiday-theme-dialog__title';
+    title.id = 'holiday-theme-dialog-title';
+    title.textContent = 'Holiday Themes';
+
+    const description = document.createElement('p');
+    description.className = 'holiday-theme-dialog__description';
+    description.id = 'holiday-theme-dialog-description';
+    description.textContent = 'Choose the holidays that should automatically switch the palette.';
+
+    const list = document.createElement('div');
+    list.className = 'holiday-theme-dialog__list';
+    list.setAttribute('role', 'group');
+    list.setAttribute('aria-labelledby', 'holiday-theme-dialog-title');
+
+    holidayThemeDialogState.checkboxes = new Map();
+    const currentYear = new Date().getFullYear();
+    HOLIDAY_DEFINITIONS.forEach((definition) => {
+      if (!definition || !definition.id) {
+        return;
+      }
+      const item = document.createElement('label');
+      item.className = 'holiday-theme-dialog__item';
+      item.setAttribute('data-holiday-id', definition.id);
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'holiday-theme-dialog__checkbox';
+      checkbox.value = definition.id;
+      checkbox.id = `holiday-theme-${definition.id}`;
+
+      const textWrapper = document.createElement('span');
+      textWrapper.className = 'holiday-theme-dialog__item-text';
+
+      const name = document.createElement('span');
+      name.className = 'holiday-theme-dialog__item-name';
+      name.textContent = definition.label;
+      textWrapper.appendChild(name);
+
+      const previewDate =
+        typeof definition.getDate === 'function' ? definition.getDate(currentYear) : null;
+      if (previewDate instanceof Date && !Number.isNaN(previewDate.getTime())) {
+        const dateText = document.createElement('span');
+        dateText.className = 'holiday-theme-dialog__item-date';
+        dateText.textContent = previewDate.toLocaleDateString(undefined, {
+          month: 'long',
+          day: 'numeric',
+        });
+        textWrapper.appendChild(dateText);
+      }
+
+      checkbox.addEventListener('change', () => {
+        if (checkbox.checked) {
+          item.dataset.checked = 'true';
+        } else {
+          delete item.dataset.checked;
+        }
+      });
+
+      item.appendChild(checkbox);
+      item.appendChild(textWrapper);
+      list.appendChild(item);
+      holidayThemeDialogState.checkboxes.set(definition.id, checkbox);
+    });
+
+    const actions = document.createElement('div');
+    actions.className = 'holiday-theme-dialog__actions';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.className = 'holiday-theme-dialog__button';
+    cancelButton.textContent = 'Cancel';
+
+    const saveButton = document.createElement('button');
+    saveButton.type = 'submit';
+    saveButton.className =
+      'holiday-theme-dialog__button holiday-theme-dialog__button--primary';
+    saveButton.textContent = 'Save';
+
+    actions.appendChild(cancelButton);
+    actions.appendChild(saveButton);
+
+    panel.appendChild(title);
+    panel.appendChild(description);
+    panel.appendChild(list);
+    panel.appendChild(actions);
+
+    root.appendChild(backdrop);
+    root.appendChild(panel);
+    document.body.appendChild(root);
+
+    backdrop.addEventListener('click', () => {
+      closeHolidayThemeDialog({ restoreFocus: true });
+    });
+
+    cancelButton.addEventListener('click', () => {
+      syncHolidayThemeDialogSelections();
+      closeHolidayThemeDialog({ restoreFocus: true });
+    });
+
+    panel.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const selected = [];
+      holidayThemeDialogState.checkboxes.forEach((checkbox, id) => {
+        if (checkbox instanceof HTMLInputElement && checkbox.checked) {
+          selected.push(id);
+        }
+      });
+      const filtered = selected.filter((id) => holidayDefinitionLookup.has(id));
+      state.holidayThemeAllowList = new Set(filtered);
+      persistHolidayThemePreferences();
+      applyColorTheme();
+      updateHolidayThemeToggle();
+      closeHolidayThemeDialog({ restoreFocus: true });
+    });
+
+    root.addEventListener('keydown', handleHolidayThemeDialogKeydown);
+
+    holidayThemeDialogState.root = root;
+    holidayThemeDialogState.panel = panel;
+    holidayThemeDialogState.list = list;
+    holidayThemeDialogState.backdrop = backdrop;
+    holidayThemeDialogState.cancelButton = cancelButton;
+    holidayThemeDialogState.saveButton = saveButton;
+
+    syncHolidayThemeDialogSelections();
+
+    return holidayThemeDialogState;
+  };
+
+  const openHolidayThemeDialog = () => {
+    const dialog = ensureHolidayThemeDialog();
+    if (!dialog.root) {
+      return;
+    }
+    syncHolidayThemeDialogSelections();
+    dialog.root.hidden = false;
+    dialog.root.dataset.open = 'true';
+    dialog.previousFocus =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    if (elements.holidayThemeSettings) {
+      elements.holidayThemeSettings.setAttribute('aria-expanded', 'true');
+    }
+    const firstCheckbox = dialog.list
+      ? dialog.list.querySelector('.holiday-theme-dialog__checkbox')
+      : null;
+    const focusTarget =
+      firstCheckbox instanceof HTMLElement ? firstCheckbox : dialog.panel || null;
+    window.requestAnimationFrame(() => {
+      if (focusTarget instanceof HTMLElement) {
+        focusTarget.focus();
+      } else if (dialog.panel instanceof HTMLElement) {
+        dialog.panel.focus();
+      }
+    });
+  };
+
   let lastPersistedTheme = null;
   let lastPersistedMeasurement = null;
   let lastPersistedFavorites = JSON.stringify(favoriteRecipeIds);
@@ -4194,7 +4654,11 @@
     if (selectionChanged) {
       state.themeSelections[mode] = activeTheme;
     }
-    setDocumentThemeAttributes(mode, activeTheme);
+    const holidayOverride = getActiveHolidayThemeOverride();
+    const themeToApply = holidayOverride?.theme || activeTheme;
+    setDocumentThemeAttributes(mode, themeToApply);
+    applyHolidayThemeDataset(holidayOverride);
+    renderHolidayThemeStatus();
     if (!shouldPersist && !selectionChanged) return;
     const serialized = JSON.stringify({ mode, selections: { ...state.themeSelections } });
     if (serialized === lastPersistedTheme) return;
@@ -4266,6 +4730,7 @@
     applyColorTheme();
     updateModeButtons();
     renderThemeOptions();
+    updateHolidayThemeToggle();
   };
 
   const persistMeasurementPreference = () => {
@@ -4700,6 +5165,12 @@
     elements.allergyOptions = document.getElementById('allergy-options');
     elements.equipmentOptions = document.getElementById('equipment-options');
     elements.themeOptions = document.getElementById('theme-options');
+    elements.holidayThemeToggle = document.getElementById('holiday-theme-toggle');
+    elements.holidayThemeSettings = document.getElementById('holiday-theme-settings');
+    elements.holidayThemeStatus = document.getElementById('holiday-theme-status');
+    if (elements.holidayThemeSettings) {
+      elements.holidayThemeSettings.setAttribute('aria-expanded', 'false');
+    }
     elements.modeToggleButtons = Array.from(
       document.querySelectorAll('#mode-toggle .mode-toggle__button'),
     );
@@ -7336,6 +7807,25 @@
             setThemeMode(mode);
           }
         });
+      });
+    }
+
+    if (elements.holidayThemeToggle) {
+      elements.holidayThemeToggle.addEventListener('change', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement)) {
+          return;
+        }
+        state.holidayThemesEnabled = Boolean(target.checked);
+        persistHolidayThemePreferences();
+        updateHolidayThemeToggle();
+        applyColorTheme();
+      });
+    }
+
+    if (elements.holidayThemeSettings) {
+      elements.holidayThemeSettings.addEventListener('click', () => {
+        openHolidayThemeDialog();
       });
     }
 
