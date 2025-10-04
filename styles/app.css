@@ -386,7 +386,7 @@ select {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: var(--layer-1);
+  background: var(--layer-2);
   border-radius: 999px;
   box-shadow: var(--shadow-1);
   border: 1px solid var(--border-strong);
@@ -894,7 +894,7 @@ select {
   flex-direction: column;
   gap: 1.4rem;
   padding: 1.5rem;
-  background: var(--layer-1);
+  background: var(--layer-2);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   color: var(--text);
