@@ -404,18 +404,31 @@ select {
 }
 
 .nav-chip__group.view-toggle {
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   flex-wrap: nowrap;
-  align-items: center;
-  padding: 0.25rem 0.5rem;
-  background: var(--layer-1);
+  align-items: stretch;
+  padding: 0;
+  background: transparent;
   border: 1px solid var(--border-strong);
-  border-radius: 999px;
+  border-radius: 0.85rem;
+  overflow: hidden;
+}
+
+.nav-chip__section {
+  display: flex;
+  align-items: stretch;
+}
+
+.nav-chip__section + .nav-chip__section {
+  border-left: 1px solid color-mix(in oklab, var(--border-strong), transparent 35%);
 }
 
 .nav-chip__settings {
   margin-left: auto;
-  padding-left: 0.3rem;
+  padding-left: 0.5rem;
+  display: flex;
+  align-items: center;
 }
 
 .nav-chip__toggle {
@@ -460,39 +473,42 @@ select {
 }
 
 .nav-chip .view-toggle__button {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   min-width: 0;
+  width: 100%;
   appearance: none;
-  padding: 0.35rem 0.9rem;
-  border-radius: 999px;
-  border: 1px solid var(--border-strong);
-  background: var(--layer-1);
+  padding: 0.6rem 0.75rem;
+  border-radius: 0;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
   color: var(--text);
   box-shadow: none;
   font-weight: 600;
-  line-height: 1;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  line-height: 1.1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 
 .nav-chip .view-toggle__button:hover {
-  background: var(--layer-3);
+  background: color-mix(in oklab, var(--brand), transparent 85%);
 }
 
 .nav-chip .view-toggle__button:focus-visible {
   outline: 2px solid var(--border-strong);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
 .nav-chip .view-toggle__button--active {
-  background: var(--brand);
-  color: var(--text);
-  border-color: var(--border-strong);
-  box-shadow: 0 0 0 2px color-mix(in oklab, var(--brand), white 20%) inset;
+  color: var(--brand);
+  background: color-mix(in oklab, var(--brand), transparent 90%);
+  border-bottom-color: var(--brand);
 }
 
 .nav-chip .view-toggle__button--active:hover {
-  background: var(--brand);
+  background: color-mix(in oklab, var(--brand), transparent 80%);
 }
 
 @media (max-width: 62.5rem) {
@@ -545,39 +561,27 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  list-style: none;
-  margin: 0;
-  padding: 0.45rem 0.75rem;
+  padding: 0.35rem;
   cursor: pointer;
   color: var(--text);
-  border-radius: 999px;
-  border: 1px solid var(--border-1);
-  background: var(--surface-0);
-  box-shadow: var(--shadow-1);
-  transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.25s ease,
-    color 0.25s ease, border-color 0.25s ease;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  transition: color 0.15s ease, background 0.15s ease;
 }
 
 .settings-panel__summary::-webkit-details-marker {
   display: none;
 }
 
-.settings-panel__summary:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-2);
-  background: var(--surface-2);
-}
-
+.settings-panel__summary:hover,
 .settings-panel__summary:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 4px;
+  background: color-mix(in oklab, var(--brand), transparent 88%);
+  outline: none;
 }
 
 .settings-panel[open] .settings-panel__summary {
-  background: var(--surface-1);
-  color: var(--text);
-  border-color: var(--border-1);
-  box-shadow: var(--shadow-2);
+  color: var(--brand);
 }
 
 

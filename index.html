@@ -22,30 +22,40 @@
       </button>
       <nav class="nav-chip" id="primary-nav" aria-label="Primary">
         <div class="nav-chip__group view-toggle">
-          <button
-            type="button"
-            class="view-toggle__button view-toggle__button--active"
-            data-view-target="meals"
-          >
-            Recipes
-          </button>
-          <button type="button" class="view-toggle__button" data-view-target="kitchen">
-            Kitchen
-          </button>
-          <button type="button" class="view-toggle__button" data-view-target="pantry">
-            Pantry
-          </button>
-          <button type="button" class="view-toggle__button" data-view-target="meal-plan">
-            Meal Plan
-          </button>
-          <button
-            type="button"
-            class="view-toggle__button"
-            data-view-target="family"
-            id="family-button"
-          >
-            Family
-          </button>
+          <div class="nav-chip__section">
+            <button
+              type="button"
+              class="view-toggle__button view-toggle__button--active"
+              data-view-target="meals"
+            >
+              Recipes
+            </button>
+          </div>
+          <div class="nav-chip__section">
+            <button type="button" class="view-toggle__button" data-view-target="kitchen">
+              Kitchen
+            </button>
+          </div>
+          <div class="nav-chip__section">
+            <button type="button" class="view-toggle__button" data-view-target="pantry">
+              Pantry
+            </button>
+          </div>
+          <div class="nav-chip__section">
+            <button type="button" class="view-toggle__button" data-view-target="meal-plan">
+              Meal Plan
+            </button>
+          </div>
+          <div class="nav-chip__section">
+            <button
+              type="button"
+              class="view-toggle__button"
+              data-view-target="family"
+              id="family-button"
+            >
+              Family
+            </button>
+          </div>
         </div>
         <details class="settings-panel nav-chip__settings" id="settings-panel">
                   <summary
