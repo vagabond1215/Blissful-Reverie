@@ -1,20 +1,19 @@
 (function () {
-  const isDev =
-    (typeof process !== 'undefined' && process?.env?.NODE_ENV !== 'production') ||
-    (typeof process === 'undefined' && typeof document !== 'undefined');
+  if (typeof document === 'undefined') {
+    return;
+  }
 
-  if (!isDev) return;
+  if (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'production') {
+    return;
+  }
 
-  const checkAdjacency = (sel) => {
+  const targets = ['.recipe-card', '.filter-category', '.panel', '.meal-card'];
+  targets.forEach((sel) => {
     document.querySelectorAll(sel).forEach((el) => {
       const cs = getComputedStyle(el);
-      const bg = cs.backgroundColor;
-      const border = cs.borderTopColor;
-      if (bg === border) {
+      if (cs.backgroundColor === cs.borderTopColor) {
         console.warn('[Theme] Same-color adjacency:', el);
       }
     });
-  };
-
-  checkAdjacency('.card, .recipe-card, .panel, .filter-category, .meal-card, .filter-section');
+  });
 })();
