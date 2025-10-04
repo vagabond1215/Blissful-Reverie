@@ -1332,23 +1332,10 @@
   const THEME_STORAGE_KEY = 'blissful-theme';
   const HOLIDAY_THEME_STORAGE_KEY = 'blissful-holiday-themes';
   let lastPersistedHolidayThemes = null;
-  const DEFAULT_THEME_PALETTES = {
-    light: {
-      brand: '#7A2236',
-      accent1: '#C2B280',
-      accent2: '#8DA397',
-      neutral: '#121314',
-    },
-    dark: {
-      brand: '#7A2236',
-      accent1: '#C2B280',
-      accent2: '#8DA397',
-      neutral: '#121314',
-    },
-  };
+  const DEFAULT_THEME_PALETTES = { light: null, dark: null };
 
   const DEFAULT_MODE = 'light';
-  const AVAILABLE_MODES = Object.keys(DEFAULT_THEME_PALETTES);
+  const AVAILABLE_MODES = ['light', 'dark'];
   let lastPersistedTheme = null;
 
   const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
@@ -1388,6 +1375,80 @@
     const g = parseInt(normalized.slice(3, 5), 16);
     const b = parseInt(normalized.slice(5, 7), 16);
     return { r, g, b, hex: normalized };
+  };
+
+  const resolveThemeColor = (value, fallbackToken) => {
+    const normalized = normalizeHexColor(value);
+    if (normalized) {
+      return normalized;
+    }
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement;
+      if (root) {
+        const style = getComputedStyle(root);
+        if (typeof value === 'string') {
+          const tokenMatch = value.trim().match(/^var\((--[\w-]+)\)$/);
+          if (tokenMatch) {
+            const tokenValue = style.getPropertyValue(tokenMatch[1]).trim();
+            const tokenHex = normalizeHexColor(tokenValue);
+            if (tokenHex) {
+              return tokenHex;
+            }
+          }
+        }
+        if (fallbackToken) {
+          const fallbackValue = style.getPropertyValue(fallbackToken).trim();
+          const fallbackHex = normalizeHexColor(fallbackValue);
+          if (fallbackHex) {
+            return fallbackHex;
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  const readPaletteFromTokens = (mode) => {
+    if (typeof document === 'undefined') {
+      return null;
+    }
+    const root = document.documentElement;
+    if (!root) {
+      return null;
+    }
+    const initialTheme = root.getAttribute('data-theme');
+    const targetTheme = mode === 'dark' ? 'dark' : 'light';
+    if (initialTheme !== targetTheme) {
+      if (targetTheme) {
+        root.setAttribute('data-theme', targetTheme);
+      } else {
+        root.removeAttribute('data-theme');
+      }
+    }
+    const style = getComputedStyle(root);
+    const palette = {
+      brand: normalizeHexColor(style.getPropertyValue('--brand')) || undefined,
+      accent1: normalizeHexColor(style.getPropertyValue('--accent-1')) || undefined,
+      accent2: normalizeHexColor(style.getPropertyValue('--accent-2')) || undefined,
+      neutral: normalizeHexColor(style.getPropertyValue('--neutral')) || undefined,
+    };
+    if (initialTheme !== targetTheme) {
+      if (initialTheme) {
+        root.setAttribute('data-theme', initialTheme);
+      } else {
+        root.removeAttribute('data-theme');
+      }
+    }
+    return palette;
+  };
+
+  const ensureDefaultPalettes = () => {
+    if (!DEFAULT_THEME_PALETTES.light) {
+      DEFAULT_THEME_PALETTES.light = readPaletteFromTokens('light');
+    }
+    if (!DEFAULT_THEME_PALETTES.dark) {
+      DEFAULT_THEME_PALETTES.dark = readPaletteFromTokens('dark');
+    }
   };
 
   const rgbToHsl = ({ r, g, b }) => {
@@ -1484,9 +1545,17 @@
   };
 
   const getReadableTextColor = (background, candidates) => {
-    const palette = Array.isArray(candidates)
+    const palette = Array.isArray(candidates) && candidates.length
       ? candidates
-      : ['#0F172A', '#111827', '#F8FAFC', '#F1F5F9'];
+      : [
+          resolveThemeColor('var(--text)', '--text'),
+          resolveThemeColor('var(--text-inverse)', '--text-inverse'),
+          resolveThemeColor('var(--neutral)', '--neutral'),
+          resolveThemeColor('var(--surface-0)', '--surface-0'),
+        ].filter(Boolean);
+    if (!palette.length) {
+      return null;
+    }
     let best = palette[0];
     let bestContrast = -Infinity;
     palette.forEach((candidate) => {
@@ -1506,30 +1575,40 @@
   const alphaColor = (hex, alpha) => {
     const rgb = hexToRgb(hex);
     if (!rgb) {
-      return `rgba(0, 0, 0, ${clamp01(alpha)})`;
+      const fallback = resolveThemeColor('var(--neutral)', '--neutral');
+      const fallbackRgb = fallback ? hexToRgb(fallback) : null;
+      if (!fallbackRgb) {
+        return null;
+      }
+      return toRgba(fallbackRgb, alpha);
     }
     return toRgba(rgb, alpha);
   };
 
   const sanitizeThemePalette = (palette, mode) => {
-    const defaults = DEFAULT_THEME_PALETTES[mode] || DEFAULT_THEME_PALETTES.light;
+    ensureDefaultPalettes();
+    const defaults = DEFAULT_THEME_PALETTES[mode] || DEFAULT_THEME_PALETTES.light || {};
     const brand =
-      normalizeHexColor(palette?.brand)
-      || normalizeHexColor(palette?.primary)
-      || normalizeHexColor(palette?.main)
-      || defaults.brand;
+      resolveThemeColor(palette?.brand)
+      || resolveThemeColor(palette?.primary)
+      || resolveThemeColor(palette?.main)
+      || defaults.brand
+      || resolveThemeColor('var(--brand)', '--brand');
     const accent1 =
-      normalizeHexColor(palette?.accent1)
-      || normalizeHexColor(palette?.accent)
-      || defaults.accent1;
+      resolveThemeColor(palette?.accent1)
+      || resolveThemeColor(palette?.accent)
+      || defaults.accent1
+      || resolveThemeColor('var(--accent-1)', '--accent-1');
     const accent2 =
-      normalizeHexColor(palette?.accent2)
-      || normalizeHexColor(palette?.accentSecondary)
-      || defaults.accent2;
+      resolveThemeColor(palette?.accent2)
+      || resolveThemeColor(palette?.accentSecondary)
+      || defaults.accent2
+      || resolveThemeColor('var(--accent-2)', '--accent-2');
     const neutral =
-      normalizeHexColor(palette?.neutral)
-      || normalizeHexColor(palette?.background)
-      || defaults.neutral;
+      resolveThemeColor(palette?.neutral)
+      || resolveThemeColor(palette?.background)
+      || defaults.neutral
+      || resolveThemeColor('var(--neutral)', '--neutral');
     return { brand, accent1, accent2, neutral };
   };
 
@@ -1560,9 +1639,6 @@
         return role && ['brand', 'accent1', 'accent2', 'neutral'].includes(role) ? role : null;
     }
   };
-
-  const WHITE_RGB = hexToRgb('#FFFFFF');
-  const BLACK_RGB = hexToRgb('#020617');
 
   const MEASUREMENT_STORAGE_KEY = 'blissful-measurement';
   const MEASUREMENT_SYSTEMS = ['imperial', 'metric'];
@@ -1734,6 +1810,7 @@
 
   const loadThemePreferences = () => {
     const fallbackMode = resolveFallbackMode();
+    ensureDefaultPalettes();
     const fallbackPalettes = sanitizeThemePalettes(DEFAULT_THEME_PALETTES);
     const fallback = { mode: fallbackMode, palettes: fallbackPalettes };
     try {
@@ -1925,35 +2002,19 @@
 
   const holidayThemePreferences = loadHolidayThemePreferences();
 
+  const clonePalette = (palette) => (palette ? { ...palette } : null);
+  const createPresetFromDefaults = () => {
+    ensureDefaultPalettes();
+    return {
+      light: clonePalette(DEFAULT_THEME_PALETTES.light),
+      dark: clonePalette(DEFAULT_THEME_PALETTES.dark),
+    };
+  };
+
   const SHARED_THEME_PRESETS = {
-    calm: {
-      light: DEFAULT_THEME_PALETTES.light,
-      dark: DEFAULT_THEME_PALETTES.dark,
-    },
-    sunset: {
-      light: {
-        background: '#FFF7ED',
-        main: '#F97316',
-        accent: '#EC4899',
-      },
-      dark: {
-        background: '#1C1917',
-        main: '#FB923C',
-        accent: '#F472B6',
-      },
-    },
-    forest: {
-      light: {
-        background: '#F0FDF4',
-        main: '#22C55E',
-        accent: '#0EA5E9',
-      },
-      dark: {
-        background: '#022C22',
-        main: '#34D399',
-        accent: '#FACC15',
-      },
-    },
+    calm: createPresetFromDefaults(),
+    sunset: createPresetFromDefaults(),
+    forest: createPresetFromDefaults(),
   };
 
   const HOLIDAY_THEME_OVERRIDES = {
@@ -8580,6 +8641,27 @@
     initThemeControls();
     initMeasurementControls();
     renderApp();
+
+    const isDevEnv =
+      typeof process === 'undefined'
+        ? true
+        : !process || !process.env || process.env.NODE_ENV !== 'production';
+    if (isDevEnv && typeof document !== 'undefined') {
+      const violate = [];
+      document
+        .querySelectorAll('.card, .panel, .filter-category, .filter-chip')
+        .forEach((el) => {
+          const cs = window.getComputedStyle(el);
+          const fill = cs.backgroundColor;
+          const border = cs.borderTopColor;
+          if (fill && border && fill === border) {
+            violate.push(el);
+          }
+        });
+      if (violate.length) {
+        console.warn('[Theme] Same-color adjacency detected on', violate);
+      }
+    }
   };
 
   if (document.readyState === 'loading') {
