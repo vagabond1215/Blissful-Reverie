@@ -5,30 +5,36 @@
 :root {
   color-scheme: light;
 
-  /* Core hues */
+  /* Core */
   --neutral: #121314;
   --brand: #7A2236;
   --accent-1: #C2B280;
   --accent-2: #8DA397;
 
   /* Text */
-  --text: #F4F6F7;
-  --text-muted: #CCD1D4;
-  --text-inverse: #1A1C20;
+  --text: #F3F5F6;
+  --text-muted: #D0D5DA;
+  --text-inverse: #111315;
 
-  /* Surfaces by layer (Light) */
-  --bg: var(--neutral);
-  --surface-1: var(--brand);
-  --surface-2: color-mix(in oklab, var(--brand), black 8%);
-  --surface-0: color-mix(in oklab, var(--neutral), white 6%);
+  /* LAYERS (distance from bg) */
+  --layer-0: var(--neutral);
+  --layer-1: color-mix(in oklab, var(--neutral), white 6%);
+  --layer-2: var(--brand);
+  --layer-3: color-mix(in oklab, var(--brand), black 8%);
 
-  /* Borders & outlines */
-  --border-1: var(--accent-2);
-  --border-2: color-mix(in oklab, var(--accent-2), black 12%);
+  /* Borders (may NEVER match adjacent fill) */
+  --border-strong: var(--accent-2);
+  --border-soft: color-mix(in oklab, var(--accent-2), black 12%);
 
-  /* Chips/Badges */
+  /* Accents */
   --chip-bg: var(--accent-1);
-  --chip-fg: #22282A;
+  --chip-fg: #272B2D;
+
+  /* Buttons/links */
+  --btn-primary-bg: var(--brand);
+  --btn-primary-fg: var(--text);
+  --btn-secondary-bg: transparent;
+  --btn-secondary-br: var(--border-strong);
 
   /* States */
   --success: #31B57A;
@@ -42,7 +48,13 @@
   --shadow-2: 0 6px 20px rgba(0, 0, 0, 0.35);
 
   /* Compatibility tokens */
-  --surface-3: color-mix(in oklab, var(--surface-2), white 6%);
+  --bg: var(--layer-0);
+  --surface-0: var(--layer-1);
+  --surface-1: var(--layer-2);
+  --surface-2: var(--layer-3);
+  --surface-3: color-mix(in oklab, var(--layer-3), white 6%);
+  --border-1: var(--border-strong);
+  --border-2: var(--border-soft);
   --color-background: var(--bg);
   --body-gradient-start: color-mix(in srgb, var(--bg) 82%, var(--surface-2) 18%);
   --body-gradient-mid: color-mix(in srgb, var(--bg) 68%, var(--surface-2) 32%);
@@ -314,7 +326,7 @@ a:hover {
 }
 
 *:focus-visible {
-  outline: 2px solid var(--border-1);
+  outline: 2px solid var(--border-strong);
   outline-offset: 2px;
 }
 
@@ -1185,10 +1197,10 @@ textarea:focus {
 }
 
 .filter-section {
-  border: 2px solid var(--border-1);
+  border: 2px solid var(--border-strong);
   border-radius: var(--radius);
   padding: 0.85rem 1rem;
-  background: var(--surface-1);
+  background: var(--layer-2);
   box-shadow: var(--shadow-1);
   color: var(--text);
   --color-text-emphasis: var(--text);
@@ -1198,9 +1210,9 @@ textarea:focus {
 }
 
 .filter-section[open] {
-  border-color: var(--border-1);
+  border-color: var(--border-strong);
   box-shadow: var(--shadow-2);
-  background: var(--surface-1);
+  background: var(--layer-2);
 }
 
 .filter-section summary {
@@ -1213,8 +1225,12 @@ textarea:focus {
   gap: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--chip-fg);
   text-transform: none;
+  background: var(--accent-1);
+  border: 1px solid var(--border-soft);
+  border-radius: calc(var(--radius) - 4px);
+  padding: 0.6rem 0.75rem;
 }
 
 .filter-section summary::-webkit-details-marker {
@@ -1242,7 +1258,7 @@ textarea:focus {
 .filter-section summary:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--color-focus-ring);
-  border-radius: 12px;
+  border-radius: calc(var(--radius) - 4px);
 }
 
 .filter-section__content {
@@ -1250,6 +1266,10 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  background: var(--layer-3);
+  border: 1px solid var(--border-soft);
+  border-radius: calc(var(--radius) - 6px);
+  padding: 0.75rem 0.85rem;
 }
 
 .checkbox-grid {
@@ -1526,11 +1546,11 @@ textarea:focus {
 .meal-card__footer button,
 .button.primary,
 .btn-primary {
-  border: 1px solid var(--border-1);
+  border: 1px solid var(--border-strong);
   border-radius: calc(var(--radius) - 6px);
   padding: 0.55rem 1.1rem;
-  background: var(--brand);
-  color: var(--text);
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -1546,10 +1566,10 @@ textarea:focus {
 
 .button.secondary,
 .btn-ghost {
-  border: 1px solid var(--border-1);
+  border: 1px solid var(--btn-secondary-br);
   border-radius: calc(var(--radius) - 6px);
   padding: 0.55rem 1.1rem;
-  background: transparent;
+  background: var(--btn-secondary-bg);
   color: var(--text);
   font-weight: 600;
   cursor: pointer;
@@ -1559,7 +1579,7 @@ textarea:focus {
 .button.secondary:hover,
 .btn-ghost:hover {
   transform: translateY(-1px);
-  background: var(--surface-2);
+  background: color-mix(in oklab, var(--layer-3), white 12%);
   box-shadow: var(--shadow-1);
 }
 
@@ -1612,8 +1632,8 @@ textarea:focus {
 }
 
 .meal-card {
-  background: var(--surface-1);
-  border: 2px solid var(--border-1);
+  background: var(--layer-2);
+  border: 2px solid var(--border-strong);
   border-radius: var(--radius);
   box-shadow: var(--shadow-2);
   display: flex;
@@ -1627,9 +1647,9 @@ textarea:focus {
   --color-text-soft: var(--text-muted);
   --color-text-badge: var(--chip-fg);
   --color-text-instruction: var(--text-muted);
-  --color-border-muted: var(--border-2);
-  --meal-section-background: var(--surface-2);
-  --meal-section-border: var(--border-2);
+  --color-border-muted: var(--border-soft);
+  --meal-section-background: var(--layer-3);
+  --meal-section-border: var(--border-soft);
   --meal-section-shadow-color: var(--shadow-1);
   --serving-control-color: var(--text);
 }
@@ -1643,22 +1663,27 @@ textarea:focus {
   border-color: var(--border-1);
 }
 
-.meal-card__header,
-.meal-card__section,
-.meal-card__details > div {
-  background: var(--meal-section-background);
-  border: 1px solid var(--meal-section-border);
-  border-radius: calc(var(--radius) - 4px);
-  padding: 1rem 1.2rem;
-  box-shadow: var(--shadow-1);
-  backdrop-filter: none;
-}
-
 .meal-card__header {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
   align-items: flex-start;
+  background: var(--accent-1);
+  color: var(--chip-fg);
+  border: 1px solid var(--border-soft);
+  border-radius: calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0 0;
+  padding: 1rem 1.2rem;
+  box-shadow: var(--shadow-1);
+}
+
+.meal-card__section,
+.meal-card__details > div {
+  background: var(--meal-section-background);
+  border: 1px solid var(--meal-section-border);
+  border-radius: calc(var(--radius) - 6px);
+  padding: 1rem 1.2rem;
+  box-shadow: var(--shadow-1);
+  backdrop-filter: none;
 }
 
 .meal-card__header h3 {
@@ -3787,17 +3812,24 @@ textarea:focus {
   color-scheme: dark;
 
   --text: #F5F6F7;
-  --text-muted: #C9CED3;
-  --text-inverse: #0E1013;
+  --text-muted: #C8CED3;
+  --text-inverse: #0E1012;
 
-  --bg: #0E0F11;
-  --surface-1: #651C2C;
-  --surface-2: #531624;
-  --surface-0: #15171A;
-  --surface-3: color-mix(in oklab, var(--surface-2), black 10%);
+  --layer-0: #0E0F11;
+  --layer-1: #15171A;
+  --layer-2: #651C2C;
+  --layer-3: #541725;
 
-  --border-1: #7E9E93;
-  --border-2: #6B8C81;
+  --border-strong: #7E9E93;
+  --border-soft: #6B8C81;
+
+  --bg: var(--layer-0);
+  --surface-0: var(--layer-1);
+  --surface-1: var(--layer-2);
+  --surface-2: var(--layer-3);
+  --surface-3: color-mix(in oklab, var(--layer-3), black 6%);
+  --border-1: var(--border-strong);
+  --border-2: var(--border-soft);
 
   --color-panel: var(--surface-0);
   --color-border: var(--border-1);
