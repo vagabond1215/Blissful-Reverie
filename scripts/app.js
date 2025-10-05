@@ -8260,10 +8260,12 @@
   const updateView = () => {
     elements.viewToggleButtons.forEach((button) => {
       const target = button.dataset.viewTarget;
-      if (target === state.activeView) {
-        button.classList.add('view-toggle__button--active');
+      const isActive = target === state.activeView;
+      button.classList.toggle('view-toggle__button--active', isActive);
+      if (isActive) {
+        button.setAttribute('aria-current', 'page');
       } else {
-        button.classList.remove('view-toggle__button--active');
+        button.removeAttribute('aria-current');
       }
     });
     const hideFilter = state.activeView === 'meal-plan' || state.activeView === 'family';

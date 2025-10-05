@@ -25,31 +25,32 @@
           <div class="nav-chip__section">
             <button
               type="button"
-              class="view-toggle__button view-toggle__button--active"
+              class="view-toggle__button tab view-toggle__button--active"
               data-view-target="meals"
+              aria-current="page"
             >
               Recipes
             </button>
           </div>
           <div class="nav-chip__section">
-            <button type="button" class="view-toggle__button" data-view-target="kitchen">
+            <button type="button" class="view-toggle__button tab" data-view-target="kitchen">
               Kitchen
             </button>
           </div>
           <div class="nav-chip__section">
-            <button type="button" class="view-toggle__button" data-view-target="pantry">
+            <button type="button" class="view-toggle__button tab" data-view-target="pantry">
               Pantry
             </button>
           </div>
           <div class="nav-chip__section">
-            <button type="button" class="view-toggle__button" data-view-target="meal-plan">
+            <button type="button" class="view-toggle__button tab" data-view-target="meal-plan">
               Meal Plan
             </button>
           </div>
           <div class="nav-chip__section">
             <button
               type="button"
-              class="view-toggle__button"
+              class="view-toggle__button tab"
               data-view-target="family"
               id="family-button"
             >
@@ -59,7 +60,7 @@
         </div>
         <details class="settings-panel nav-chip__settings" id="settings-panel">
                   <summary
-                    class="settings-panel__summary"
+                    class="settings-panel__summary settings-btn icon-btn"
                     aria-label="Display and unit settings"
                     aria-haspopup="true"
                     title="Display and unit settings"
