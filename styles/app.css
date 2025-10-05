@@ -393,21 +393,15 @@ select {
   left: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  --nav-chip-button-bg: color-mix(in srgb, var(--layer-0) 26%, transparent);
-  --nav-chip-button-hover-bg: color-mix(in srgb, var(--layer-0) 34%, transparent);
-  --nav-chip-button-active-bg: color-mix(in srgb, var(--accent-1) 34%, transparent);
-  --nav-chip-button-outline: color-mix(in srgb, var(--border-strong), transparent 60%);
-  background: var(--glass-elevated);
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--layer-2);
+  border: 2px solid var(--border-strong);
   border-radius: 999px;
-  box-shadow: 0 22px 42px -28px var(--shadow-2);
-  border: 1px solid var(--glass-border);
-  padding: 10px 12px;
-  overflow: visible;
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
-  z-index: 20;
+  box-shadow: var(--shadow-1);
   color: var(--text);
+  overflow: visible;
+  z-index: 20;
 }
 
 .nav-chip__group {
@@ -417,16 +411,11 @@ select {
 }
 
 .nav-chip__group.view-toggle {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  display: inline-flex;
   flex-wrap: nowrap;
-  align-items: stretch;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 999px;
-  overflow: visible;
+  align-items: center;
   gap: 0.35rem;
+  padding: 0;
 }
 
 .nav-chip__section {
@@ -482,47 +471,94 @@ select {
 }
 
 
-.nav-chip .view-toggle__button {
-  flex: 1 1 auto;
-  min-width: 0;
-  width: 100%;
+.nav-chip .tab,
+.nav-chip .icon-btn,
+.nav-chip .settings-btn {
   appearance: none;
-  padding: 0.75rem 1.15rem;
-  border-radius: 999px;
-  border: none;
-  background: transparent;
-  color: var(--bg);
-  box-shadow: inset 0 0 0 1px var(--nav-chip-button-outline);
-  backdrop-filter: blur(18px);
-  font-weight: 600;
-  line-height: 1.1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease,
-    transform 0.18s ease;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.38rem 0.95rem;
+  min-width: 0;
+  line-height: 1;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+  border: 1px solid color-mix(in oklab, var(--layer-0), white 22%);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--layer-0), white 8%) 0%,
+    color-mix(in oklab, var(--layer-0), black 2%) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--layer-0), white 10%),
+    0 1px 1px rgba(0, 0, 0, 0.25);
+  transition: background 0.15s ease, border-color 0.15s ease,
+    transform 0.06s ease;
+  cursor: pointer;
 }
 
-.nav-chip .view-toggle__button:hover {
-  background: color-mix(in srgb, var(--layer-0) 18%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-1) 55%, transparent);
+.nav-chip .icon-btn,
+.nav-chip .settings-btn {
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.nav-chip .tab:hover,
+.nav-chip .icon-btn:hover,
+.nav-chip .settings-btn:hover {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--layer-0), white 10%) 0%,
+    color-mix(in oklab, var(--layer-0), black 0%) 100%
+  );
   transform: translateY(-1px);
 }
 
-.nav-chip .view-toggle__button:focus-visible {
+.nav-chip .tab:active,
+.nav-chip .icon-btn:active,
+.nav-chip .settings-btn:active {
+  transform: translateY(0);
+}
+
+.nav-chip .tab[aria-current='page'],
+.nav-chip .tab.is-active,
+.nav-chip .view-toggle__button--active {
   outline: 2px solid var(--border-strong);
   outline-offset: -2px;
 }
 
-
-.nav-chip .view-toggle__button--active {
-  color: var(--bg);
-  background: color-mix(in srgb, var(--accent-1) 22%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-1) 60%, transparent);
+.nav-chip .tab:focus-visible,
+.nav-chip .icon-btn:focus-visible,
+.nav-chip .settings-btn:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
 }
 
-.nav-chip .view-toggle__button--active:hover {
-  background: color-mix(in srgb, var(--accent-1) 30%, transparent);
+.nav-chip .settings-panel[open] .settings-btn {
+  outline: 2px solid var(--border-strong);
+  outline-offset: -2px;
+}
+
+[data-theme='dark'] .nav-chip .tab,
+[data-theme='dark'] .nav-chip .icon-btn,
+[data-theme='dark'] .nav-chip .settings-btn {
+  border-color: color-mix(in oklab, var(--layer-0), white 16%);
+}
+
+@supports not (color: color-mix(in oklab, black, white)) {
+  .nav-chip .tab,
+  .nav-chip .icon-btn,
+  .nav-chip .settings-btn {
+    background: var(--layer-0);
+    border-color: var(--border-soft);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+  }
 }
 
 @media (min-width: 62.5625rem) {
@@ -581,10 +617,10 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.35rem;
+  padding: 0;
   cursor: pointer;
   color: var(--text);
-  border-radius: 50%;
+  border-radius: 999px;
   border: none;
   background: none;
   transition: color 0.15s ease, background 0.15s ease;
@@ -596,27 +632,7 @@ select {
 
 .settings-panel__summary:hover,
 .settings-panel__summary:focus-visible {
-  background: color-mix(in oklab, var(--brand), transparent 88%);
   outline: none;
-}
-
-.settings-panel[open] .settings-panel__summary {
-  color: var(--bg);
-}
-
-.nav-chip .settings-panel__summary {
-  color: var(--bg);
-  background: transparent;
-}
-
-.nav-chip .settings-panel__summary:hover,
-.nav-chip .settings-panel__summary:focus-visible {
-  color: var(--bg);
-  background: color-mix(in srgb, var(--layer-0) 16%, transparent);
-}
-
-.nav-chip .settings-panel[open] .settings-panel__summary {
-  color: var(--bg);
 }
 
 
@@ -624,8 +640,8 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: calc(1.35rem + 1px);
-  height: calc(1.35rem + 1px);
+  width: 1.25rem;
+  height: 1.25rem;
   overflow: visible;
 }
 
