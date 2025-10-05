@@ -5613,6 +5613,7 @@
     elements.recipeFamilyFilter = document.getElementById('recipe-family-filter');
     elements.pantryOnlyToggle = document.getElementById('pantry-only-toggle');
     elements.substitutionToggle = document.getElementById('substitution-toggle');
+    elements.recipeActionChip = document.getElementById('recipe-action-chip');
     elements.ingredientSection = document.getElementById('ingredient-section');
     elements.tagSection = document.getElementById('tag-section');
     elements.allergySection = document.getElementById('allergy-section');
@@ -6073,7 +6074,7 @@
     const hasSelection = ids.length > 0;
     const allButton = document.createElement('button');
     allButton.type = 'button';
-    allButton.className = 'recipe-family-filter__button recipe-family-filter__button--all';
+    allButton.className = 'recipe-family-filter__button recipe-family-filter__button--all tab';
     if (!hasSelection) {
       allButton.classList.add('recipe-family-filter__button--active');
     }
@@ -6091,7 +6092,7 @@
       }
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = 'recipe-family-filter__button';
+      button.className = 'recipe-family-filter__button icon-btn';
       const isActive = selectedSet.has(member.id);
       if (isActive) {
         button.classList.add('recipe-family-filter__button--active');
@@ -6160,6 +6161,15 @@
         elements.substitutionToggle.hidden = true;
         elements.substitutionToggle.disabled = true;
         elements.substitutionToggle.setAttribute('aria-hidden', 'true');
+      }
+    }
+    if (elements.recipeActionChip) {
+      if (isMealsView) {
+        elements.recipeActionChip.hidden = false;
+        elements.recipeActionChip.removeAttribute('aria-hidden');
+      } else {
+        elements.recipeActionChip.hidden = true;
+        elements.recipeActionChip.setAttribute('aria-hidden', 'true');
       }
     }
     if (elements.filterSearch) {
