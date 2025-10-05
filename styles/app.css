@@ -82,6 +82,10 @@
   --color-surface-elevated: var(--surface-2);
   --color-surface-soft: color-mix(in srgb, var(--brand) 14%, transparent);
   --color-surface-highlight: color-mix(in srgb, var(--accent-1) 18%, transparent);
+  --glass-background: color-mix(in srgb, var(--layer-0) 82%, transparent 18%);
+  --glass-surface: color-mix(in srgb, var(--layer-1) 84%, transparent 16%);
+  --glass-elevated: color-mix(in srgb, var(--layer-2) 88%, transparent 12%);
+  --glass-border: color-mix(in srgb, var(--border-strong), transparent 48%);
   --surface-hover-subtle: color-mix(in srgb, var(--text) 8%, var(--surface-1));
   --surface-hover-strong: color-mix(in srgb, var(--text) 12%, var(--surface-2));
   --surface-overlay: color-mix(in srgb, var(--surface-1) 72%, transparent);
@@ -332,14 +336,14 @@ a:hover {
 
 html,
 body {
-  background: var(--layer-0);
+  background: var(--glass-background);
   color: var(--text);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--layer-0);
+  background: var(--glass-background);
   color: var(--text);
 }
 
@@ -371,12 +375,16 @@ select {
   flex-direction: column;
   color: var(--text);
   padding-top: 5rem;
-  background: var(--layer-0);
+  background: var(--glass-surface);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
 }
 
 #app-layout {
-  background: var(--layer-0);
+  background: var(--glass-background);
   color: var(--text);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
 }
 
 .nav-chip {
@@ -386,13 +394,18 @@ select {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: var(--layer-2);
+  --nav-chip-button-bg: color-mix(in srgb, var(--layer-0) 26%, transparent);
+  --nav-chip-button-hover-bg: color-mix(in srgb, var(--layer-0) 34%, transparent);
+  --nav-chip-button-active-bg: color-mix(in srgb, var(--accent-1) 34%, transparent);
+  --nav-chip-button-outline: color-mix(in srgb, var(--border-strong), transparent 60%);
+  background: var(--glass-elevated);
   border-radius: 999px;
-  box-shadow: var(--shadow-1);
-  border: 1px solid var(--border-strong);
-  padding: 7px;
+  box-shadow: 0 22px 42px -28px var(--shadow-2);
+  border: 1px solid var(--glass-border);
+  padding: 10px 12px;
   overflow: visible;
-  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
   z-index: 20;
   color: var(--text);
 }
@@ -410,9 +423,9 @@ select {
   align-items: stretch;
   padding: 0;
   background: transparent;
-  border: 1px solid var(--border-strong);
-  border-radius: 0.85rem;
-  overflow: hidden;
+  border: none;
+  border-radius: 999px;
+  overflow: visible;
 }
 
 .nav-chip__section {
@@ -477,12 +490,14 @@ select {
   min-width: 0;
   width: 100%;
   appearance: none;
-  padding: 0.6rem 0.75rem;
+  padding: 10px 0.85rem;
   border-radius: 0;
   border: none;
-  background: color-mix(in srgb, var(--layer-0) 36%, transparent);
+  background: var(--nav-chip-button-bg);
   color: var(--text);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border-strong), transparent 70%);
+  box-shadow:
+    inset 0 0 0 1px var(--nav-chip-button-outline),
+    0 12px 26px color-mix(in srgb, var(--layer-0) 28%, transparent 82%);
   backdrop-filter: blur(18px);
   font-weight: 600;
   line-height: 1.1;
@@ -493,10 +508,10 @@ select {
 }
 
 .nav-chip .view-toggle__button:hover {
-  background: color-mix(in srgb, var(--layer-0) 42%, transparent);
+  background: var(--nav-chip-button-hover-bg);
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--accent-1) 60%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--accent-1) 45%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--accent-1) 65%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--accent-1) 55%, transparent),
     0 0 18px color-mix(in srgb, var(--accent-1) 28%, transparent);
 }
 
@@ -507,15 +522,25 @@ select {
 
 .nav-chip .view-toggle__button--active {
   color: var(--text);
-  background: color-mix(in srgb, var(--layer-0) 46%, var(--accent-1) 14%);
+  background: var(--nav-chip-button-active-bg);
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--accent-1) 60%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--accent-1) 45%, transparent),
-    0 0 20px color-mix(in srgb, var(--accent-1) 32%, transparent);
+    inset 0 0 0 1px color-mix(in srgb, var(--accent-1) 65%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--accent-1) 55%, transparent),
+    0 0 22px color-mix(in srgb, var(--accent-1) 34%, transparent);
 }
 
 .nav-chip .view-toggle__button--active:hover {
-  background: color-mix(in srgb, var(--layer-0) 40%, var(--accent-1) 20%);
+  background: color-mix(in srgb, var(--accent-1) 40%, transparent 35%);
+}
+
+@media (min-width: 62.5625rem) {
+  .nav-chip__section:first-child .view-toggle__button {
+    border-radius: 999px 0 0 999px;
+  }
+
+  .nav-chip__section:last-child .view-toggle__button {
+    border-radius: 0 999px 999px 0;
+  }
 }
 
 @media (max-width: 62.5rem) {
@@ -589,6 +614,21 @@ select {
 
 .settings-panel[open] .settings-panel__summary {
   color: var(--brand);
+}
+
+.nav-chip .settings-panel__summary {
+  color: var(--nav-chip-button-bg);
+  background: transparent;
+}
+
+.nav-chip .settings-panel__summary:hover,
+.nav-chip .settings-panel__summary:focus-visible {
+  color: var(--nav-chip-button-hover-bg);
+  background: color-mix(in srgb, var(--layer-0) 16%, transparent);
+}
+
+.nav-chip .settings-panel[open] .settings-panel__summary {
+  color: var(--nav-chip-button-active-bg);
 }
 
 
@@ -943,6 +983,13 @@ select {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: calc(var(--radius) - 6px);
+  padding: 0.85rem 1.1rem;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 36px -26px var(--shadow-2);
 }
 
 .panel-header__actions {
@@ -2030,6 +2077,13 @@ textarea:focus {
   justify-content: space-between;
   gap: 1.5rem;
   align-items: flex-start;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: calc(var(--radius) - 6px);
+  padding: 1rem 1.25rem;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 36px -26px var(--shadow-2);
 }
 
 .pantry-view__header h2 {
@@ -2180,6 +2234,13 @@ textarea:focus {
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: calc(var(--radius) - 6px);
+  padding: 1rem 1.25rem;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 36px -26px var(--shadow-2);
 }
 
 .meal-plan-view__mode-toggle {
@@ -2692,6 +2753,13 @@ textarea:focus {
   justify-content: space-between;
   gap: 1.5rem;
   flex-wrap: wrap;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: calc(var(--radius) - 6px);
+  padding: 1rem 1.25rem;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 36px -26px var(--shadow-2);
 }
 
 .family-view__header-text {
@@ -2813,6 +2881,13 @@ textarea:focus {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: calc(var(--radius) - 6px);
+  padding: 1rem 1.25rem;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 36px -26px var(--shadow-2);
 }
 
 .meal-plan-day-modal__titles {
