@@ -11,54 +11,33 @@
     <div class="app-shell" id="recipes-page">
       <header class="topbar">
         <div class="topbar__row">
-          <button
-            type="button"
-            class="nav-chip__toggle"
-            id="primary-nav-toggle"
-            aria-label="Toggle primary menu"
-            aria-expanded="false"
-            aria-controls="primary-nav"
-          >
-            <span class="nav-chip__toggle-icon" aria-hidden="true">☰</span>
-            <span class="nav-chip__toggle-label">Menu</span>
-          </button>
           <nav class="nav-chip nav-chip--tabs" id="primary-nav" aria-label="Primary">
-            <div class="nav-chip__group view-toggle">
-              <div class="nav-chip__section">
-                <button
-                  type="button"
-                  class="view-toggle__button tab view-toggle__button--active"
-                  data-view-target="meals"
-                  aria-current="page"
-                >
-                  Recipes
-                </button>
-              </div>
-              <div class="nav-chip__section">
-                <button type="button" class="view-toggle__button tab" data-view-target="kitchen">
-                  Kitchen
-                </button>
-              </div>
-              <div class="nav-chip__section">
-                <button type="button" class="view-toggle__button tab" data-view-target="pantry">
-                  Pantry
-                </button>
-              </div>
-              <div class="nav-chip__section">
-                <button type="button" class="view-toggle__button tab" data-view-target="meal-plan">
-                  Meal Plan
-                </button>
-              </div>
-              <div class="nav-chip__section">
-                <button
-                  type="button"
-                  class="view-toggle__button tab"
-                  data-view-target="family"
-                  id="family-button"
-                >
-                  Family
-                </button>
-              </div>
+            <div class="tabs-list view-toggle">
+              <button
+                type="button"
+                class="view-toggle__button tab view-toggle__button--active"
+                data-view-target="meals"
+                aria-current="page"
+              >
+                Recipes
+              </button>
+              <button type="button" class="view-toggle__button tab" data-view-target="kitchen">
+                Kitchen
+              </button>
+              <button type="button" class="view-toggle__button tab" data-view-target="pantry">
+                Pantry
+              </button>
+              <button type="button" class="view-toggle__button tab" data-view-target="meal-plan">
+                Meal Plan
+              </button>
+              <button
+                type="button"
+                class="view-toggle__button tab"
+                data-view-target="family"
+                id="family-button"
+              >
+                Family
+              </button>
             </div>
             <details class="settings-panel nav-chip__settings" id="settings-panel">
               <summary
@@ -74,7 +53,7 @@
                   <circle class="gear-hole" cx="12" cy="12" r="3.2" />
                 </svg>
               </summary>
-              <div class="settings-panel__content">
+              <div class="settings-panel__content settings-menu">
                 <div class="theme-toolbar" id="theme-toolbar">
                   <div class="theme-toolbar__group">
                     <span class="theme-toolbar__label">Mode</span>
