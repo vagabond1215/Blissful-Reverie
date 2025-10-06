@@ -4547,3 +4547,130 @@ textarea:focus {
 #recipes-page .settings-dropdown .menu-item:hover{
   background: var(--layer-1);
 }
+
+/* ===== height baseline so left chip matches others ===== */
+:root {
+  --chip-h: 42px;
+}
+
+#recipes-page [data-chip="tabs"] {
+  padding: 0.25rem 0.5rem;
+  gap: 0.5rem;
+}
+
+#recipes-page [data-chip="tabs"] .tabs-list {
+  display: flex;
+  gap: 0;
+}
+
+#recipes-page [data-chip="tabs"] .tabs-list .tab {
+  height: var(--chip-h);
+  padding: 0 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+#recipes-page [data-chip="tabs"] .tabs-list .tab + .tab {
+  margin-left: -1px;
+}
+
+/* ===== reset <details> container inside chip (no bg box!) ===== */
+#recipes-page .nav-chip__settings {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin-left: 0.5rem;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: var(--chip-h);
+}
+
+/* remove default marker/bullet from summary */
+#recipes-page .nav-chip__settings > summary::-webkit-details-marker {
+  display: none;
+}
+
+#recipes-page .nav-chip__settings > summary {
+  list-style: none;
+}
+
+/* ===== PURE gear trigger: no pill, no outline ===== */
+#recipes-page .nav-chip__settings > summary.settings-btn {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+
+#recipes-page .nav-chip__settings > summary:focus,
+#recipes-page .nav-chip__settings > summary:focus-visible {
+  outline: none !important;
+}
+
+/* The gear itself: black on red chip; center hole shows chip red */
+#recipes-page .nav-chip__settings .settings-btn svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  fill: var(--layer-0) !important;
+  stroke: none !important;
+  filter: none !important;
+  transition: transform 0.15s ease;
+}
+
+#recipes-page .nav-chip__settings .settings-btn svg .gear-hole {
+  fill: var(--layer-2) !important;
+}
+
+#recipes-page .nav-chip__settings .settings-btn:hover svg {
+  transform: rotate(12deg);
+}
+
+/* Defensive: nuke any inherited pill styles from libs/classes */
+#recipes-page .nav-chip__settings .icon-btn,
+#recipes-page .nav-chip__settings .tab {
+  all: unset !important;
+  display: inline-flex !important;
+}
+
+/* ===== POPUP PANEL: page background with sage border =================== */
+/* Position the first sibling after <summary> as the popup */
+#recipes-page .nav-chip__settings[open] > :not(summary) {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 1000;
+  background: var(--layer-0) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-2) !important;
+  min-inline-size: 240px;
+  padding: 0.5rem;
+}
+
+/* Optional item hover */
+#recipes-page .nav-chip__settings[open] .menu-item:hover {
+  background: var(--layer-1);
+  border-radius: 10px;
+}
+
+/* ===== kill any stray background wrappers around chips ===== */
+#recipes-page .topbar,
+#recipes-page .topbar__row,
+#recipes-page .toolbar,
+#recipes-page .header-shelf,
+#recipes-page .chip-shelf {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
