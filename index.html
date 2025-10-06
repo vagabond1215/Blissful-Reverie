@@ -11,8 +11,13 @@
     <div class="app-shell" id="recipes-page">
       <header class="topbar">
         <div class="topbar__row">
-          <nav class="nav-chip nav-chip--tabs" id="primary-nav" aria-label="Primary">
-            <div class="tabs-list view-toggle">
+          <nav
+            class="nav-chip nav-chip--tabs"
+            id="primary-nav"
+            aria-label="Primary"
+            data-chip="tabs"
+          >
+            <div class="tabs-list">
               <button
                 type="button"
                 class="view-toggle__button tab view-toggle__button--active"
@@ -247,12 +252,14 @@
             id="recipe-family-filter"
             hidden
             aria-hidden="true"
+            data-chip="filters"
           ></div>
           <div
             class="nav-chip nav-chip--actions"
             id="recipe-action-chip"
             role="group"
             aria-label="Recipe quick actions"
+            data-chip="actions"
           >
             <button
               type="button"
