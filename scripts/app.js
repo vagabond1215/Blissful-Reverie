@@ -8314,6 +8314,35 @@
       return;
     }
 
+    const chips = headerRow.querySelectorAll('.nav-chip');
+    if (chips[0]) {
+      chips[0].setAttribute('data-chip', 'tabs');
+    }
+    if (chips[1]) {
+      chips[1].setAttribute('data-chip', 'filters');
+    }
+    if (chips[2]) {
+      chips[2].setAttribute('data-chip', 'actions');
+    }
+
+    const tabsChip = headerRow.querySelector('[data-chip="tabs"]') || chips[0] || null;
+    if (tabsChip) {
+      let tabsList = tabsChip.querySelector('.tabs-list');
+      if (!tabsList) {
+        tabsList = document.createElement('div');
+        tabsList.className = 'tabs-list';
+        const tabButtons = Array.from(tabsChip.querySelectorAll('button.tab, a.tab'));
+        tabButtons.forEach((button) => tabsList.appendChild(button));
+        tabsChip.insertBefore(tabsList, tabsChip.firstChild || null);
+      }
+
+      const gear = tabsChip.querySelector('.settings-btn');
+      if (gear) {
+        gear.classList.add('settings-btn');
+        gear.classList.remove('icon-btn', 'tab');
+      }
+    }
+
     const quickFilters =
       document.querySelector('#quick-filters') ||
       document.querySelector('.quick-filters');
@@ -8322,6 +8351,7 @@
       if (controls.length) {
         const chip = document.createElement('div');
         chip.className = 'nav-chip nav-chip--filters';
+        chip.setAttribute('data-chip', 'filters');
         controls.forEach((control) => {
           control.classList.add('icon-btn');
         });
