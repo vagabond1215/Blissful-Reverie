@@ -494,33 +494,59 @@ select {
   margin-left: -1px;
 }
 
-/* Settings dropdown / panel should match page bg, not card color */
+/* Panel container background = page background, with sage border */
 #recipes-page .settings-menu,
 #recipes-page .settings-panel,
 #recipes-page .settings-dropdown,
-#recipes-page .settings-popover {
+#recipes-page .settings-popover,
+#recipes-page [role='menu'].settings,
+#recipes-page .popover.settings,
+#recipes-page .dropdown-menu.settings {
   background: var(--layer-0) !important;
   color: var(--text) !important;
   border: 1px solid var(--border-strong) !important;
+  border-radius: var(--radius);
   box-shadow: var(--shadow-2) !important;
+}
+
+/* Menu items + hovers, keep contrast without introducing new hues */
+#recipes-page .settings-menu .menu-item,
+#recipes-page .settings-panel .menu-item,
+#recipes-page .settings-dropdown .menu-item {
+  background: transparent;
+  color: var(--text);
+  border-radius: 10px;
+}
+
+#recipes-page .settings-menu .menu-item:hover,
+#recipes-page .settings-panel .menu-item:hover,
+#recipes-page .settings-dropdown .menu-item:hover {
+  background: var(--layer-1);
+}
+
+/* Switches/inputs inside the panel stay neutral and accessible */
+#recipes-page .settings-menu input,
+#recipes-page .settings-menu select {
+  background: var(--layer-1);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
 }
 
 /* Reuse the protruding gear styling */
 #recipes-page .holiday-settings-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   inline-size: 32px;
   block-size: 32px;
-  padding: 0;
-  border: none;
-  background: transparent;
+  padding: 0 !important;
   display: grid;
   place-items: center;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
-  color: var(--text);
 }
 
 #recipes-page .holiday-settings-btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px color-mix(in oklab, var(--layer-2), var(--layer-0) 65%);
+  outline: none !important;
 }
 
 #recipes-page .holiday-settings-btn svg {
@@ -529,6 +555,7 @@ select {
   display: block;
   fill: var(--layer-0);
   transition: transform 0.15s ease;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
 }
 
 #recipes-page .holiday-settings-btn:hover svg {
@@ -537,6 +564,11 @@ select {
 
 #recipes-page .holiday-settings-btn svg .gear-hole {
   fill: var(--layer-2);
+}
+
+#recipes-page .holiday-settings-btn::before,
+#recipes-page .holiday-settings-btn::after {
+  content: none !important;
 }
 
 .nav-chip__group {
@@ -708,39 +740,41 @@ select {
   outline-offset: 2px;
 }
 
-.nav-chip--tabs .settings-btn {
+#recipes-page .nav-chip--tabs .settings-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
   inline-size: 32px;
   block-size: 32px;
-  padding: 0;
   display: grid;
   place-items: center;
-  border: none;
-  background: transparent;
-  color: var(--text);
-  border-radius: 999px;
+}
+
+#recipes-page .nav-chip--tabs .settings-btn:focus-visible {
+  outline: none !important;
+}
+
+#recipes-page .nav-chip--tabs .settings-btn svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+  fill: var(--layer-0);
+  transition: transform 0.15s ease;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
 }
 
-.nav-chip--tabs .settings-btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px color-mix(in oklab, var(--layer-2), var(--layer-0) 65%);
-}
-
-.nav-chip--tabs .settings-btn svg {
-  display: block;
-  width: 22px;
-  height: 22px;
-  fill: var(--layer-0);
-  filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0));
-  transition: transform 0.15s ease;
-}
-
-.nav-chip--tabs .settings-btn:hover svg {
+#recipes-page .nav-chip--tabs .settings-btn:hover svg {
   transform: rotate(12deg);
 }
 
-.nav-chip--tabs .settings-btn svg .gear-hole {
+#recipes-page .nav-chip--tabs .settings-btn svg .gear-hole {
   fill: var(--layer-2);
+}
+
+#recipes-page .nav-chip--tabs .settings-btn::before,
+#recipes-page .nav-chip--tabs .settings-btn::after {
+  content: none !important;
 }
 
 [data-theme='dark'] .nav-chip .tab,
