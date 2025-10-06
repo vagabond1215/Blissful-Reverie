@@ -5721,14 +5721,6 @@
     renderApp();
   };
 
-  const clearMealFilterFamilyMembers = () => {
-    const filters = ensureMealFilters();
-    if (Array.isArray(filters.familyMembers) && filters.familyMembers.length) {
-      filters.familyMembers = [];
-      renderApp();
-    }
-  };
-
   const populateCheckboxGroup = (view, container, options, field, config) => {
     let spanClassName;
     let labelFormatter;
@@ -6071,20 +6063,6 @@
     list.className = 'recipe-family-filter__list';
     list.setAttribute('role', 'group');
     list.setAttribute('aria-label', 'Filter recipes by family member');
-    const hasSelection = ids.length > 0;
-    const allButton = document.createElement('button');
-    allButton.type = 'button';
-    allButton.className = 'recipe-family-filter__button recipe-family-filter__button--all tab';
-    if (!hasSelection) {
-      allButton.classList.add('recipe-family-filter__button--active');
-    }
-    allButton.textContent = 'All';
-    allButton.title = 'Show recipes for all family members';
-    allButton.setAttribute('aria-pressed', hasSelection ? 'false' : 'true');
-    allButton.addEventListener('click', () => {
-      clearMealFilterFamilyMembers();
-    });
-    list.appendChild(allButton);
     const selectedSet = new Set(ids);
     members.forEach((member) => {
       if (!member || !member.id) {
@@ -8330,6 +8308,45 @@
     persistAppState();
   };
 
+  const enhanceRecipesHeader = () => {
+    const headerRow = document.querySelector('#recipes-page .topbar__row');
+    if (!headerRow) {
+      return;
+    }
+
+    const quickFilters =
+      document.querySelector('#quick-filters') ||
+      document.querySelector('.quick-filters');
+    if (quickFilters && !quickFilters.closest('.nav-chip')) {
+      const controls = Array.from(quickFilters.querySelectorAll('button, a'));
+      if (controls.length) {
+        const chip = document.createElement('div');
+        chip.className = 'nav-chip nav-chip--filters';
+        controls.forEach((control) => {
+          control.classList.add('icon-btn');
+        });
+        chip.append(...controls);
+        headerRow.insertBefore(chip, headerRow.children[1] || null);
+      }
+    }
+
+    const holidayButton =
+      document.querySelector('#holiday-settings-button') ||
+      document.querySelector('#holiday-theme-settings') ||
+      headerRow.querySelector('.holiday-settings-btn');
+    if (holidayButton instanceof HTMLElement) {
+      holidayButton.classList.add('holiday-settings-btn');
+      if (!holidayButton.querySelector('svg .gear-hole')) {
+        holidayButton.innerHTML = `
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M19.14 12.94a7.9 7.9 0 0 0 .05-.94 7.9 7.9 0 0 0-.05-.94l2.02-1.57a.6.6 0 0 0 .14-.77l-1.91-3.3a.6.6 0 0 0-.72-.27l-2.38.96a7.53 7.53 0 0 0-1.63-.95l-.36-2.54A.6.6 0 0 0 13.1 1h-3.2a.6.6 0 0 0-.59.52l-.36 2.54c-.58.24-1.13.55-1.63.95l-2.38-.96a.6.6 0 0 0-.72.27L2.31 8.12a.6.6 0 0 0 .14.77l2.02 1.57c-.03.31-.05.62-.05.94s.02.63.05.94L2.45 14.9a.6.6 0 0 0-.14.77l1.91 3.3c.16.28.5.4.8.27l2.38-.96c.5.4 1.05.71 1.63.95l.36 2.54c.05.29.3.53.59.53h3.2c.29 0 .54-.24.59-.53l.36-2.54c.58-.24 1.13-.55 1.63-.95l2.38.96c.3.13.64.01.8-.27l1.91-3.3a.6.6 0 0 0-.14-.77l-2.02-1.57Z" />
+            <circle class="gear-hole" cx="12" cy="12" r="3.2" />
+          </svg>
+        `.trim();
+      }
+    }
+  };
+
   const bindEvents = () => {
     elements.viewToggleButtons.forEach((button) => {
       button.addEventListener('click', () => {
@@ -8649,6 +8666,7 @@
 
   const init = () => {
     cacheElements();
+    enhanceRecipesHeader();
     bindEvents();
     initThemeControls();
     initMeasurementControls();
