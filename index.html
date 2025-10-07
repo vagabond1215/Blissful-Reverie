@@ -11,39 +11,7 @@
     <div class="app-shell" id="recipes-page">
       <header class="topbar">
         <div class="topbar__row">
-          <nav
-            class="nav-chip nav-chip--tabs"
-            id="primary-nav"
-            aria-label="Primary"
-            data-chip="tabs"
-          >
-            <div class="tabs-list">
-              <button
-                type="button"
-                class="view-toggle__button tab view-toggle__button--active"
-                data-view-target="meals"
-                aria-current="page"
-              >
-                Recipes
-              </button>
-              <button type="button" class="view-toggle__button tab" data-view-target="kitchen">
-                Kitchen
-              </button>
-              <button type="button" class="view-toggle__button tab" data-view-target="pantry">
-                Pantry
-              </button>
-              <button type="button" class="view-toggle__button tab" data-view-target="meal-plan">
-                Meal Plan
-              </button>
-              <button
-                type="button"
-                class="view-toggle__button tab"
-                data-view-target="family"
-                id="family-button"
-              >
-                Family
-              </button>
-            </div>
+          <div class="nav-chip nav-chip--settings" data-chip="settings">
             <details class="settings-panel nav-chip__settings" id="settings-panel">
               <summary
                 class="settings-panel__summary settings-btn"
@@ -246,6 +214,40 @@
                 </div>
               </div>
             </details>
+          </div>
+          <nav
+            class="nav-chip nav-chip--tabs"
+            id="primary-nav"
+            aria-label="Primary"
+            data-chip="tabs"
+          >
+            <div class="tabs-list">
+              <button
+                type="button"
+                class="view-toggle__button tab view-toggle__button--active"
+                data-view-target="meals"
+                aria-current="page"
+              >
+                Recipes
+              </button>
+              <button type="button" class="view-toggle__button tab" data-view-target="kitchen">
+                Kitchen
+              </button>
+              <button type="button" class="view-toggle__button tab" data-view-target="pantry">
+                Pantry
+              </button>
+              <button type="button" class="view-toggle__button tab" data-view-target="meal-plan">
+                Meal Plan
+              </button>
+              <button
+                type="button"
+                class="view-toggle__button tab"
+                data-view-target="family"
+                id="family-button"
+              >
+                Family
+              </button>
+            </div>
           </nav>
           <div
             class="nav-chip nav-chip--filters recipe-family-filter"
