@@ -4674,3 +4674,109 @@ textarea:focus {
   box-shadow: none !important;
 }
 
+/* ===== unified chip height ===== */
+:root { --chip-h: 42px; } /* tune if you want taller/shorter */
+
+/* Topbar wrappers must not paint */
+#recipes-page .topbar,
+#recipes-page .topbar__row { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+
+/* === All chips share the same frame (card-red + sage) and height === */
+#recipes-page .nav-chip{
+  display:flex; align-items:center; gap:.5rem;
+  background: var(--layer-2);             /* red */
+  border: 2px solid var(--border-strong); /* sage */
+  border-radius: 999px;
+  padding: .25rem .5rem;
+  min-height: calc(var(--chip-h) + .5rem);  /* inner height + vertical padding */
+  flex: 0 0 auto;                            /* never stretch */
+}
+
+/* === Left chip tabs: keep pill look, no stretch, match height === */
+#recipes-page [data-chip="tabs"] .tabs-list{ display:flex; gap:0; align-items:center; }
+#recipes-page [data-chip="tabs"] .tabs-list .tab{
+  height: var(--chip-h);
+  padding: 0 .95rem;
+  border-radius: 999px;                      /* pill */
+  display:inline-flex; align-items:center; justify-content:center;
+  margin:0; position:relative; z-index:1;
+  /* matte button look (theme aware) */
+  border:1px solid color-mix(in oklab, var(--layer-0), white 22%);
+  background:
+    linear-gradient(to bottom,
+      color-mix(in oklab, var(--layer-0), white 8%) 0%,
+      color-mix(in oklab, var(--layer-0), black 2%) 100%);
+  color: var(--text);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--layer-0), white 10%), 0 1px 1px rgba(0,0,0,.25);
+  transition: background .15s, border-color .15s, transform .06s;
+}
+#recipes-page [data-chip="tabs"] .tabs-list .tab + .tab{ margin-left:-1px; } /* overlap borders only between tabs */
+#recipes-page [data-chip="tabs"] .tabs-list .tab:hover{ transform: translateY(-1px); }
+#recipes-page [data-chip="tabs"] .tabs-list .tab:active{ transform: translateY(0); }
+#recipes-page [data-chip="tabs"] .tabs-list .tab.is-active,
+#recipes-page [data-chip="tabs"] .tabs-list .tab[aria-current="page"]{
+  outline:2px solid var(--border-strong); outline-offset:-2px;
+}
+
+/* === PURE GEAR (inside <details>) — NO pill, NO outline/background === */
+#recipes-page .nav-chip__settings{
+  background: transparent !important; border: 0 !important; padding: 0 !important;
+  display:inline-flex; align-items:center; height: var(--chip-h);
+  margin-left:.5rem; /* space away from overlapped tabs */
+}
+#recipes-page .nav-chip__settings > summary::-webkit-details-marker{ display:none; }
+#recipes-page .nav-chip__settings > summary{ list-style:none; }
+
+#recipes-page .nav-chip__settings > summary.settings-btn{
+  all: unset;                                   /* obliterate inherited button styles */
+  display:inline-flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  inline-size: 20px; block-size: 20px;          /* visible size; hit area from chip height */
+}
+#recipes-page .nav-chip__settings > summary:focus,
+#recipes-page .nav-chip__settings > summary:focus-visible{ outline:none !important; }
+
+/* Gear visual: teeth = page bg; center hole = chip red */
+#recipes-page .nav-chip__settings .settings-btn svg{
+  width: 20px; height: 20px; display:block;
+  fill: var(--layer-0) !important; stroke:none !important; filter:none !important;
+  transition: transform .15s ease;
+}
+#recipes-page .nav-chip__settings .settings-btn svg .gear-hole{ fill: var(--layer-2) !important; }
+#recipes-page .nav-chip__settings .settings-btn:hover svg{ transform: rotate(12deg); }
+
+/* In case some lib/class re-applies pill chrome to the gear, nuke it */
+#recipes-page .nav-chip__settings .icon-btn,
+#recipes-page .nav-chip__settings .tab{ all: unset !important; display:inline-flex !important; }
+
+/* === Popup panel uses page background (theme-aware) === */
+#recipes-page .nav-chip__settings[open] > .settings-menu{
+  position:absolute; top: calc(100% + 8px); right:0; z-index:1000;
+  background: var(--layer-0) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-2) !important;
+  min-inline-size: 240px;
+  padding:.5rem;
+}
+
+/* === Middle/right chips: same frame & height, icon pills uniform === */
+#recipes-page .nav-chip--filters .icon-btn,
+#recipes-page .nav-chip--actions .icon-btn{
+  inline-size:32px; block-size:32px; padding:0; display:grid; place-items:center;
+  border-radius:999px;
+  border:1px solid color-mix(in oklab, var(--layer-0), white 22%);
+  background:
+    linear-gradient(to bottom,
+      color-mix(in oklab, var(--layer-0), white 8%) 0%,
+      color-mix(in oklab, var(--layer-0), black 2%) 100%);
+  color: var(--text);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--layer-0), white 10%), 0 1px 1px rgba(0,0,0,.25);
+  transition: background .15s, border-color .15s, transform .06s;
+}
+
+/* === Kill any stray backgrounds around the chip shelf === */
+#recipes-page .toolbar, #recipes-page .header-shelf, #recipes-page .chip-shelf{
+  background: transparent !important; border:0 !important; box-shadow:none !important;
+}

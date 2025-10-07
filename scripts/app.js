@@ -8325,6 +8325,16 @@
       chips[2].setAttribute('data-chip', 'actions');
     }
 
+    const settingsPanel = headerRow.querySelector('#settings-panel');
+    if (settingsPanel) {
+      settingsPanel.classList.remove('icon-btn', 'tab');
+      const settingsSummary = settingsPanel.querySelector('summary');
+      if (settingsSummary) {
+        settingsSummary.classList.add('settings-btn');
+        settingsSummary.classList.remove('icon-btn', 'tab');
+      }
+    }
+
     const tabsChip = headerRow.querySelector('[data-chip="tabs"]') || chips[0] || null;
     if (tabsChip) {
       let tabsList = tabsChip.querySelector('.tabs-list');
