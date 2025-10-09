@@ -3,6 +3,21 @@
   const recipes = Array.isArray(window.BLISSFUL_RECIPES) ? window.BLISSFUL_RECIPES : [];
   const ingredients = Array.isArray(window.BLISSFUL_INGREDIENTS) ? window.BLISSFUL_INGREDIENTS : [];
 
+  const assignLayerAttributes = (node, depth = 1) => {
+    if (!node || node.nodeType !== Node.ELEMENT_NODE) {
+      return;
+    }
+    node.setAttribute('data-layer', depth);
+    const nextDepth = depth + 1;
+    for (const child of node.children) {
+      assignLayerAttributes(child, nextDepth);
+    }
+  };
+
+  if (document?.documentElement) {
+    assignLayerAttributes(document.documentElement, 1);
+  }
+
   if (!recipes.length || !ingredients.length) {
     console.error('Blissful Reverie data could not be loaded.');
     return;
