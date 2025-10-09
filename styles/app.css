@@ -6,8 +6,8 @@
   color-scheme: light;
 
   /* Core */
-  --neutral: #121314;
-  --brand: #7A2236;
+  --neutral: #05060F;
+  --brand: #5F0F40;
   --accent-1: #C2B280;
   --accent-2: #8DA397;
 
@@ -16,11 +16,11 @@
   --text-muted: #D0D5DA;
   --text-inverse: #111315;
 
-  /* LAYERS (distance from bg) */
+  /* LAYERS (distance from bg, intentionally contrasting) */
   --layer-0: var(--neutral);
-  --layer-1: color-mix(in oklab, var(--neutral), white 6%);
+  --layer-1: #0F3D3E;
   --layer-2: var(--brand);
-  --layer-3: color-mix(in oklab, var(--brand), black 8%);
+  --layer-3: #6A3D13;
 
   /* Borders (may NEVER match adjacent fill) */
   --border-strong: var(--accent-2);
@@ -4192,10 +4192,10 @@ textarea:focus {
   --text-muted: #C8CED3;
   --text-inverse: #0E1012;
 
-  --layer-0: #0E0F11;
-  --layer-1: #15171A;
-  --layer-2: #651C2C;
-  --layer-3: #541725;
+  --layer-0: #03070D;
+  --layer-1: #0D3246;
+  --layer-2: #4A123F;
+  --layer-3: #7A3F12;
 
   --border-strong: #7E9E93;
   --border-soft: #6B8C81;
