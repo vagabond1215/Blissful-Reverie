@@ -420,8 +420,8 @@ select {
 }
 
 #recipes-page .topbar__row > .nav-chip--tabs {
-  flex: 1 1 20rem;
-  min-inline-size: min(100%, 18rem);
+  flex: 0 0 auto;
+  margin-inline-end: auto;
 }
 
 /* Header row: invisible container, consistent spacing */
@@ -4604,22 +4604,40 @@ textarea:focus {
 
 /* ===== reset <details> container inside chip (no bg box!) ===== */
 #recipes-page .nav-chip--settings {
-  padding: 0;
-  width: 50px;
-  justify-content: center;
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0.25rem;
+  inline-size: 2.75rem;
+  min-inline-size: 2.75rem;
+}
+
+#recipes-page .nav-chip--settings .nav-chip__settings-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  fill: var(--layer-0) !important;
+  stroke: none !important;
+  filter: none !important;
+  transition: transform 0.15s ease;
+}
+
+#recipes-page .nav-chip--settings .nav-chip__settings-icon .gear-hole {
+  fill: var(--layer-2) !important;
+}
+
+#recipes-page .nav-chip--settings:hover .nav-chip__settings-icon,
+#recipes-page .nav-chip--settings:focus-within .nav-chip__settings-icon {
+  transform: rotate(12deg);
 }
 
 #recipes-page .nav-chip__settings {
   background: transparent !important;
   border: 0 !important;
   padding: 0 !important;
-  margin-left: 0;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
+  margin: 0;
+  position: absolute;
+  inset: 0;
 }
 
 /* remove default marker/bullet from summary */
@@ -4634,35 +4652,20 @@ textarea:focus {
 /* ===== PURE gear trigger: no pill, no outline ===== */
 #recipes-page .nav-chip__settings > summary.settings-btn {
   all: unset;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  width: 100%;
-  height: 100%;
-}
-
-#recipes-page .nav-chip__settings > summary:focus,
-#recipes-page .nav-chip__settings > summary:focus-visible {
-  outline: none !important;
-}
-
-/* The gear itself: black on red chip; center hole shows chip red */
-#recipes-page .nav-chip__settings .settings-btn svg {
-  width: 20px;
-  height: 20px;
+  position: absolute;
+  inset: 0;
   display: block;
-  fill: var(--layer-0) !important;
-  stroke: none !important;
-  filter: none !important;
-  transition: transform 0.15s ease;
+  cursor: pointer;
+  border-radius: inherit;
 }
 
-#recipes-page .nav-chip__settings .settings-btn svg .gear-hole {
-  fill: var(--layer-2) !important;
+#recipes-page .nav-chip__settings > summary:focus {
+  outline: none;
 }
 
-#recipes-page .nav-chip__settings .settings-btn:hover svg {
-  transform: rotate(12deg);
+#recipes-page .nav-chip__settings > summary:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 3px;
 }
 
 /* Defensive: nuke any inherited pill styles from libs/classes */
@@ -4751,30 +4754,28 @@ textarea:focus {
 
 /* === PURE GEAR (inside <details>) — NO pill, NO outline/background === */
 #recipes-page .nav-chip__settings{
-  background: transparent !important; border: 0 !important; padding: 0 !important;
-  display:inline-flex; align-items:center; height: var(--chip-h);
-  margin-left:.5rem; /* space away from overlapped tabs */
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0;
+  position: absolute;
+  inset: 0;
 }
 #recipes-page .nav-chip__settings > summary::-webkit-details-marker{ display:none; }
 #recipes-page .nav-chip__settings > summary{ list-style:none; }
 
 #recipes-page .nav-chip__settings > summary.settings-btn{
-  all: unset;                                   /* obliterate inherited button styles */
-  display:inline-flex; align-items:center; justify-content:center;
+  all: unset;
+  position: absolute;
+  inset: 0;
+  display:block;
   cursor:pointer;
-  inline-size: 20px; block-size: 20px;          /* visible size; hit area from chip height */
+  border-radius: inherit;
 }
-#recipes-page .nav-chip__settings > summary:focus,
-#recipes-page .nav-chip__settings > summary:focus-visible{ outline:none !important; }
+#recipes-page .nav-chip__settings > summary:focus{ outline:none; }
+#recipes-page .nav-chip__settings > summary:focus-visible{ outline:2px solid var(--border-strong); outline-offset:3px; }
 
-/* Gear visual: teeth = page bg; center hole = chip red */
-#recipes-page .nav-chip__settings .settings-btn svg{
-  width: 20px; height: 20px; display:block;
-  fill: var(--layer-0) !important; stroke:none !important; filter:none !important;
-  transition: transform .15s ease;
-}
-#recipes-page .nav-chip__settings .settings-btn svg .gear-hole{ fill: var(--layer-2) !important; }
-#recipes-page .nav-chip__settings .settings-btn:hover svg{ transform: rotate(12deg); }
+/* Gear visual handled by .nav-chip__settings-icon on the chip container */
 
 /* In case some lib/class re-applies pill chrome to the gear, nuke it */
 #recipes-page .nav-chip__settings .icon-btn,
