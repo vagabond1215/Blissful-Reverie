@@ -4521,11 +4521,22 @@ textarea:focus {
 
 /* ================= CLEAR STRAY BACKGROUNDS AROUND CHIPS ================= */
 #recipes-page .topbar{ background: var(--layer-0) !important; border: 0 !important; box-shadow: none !important; padding: 0 .75rem !important; height: 50px; }
-#recipes-page .topbar__row{ display: flex; align-items: stretch; gap: .75rem; flex-wrap: nowrap; background: transparent !important; border: 0 !important; height: 100%; overflow-x: auto; }
+#recipes-page .topbar__row{ display: flex; align-items: stretch; gap: .75rem; flex-wrap: nowrap; background: transparent !important; border: 0 !important; height: 100%; overflow-x: auto; position: relative; }
 #recipes-page .toolbar, #recipes-page .header-shelf, #recipes-page .chip-shelf,
 #recipes-page .quick-filters, #recipes-page .actions-mini,
 #recipes-page .quick-filters > *, #recipes-page .actions-mini > *{
   background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important;
+}
+
+#recipes-page .topbar{ position: relative; }
+
+#recipes-page .topbar__row--settings-open{
+  overflow: visible;
+}
+
+#recipes-page .topbar--settings-open{
+  overflow: visible;
+  z-index: 10;
 }
 
 /* ================= SETTINGS MENU PANEL BACKGROUND ====================== */
@@ -4607,21 +4618,24 @@ textarea:focus {
   position: relative;
   display: grid;
   place-items: center;
-  padding: 0.3125rem;
+  /* 3rem chip - 36px icon = 12px → 6px padding on each side keeps the gear centered */
+  padding: 6px;
   inline-size: 3rem;
   min-inline-size: 3rem;
   block-size: 3rem;
   min-block-size: 3rem;
+  z-index: 5;
 }
 
 #recipes-page .nav-chip--settings .nav-chip__settings-icon {
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   display: block;
   fill: var(--layer-0) !important;
   stroke: none !important;
   filter: none !important;
   transition: transform 0.15s ease;
+  transform-origin: 50% 50%;
 }
 
 #recipes-page .nav-chip--settings .nav-chip__settings-icon .gear-hole {

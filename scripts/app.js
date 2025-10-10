@@ -8350,6 +8350,18 @@
         settingsSummary.classList.add('settings-btn');
         settingsSummary.classList.remove('icon-btn', 'tab');
       }
+
+      const topbar = headerRow.closest('.topbar');
+      const updateSettingsOverflow = () => {
+        const isOpen = settingsPanel.hasAttribute('open');
+        headerRow.classList.toggle('topbar__row--settings-open', isOpen);
+        if (topbar) {
+          topbar.classList.toggle('topbar--settings-open', isOpen);
+        }
+      };
+
+      settingsPanel.addEventListener('toggle', updateSettingsOverflow);
+      updateSettingsOverflow();
     }
 
     const tabsChip =
