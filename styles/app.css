@@ -523,8 +523,8 @@ select {
 }
 /* SVG colors: teeth = pure black, hole = chip red */
 #recipes-page .nav-chip--tabs .settings-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 35px;
+  height: 35px;
   display: block;
   fill: #000 !important;
   stroke: none;
@@ -823,8 +823,8 @@ select {
 }
 
 #recipes-page .nav-chip--tabs .settings-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 35px;
+  height: 35px;
   display: block;
   fill: var(--layer-0) !important;
   stroke: none;
@@ -4464,10 +4464,10 @@ textarea:focus {
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer;
   margin-left: .5rem;                  /* spacing away from overlapped tabs */
-  inline-size: 32px;
-  block-size: 32px;
-  min-inline-size: 32px;
-  min-block-size: 32px;
+  inline-size: 44px;
+  block-size: 44px;
+  min-inline-size: 44px;
+  min-block-size: 44px;
   list-style: none;
 }
 #recipes-page [data-chip="tabs"] .settings-btn::-webkit-details-marker{ display: none; }
@@ -4478,7 +4478,7 @@ textarea:focus {
 
 /* Gear visual itself: teeth = page bg (black in dark), hole = chip red */
 #recipes-page [data-chip="tabs"] .settings-btn svg{
-  width: 20px; height: 20px; display: block;
+  width: 35px; height: 35px; display: block;
   fill: var(--layer-0) !important; stroke: none !important; filter: none !important;
   transition: transform .15s ease;
 }
@@ -4607,14 +4607,16 @@ textarea:focus {
   position: relative;
   display: grid;
   place-items: center;
-  padding: 0.25rem;
-  inline-size: 2.75rem;
-  min-inline-size: 2.75rem;
+  padding: 0.3125rem;
+  inline-size: 3rem;
+  min-inline-size: 3rem;
+  block-size: 3rem;
+  min-block-size: 3rem;
 }
 
 #recipes-page .nav-chip--settings .nav-chip__settings-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: block;
   fill: var(--layer-0) !important;
   stroke: none !important;

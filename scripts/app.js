@@ -8329,16 +8329,18 @@
       return;
     }
 
-    const chips = headerRow.querySelectorAll('.nav-chip');
-    if (chips[0]) {
-      chips[0].setAttribute('data-chip', 'tabs');
-    }
-    if (chips[1]) {
-      chips[1].setAttribute('data-chip', 'filters');
-    }
-    if (chips[2]) {
-      chips[2].setAttribute('data-chip', 'actions');
-    }
+    const ensureChipRole = (selector, role) => {
+      const chip = headerRow.querySelector(selector);
+      if (chip && !chip.hasAttribute('data-chip')) {
+        chip.setAttribute('data-chip', role);
+      }
+      return chip;
+    };
+
+    ensureChipRole('.nav-chip--settings', 'settings');
+    ensureChipRole('.nav-chip--tabs', 'tabs');
+    ensureChipRole('.nav-chip--filters', 'filters');
+    ensureChipRole('.nav-chip--actions', 'actions');
 
     const settingsPanel = headerRow.querySelector('#settings-panel');
     if (settingsPanel) {
@@ -8350,7 +8352,8 @@
       }
     }
 
-    const tabsChip = headerRow.querySelector('[data-chip="tabs"]') || chips[0] || null;
+    const tabsChip =
+      headerRow.querySelector('[data-chip="tabs"]') || headerRow.querySelector('.nav-chip--tabs');
     if (tabsChip) {
       let tabsList = tabsChip.querySelector('.tabs-list');
       if (!tabsList) {
