@@ -15,6 +15,12 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'pasta-farfalle', name: 'Farfalle', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
   { slug: 'pasta-lasagna-noodles', name: 'Lasagna Noodles', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
   { slug: 'pasta-orzo', name: 'Orzo', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
+  { slug: 'pasta-ramen', name: 'Ramen Noodles', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
+  { slug: 'pasta-gnocchi', name: 'Potato Gnocchi', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
+  { slug: 'pasta-orecchiette', name: 'Orecchiette', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
+  { slug: 'pasta-shells', name: 'Pasta Shells', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
+  { slug: 'pasta-jumbo-shells', name: 'Jumbo Pasta Shells', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
+  { slug: 'pasta-rigatoni', name: 'Rigatoni', category: 'Pasta', tags: ['Contains Gluten', 'Vegetarian'] },
 
   // Dairy
   { slug: 'dairy-butter-unsalted', name: 'Butter (Unsalted)', category: 'Dairy', tags: ['Contains Dairy', 'Vegetarian'] },
@@ -89,8 +95,10 @@ window.BLISSFUL_INGREDIENTS = [
   },
 
   // Meat (raw single-ingredient; suitability tags are general)
-  { slug: 'meat-beef-ground-85', name: 'Ground Beef (85% Lean)', category: 'Meat', tags: ['Halal-Friendly', 'Kosher-Friendly', 'Paleo'] },
+  { slug: 'meat-beef-ground-85', name: 'Ground Beef (85% Lean)', category: 'Meat', tags: ['Halal-Friendly', 'Kosher-Friendly', 'Paleo'], aliases: ['Lean Ground Beef', 'Ground Beef'] },
   { slug: 'meat-beef-steak-ribeye', name: 'Beef Ribeye', category: 'Meat', tags: ['Halal-Friendly', 'Kosher-Friendly', 'Paleo'] },
+  { slug: 'meat-beef-flank-steak', name: 'Beef Flank Steak', category: 'Meat', tags: ['Halal-Friendly', 'Kosher-Friendly', 'Paleo'] },
+  { slug: 'meat-beef-sirloin-steak', name: 'Beef Sirloin Steak', category: 'Meat', tags: ['Halal-Friendly', 'Kosher-Friendly', 'Paleo'] },
   { slug: 'meat-chicken-breast', name: 'Chicken Breast', category: 'Meat', tags: ['Halal-Friendly', 'Kosher-Friendly', 'Paleo'] },
   { slug: 'meat-chicken-thigh', name: 'Chicken Thigh', category: 'Meat', tags: ['Halal-Friendly', 'Kosher-Friendly', 'Paleo'] },
   { slug: 'meat-pork-chop', name: 'Pork Chop', category: 'Meat', tags: ['Paleo'] },
@@ -163,10 +171,14 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'spice-matcha-powder', name: 'Matcha Powder', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'spice-instant-espresso', name: 'Instant Espresso Powder', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'spice-taco-seasoning', name: 'Taco Seasoning', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Nightshade'] },
+  { slug: 'spice-lavender', name: 'Culinary Lavender', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'spice-nutmeg-whole', name: 'Whole Nutmeg', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'spice-caraway-seed', name: 'Caraway Seeds', category: 'Spice', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
 
   // Vegetables
   { slug: 'veg-asparagus', name: 'Asparagus', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Low-FODMAP'] },
   { slug: 'veg-bell-pepper-red', name: 'Bell Pepper (Red)', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Nightshade', 'Low-FODMAP'] },
+  { slug: 'veg-bell-pepper', name: 'Bell Pepper', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Nightshade'] },
   { slug: 'veg-broccoli', name: 'Broccoli', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'veg-carrot', name: 'Carrot', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Low-FODMAP'] },
   { slug: 'veg-cauliflower', name: 'Cauliflower', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Low-FODMAP'] },
@@ -181,6 +193,7 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'veg-kale', name: 'Kale', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'veg-lettuce-romaine', name: 'Romaine Lettuce', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Low-FODMAP'] },
   { slug: 'veg-mushroom-button', name: 'Button Mushroom', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
+  { slug: 'veg-mushroom', name: 'Mushrooms', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'veg-onion-yellow', name: 'Onion (Yellow)', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Allium'] },
   { slug: 'veg-pea-frozen', name: 'Peas (Frozen)', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'veg-potato-russet', name: 'Potato (Russet)', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Nightshade', 'Low-FODMAP'] },
@@ -189,6 +202,8 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'veg-sweet-potato', name: 'Sweet Potato', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Low-FODMAP'] },
   { slug: 'veg-tomato-roma', name: 'Tomato (Roma)', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Nightshade'] },
   { slug: 'veg-zucchini', name: 'Zucchini', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Low-FODMAP'] },
+  { slug: 'veg-pimento', name: 'Pimento Peppers', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Nightshade'] },
+  { slug: 'veg-artichoke', name: 'Artichoke Hearts', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'veg-brussels-sprouts', name: 'Brussels Sprouts', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'veg-cabbage-green', name: 'Green Cabbage', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian'] },
   { slug: 'veg-onion-red', name: 'Onion (Red)', category: 'Vegetable', tags: ['Gluten-Free', 'Vegan', 'Vegetarian', 'Allium'] },
@@ -241,6 +256,7 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'grain-quinoa', name: 'Quinoa', category: 'Grain', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'grain-rice-basmati', name: 'Rice (Basmati)', category: 'Grain', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Low-FODMAP'] },
   { slug: 'grain-rice-brown', name: 'Rice (Brown)', category: 'Grain', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
+  { slug: 'grain-rice-cooked', name: 'Cooked Rice', category: 'Grain', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'grain-wheat-flour-ap', name: 'Wheat Flour (All-Purpose)', category: 'Grain', tags: ['Contains Gluten', 'Vegetarian', 'Vegan'] },
   { slug: 'grain-couscous', name: 'Couscous', category: 'Grain', tags: ['Contains Gluten', 'Vegetarian', 'Vegan'] },
   { slug: 'grain-millet', name: 'Millet', category: 'Grain', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
@@ -301,6 +317,7 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'baking-cocoa-powder', name: 'Cocoa Powder', category: 'Baking', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },
   { slug: 'baking-cornstarch', name: 'Cornstarch', category: 'Baking', tags: ['Gluten-Free', 'Vegetarian', 'Vegan', 'Low-FODMAP'] },
   { slug: 'baking-egg', name: 'Eggs', category: 'Baking', tags: ['Contains Eggs'] },
+  { slug: 'baking-sprinkles', name: 'Sprinkles', category: 'Baking', tags: ['Vegetarian'] },
 
   // Baking Alternatives
   {
@@ -371,6 +388,7 @@ window.BLISSFUL_INGREDIENTS = [
   },
   { slug: 'condiment-soy-sauce', name: 'Soy Sauce', category: 'Condiment/Sauce', tags: ['Contains Soy', 'Contains Gluten', 'Vegetarian', 'Vegan'] },
   { slug: 'condiment-tamari-gf', name: 'Tamari (GF)', category: 'Condiment/Sauce', tags: ['Gluten-Free', 'Contains Soy', 'Vegetarian', 'Vegan'] },
+  { slug: 'condiment-wasabi-paste', name: 'Wasabi Paste', category: 'Condiment/Sauce', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan'] },
   { slug: 'condiment-sriracha', name: 'Sriracha', category: 'Condiment/Sauce', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan', 'Nightshade'] },
   { slug: 'condiment-hot-sauce', name: 'Hot Sauce', category: 'Condiment/Sauce', tags: ['Gluten-Free*', 'Vegetarian', 'Vegan', 'Nightshade'] },
   { slug: 'condiment-worcestershire', name: 'Worcestershire Sauce', category: 'Condiment/Sauce', tags: ['Gluten-Free*', 'Contains Fish*', 'Vegetarian*'] }, // many contain anchovy; some are veg/GF
@@ -434,6 +452,7 @@ window.BLISSFUL_INGREDIENTS = [
   { slug: 'baked-empanada-dough', name: 'Empanada Dough Discs', category: 'Baked Goods & Doughs', tags: ['Contains Gluten', 'Vegetarian'] },
   { slug: 'baked-dumpling-wrappers', name: 'Dumpling Wrappers', category: 'Baked Goods & Doughs', tags: ['Contains Gluten', 'Vegetarian'] },
   { slug: 'baked-bao-dough', name: 'Bao Dough', category: 'Baked Goods & Doughs', tags: ['Contains Gluten', 'Vegetarian'] },
+  { slug: 'baked-crackers', name: 'Crackers', category: 'Baked Goods & Doughs', tags: ['Contains Gluten', 'Vegetarian'] },
 
   // Beverages & Mixers (non-stock)
   { slug: 'mix-tonic-water', name: 'Tonic Water', category: 'Beverages & Mixers', tags: ['Gluten-Free', 'Vegetarian', 'Vegan'] },

@@ -55,6 +55,59 @@ test('doesEntryMatchIngredient avoids false positives for different items', () =
   );
 });
 
+test('doesEntryMatchIngredient uses whole phrases instead of substrings', () => {
+  const matcher = matching.createIngredientMatcher({
+    slug: 'meat-ham',
+    name: 'Ham',
+  });
+  const entry = {
+    text: matching.sanitizeComparisonText('graham crackers'),
+    tokens: matching.buildTokenSet('graham crackers'),
+  };
+  assert(
+    !matching.doesEntryMatchIngredient(entry, matcher),
+    'expected graham crackers not to match ham',
+  );
+});
+
+test('mapRecipesToIngredientMatches keeps the most specific overlapping ingredient', () => {
+  const ingredients = [
+    { slug: 'pasta-shells', name: 'Pasta Shells' },
+    { slug: 'pasta-jumbo-shells', name: 'Jumbo Pasta Shells' },
+    { slug: 'grain-rice-brown', name: 'Rice (Brown)' },
+    { slug: 'grain-rice-cooked', name: 'Cooked Rice' },
+    { slug: 'veg-bell-pepper-red', name: 'Bell Pepper (Red)' },
+    { slug: 'veg-bell-pepper', name: 'Bell Pepper' },
+    {
+      slug: 'meat-beef-ground-85',
+      name: 'Ground Beef (85% Lean)',
+      aliases: ['Lean Ground Beef', 'Ground Beef'],
+    },
+  ];
+  const recipes = [
+    {
+      id: 'specific-ingredients',
+      ingredients: [
+        { item: 'jumbo pasta shells' },
+        { item: 'cooked brown rice' },
+        { item: 'green bell pepper' },
+        { item: 'lean ground beef' },
+      ],
+    },
+  ];
+  const index = matching.createIngredientMatcherIndex(ingredients);
+  const { recipeIngredientMatches } = matching.mapRecipesToIngredientMatches(recipes, index);
+  const matches = recipeIngredientMatches.get('specific-ingredients');
+
+  assert(matches.has('pasta-jumbo-shells'));
+  assert(!matches.has('pasta-shells'));
+  assert(matches.has('grain-rice-brown'));
+  assert(!matches.has('grain-rice-cooked'));
+  assert(matches.has('veg-bell-pepper'));
+  assert(!matches.has('veg-bell-pepper-red'));
+  assert(matches.has('meat-beef-ground-85'));
+});
+
 test('mapRecipesToIngredientMatches maps matches and usage flags', () => {
   const ingredients = [
     { slug: 'veg-sweet-potato', name: 'Sweet Potato', category: 'Vegetable' },

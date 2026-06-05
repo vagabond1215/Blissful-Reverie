@@ -1,0 +1,19 @@
+{
+  "name": "blissful-reverie",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static local-first meal planning workspace.",
+  "scripts": {
+    "validate:data": "node scripts/validate-data.js",
+    "test:validation": "node tests/data-validation.test.js",
+    "test:matching": "node tests/ingredient-matching.test.js",
+    "test:pantry": "node tests/pantry-matching.test.js",
+    "test:productivity": "node tests/productivity-tools.test.js",
+    "test:wiring": "node tests/integration-wiring.test.js",
+    "test": "npm run validate:data && npm run test:validation && npm run test:matching && npm run test:pantry && npm run test:productivity && npm run test:wiring"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}

@@ -7652,6 +7652,7 @@
   const createMealCard = (recipe) => {
     const card = document.createElement('article');
     card.className = 'meal-card';
+    card.dataset.recipeId = recipe.id;
 
     const filters = ensureMealFilters();
     const substitutionsAllowed = Boolean(filters.substitutionsAllowed);
@@ -8090,6 +8091,19 @@
       empty.appendChild(paragraph);
       elements.mealGrid.appendChild(empty);
     }
+
+    const productivityUi = window.BlissfulProductivityUI;
+    if (productivityUi && typeof productivityUi.render === 'function') {
+      productivityUi.render({
+        recipes,
+        recipeById: recipeLookupById,
+        recipeIngredientMatches,
+        ingredientBySlug,
+        substitutionGraph,
+        pantryInventory: state.pantryInventory,
+        substitutionsAllowed: Boolean(filters.substitutionsAllowed),
+      });
+    }
   };
 
   const setKitchenItemOwned = (itemId, owned) => {
@@ -8322,6 +8336,43 @@
     updateView();
     persistAppState();
   };
+
+  const applyStarterState = (starterState) => {
+    if (!starterState || typeof starterState !== 'object') {
+      return false;
+    }
+
+    const familyMembers = sanitizeFamilyMembers(starterState.familyMembers);
+    state.activeView = AVAILABLE_VIEWS.includes(starterState.activeView)
+      ? starterState.activeView
+      : 'meals';
+    state.familyMembers = familyMembers;
+    state.mealFilters = sanitizeMealFilters(starterState.mealFilters, familyMembers);
+    state.pantryFilters = sanitizePantryFilters(starterState.pantryFilters);
+    state.kitchenFilters = sanitizeKitchenFilters(starterState.kitchenFilters);
+    state.mealPlanViewMode = MEAL_PLAN_VIEW_MODES.includes(starterState.mealPlanViewMode)
+      ? starterState.mealPlanViewMode
+      : DEFAULT_MEAL_PLAN_MODE;
+    state.mealPlanMemberFilter = sanitizeMealPlanMemberFilter(
+      starterState.mealPlanMemberFilter,
+      familyMembers,
+    );
+    state.mealPlanMacroSelection = sanitizeMealPlanMacroSelection(
+      starterState.mealPlanMacroSelection,
+      familyMembers,
+    );
+    state.servingOverrides = sanitizeServingOverrides(starterState.servingOverrides);
+    state.notes = sanitizeNotes(starterState.notes);
+    state.openNotes = sanitizeOpenNotes(starterState.openNotes);
+    state.pantryInventory = sanitizePantryInventory(starterState.pantryInventory);
+    state.kitchenInventory = sanitizeKitchenInventory(starterState.kitchenInventory);
+    renderApp();
+    return true;
+  };
+
+  window.BlissfulApp = Object.assign({}, window.BlissfulApp || {}, {
+    applyStarterState,
+  });
 
   const enhanceRecipesHeader = () => {
     const headerRow = document.querySelector('#recipes-page .topbar__row');

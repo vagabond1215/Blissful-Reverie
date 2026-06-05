@@ -60,11 +60,19 @@
     'chunks',
     'strips',
   ]);
+  const LOW_SPECIFICITY_TOKENS = new Set(['cooked']);
 
   const sanitizeComparisonText = (value) =>
     String(value || '')
       .toLowerCase()
       .replace(/\([^)]*\)/g, ' ')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+
+  const sanitizeMatcherText = (value) =>
+    String(value || '')
+      .toLowerCase()
+      .replace(/[()]/g, ' ')
       .replace(/[^a-z0-9]+/g, ' ')
       .trim();
 
@@ -115,7 +123,7 @@
       }
     }
     const variants = new Set();
-    const normalizedName = sanitizeComparisonText(ingredient.name);
+    const normalizedName = sanitizeMatcherText(ingredient.name);
     if (normalizedName && normalizedName.includes(' ')) {
       variants.add(normalizedName);
     }
@@ -131,19 +139,22 @@
     }
     if (Array.isArray(ingredient.aliases)) {
       ingredient.aliases
-        .map((alias) => sanitizeComparisonText(alias))
+        .map((alias) => sanitizeMatcherText(alias))
         .filter(Boolean)
         .forEach((alias) => variants.add(alias));
     }
     return { slug: ingredient.slug, label: ingredient.name, tokens, variants };
   };
 
+  const containsPhrase = (text, phrase) =>
+    Boolean(text && phrase && ` ${text} `.includes(` ${phrase} `));
+
   const doesEntryMatchIngredient = (entry, matcher) => {
     if (!entry || !matcher) return false;
     if (matcher.variants) {
       for (const variant of matcher.variants) {
         if (!variant) continue;
-        if (entry.text.includes(variant) || variant.includes(entry.text)) {
+        if (containsPhrase(entry.text, variant) || containsPhrase(variant, entry.text)) {
           return true;
         }
       }
@@ -194,25 +205,35 @@
     const matchedSlugs = new Set();
     if (!entries.length) return matchedSlugs;
 
-    const candidateSlugs = new Set();
     entries.forEach((entry) => {
       if (!entry || !(entry.tokens instanceof Set)) return;
+      const candidateSlugs = new Set(index.slugsWithoutTokens);
       entry.tokens.forEach((token) => {
         const slugsForToken = index.tokenIndex.get(token);
         if (slugsForToken) {
           slugsForToken.forEach((slug) => candidateSlugs.add(slug));
         }
       });
-    });
 
-    index.slugsWithoutTokens.forEach((slug) => candidateSlugs.add(slug));
-
-    candidateSlugs.forEach((slug) => {
-      const matcher = index.matchers.get(slug);
-      if (!matcher) return;
-      if (entries.some((entry) => doesEntryMatchIngredient(entry, matcher))) {
-        matchedSlugs.add(slug);
-      }
+      const entryMatches = Array.from(candidateSlugs)
+        .map((slug) => index.matchers.get(slug))
+        .filter((matcher) => matcher && doesEntryMatchIngredient(entry, matcher));
+      entryMatches.forEach((matcher) => {
+        const isLessSpecific = entryMatches.some((other) => {
+          if (other === matcher) return false;
+          const matcherTokens = Array.from(matcher.tokens)
+            .filter((token) => !LOW_SPECIFICITY_TOKENS.has(token));
+          const otherTokens = new Set(
+            Array.from(other.tokens).filter((token) => !LOW_SPECIFICITY_TOKENS.has(token)),
+          );
+          if (matcherTokens.length >= otherTokens.size) return false;
+          if (!Array.from(otherTokens).every((token) => entry.tokens.has(token))) return false;
+          return matcherTokens.every((token) => otherTokens.has(token));
+        });
+        if (!isLessSpecific) {
+          matchedSlugs.add(matcher.slug);
+        }
+      });
     });
 
     return matchedSlugs;
