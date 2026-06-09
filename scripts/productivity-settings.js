@@ -3,59 +3,12 @@
     return;
   }
 
-  const applyStyles = () => {
-    if (document.getElementById('productivity-settings-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'productivity-settings-styles';
-    style.textContent = `
-      .productivity-settings-advanced {
-        display: grid;
-        gap: 0.65rem;
-        border: 1px solid var(--border-1);
-        border-radius: 1rem;
-        padding: 0.65rem 0.75rem;
-        background: var(--surface-0);
-      }
-
-      .productivity-settings-advanced__summary {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.75rem;
-        color: var(--text);
-        cursor: pointer;
-        font-weight: 800;
-        list-style: none;
-      }
-
-      .productivity-settings-advanced__summary::-webkit-details-marker {
-        display: none;
-      }
-
-      .productivity-settings-advanced__summary::after {
-        content: '⌄';
-        color: var(--text-muted);
-        font-size: 0.95rem;
-      }
-
-      .productivity-settings-advanced[open] .productivity-settings-advanced__summary::after {
-        content: '⌃';
-      }
-
-      .productivity-settings-advanced__body {
-        display: grid;
-        gap: 0.85rem;
-        padding-top: 0.65rem;
-      }
-
-      .productivity-settings-advanced__description {
-        margin: 0;
-        color: var(--text-muted);
-        font-size: 0.82rem;
-        line-height: 1.35;
-      }
-    `;
-    document.head.appendChild(style);
+  const ensureProductivityStylesheet = () => {
+    if (document.querySelector('link[href="styles/productivity.css"]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'styles/productivity.css';
+    document.head.appendChild(link);
   };
 
   const simplifySettings = () => {
@@ -72,7 +25,7 @@
       return Boolean(toolbar);
     }
 
-    applyStyles();
+    ensureProductivityStylesheet();
 
     const advanced = document.createElement('details');
     advanced.className = 'productivity-settings-advanced';
