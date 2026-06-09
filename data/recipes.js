@@ -1582,7 +1582,7 @@ window.BLISSFUL_RECIPES = [
     allergens: ['gluten', 'dairy', 'eggs'],
   },
   {
-    id: 'turkey-club-sandwich',
+    id: 'stacked-turkey-club-sandwich',
     name: 'Stacked Turkey Club Sandwich',
     category: 'Turkey',
     description: 'Triple-decker sandwich with roasted turkey, bacon, lettuce, tomato, and aioli.',
@@ -8248,7 +8248,7 @@ window.BLISSFUL_RECIPES = [
       sugar: 6,
       sodium: 1180,
     },
-    allergens: ['gluten', 'dairy', 'seafood'],
+    allergens: ['gluten', 'dairy', 'fish'],
   },
   {
     id: 'steak-and-eggs-skillet',
@@ -8321,7 +8321,7 @@ window.BLISSFUL_RECIPES = [
       sugar: 5,
       sodium: 980,
     },
-    allergens: ['dairy', 'eggs', 'seafood'],
+    allergens: ['dairy', 'eggs', 'shellfish'],
   },
   {
     id: 'loaded-hashbrown-casserole',
@@ -8790,7 +8790,7 @@ window.BLISSFUL_RECIPES = [
       sugar: 3,
       sodium: 660,
     },
-    allergens: ['eggs', 'dairy', 'seafood'],
+    allergens: ['eggs', 'dairy', 'fish'],
   },
   {
     id: 'classic-diner-cheeseburger',
@@ -9198,7 +9198,7 @@ window.BLISSFUL_RECIPES = [
       sugar: 6,
       sodium: 1180,
     },
-    allergens: ['gluten', 'dairy', 'seafood'],
+    allergens: ['gluten', 'dairy', 'fish'],
   },
   {
     id: 'grilled-cheese-tomato-soup-combo',
@@ -10278,7 +10278,7 @@ window.BLISSFUL_RECIPES = [
       sugar: 3,
       sodium: 320,
     },
-    allergens: ['dairy', 'seafood'],
+    allergens: ['dairy', 'fish'],
   },
   {
     id: 'chocolate-covered-pretzel-snack',
@@ -10976,7 +10976,7 @@ window.BLISSFUL_RECIPES = [
       sugar: 2,
       sodium: 640,
     },
-    allergens: ['seafood', 'gluten', 'eggs'],
+    allergens: ['shellfish', 'gluten', 'eggs'],
   },
   {
     id: 'shrimp-cocktail-platter',
@@ -11012,7 +11012,7 @@ window.BLISSFUL_RECIPES = [
       sugar: 9,
       sodium: 860,
     },
-    allergens: ['seafood'],
+    allergens: ['shellfish'],
   },
   {
     id: 'tomato-basil-bruschetta',
@@ -11155,7 +11155,7 @@ window.BLISSFUL_RECIPES = [
       sugar: 4,
       sodium: 640,
     },
-    allergens: ['gluten', 'seafood', 'dairy'],
+    allergens: ['gluten', 'shellfish', 'dairy'],
   },
   {
     id: 'bbq-glazed-meatballs',
@@ -11302,7 +11302,7 @@ window.BLISSFUL_RECIPES = [
       sugar: 4,
       sodium: 680,
     },
-    allergens: ['gluten', 'dairy', 'eggs', 'seafood'],
+    allergens: ['gluten', 'dairy', 'eggs', 'shellfish'],
   },
   {
     id: 'buffalo-chicken-dip',
@@ -11490,7 +11490,7 @@ window.BLISSFUL_RECIPES = [
       sugar: 2,
       sodium: 620,
     },
-    allergens: ['seafood', 'dairy', 'gluten'],
+    allergens: ['shellfish', 'dairy', 'gluten'],
   },
   {
     id: 'seared-ahi-tuna-bites',
@@ -11527,7 +11527,7 @@ window.BLISSFUL_RECIPES = [
       sugar: 2,
       sodium: 480,
     },
-    allergens: ['soy', 'sesame', 'eggs', 'seafood'],
+    allergens: ['soy', 'sesame', 'eggs', 'fish'],
   },
   {
     id: 'korean-bbq-beef-skewers',
@@ -11784,7 +11784,7 @@ window.BLISSFUL_RECIPES = [
       sugar: 0,
       sodium: 620,
     },
-    allergens: ['seafood'],
+    allergens: ['shellfish'],
   },
   {
     id: 'baked-brie-with-jam',
