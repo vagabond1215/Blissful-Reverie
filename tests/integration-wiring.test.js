@@ -12,6 +12,7 @@ const expectedScripts = [
   'scripts/ingredient-matching.js',
   'scripts/productivity-tools.js',
   'scripts/productivity-settings.js',
+  'scripts/productivity-backup.js',
   'scripts/productivity-onboarding.js',
   'scripts/productivity-ui.js',
   'scripts/theme-utils.js',

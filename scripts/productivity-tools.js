@@ -17,6 +17,18 @@
     HOLIDAY_THEME_STORAGE_KEY,
     MEASUREMENT_STORAGE_KEY,
   ];
+  const isRecord = (value) => (
+    value && typeof value === 'object' && !Array.isArray(value)
+  );
+  const BACKUP_DATA_VALIDATORS = new Map([
+    [APP_STATE_STORAGE_KEY, isRecord],
+    [MEAL_PLAN_STORAGE_KEY, isRecord],
+    [FAVORITES_STORAGE_KEY, Array.isArray],
+    [PANTRY_FAVORITES_STORAGE_KEY, Array.isArray],
+    [THEME_STORAGE_KEY, isRecord],
+    [HOLIDAY_THEME_STORAGE_KEY, isRecord],
+    [MEASUREMENT_STORAGE_KEY, (value) => value === 'imperial' || value === 'metric'],
+  ]);
 
   const GENERATED_CATEGORY_LABELS = new Map([
     ['Ingredient Spotlight', 'Ingredient idea'],
@@ -166,15 +178,77 @@
     };
   };
 
-  const restoreBackup = (backup, storage = global.localStorage) => {
-    if (!backup || backup.app !== 'Blissful Reverie' || typeof backup.data !== 'object') {
+  const getBackupEntries = (backup) => {
+    if (!backup || typeof backup !== 'object' || Array.isArray(backup)) {
       throw new Error('Invalid Blissful Reverie backup.');
     }
-    BACKUP_KEYS.forEach((key) => {
-      if (Object.prototype.hasOwnProperty.call(backup.data, key)) {
-        storage?.setItem?.(key, String(backup.data[key]));
+    if (backup.app !== 'Blissful Reverie') {
+      throw new Error('Backup is not for Blissful Reverie.');
+    }
+    if (backup.version !== BACKUP_VERSION) {
+      throw new Error('Unsupported Blissful Reverie backup version.');
+    }
+    if (!backup.data || typeof backup.data !== 'object' || Array.isArray(backup.data)) {
+      throw new Error('Backup data is missing or invalid.');
+    }
+
+    return BACKUP_KEYS
+      .filter((key) => Object.prototype.hasOwnProperty.call(backup.data, key))
+      .map((key) => {
+        const value = backup.data[key];
+        if (typeof value !== 'string') {
+          throw new Error(`Backup data for ${key} is invalid.`);
+        }
+        const validator = BACKUP_DATA_VALIDATORS.get(key);
+        try {
+          const parsedValue = key === MEASUREMENT_STORAGE_KEY ? value : JSON.parse(value);
+          if (!validator?.(parsedValue)) {
+            throw new Error('Invalid backup value.');
+          }
+        } catch (error) {
+          throw new Error(`Backup data for ${key} is invalid.`);
+        }
+        return [key, value];
+      });
+  };
+
+  const restoreBackup = (backup, storage = global.localStorage) => {
+    const entries = getBackupEntries(backup);
+    if (!storage || typeof storage.setItem !== 'function') {
+      throw new Error('Backup storage is unavailable.');
+    }
+
+    const previousValues = new Map();
+    entries.forEach(([key]) => {
+      try {
+        previousValues.set(key, typeof storage.getItem === 'function' ? storage.getItem(key) : null);
+      } catch (error) {
+        previousValues.set(key, null);
       }
     });
+
+    const writtenKeys = [];
+    try {
+      entries.forEach(([key, value]) => {
+        storage.setItem(key, value);
+        writtenKeys.push(key);
+      });
+    } catch (error) {
+      writtenKeys.reverse().forEach((key) => {
+        try {
+          const previous = previousValues.get(key);
+          if (previous === null || previous === undefined) {
+            storage.removeItem?.(key);
+          } else {
+            storage.setItem(key, previous);
+          }
+        } catch (rollbackError) {
+          // Best effort only; the original storage error remains the useful failure.
+        }
+      });
+      throw new Error('Unable to restore backup.');
+    }
+
     return true;
   };
 

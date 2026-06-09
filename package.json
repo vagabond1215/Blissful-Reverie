@@ -9,8 +9,9 @@
     "test:matching": "node tests/ingredient-matching.test.js",
     "test:pantry": "node tests/pantry-matching.test.js",
     "test:productivity": "node tests/productivity-tools.test.js",
+    "test:backup": "node tests/productivity-backup.test.js",
     "test:wiring": "node tests/integration-wiring.test.js",
-    "test": "npm run validate:data && npm run test:validation && npm run test:matching && npm run test:pantry && npm run test:productivity && npm run test:wiring"
+    "test": "npm run validate:data && npm run test:validation && npm run test:matching && npm run test:pantry && npm run test:productivity && npm run test:backup && npm run test:wiring"
   },
   "engines": {
     "node": ">=18"
