@@ -14,12 +14,23 @@ const storage = {
   setItem: (key, value) => backupStorage.set(key, String(value)),
 };
 storage.setItem('blissful-app-state', JSON.stringify({ activeView: 'meals' }));
+storage.setItem('blissful-meal-plan', JSON.stringify({ '2026-06-09': [] }));
 storage.setItem('blissful-favorites', JSON.stringify(['recipe-a']));
+storage.setItem('blissful-pantry-favorites', JSON.stringify(['grain-quinoa']));
+storage.setItem('blissful-theme', JSON.stringify({ mode: 'dark' }));
+storage.setItem('blissful-holiday-themes', JSON.stringify({ enabled: true }));
 storage.setItem('blissful-measurement', 'metric');
 const backup = tools.createBackup(storage);
 assert.equal(backup.app, 'Blissful Reverie');
 assert.equal(backup.version, 1);
+assert.equal(typeof backup.exportedAt, 'string');
+assert.deepEqual(Object.keys(backup.data).sort(), [...tools.BACKUP_KEYS].sort());
 assert.equal(backup.data['blissful-app-state'], JSON.stringify({ activeView: 'meals' }));
+assert.equal(backup.data['blissful-meal-plan'], JSON.stringify({ '2026-06-09': [] }));
+assert.equal(backup.data['blissful-favorites'], JSON.stringify(['recipe-a']));
+assert.equal(backup.data['blissful-pantry-favorites'], JSON.stringify(['grain-quinoa']));
+assert.equal(backup.data['blissful-theme'], JSON.stringify({ mode: 'dark' }));
+assert.equal(backup.data['blissful-holiday-themes'], JSON.stringify({ enabled: true }));
 assert.equal(backup.data['blissful-measurement'], 'metric');
 assert.equal(backup.data['blissful-measurement-system'], undefined);
 
@@ -29,6 +40,51 @@ tools.restoreBackup(backup, {
 });
 assert.equal(restoreStorage.get('blissful-favorites'), JSON.stringify(['recipe-a']));
 assert.equal(restoreStorage.get('blissful-measurement'), 'metric');
+
+assert.throws(
+  () => tools.restoreBackup({ app: 'Another Planner', version: 1, data: {} }, storage),
+  /not for Blissful Reverie/,
+);
+assert.throws(
+  () => tools.restoreBackup({ app: 'Blissful Reverie', version: 2, data: {} }, storage),
+  /Unsupported Blissful Reverie backup version/,
+);
+assert.throws(
+  () => tools.restoreBackup({ app: 'Blissful Reverie', version: 1 }, storage),
+  /Backup data is missing or invalid/,
+);
+
+let invalidBackupWrites = 0;
+const invalidBackupStorage = {
+  getItem: () => null,
+  setItem: () => {
+    invalidBackupWrites += 1;
+  },
+};
+assert.throws(
+  () => tools.restoreBackup({
+    app: 'Blissful Reverie',
+    version: 1,
+    data: {
+      'blissful-app-state': JSON.stringify({ activeView: 'meals' }),
+      'blissful-favorites': ['recipe-a'],
+    },
+  }, invalidBackupStorage),
+  /Backup data for blissful-favorites is invalid/,
+);
+assert.equal(invalidBackupWrites, 0);
+assert.throws(
+  () => tools.restoreBackup({
+    app: 'Blissful Reverie',
+    version: 1,
+    data: {
+      'blissful-app-state': JSON.stringify({ activeView: 'meals' }),
+      'blissful-favorites': '{broken json',
+    },
+  }, invalidBackupStorage),
+  /Backup data for blissful-favorites is invalid/,
+);
+assert.equal(invalidBackupWrites, 0);
 
 assert.equal(tools.hasMeaningfulAppState(null), false);
 assert.equal(tools.hasMeaningfulAppState({

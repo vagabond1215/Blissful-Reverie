@@ -38,6 +38,7 @@ npm run test:validation
 npm run test:matching
 npm run test:pantry
 npm run test:productivity
+npm run test:backup
 npm run test:wiring
 ```
 
@@ -50,6 +51,7 @@ npm run test:wiring
 - `scripts/productivity-ui.js` renders badges, the pantry dashboard, and the smart shopping list from live state supplied by `scripts/app.js`.
 - `scripts/productivity-onboarding.js` handles first-run setup and applies saved starter state without a normal reload.
 - `scripts/productivity-settings.js` moves optional palette and holiday controls into the native `Advanced appearance` disclosure before app event handlers are bound.
+- `scripts/productivity-backup.js` adds compact local JSON backup import and export controls inside Settings.
 - `scripts/app.js` owns in-memory state, localStorage persistence, recipe rendering, filters, pantry, family, and meal planning.
 
 User data remains in browser localStorage. The primary state key is `blissful-app-state`; meal plans, favorites, theme preferences, holiday settings, and measurement preferences use separate version-stable keys. There is no network synchronization.
