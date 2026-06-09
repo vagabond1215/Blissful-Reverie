@@ -31,6 +31,25 @@ assert(!themeUtils.includes('BLISSFUL_INGREDIENTS'));
 assert(!themeUtils.includes('productivity-tools.js'));
 assert(!themeUtils.includes('document.createElement(\'script\')'));
 
+const productivityStyles = read('styles/productivity.css');
+assert(productivityStyles.includes('.productivity-dashboard'));
+assert(productivityStyles.includes('.productivity-onboarding'));
+assert(productivityStyles.includes('.productivity-backup'));
+assert(productivityStyles.includes('.productivity-settings-advanced'));
+
+[
+  'scripts/productivity-settings.js',
+  'scripts/productivity-backup.js',
+  'scripts/productivity-onboarding.js',
+  'scripts/productivity-ui.js',
+].forEach((relativePath) => {
+  const content = read(relativePath);
+  assert(!content.includes('style.textContent'), `${relativePath} should not embed long CSS strings`);
+});
+
+const productivitySettings = read('scripts/productivity-settings.js');
+assert(productivitySettings.includes('styles/productivity.css'));
+
 const productivityUi = read('scripts/productivity-ui.js');
 assert(!productivityUi.includes('MutationObserver'));
 assert(productivityUi.includes('global.BlissfulProductivityUI'));

@@ -74,77 +74,6 @@
 
   const tools = global.BlissfulProductivity || {};
 
-  const applyStyles = () => {
-    if (document.getElementById('productivity-backup-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'productivity-backup-styles';
-    style.textContent = `
-      .productivity-backup {
-        border: 1px solid var(--border-1);
-        border-radius: 1rem;
-        padding: 0.65rem 0.75rem;
-        background: var(--surface-0);
-      }
-
-      .productivity-backup__summary {
-        color: var(--text);
-        cursor: pointer;
-        font-weight: 800;
-      }
-
-      .productivity-backup__body {
-        display: grid;
-        gap: 0.7rem;
-        padding-top: 0.65rem;
-      }
-
-      .productivity-backup__description,
-      .productivity-backup__status {
-        margin: 0;
-        color: var(--text-muted);
-        font-size: 0.82rem;
-        line-height: 1.35;
-      }
-
-      .productivity-backup__actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.55rem;
-      }
-
-      .productivity-backup__button {
-        border: 1px solid var(--btn-secondary-br);
-        border-radius: calc(var(--radius) - 6px);
-        padding: 0.5rem 0.75rem;
-        background: var(--btn-secondary-bg);
-        color: var(--text);
-        cursor: pointer;
-        font: inherit;
-        font-size: 0.82rem;
-        font-weight: 700;
-      }
-
-      .productivity-backup__button:hover,
-      .productivity-backup__button:focus-visible {
-        background: color-mix(in oklab, var(--layer-3), white 12%);
-      }
-
-      .productivity-backup__button:disabled {
-        cursor: wait;
-        opacity: 0.6;
-      }
-
-      .productivity-backup__status[data-state='success'] {
-        color: var(--color-success, #26734d);
-      }
-
-      .productivity-backup__status[data-state='error'] {
-        color: var(--color-danger, #a53b32);
-      }
-    `;
-    document.head.appendChild(style);
-  };
-
   const renderBackupControls = () => {
     const toolbar = document.getElementById('theme-toolbar');
     if (!toolbar || document.getElementById('productivity-settings-backup')) {
@@ -156,8 +85,6 @@
     ) {
       return false;
     }
-
-    applyStyles();
 
     const details = document.createElement('details');
     details.className = 'productivity-backup';
