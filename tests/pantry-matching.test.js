@@ -67,4 +67,34 @@ const substitutedShoppingList = tools.buildShoppingList({
 });
 assert.deepEqual(substitutedShoppingList, []);
 
+const plannedRecipes = [
+  { id: 'planned-a', name: 'Planned A' },
+  { id: 'planned-b', name: 'Planned B' },
+];
+const plannedShoppingList = tools.buildShoppingList({
+  recipes: plannedRecipes,
+  pantryInventory: { owned: { quantity: '1', unit: 'each' } },
+  recipeMatchesById: new Map([
+    ['planned-a', new Set(['owned', 'shared-missing'])],
+    ['planned-b', new Set(['shared-missing', 'second-missing'])],
+  ]),
+  ingredientBySlug: new Map([
+    ['owned', { slug: 'owned', name: 'Owned Ingredient', category: 'Pantry' }],
+    ['shared-missing', { slug: 'shared-missing', name: 'Shared Missing', category: 'Produce' }],
+    ['second-missing', { slug: 'second-missing', name: 'Second Missing', category: 'Produce' }],
+  ]),
+});
+assert.deepEqual(
+  plannedShoppingList.map((item) => item.slug),
+  ['second-missing', 'shared-missing'],
+);
+assert.deepEqual(
+  plannedShoppingList.find((item) => item.slug === 'shared-missing').recipes,
+  ['Planned A', 'Planned B'],
+);
+assert.equal(
+  plannedShoppingList.some((item) => item.slug === 'owned'),
+  false,
+);
+
 console.log('Pantry matching tests passed.');

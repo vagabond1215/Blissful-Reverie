@@ -6,10 +6,17 @@
 
   const SHOPPING_RECIPE_LIMIT = 8;
   const SHOPPING_ITEM_LIMIT = 18;
+  const SHOPPING_SOURCE_MEAL_PLAN = 'meal-plan';
+  const SHOPPING_SOURCE_CLOSEST = 'closest';
   let currentContext = null;
+  let shoppingSource = SHOPPING_SOURCE_MEAL_PLAN;
 
   const getRecipes = () => (
     Array.isArray(currentContext?.recipes) ? currentContext.recipes : []
+  );
+
+  const getPlannedRecipes = () => (
+    Array.isArray(currentContext?.plannedRecipes) ? currentContext.plannedRecipes.filter(Boolean) : []
   );
 
   const getRecipeMatches = () => (
@@ -194,6 +201,41 @@
       .slice(0, SHOPPING_RECIPE_LIMIT)
       .map(({ recipe }) => recipe);
 
+  const createShoppingSourceControl = (selectedSource) => {
+    const fieldset = document.createElement('fieldset');
+    fieldset.className = 'productivity-shopping__source-control';
+    const legend = document.createElement('legend');
+    legend.className = 'productivity-shopping__source-legend';
+    legend.textContent = 'Shopping source';
+    fieldset.appendChild(legend);
+
+    [
+      { value: SHOPPING_SOURCE_MEAL_PLAN, label: 'From meal plan' },
+      { value: SHOPPING_SOURCE_CLOSEST, label: 'Closest recipes' },
+    ].forEach((option) => {
+      const label = document.createElement('label');
+      label.className = 'productivity-shopping__source-option';
+      if (selectedSource === option.value) {
+        label.classList.add('productivity-shopping__source-option--active');
+      }
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'productivity-shopping-source';
+      input.value = option.value;
+      input.checked = selectedSource === option.value;
+      input.addEventListener('change', () => {
+        shoppingSource = option.value;
+        renderDashboard();
+      });
+      const text = document.createElement('span');
+      text.textContent = option.label;
+      label.appendChild(input);
+      label.appendChild(text);
+      fieldset.appendChild(label);
+    });
+    return fieldset;
+  };
+
   const buildShoppingText = (items) => {
     if (!items.length) return 'No missing ingredients yet.';
     const lines = ['Blissful Reverie shopping list'];
@@ -236,7 +278,14 @@
   };
 
   const createShoppingPanel = (entries) => {
-    const candidates = getShoppingCandidateRecipes(entries);
+    const source = shoppingSource === SHOPPING_SOURCE_CLOSEST
+      ? SHOPPING_SOURCE_CLOSEST
+      : SHOPPING_SOURCE_MEAL_PLAN;
+    shoppingSource = source;
+    const plannedRecipes = getPlannedRecipes();
+    const candidates = source === SHOPPING_SOURCE_MEAL_PLAN
+      ? plannedRecipes
+      : getShoppingCandidateRecipes(entries);
     const shoppingItems = typeof tools.buildShoppingList === 'function'
       ? tools.buildShoppingList({
           recipes: candidates,
@@ -261,9 +310,16 @@
     headerText.appendChild(title);
     const subtitle = document.createElement('p');
     subtitle.className = 'productivity-shopping__subtitle';
-    subtitle.textContent = shoppingItems.length
-      ? `${shoppingItems.length} missing ingredient${shoppingItems.length === 1 ? '' : 's'} from your closest recipes`
-      : 'Add pantry quantities to generate missing ingredients.';
+    if (source === SHOPPING_SOURCE_MEAL_PLAN && !plannedRecipes.length) {
+      subtitle.textContent = 'No planned recipes yet.';
+    } else if (shoppingItems.length) {
+      const sourceLabel = source === SHOPPING_SOURCE_MEAL_PLAN ? 'planned recipes' : 'closest recipes';
+      subtitle.textContent = `${shoppingItems.length} missing ingredient${shoppingItems.length === 1 ? '' : 's'} from your ${sourceLabel}`;
+    } else if (source === SHOPPING_SOURCE_MEAL_PLAN) {
+      subtitle.textContent = 'Your planned recipes are covered by pantry items and substitutions.';
+    } else {
+      subtitle.textContent = 'Add pantry quantities to generate missing ingredients.';
+    }
     headerText.appendChild(subtitle);
     header.appendChild(headerText);
 
@@ -275,11 +331,18 @@
     copyButton.addEventListener('click', () => copyShoppingList(copyButton, shoppingItems));
     header.appendChild(copyButton);
     panel.appendChild(header);
+    panel.appendChild(createShoppingSourceControl(source));
 
     if (!shoppingItems.length) {
       const empty = document.createElement('p');
       empty.className = 'productivity-shopping__empty';
-      empty.textContent = 'Recipes that are missing ingredients will appear here once your pantry is populated.';
+      if (source === SHOPPING_SOURCE_MEAL_PLAN && !plannedRecipes.length) {
+        empty.textContent = 'Add recipes to your meal plan, or switch to closest recipes for pantry-based suggestions.';
+      } else if (source === SHOPPING_SOURCE_MEAL_PLAN) {
+        empty.textContent = 'Missing planned-meal ingredients will appear here as your pantry changes.';
+      } else {
+        empty.textContent = 'Recipes that are missing ingredients will appear here once your pantry is populated.';
+      }
       panel.appendChild(empty);
       return panel;
     }

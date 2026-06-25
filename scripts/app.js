@@ -3852,6 +3852,8 @@
     closeRecipeScheduleDialog();
     if (state.activeView === 'meal-plan') {
       renderMealPlan();
+    } else if (state.activeView === 'meals') {
+      renderMeals();
     }
   };
 
@@ -8094,8 +8096,13 @@
 
     const productivityUi = window.BlissfulProductivityUI;
     if (productivityUi && typeof productivityUi.render === 'function') {
+      const productivityTools = window.BlissfulProductivity || {};
+      const plannedRecipes = typeof productivityTools.resolvePlannedRecipes === 'function'
+        ? productivityTools.resolvePlannedRecipes(state.mealPlan, recipeLookupById)
+        : [];
       productivityUi.render({
         recipes,
+        plannedRecipes,
         recipeById: recipeLookupById,
         recipeIngredientMatches,
         ingredientBySlug,

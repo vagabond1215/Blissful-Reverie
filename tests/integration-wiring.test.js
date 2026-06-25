@@ -36,8 +36,10 @@ assert(productivityStyles.includes('.productivity-dashboard'));
 assert(productivityStyles.includes('.productivity-onboarding'));
 assert(productivityStyles.includes('.productivity-backup'));
 assert(productivityStyles.includes('.productivity-settings-advanced'));
+assert(productivityStyles.includes('.productivity-shopping__source-control'));
 
 [
+  'scripts/productivity-tools.js',
   'scripts/productivity-settings.js',
   'scripts/productivity-backup.js',
   'scripts/productivity-onboarding.js',
@@ -53,10 +55,13 @@ assert(productivitySettings.includes('styles/productivity.css'));
 const productivityUi = read('scripts/productivity-ui.js');
 assert(!productivityUi.includes('MutationObserver'));
 assert(productivityUi.includes('global.BlissfulProductivityUI'));
+assert(productivityUi.includes('From meal plan'));
+assert(productivityUi.includes('Closest recipes'));
 
 const app = read('scripts/app.js');
 assert(app.includes('card.dataset.recipeId = recipe.id'));
 assert(app.includes('productivityUi.render({'));
+assert(app.includes('plannedRecipes'));
 assert(app.includes('applyStarterState'));
 
 console.log('Application wiring tests passed.');
