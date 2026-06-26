@@ -160,6 +160,60 @@
     });
   };
 
+  const hasRecipeId = (recipeLookup, recipeId) => {
+    if (!recipeId) return false;
+    if (recipeLookup instanceof Map || recipeLookup instanceof Set) {
+      return recipeLookup.has(recipeId);
+    }
+    if (Array.isArray(recipeLookup)) {
+      return recipeLookup.some((recipe) => recipe?.id === recipeId || recipe === recipeId);
+    }
+    if (recipeLookup && typeof recipeLookup === 'object') {
+      return Boolean(recipeLookup[recipeId]);
+    }
+    return true;
+  };
+
+  const getRecipeFromLookup = (recipeLookup, recipeId) => {
+    if (!hasRecipeId(recipeLookup, recipeId)) return null;
+    if (recipeLookup instanceof Map) {
+      return recipeLookup.get(recipeId) || null;
+    }
+    if (Array.isArray(recipeLookup)) {
+      return recipeLookup.find((recipe) => recipe?.id === recipeId) || null;
+    }
+    if (recipeLookup && typeof recipeLookup === 'object') {
+      return recipeLookup[recipeId] || null;
+    }
+    return null;
+  };
+
+  const getPlannedRecipeIds = (mealPlan, recipeLookup) => {
+    if (!mealPlan || typeof mealPlan !== 'object' || Array.isArray(mealPlan)) {
+      return [];
+    }
+    const ids = [];
+    const seen = new Set();
+    Object.values(mealPlan).forEach((entries) => {
+      if (!Array.isArray(entries)) return;
+      entries.forEach((entry) => {
+        if (!entry || typeof entry !== 'object') return;
+        const recipeId = typeof entry.recipeId === 'string' ? entry.recipeId.trim() : '';
+        if (!recipeId || seen.has(recipeId) || !hasRecipeId(recipeLookup, recipeId)) {
+          return;
+        }
+        seen.add(recipeId);
+        ids.push(recipeId);
+      });
+    });
+    return ids;
+  };
+
+  const resolvePlannedRecipes = (mealPlan, recipeLookup) =>
+    getPlannedRecipeIds(mealPlan, recipeLookup)
+      .map((recipeId) => getRecipeFromLookup(recipeLookup, recipeId))
+      .filter(Boolean);
+
   const createBackup = (storage = global.localStorage) => {
     const data = {};
     BACKUP_KEYS.forEach((key) => {
@@ -432,6 +486,8 @@
     getPantrySlugSet,
     analyzeRecipePantryFit,
     buildShoppingList,
+    getPlannedRecipeIds,
+    resolvePlannedRecipes,
     createBackup,
     restoreBackup,
     hasMeaningfulAppState,

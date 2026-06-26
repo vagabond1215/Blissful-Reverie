@@ -167,4 +167,30 @@ const dashboard = tools.summarizeDashboard({
 assert.equal(dashboard.cookNow.length, 1);
 assert.equal(dashboard.nearlyReady.length, 1);
 
+const plannedRecipeLookup = new Map([
+  ['recipe-a', { id: 'recipe-a', name: 'Recipe A' }],
+  ['recipe-b', { id: 'recipe-b', name: 'Recipe B' }],
+]);
+const mealPlan = {
+  '2026-06-09': [
+    { id: 'entry-a', type: 'meal', title: 'Recipe A', recipeId: 'recipe-a', time: '08:00' },
+    { id: 'entry-b', type: 'meal', title: 'Recipe A again', recipeId: 'recipe-a', time: '12:00' },
+    { id: 'entry-c', type: 'meal', title: 'Deleted recipe', recipeId: 'recipe-deleted', time: '18:00' },
+    { id: 'entry-d', type: 'snack', title: 'Loose snack', time: '20:00' },
+  ],
+  '2026-06-10': [
+    { id: 'entry-e', type: 'meal', title: 'Recipe B', recipeId: 'recipe-b', attendance: { guests: 2 } },
+  ],
+  broken: [
+    { id: 'entry-f', type: 'meal', title: 'Recipe A', recipeId: 'recipe-a' },
+  ],
+};
+assert.deepEqual(tools.getPlannedRecipeIds(mealPlan, plannedRecipeLookup), ['recipe-a', 'recipe-b']);
+assert.deepEqual(
+  tools.resolvePlannedRecipes(mealPlan, plannedRecipeLookup).map((recipe) => recipe.name),
+  ['Recipe A', 'Recipe B'],
+);
+assert.deepEqual(tools.getPlannedRecipeIds({}, plannedRecipeLookup), []);
+assert.deepEqual(tools.getPlannedRecipeIds(null, plannedRecipeLookup), []);
+
 console.log('Productivity helper tests passed.');
