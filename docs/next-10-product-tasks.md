@@ -9,7 +9,7 @@ This document records the implemented state of the recovery roadmap on PR #118.
 3. **Export/import backup** - implemented as tested localStorage backup and restore helpers in `scripts/productivity-tools.js`; a dedicated settings UI remains optional follow-up work.
 4. **Dashboard summary** - implemented above the recipe grid with Cook now, Almost ready, and Shopping candidates groups.
 5. **Missing-ingredient counts** - implemented on recipe cards and dashboard entries using live pantry state and the app substitution graph.
-6. **Shopping list generation** - implemented as a categorized smart shopping panel with recipe references and copy support.
+6. **Shopping list generation** - implemented as a categorized smart shopping panel with planned-meal and closest-recipe source modes, recipe references, compact empty states, and copy feedback.
 7. **Add recipe to meal plan from cards** - implemented by the existing calendar action on every recipe card.
 8. **Generated recipe labels** - implemented on recipe cards for curated recipes, generated templates, and ingredient ideas.
 9. **Move theme controls deeper into settings** - implemented with the native keyboard-accessible `Advanced appearance` disclosure. Controls retain their existing IDs and event handlers.
@@ -24,5 +24,7 @@ The application shell loads data, matching, productivity helpers, settings, onbo
 ## Follow-up candidates
 
 - Add a visible backup import/export control that uses the existing tested helpers.
-- Let users choose meal-plan recipes as the shopping-list source instead of the current closest-recipe limit.
+- Define shopping-list quantity aggregation and serving-size policy before changing the shopping-list algorithm.
+- Audit meal-plan workflow friction after shopping-list integration before changing meal-plan behavior.
+- Create a repeatable browser smoke-test checklist for future productivity UI work.
 - Split additional app-shell domains into tested modules only when a focused feature change requires it.
