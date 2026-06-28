@@ -291,10 +291,15 @@
 }
 
 .productivity-dashboard__subtitle,
-.productivity-shopping__subtitle {
+.productivity-shopping__subtitle,
+.productivity-shopping__mode-note {
   margin: 0.25rem 0 0;
   color: var(--text-muted);
   font-size: 0.9rem;
+}
+
+.productivity-shopping__mode-note {
+  font-size: 0.8rem;
 }
 
 .productivity-dashboard__groups {
@@ -360,8 +365,41 @@
   font-size: 0.85rem;
 }
 
-.productivity-shopping__copy {
+.productivity-shopping__empty {
+  border: 1px dashed var(--border-1);
+  border-radius: 0.85rem;
+  padding: 0.7rem 0.8rem;
+  background: color-mix(in oklab, var(--surface-0), transparent 20%);
+}
+
+.productivity-shopping__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.productivity-shopping__source-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--accent-1);
+  border-radius: 999px;
+  padding: 0.18rem 0.5rem;
+  background: color-mix(in oklab, var(--accent-1), transparent 85%);
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.productivity-shopping__copy-wrap {
+  display: grid;
+  justify-items: end;
+  gap: 0.25rem;
   flex: 0 0 auto;
+}
+
+.productivity-shopping__copy {
   border: 1px solid var(--border-1);
   border-radius: 999px;
   padding: 0.35rem 0.7rem;
@@ -373,15 +411,49 @@
   cursor: pointer;
 }
 
+.productivity-shopping__copy:hover:not(:disabled),
+.productivity-shopping__copy:focus-visible {
+  background: color-mix(in oklab, var(--layer-3), white 12%);
+}
+
 .productivity-shopping__copy:focus-visible {
   outline: 2px solid var(--accent-1);
   outline-offset: 2px;
 }
 
+.productivity-shopping__copy:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.productivity-shopping__copy[data-state='success'] {
+  border-color: var(--accent-1);
+}
+
+.productivity-shopping__copy[data-state='error'] {
+  border-color: var(--color-danger, #a53b32);
+}
+
+.productivity-shopping__copy-status {
+  min-height: 1em;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.productivity-shopping__copy-status[data-state='success'] {
+  color: var(--color-success, #26734d);
+}
+
+.productivity-shopping__copy-status[data-state='error'] {
+  color: var(--color-danger, #a53b32);
+}
+
 .productivity-shopping__source-control {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
   gap: 0.45rem;
   margin: 0;
   padding: 0;
@@ -389,6 +461,7 @@
 }
 
 .productivity-shopping__source-legend {
+  align-self: center;
   margin-right: 0.1rem;
   padding: 0;
   color: var(--text-muted);
@@ -399,10 +472,10 @@
 .productivity-shopping__source-option {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.4rem;
   border: 1px solid var(--border-1);
   border-radius: 999px;
-  padding: 0.3rem 0.55rem;
+  padding: 0.32rem 0.6rem;
   background: var(--surface-0);
   color: var(--text);
   font-size: 0.8rem;
@@ -412,6 +485,7 @@
 
 .productivity-shopping__source-option--active {
   border-color: var(--accent-1);
+  background: color-mix(in oklab, var(--accent-1), transparent 90%);
 }
 
 .productivity-shopping__source-option input {
@@ -424,6 +498,22 @@
   outline-offset: 2px;
 }
 
+.productivity-shopping__source-text {
+  display: grid;
+  gap: 0.05rem;
+  line-height: 1.1;
+}
+
+.productivity-shopping__source-name {
+  white-space: nowrap;
+}
+
+.productivity-shopping__source-detail {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
 .productivity-shopping__categories {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -433,4 +523,34 @@
 .productivity-shopping__category {
   display: grid;
   gap: 0.45rem;
+}
+
+@media (max-width: 640px) {
+  .productivity-dashboard__header,
+  .productivity-shopping__header {
+    display: grid;
+  }
+
+  .productivity-shopping__copy-wrap {
+    justify-items: start;
+  }
+
+  .productivity-shopping__source-control {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .productivity-shopping__source-option {
+    justify-content: flex-start;
+  }
+
+  .productivity-shopping__item {
+    align-items: flex-start;
+  }
+
+  .productivity-shopping__item-note {
+    max-width: 45%;
+    white-space: normal;
+    text-align: right;
+  }
 }

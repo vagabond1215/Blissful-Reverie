@@ -37,6 +37,9 @@ assert(productivityStyles.includes('.productivity-onboarding'));
 assert(productivityStyles.includes('.productivity-backup'));
 assert(productivityStyles.includes('.productivity-settings-advanced'));
 assert(productivityStyles.includes('.productivity-shopping__source-control'));
+assert(productivityStyles.includes('.productivity-shopping__source-pill'));
+assert(productivityStyles.includes('.productivity-shopping__copy-status'));
+assert(productivityStyles.includes('@media (max-width: 640px)'));
 
 [
   'scripts/productivity-tools.js',
@@ -57,6 +60,11 @@ assert(!productivityUi.includes('MutationObserver'));
 assert(productivityUi.includes('global.BlissfulProductivityUI'));
 assert(productivityUi.includes('From meal plan'));
 assert(productivityUi.includes('Closest recipes'));
+assert(productivityUi.includes('Planned meals are covered by your pantry'));
+assert(productivityUi.includes('Add pantry items to compare closest recipes'));
+assert(productivityUi.includes('Shopping list copied.'));
+assert(productivityUi.includes('productivity-shopping__copy-status'));
+assert(productivityUi.includes('productivity-shopping__source-pill'));
 
 const app = read('scripts/app.js');
 assert(app.includes('card.dataset.recipeId = recipe.id'));
