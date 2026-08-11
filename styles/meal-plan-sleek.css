@@ -1,0 +1,296 @@
+/*
+  Meal-plan sleek layout pass.
+
+  This file sits after the clean base theme reset and trims excess chrome in the
+  meal-planning view without changing runtime behavior or DOM structure.
+*/
+
+:root {
+  --sleek-control-height: 2.5rem;
+  --sleek-control-radius: 999px;
+  --sleek-surface: var(--base-surface, #fff);
+  --sleek-panel: var(--base-panel, #f1ece2);
+  --sleek-line: var(--base-border, #d8d0c4);
+  --sleek-line-strong: var(--base-border-strong, #b9afa1);
+  --sleek-text: var(--base-text, #24211d);
+  --sleek-muted: var(--base-text-muted, #6f6860);
+}
+
+.app-shell {
+  padding: 0.9rem clamp(0.75rem, 1.6vw, 1.25rem) 2rem !important;
+}
+
+#recipes-page .topbar,
+.topbar {
+  margin-bottom: 1rem !important;
+  padding: 0.25rem 0 !important;
+}
+
+.layout {
+  gap: 1rem !important;
+  padding: 1rem clamp(0.75rem, 1.8vw, 1.5rem) 2rem 0 !important;
+}
+
+.meal-plan-view {
+  gap: 0.9rem !important;
+  padding: clamp(0.85rem, 1.4vw, 1.15rem) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(36, 33, 29, 0.08) !important;
+}
+
+.meal-plan-view__header {
+  min-height: var(--sleek-control-height) !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  gap: 0.65rem !important;
+}
+
+.meal-plan-view__navigator,
+.meal-plan-family-filter,
+.meal-plan-view__mode-toggle {
+  min-height: var(--sleek-control-height) !important;
+  height: var(--sleek-control-height) !important;
+  border-radius: var(--sleek-control-radius) !important;
+  border: 1px solid var(--sleek-line) !important;
+  background: var(--sleek-surface) !important;
+  box-shadow: none !important;
+}
+
+.meal-plan-view__navigator {
+  padding: 0.2rem 0.35rem 0.2rem 0.85rem !important;
+  flex: 1 1 18rem !important;
+}
+
+.meal-plan-nav__label {
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: var(--sleek-text) !important;
+}
+
+.meal-plan-nav__controls {
+  gap: 0.25rem !important;
+}
+
+.meal-plan-nav__button {
+  inline-size: 2rem !important;
+  block-size: 2rem !important;
+  border: 0 !important;
+  background: var(--sleek-panel) !important;
+  box-shadow: none !important;
+  color: var(--sleek-text) !important;
+}
+
+.meal-plan-family-filter {
+  gap: 0.45rem !important;
+  padding: 0.2rem 0.45rem 0.2rem 0.75rem !important;
+  flex: 0 0 auto !important;
+}
+
+.meal-plan-family-filter__label {
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  color: var(--sleek-muted) !important;
+}
+
+.meal-plan-family-filter__list {
+  gap: 0.2rem !important;
+}
+
+.meal-plan-family-filter__button {
+  inline-size: 2rem !important;
+  block-size: 2rem !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 1.2rem !important;
+}
+
+.meal-plan-family-filter__button--active,
+.meal-plan-family-filter__button[aria-pressed='true'] {
+  background: var(--sleek-panel) !important;
+  color: var(--sleek-text) !important;
+  outline: 0 !important;
+}
+
+.meal-plan-view__mode-toggle {
+  margin-left: 0 !important;
+  gap: 0.1rem !important;
+  padding: 0.2rem !important;
+  flex: 0 0 auto !important;
+}
+
+.meal-plan-view__mode-button {
+  inline-size: 2.1rem !important;
+  min-inline-size: 2.1rem !important;
+  block-size: 2rem !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--sleek-muted) !important;
+  font-size: 0 !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+}
+
+.meal-plan-view__mode-button::before {
+  font-size: 0.86rem !important;
+  line-height: 1 !important;
+}
+
+.meal-plan-view__mode-button:nth-child(1)::before {
+  content: 'D';
+}
+
+.meal-plan-view__mode-button:nth-child(2)::before {
+  content: 'W';
+}
+
+.meal-plan-view__mode-button:nth-child(3)::before {
+  content: 'M';
+}
+
+.meal-plan-view__mode-button.mode-toggle__button--active,
+.meal-plan-view__mode-button[aria-pressed='true'] {
+  background: var(--sleek-panel) !important;
+  color: var(--sleek-text) !important;
+  outline: 0 !important;
+}
+
+.meal-plan-view__layout {
+  gap: clamp(0.85rem, 1.4vw, 1.25rem) !important;
+  grid-template-columns: minmax(0, 2fr) minmax(20rem, 0.92fr) !important;
+}
+
+.meal-plan-calendar,
+.meal-plan-sidebar {
+  border: 1px solid var(--sleek-line) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+  background: var(--sleek-surface) !important;
+}
+
+.meal-plan-calendar {
+  padding: clamp(0.75rem, 1.2vw, 1rem) !important;
+}
+
+.meal-plan-sidebar {
+  padding: clamp(0.75rem, 1.2vw, 1rem) !important;
+  gap: 0 !important;
+}
+
+.meal-plan-summary {
+  flex: 1 1 auto !important;
+  padding: clamp(0.85rem, 1.4vw, 1.1rem) !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.meal-plan-summary__macros {
+  gap: 0.75rem !important;
+}
+
+.meal-plan-summary__group {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.meal-plan-summary__stat-list {
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)) !important;
+  gap: 0.55rem !important;
+}
+
+.meal-plan-summary__stat {
+  padding: 0.65rem 0.7rem !important;
+  border-radius: 0.55rem !important;
+  background: var(--sleek-panel) !important;
+  box-shadow: none !important;
+}
+
+.meal-plan-calendar__month,
+.meal-plan-calendar__week,
+.meal-plan-calendar__week-view,
+.meal-plan-calendar__day-names {
+  gap: 0.6rem !important;
+}
+
+.meal-plan-calendar__cell {
+  border: 1px solid var(--sleek-line) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: none !important;
+}
+
+.meal-plan-calendar__cell--selected {
+  outline: 2px solid var(--sleek-line-strong) !important;
+  outline-offset: 2px !important;
+}
+
+#recipes-page .nav-chip__toggle {
+  color: var(--sleek-text) !important;
+  background: var(--sleek-surface) !important;
+  border: 1px solid var(--sleek-line) !important;
+  box-shadow: 0 1px 3px rgba(36, 33, 29, 0.1) !important;
+}
+
+#recipes-page .nav-chip__toggle-icon,
+#recipes-page .nav-chip__toggle svg {
+  color: var(--sleek-text) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 62.5rem) {
+  #recipes-page .topbar__row {
+    position: relative !important;
+  }
+
+  #recipes-page .nav-chip--tabs.nav-chip--open {
+    position: absolute !important;
+    inset-block-start: calc(100% + 0.45rem) !important;
+    inset-inline-start: 0 !important;
+    width: min(22rem, calc(100vw - 1.5rem)) !important;
+    max-width: calc(100vw - 1.5rem) !important;
+    z-index: 40 !important;
+    align-items: stretch !important;
+  }
+
+  .meal-plan-view__header {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+  }
+
+  .meal-plan-view__navigator,
+  .meal-plan-family-filter,
+  .meal-plan-view__mode-toggle {
+    width: 100% !important;
+  }
+
+  .meal-plan-view__layout {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    padding-inline: 0.65rem !important;
+  }
+
+  .meal-plan-view {
+    padding: 0.65rem !important;
+  }
+
+  .meal-plan-calendar,
+  .meal-plan-sidebar {
+    padding: 0.65rem !important;
+  }
+}
