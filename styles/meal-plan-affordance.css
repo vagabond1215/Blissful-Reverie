@@ -1,0 +1,74 @@
+.meal-card__header-actions.meal-plan-affordance__actions {
+  flex-wrap: wrap;
+  max-inline-size: 13rem;
+}
+
+.meal-card__schedule-button.meal-plan-affordance__schedule-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  inline-size: auto;
+  min-inline-size: 36px;
+  padding-inline: 0.7rem;
+  border-radius: 999px;
+}
+
+.meal-plan-affordance__schedule-text {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.meal-plan-affordance__helper {
+  flex: 1 0 100%;
+  margin-inline-start: auto;
+  max-inline-size: 12rem;
+  color: var(--chip-fg);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.25;
+  opacity: 0.9;
+  text-align: right;
+}
+
+.meal-plan-affordance__feedback {
+  margin: 0 0 1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: calc(var(--radius) - 8px);
+  background: var(--layer-2);
+  color: var(--text);
+  box-shadow: var(--shadow-1);
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+}
+
+.meal-plan-affordance__feedback[hidden] {
+  display: none;
+}
+
+@media (max-width: 520px) {
+  .meal-card__header-actions.meal-plan-affordance__actions {
+    max-inline-size: 8.5rem;
+  }
+
+  .meal-card__schedule-button.meal-plan-affordance__schedule-button {
+    padding-inline: 0;
+    inline-size: 36px;
+  }
+
+  .meal-plan-affordance__schedule-text {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .meal-plan-affordance__helper {
+    font-size: 0.72rem;
+  }
+}
