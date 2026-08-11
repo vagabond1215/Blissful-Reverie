@@ -19,9 +19,14 @@
     ensureStylesheet('styles/meal-plan-sleek.css');
   };
 
+  const ensureTopbarDockedStylesheet = () => {
+    ensureStylesheet('styles/topbar-docked.css');
+  };
+
   const ensureVisualResetStylesheets = () => {
     ensureBaseThemeStylesheet();
     ensureMealPlanSleekStylesheet();
+    ensureTopbarDockedStylesheet();
   };
 
   const ensureProductivityStylesheet = () => {
