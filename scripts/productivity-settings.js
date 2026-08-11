@@ -15,6 +15,15 @@
     ensureStylesheet('styles/base-theme.css');
   };
 
+  const ensureMealPlanSleekStylesheet = () => {
+    ensureStylesheet('styles/meal-plan-sleek.css');
+  };
+
+  const ensureVisualResetStylesheets = () => {
+    ensureBaseThemeStylesheet();
+    ensureMealPlanSleekStylesheet();
+  };
+
   const ensureProductivityStylesheet = () => {
     ensureStylesheet('styles/productivity.css');
   };
@@ -79,12 +88,12 @@
   const start = () => {
     ensureMealPlanAffordanceAssets();
     if (simplifySettings()) {
-      ensureBaseThemeStylesheet();
+      ensureVisualResetStylesheets();
       return;
     }
     window.requestAnimationFrame(() => {
       simplifySettings();
-      ensureBaseThemeStylesheet();
+      ensureVisualResetStylesheets();
     });
   };
 
