@@ -1,0 +1,440 @@
+/*
+  Clean base theme reset.
+
+  This stylesheet intentionally overrides the legacy generated theme output without
+  changing DOM structure or runtime behavior. It is loaded after the legacy app
+  stylesheet so the app can keep working while the visual system is reset to a
+  calm, readable baseline.
+*/
+
+:root,
+:root[data-theme='light'],
+:root[data-theme='dark'] {
+  color-scheme: light !important;
+
+  /* Canonical neutral base */
+  --base-page: #f7f3ea !important;
+  --base-page-soft: #fbfaf6 !important;
+  --base-surface: #ffffff !important;
+  --base-panel: #f1ece2 !important;
+  --base-panel-strong: #e8dfd2 !important;
+  --base-raised: #fffdf8 !important;
+  --base-text: #24211d !important;
+  --base-text-muted: #6f6860 !important;
+  --base-text-soft: #8c8378 !important;
+  --base-border: #d8d0c4 !important;
+  --base-border-strong: #b9afa1 !important;
+  --base-accent: #6f6254 !important;
+  --base-accent-soft: #e9e1d5 !important;
+  --base-focus: #2563eb !important;
+  --base-success: #2f7d57 !important;
+  --base-warning: #a66a00 !important;
+  --base-danger: #b8453c !important;
+
+  /* Legacy palette aliases, deliberately flattened. */
+  --neutral: var(--base-page) !important;
+  --brand: var(--base-accent) !important;
+  --accent-1: var(--base-accent-soft) !important;
+  --accent-2: var(--base-border-strong) !important;
+  --text: var(--base-text) !important;
+  --text-muted: var(--base-text-muted) !important;
+  --text-inverse: var(--base-surface) !important;
+
+  --layer-0: var(--base-page) !important;
+  --layer-1: var(--base-surface) !important;
+  --layer-2: var(--base-panel) !important;
+  --layer-3: var(--base-panel-strong) !important;
+
+  --border-strong: var(--base-border-strong) !important;
+  --border-soft: var(--base-border) !important;
+  --border-1: var(--base-border) !important;
+  --border-2: var(--base-border) !important;
+
+  --chip-bg: var(--base-accent-soft) !important;
+  --chip-fg: var(--base-text) !important;
+
+  --btn-primary-bg: var(--base-text) !important;
+  --btn-primary-fg: var(--base-surface) !important;
+  --btn-secondary-bg: var(--base-surface) !important;
+  --btn-secondary-br: var(--base-border-strong) !important;
+
+  --success: var(--base-success) !important;
+  --warning: var(--base-warning) !important;
+  --danger: var(--base-danger) !important;
+  --info: var(--base-focus) !important;
+  --color-success: var(--base-success) !important;
+  --color-warning: var(--base-warning) !important;
+  --color-danger: var(--base-danger) !important;
+  --color-focus-ring: var(--base-focus) !important;
+
+  --radius: 14px !important;
+  --shadow-1: 0 1px 2px rgba(36, 33, 29, 0.08) !important;
+  --shadow-2: 0 14px 32px rgba(36, 33, 29, 0.12) !important;
+
+  --bg: var(--base-page) !important;
+  --surface-0: var(--base-surface) !important;
+  --surface-1: var(--base-panel) !important;
+  --surface-2: var(--base-raised) !important;
+  --surface-3: var(--base-panel-strong) !important;
+  --color-background: var(--base-page) !important;
+  --color-layout-background: var(--base-page) !important;
+  --color-panel: var(--base-surface) !important;
+  --color-surface: var(--base-surface) !important;
+  --color-surface-elevated: var(--base-raised) !important;
+  --color-surface-soft: var(--base-panel) !important;
+  --color-surface-highlight: var(--base-accent-soft) !important;
+
+  --color-text-primary: var(--base-text) !important;
+  --color-text-strong: var(--base-text) !important;
+  --color-text-secondary: var(--base-text-muted) !important;
+  --color-text-tertiary: var(--base-text-muted) !important;
+  --color-text-muted: var(--base-text-muted) !important;
+  --color-text-soft: var(--base-text-soft) !important;
+  --color-text-instruction: var(--base-text-muted) !important;
+  --color-text-inline: var(--base-accent) !important;
+  --color-tag-text: var(--base-text) !important;
+  --color-text-inverse: var(--base-surface) !important;
+  --color-text-badge: var(--base-text) !important;
+  --color-text-emphasis: var(--base-text) !important;
+  --color-gunmetal: var(--base-text) !important;
+
+  --glass-background: var(--base-page) !important;
+  --glass-surface: var(--base-surface) !important;
+  --glass-elevated: var(--base-raised) !important;
+  --glass-border: var(--base-border) !important;
+  --surface-hover-subtle: var(--base-panel) !important;
+  --surface-hover-strong: var(--base-panel-strong) !important;
+  --surface-overlay: rgba(255, 255, 255, 0.92) !important;
+  --surface-overlay-soft: rgba(255, 255, 255, 0.86) !important;
+  --surface-overlay-strong: rgba(255, 255, 255, 0.96) !important;
+  --surface-overlay-heavy: rgba(255, 255, 255, 0.98) !important;
+  --overlay-backdrop: rgba(36, 33, 29, 0.24) !important;
+  --overlay-backdrop-strong: rgba(36, 33, 29, 0.34) !important;
+
+  --color-border: var(--base-border) !important;
+  --color-border-strong: var(--base-border-strong) !important;
+  --color-border-muted: var(--base-border) !important;
+  --color-border-soft: var(--base-border) !important;
+
+  --gradient-primary: var(--base-surface) !important;
+  --gradient-accent: var(--base-panel) !important;
+  --gradient-accent-secondary: var(--base-panel) !important;
+  --gradient-accent-tertiary: var(--base-panel) !important;
+  --surface-glass-background: var(--base-surface) !important;
+  --surface-glass-background-strong: var(--base-surface) !important;
+  --surface-glass-primary: var(--base-surface) !important;
+  --surface-glass-primary-soft: var(--base-surface) !important;
+  --surface-glass-accent-1: var(--base-panel) !important;
+  --surface-glass-accent-2: var(--base-panel) !important;
+  --surface-elevated-gradient: var(--base-raised) !important;
+  --surface-panel-gradient: var(--base-surface) !important;
+  --surface-section-gradient: var(--base-panel) !important;
+  --surface-card-gradient: var(--base-surface) !important;
+
+  --view-toggle-inactive-gradient: var(--base-surface) !important;
+  --view-toggle-inactive-border: var(--base-border) !important;
+  --view-toggle-inactive-text: var(--base-text-muted) !important;
+  --view-toggle-hover-glow: 0 0 0 transparent !important;
+  --view-toggle-active-gradient: var(--base-accent-soft) !important;
+  --view-toggle-active-text: var(--base-text) !important;
+
+  --meal-plan-type-meal: var(--base-accent) !important;
+  --meal-plan-type-drink: var(--base-border-strong) !important;
+  --meal-plan-type-snack: var(--base-accent-soft) !important;
+  --meal-plan-type-text: var(--base-text) !important;
+  --meal-plan-border: var(--base-border) !important;
+  --meal-plan-surface: var(--base-surface) !important;
+
+  --filter-section-background: var(--base-surface) !important;
+  --filter-section-border: var(--base-border) !important;
+  --filter-section-shadow: var(--shadow-1) !important;
+  --meal-section-background: var(--base-surface) !important;
+  --meal-section-border: var(--base-border) !important;
+  --meal-section-shadow-color: var(--shadow-1) !important;
+  --serving-control-color: var(--base-text-muted) !important;
+}
+
+html,
+body,
+.app-shell,
+#app-layout,
+.layout {
+  background: var(--base-page) !important;
+  color: var(--base-text) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.app-shell {
+  padding: 1.25rem clamp(1rem, 2.4vw, 2rem) 3rem !important;
+}
+
+#recipes-page .topbar,
+.topbar {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.nav-chip,
+#recipes-page .nav-chip,
+.panel-header__actions {
+  background: var(--base-surface) !important;
+  border: 1px solid var(--base-border) !important;
+  box-shadow: var(--shadow-1) !important;
+}
+
+.nav-chip .tab,
+.nav-chip .icon-btn,
+.nav-chip__toggle,
+.mode-toggle__button,
+.productivity-shopping__source-option,
+.productivity-shopping__copy,
+.productivity-backup__button,
+.productivity-onboarding__dismiss,
+.productivity-onboarding__submit {
+  background: var(--base-surface) !important;
+  color: var(--base-text) !important;
+  border: 1px solid var(--base-border) !important;
+  box-shadow: none !important;
+}
+
+.nav-chip .tab[aria-current='page'],
+.nav-chip .tab.is-active,
+.nav-chip .view-toggle__button--active,
+.mode-toggle__button--active,
+.productivity-shopping__source-option--active,
+.recipe-family-filter__button--active {
+  background: var(--base-accent-soft) !important;
+  color: var(--base-text) !important;
+  border-color: var(--base-border-strong) !important;
+  outline: 2px solid var(--base-border-strong) !important;
+  outline-offset: -2px !important;
+}
+
+.nav-chip .tab:hover,
+.nav-chip .icon-btn:hover,
+.nav-chip__toggle:hover,
+.mode-toggle__button:hover,
+.button.secondary:hover,
+.btn-ghost:hover,
+.productivity-shopping__copy:hover:not(:disabled),
+.productivity-backup__button:hover {
+  background: var(--base-panel) !important;
+  color: var(--base-text) !important;
+  box-shadow: var(--shadow-1) !important;
+}
+
+.filter-panel,
+.pantry-view,
+.kitchen-view,
+.meal-plan-view,
+.productivity-dashboard,
+.productivity-shopping,
+.productivity-dashboard__group,
+.productivity-onboarding,
+.productivity-settings-advanced,
+.productivity-backup,
+.settings-panel__content,
+#recipes-page .settings-menu,
+#recipes-page .settings-panel,
+#recipes-page .settings-dropdown,
+#recipes-page .settings-popover {
+  background: var(--base-surface) !important;
+  color: var(--base-text) !important;
+  border: 1px solid var(--base-border) !important;
+  box-shadow: var(--shadow-1) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.panel-header,
+.pantry-view__header,
+.meal-plan-view__header,
+.filter-section,
+.tag-group,
+.ingredient-group,
+.meal-card,
+.meal-card__section,
+.meal-card__details > div,
+.meal-card__substitution-notice,
+.theme-color-control,
+.productivity-shopping__empty {
+  background: var(--base-surface) !important;
+  color: var(--base-text) !important;
+  border: 1px solid var(--base-border) !important;
+  box-shadow: var(--shadow-1) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.meal-card:hover,
+.pantry-form button:hover,
+.meal-card__footer button:hover,
+.button.primary:hover,
+.btn-primary:hover {
+  box-shadow: var(--shadow-2) !important;
+}
+
+.meal-card__header,
+.filter-section summary,
+.meal-plan-affordance__feedback {
+  background: var(--base-panel) !important;
+  color: var(--base-text) !important;
+  border: 1px solid var(--base-border) !important;
+  box-shadow: none !important;
+}
+
+.filter-section__content,
+.tag-group[open],
+.ingredient-group[open],
+.tag-group,
+.ingredient-group {
+  background: var(--base-raised) !important;
+}
+
+.tag,
+.badge,
+.pill,
+.productivity-badge,
+.productivity-shopping__source-pill,
+.tag-group__summary-count {
+  background: var(--base-accent-soft) !important;
+  color: var(--base-text) !important;
+  border: 1px solid var(--base-border) !important;
+  box-shadow: none !important;
+}
+
+.meal-card__schedule-button,
+.meal-card__favorite-button,
+.filter-action-button,
+.pantry-only-filter,
+.substitution-toggle {
+  background: var(--base-surface) !important;
+  color: var(--base-text) !important;
+  border: 1px solid var(--base-border) !important;
+  box-shadow: none !important;
+}
+
+.meal-card__schedule-button:hover,
+.meal-card__favorite-button:hover,
+.filter-action-button:hover,
+.pantry-only-filter:hover,
+.substitution-toggle:hover {
+  background: var(--base-panel) !important;
+  color: var(--base-text) !important;
+}
+
+.meal-card__favorite-button--active,
+.meal-card__favorite-button[aria-pressed='true'],
+.favorite-filter.favorite-filter--active,
+.favorite-filter[aria-pressed='true'],
+.pantry-only-filter.pantry-only-filter--active,
+.pantry-only-filter[aria-pressed='true'],
+.substitution-toggle.substitution-toggle--active,
+.substitution-toggle[aria-pressed='true'],
+.filter-toggle[data-filter-state='include'] .filter-toggle__icon {
+  background: var(--base-accent) !important;
+  color: var(--base-surface) !important;
+  border-color: var(--base-accent) !important;
+}
+
+.filter-toggle[data-filter-state='exclude'] .filter-toggle__icon {
+  background: var(--base-danger) !important;
+  border-color: var(--base-danger) !important;
+  color: var(--base-surface) !important;
+}
+
+.button.primary,
+.btn-primary,
+.pantry-form button,
+.meal-card__footer button {
+  background: var(--base-text) !important;
+  color: var(--base-surface) !important;
+  border-color: var(--base-text) !important;
+}
+
+.button.secondary,
+.btn-ghost {
+  background: var(--base-surface) !important;
+  color: var(--base-text) !important;
+  border-color: var(--base-border-strong) !important;
+}
+
+input,
+textarea,
+select,
+.input-group input,
+#filter-search,
+.productivity-onboarding__field input,
+.productivity-onboarding__field select,
+.theme-color-control__value {
+  background: var(--base-surface) !important;
+  color: var(--base-text) !important;
+  border: 1px solid var(--base-border-strong) !important;
+  box-shadow: none !important;
+}
+
+*:focus-visible,
+.nav-chip .tab:focus-visible,
+.nav-chip .icon-btn:focus-visible,
+.filter-action-button:focus-visible,
+.meal-card__schedule-button:focus-visible,
+.meal-card__favorite-button:focus-visible,
+.productivity-shopping__copy:focus-visible,
+.productivity-shopping__source-option:focus-within {
+  outline: 2px solid var(--base-focus) !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
+}
+
+.title-group p,
+.meal-card__description,
+.productivity-dashboard__subtitle,
+.productivity-shopping__subtitle,
+.productivity-shopping__mode-note,
+.productivity-dashboard__item-note,
+.productivity-shopping__item-note,
+.productivity-dashboard__empty,
+.productivity-shopping__empty,
+.productivity-backup__description,
+.productivity-backup__status,
+.productivity-onboarding__subtitle,
+.productivity-onboarding__note,
+.theme-toolbar__label,
+.holiday-theme-toggle__description,
+.holiday-theme-toggle__status {
+  color: var(--base-text-muted) !important;
+}
+
+#recipes-page .nav-chip--tabs .settings-btn svg,
+#recipes-page .holiday-settings-btn svg {
+  fill: var(--base-text) !important;
+  filter: none !important;
+}
+
+#recipes-page .nav-chip--tabs .settings-btn svg .gear-hole,
+#recipes-page .holiday-settings-btn svg .gear-hole {
+  fill: var(--base-surface) !important;
+}
+
+.productivity-settings-advanced,
+.theme-toolbar__group:has(#theme-palette),
+.theme-toolbar__group--holiday {
+  display: none !important;
+}
+
+.settings-panel__content::before {
+  content: 'Theme customization is temporarily paused during the visual reset.';
+  display: block;
+  color: var(--base-text-muted);
+  font-size: 0.85rem;
+  line-height: 1.35;
+  margin-bottom: 0.75rem;
+}
+
+@supports not selector(:has(*)) {
+  #theme-palette {
+    display: none !important;
+  }
+}
