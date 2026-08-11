@@ -77,10 +77,15 @@
   };
 
   const start = () => {
-    ensureBaseThemeStylesheet();
     ensureMealPlanAffordanceAssets();
-    if (simplifySettings()) return;
-    window.requestAnimationFrame(() => simplifySettings());
+    if (simplifySettings()) {
+      ensureBaseThemeStylesheet();
+      return;
+    }
+    window.requestAnimationFrame(() => {
+      simplifySettings();
+      ensureBaseThemeStylesheet();
+    });
   };
 
   if (document.readyState === 'loading') {
