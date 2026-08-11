@@ -3,12 +3,25 @@
     return;
   }
 
-  const ensureProductivityStylesheet = () => {
-    if (document.querySelector('link[href="styles/productivity.css"]')) return;
+  const ensureStylesheet = (href) => {
+    if (document.querySelector(`link[href="${href}"]`)) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'styles/productivity.css';
+    link.href = href;
     document.head.appendChild(link);
+  };
+
+  const ensureProductivityStylesheet = () => {
+    ensureStylesheet('styles/productivity.css');
+  };
+
+  const ensureMealPlanAffordanceAssets = () => {
+    ensureStylesheet('styles/meal-plan-affordance.css');
+    if (document.querySelector('script[src="scripts/meal-plan-affordance-copy.js"]')) return;
+    const script = document.createElement('script');
+    script.src = 'scripts/meal-plan-affordance-copy.js';
+    script.defer = true;
+    (document.body || document.head).appendChild(script);
   };
 
   const simplifySettings = () => {
@@ -60,6 +73,7 @@
   };
 
   const start = () => {
+    ensureMealPlanAffordanceAssets();
     if (simplifySettings()) return;
     window.requestAnimationFrame(() => simplifySettings());
   };
