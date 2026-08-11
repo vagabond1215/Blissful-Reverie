@@ -11,11 +11,18 @@
     'Add recipes from recipe cards to build this day. Planned recipes can feed the Smart shopping list.';
   const BUTTON_TEXT = 'Plan & shop';
   const HELPER_TEXT = 'Scheduled recipes can feed Smart shopping list.';
-  const FEEDBACK_TEXT = 'Added to meal plan — missing ingredients can appear in Smart shopping list.';
   const FEEDBACK_RESET_MS = 5000;
   let feedbackTimer = null;
   let observer = null;
   let enhanceQueued = false;
+
+  const scheduleFrame = (callback) => {
+    if (typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(callback);
+      return;
+    }
+    window.setTimeout(callback, 0);
+  };
 
   const getRecipeNameForButton = (button) => {
     const card = button && typeof button.closest === 'function' ? button.closest('.meal-card') : null;
@@ -38,7 +45,7 @@
     const mealView = document.getElementById('meal-view');
     if (mealView) {
       mealView.insertBefore(feedback, mealView.firstChild);
-    } else {
+    } else if (document.body) {
       document.body.appendChild(feedback);
     }
     return feedback;
@@ -94,7 +101,7 @@
 
   const enhanceMealPlanEmptyStates = () => {
     document.querySelectorAll(MEAL_PLAN_EMPTY_SELECTOR).forEach((empty) => {
-      if (!(empty instanceof HTMLElement)) {
+      if (!(empty instanceof HTMLElement) || empty.textContent === EMPTY_TEXT) {
         return;
       }
       empty.textContent = EMPTY_TEXT;
@@ -112,7 +119,7 @@
       return;
     }
     enhanceQueued = true;
-    window.requestAnimationFrame(enhancePage);
+    scheduleFrame(enhancePage);
   };
 
   const bindScheduleConfirmation = () => {
@@ -136,7 +143,7 @@
   };
 
   const startObserver = () => {
-    if (observer || !document.body) {
+    if (observer || !document.body || typeof MutationObserver !== 'function') {
       return;
     }
     observer = new MutationObserver(() => queueEnhance());
