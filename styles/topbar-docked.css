@@ -1,0 +1,243 @@
+/*
+  Docked top navigation rail.
+
+  Keeps the app controls on a full-width top bar and anchors the left settings
+  popover inside the viewport. This is a visual-only patch layered after the
+  base reset and meal-plan sleek styles.
+*/
+
+:root {
+  --dock-height: 4.25rem;
+  --dock-padding-inline: clamp(0.8rem, 2vw, 1.5rem);
+  --dock-bg: var(--base-page, #f7f3ea);
+  --dock-surface: var(--base-surface, #fff);
+  --dock-panel: var(--base-panel, #f1ece2);
+  --dock-line: var(--base-border, #d8d0c4);
+  --dock-line-strong: var(--base-border-strong, #b9afa1);
+  --dock-text: var(--base-text, #24211d);
+  --dock-muted: var(--base-text-muted, #6f6860);
+}
+
+.app-shell {
+  padding: 0 0 2rem !important;
+}
+
+#recipes-page .topbar,
+.topbar {
+  position: sticky !important;
+  inset-block-start: 0 !important;
+  z-index: 100 !important;
+  min-height: var(--dock-height) !important;
+  width: 100vw !important;
+  margin: 0 !important;
+  margin-inline: calc(50% - 50vw) !important;
+  padding: 0.6rem var(--dock-padding-inline) !important;
+  display: flex !important;
+  align-items: center !important;
+  background: color-mix(in srgb, var(--dock-bg) 94%, white 6%) !important;
+  border-block-end: 1px solid var(--dock-line) !important;
+  box-shadow: 0 1px 0 rgba(36, 33, 29, 0.04) !important;
+  overflow: visible !important;
+}
+
+#recipes-page .topbar__row,
+.topbar__row {
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.55rem !important;
+  overflow: visible !important;
+}
+
+#recipes-page .nav-chip,
+.nav-chip,
+#recipes-page .nav-chip--tabs,
+#recipes-page .nav-chip--settings {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#recipes-page .nav-chip--settings {
+  position: relative !important;
+  flex: 0 0 auto !important;
+  inline-size: 2.9rem !important;
+  block-size: 2.9rem !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: visible !important;
+  color: var(--dock-text) !important;
+}
+
+#recipes-page .nav-chip__settings-icon {
+  position: absolute !important;
+  inset-inline-start: 50% !important;
+  inset-block-start: 50% !important;
+  inline-size: 1.35rem !important;
+  block-size: 1.35rem !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 2 !important;
+  display: block !important;
+  color: var(--dock-text) !important;
+  fill: currentColor !important;
+  opacity: 1 !important;
+  filter: none !important;
+  pointer-events: none !important;
+}
+
+#recipes-page .nav-chip__settings-icon .gear-hole {
+  fill: var(--dock-surface) !important;
+}
+
+#recipes-page .settings-panel.nav-chip__settings {
+  position: static !important;
+  display: grid !important;
+  place-items: center !important;
+  inline-size: 2.9rem !important;
+  block-size: 2.9rem !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+#recipes-page .settings-panel__summary.settings-btn,
+#recipes-page .nav-chip__toggle {
+  inline-size: 2.9rem !important;
+  block-size: 2.9rem !important;
+  min-inline-size: 2.9rem !important;
+  min-block-size: 2.9rem !important;
+  padding: 0 !important;
+  border-radius: 1rem !important;
+  background: var(--dock-surface) !important;
+  border: 1px solid var(--dock-line) !important;
+  color: var(--dock-text) !important;
+  box-shadow: 0 1px 3px rgba(36, 33, 29, 0.1) !important;
+}
+
+#recipes-page .settings-panel__summary.settings-btn:hover,
+#recipes-page .nav-chip__toggle:hover {
+  background: var(--dock-panel) !important;
+  border-color: var(--dock-line-strong) !important;
+}
+
+#recipes-page .settings-panel[open] .settings-panel__summary.settings-btn {
+  background: var(--dock-panel) !important;
+  border-color: var(--dock-line-strong) !important;
+}
+
+#recipes-page .settings-panel__content.settings-menu,
+#recipes-page .settings-menu {
+  position: absolute !important;
+  inset-block-start: calc(100% + 0.55rem) !important;
+  inset-inline-start: 0 !important;
+  inset-inline-end: auto !important;
+  transform: none !important;
+  width: min(22rem, calc(100vw - 1.5rem)) !important;
+  max-width: calc(100vw - 1.5rem) !important;
+  max-height: calc(100vh - var(--dock-height) - 1.25rem) !important;
+  overflow: auto !important;
+  padding: 1rem !important;
+  border-radius: 1rem !important;
+  background: var(--dock-surface) !important;
+  border: 1px solid var(--dock-line) !important;
+  box-shadow: 0 18px 44px rgba(36, 33, 29, 0.16) !important;
+  color: var(--dock-text) !important;
+  z-index: 120 !important;
+}
+
+#recipes-page .settings-panel__content::before {
+  margin: 0 !important;
+  white-space: normal !important;
+}
+
+#recipes-page .nav-chip--tabs {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0 !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  scrollbar-width: none !important;
+}
+
+#recipes-page .nav-chip--tabs::-webkit-scrollbar {
+  display: none !important;
+}
+
+#recipes-page .nav-chip--tabs .tab,
+#recipes-page .nav-chip--tabs a,
+#recipes-page .nav-chip--tabs button {
+  flex: 0 0 auto !important;
+}
+
+#recipes-page .nav-chip--tabs .tab {
+  background: var(--dock-surface) !important;
+  border: 1px solid var(--dock-line) !important;
+  color: var(--dock-text) !important;
+  box-shadow: none !important;
+}
+
+#recipes-page .nav-chip--tabs .tab[aria-current='page'],
+#recipes-page .nav-chip--tabs .tab.is-active,
+#recipes-page .nav-chip--tabs .tab[aria-pressed='true'] {
+  background: var(--dock-panel) !important;
+  border-color: var(--dock-line-strong) !important;
+}
+
+.layout {
+  padding-block-start: 1rem !important;
+}
+
+@media (max-width: 62.5rem) {
+  #recipes-page .topbar,
+  .topbar {
+    min-height: 3.75rem !important;
+    padding-block: 0.45rem !important;
+  }
+
+  #recipes-page .settings-panel__content.settings-menu,
+  #recipes-page .settings-menu {
+    inset-inline-start: 0 !important;
+    width: min(20rem, calc(100vw - 1rem)) !important;
+    max-width: calc(100vw - 1rem) !important;
+  }
+
+  #recipes-page .nav-chip--tabs.nav-chip--open {
+    position: absolute !important;
+    inset-block-start: calc(100% + 0.55rem) !important;
+    inset-inline-start: 0 !important;
+    width: min(24rem, calc(100vw - 1rem)) !important;
+    max-width: calc(100vw - 1rem) !important;
+    max-height: calc(100vh - var(--dock-height) - 1rem) !important;
+    overflow: auto !important;
+    padding: 0.65rem !important;
+    border-radius: 1rem !important;
+    background: var(--dock-surface) !important;
+    border: 1px solid var(--dock-line) !important;
+    box-shadow: 0 18px 44px rgba(36, 33, 29, 0.16) !important;
+    z-index: 118 !important;
+  }
+}
+
+@media (max-width: 720px) {
+  #recipes-page .topbar,
+  .topbar {
+    padding-inline: 0.65rem !important;
+  }
+
+  #recipes-page .settings-panel__summary.settings-btn,
+  #recipes-page .nav-chip__toggle,
+  #recipes-page .settings-panel.nav-chip__settings,
+  #recipes-page .nav-chip--settings {
+    inline-size: 2.65rem !important;
+    block-size: 2.65rem !important;
+    min-inline-size: 2.65rem !important;
+    min-block-size: 2.65rem !important;
+  }
+
+  #recipes-page .nav-chip__settings-icon {
+    inline-size: 1.2rem !important;
+    block-size: 1.2rem !important;
+  }
+}
