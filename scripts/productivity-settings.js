@@ -11,6 +11,10 @@
     document.head.appendChild(link);
   };
 
+  const ensureBaseThemeStylesheet = () => {
+    ensureStylesheet('styles/base-theme.css');
+  };
+
   const ensureProductivityStylesheet = () => {
     ensureStylesheet('styles/productivity.css');
   };
@@ -73,6 +77,7 @@
   };
 
   const start = () => {
+    ensureBaseThemeStylesheet();
     ensureMealPlanAffordanceAssets();
     if (simplifySettings()) return;
     window.requestAnimationFrame(() => simplifySettings());
