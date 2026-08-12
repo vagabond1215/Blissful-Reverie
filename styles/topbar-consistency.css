@@ -1,0 +1,97 @@
+/* Shared top-bar geometry and page-specific action normalization. */
+
+:root {
+  --topbar-segment-height: 38px;
+}
+
+#recipes-page #primary-nav.nav-chip--tabs {
+  height: var(--topbar-segment-height) !important;
+  min-height: var(--topbar-segment-height) !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#recipes-page #primary-nav.nav-chip--tabs .tabs-list {
+  height: 100% !important;
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+#recipes-page #primary-nav.nav-chip--tabs .tab {
+  height: 100% !important;
+  min-height: 0 !important;
+  padding-block: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#page-action-bar.page-action-bar {
+  min-height: var(--topbar-segment-height) !important;
+  height: var(--topbar-segment-height) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 999px !important;
+}
+
+#page-action-bar .page-action-bar__button,
+#page-action-bar #family-manage-action,
+#page-action-bar .recipe-page-action {
+  height: var(--topbar-segment-height) !important;
+  min-height: var(--topbar-segment-height) !important;
+  max-height: var(--topbar-segment-height) !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+}
+
+#page-action-bar .page-action-bar__button--icon,
+#page-action-bar .recipe-page-action {
+  width: 40px !important;
+  min-width: 40px !important;
+  padding: 0 !important;
+}
+
+#page-action-bar .pantry-page-action--state {
+  min-width: 68px;
+  padding-inline: 11px !important;
+  font-size: 0.76rem;
+}
+
+#page-action-bar .pantry-page-action--sort {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+#page-action-bar .pantry-page-action--favorite {
+  font-size: 0.9rem;
+}
+
+#page-action-bar .page-action-bar__button[aria-pressed="true"] {
+  background: var(--surface-muted, #eef1f4) !important;
+}
+
+/* The Pantry top bar owns these controls now; keep the legacy controller as a hidden behavior bridge. */
+#pantry-sort-filter {
+  display: none !important;
+}
+
+/* One visible dynamic button should look like one button, not a button inside a second pill. */
+#page-action-bar #family-manage-action:not([hidden]):only-child,
+#page-action-bar:has(#family-manage-action:not([hidden])) #family-manage-action {
+  box-shadow: none !important;
+}
+
+.recipe-topbar-search input,
+.pantry-topbar-search #filter-search {
+  height: var(--topbar-segment-height) !important;
+  min-height: var(--topbar-segment-height) !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 760px) {
+  :root { --topbar-segment-height: 36px; }
+  #page-action-bar .page-action-bar__button--icon,
+  #page-action-bar .recipe-page-action {
+    width: 38px !important;
+    min-width: 38px !important;
+  }
+}
