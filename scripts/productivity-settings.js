@@ -127,6 +127,11 @@
     ensureScript('scripts/ui-polish.js');
   };
 
+  const ensureShoppingReadinessRefinementAssets = () => {
+    ensureStylesheet('styles/shopping-readiness-refine.css');
+    ensureScript('scripts/meal-plan-shopping-refine.js');
+  };
+
   const simplifySettings = () => {
     const toolbar = document.getElementById('theme-toolbar');
     if (!toolbar || document.getElementById('productivity-settings-advanced')) {
@@ -186,6 +191,7 @@
     ensureRestockAssets();
     ensureWorkspaceFlowAssets();
     ensureUiPolishAssets();
+    ensureShoppingReadinessRefinementAssets();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();
       return;

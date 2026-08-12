@@ -1,0 +1,225 @@
+/* Meal-plan shopping ownership, Almost Ready chips, recipe preview, and denser Pantry rows. */
+
+/* Pantry rows: remove the remaining top/bottom air while preserving 26px controls. */
+#pantry-grid .pantry-card--compact.pantry-card {
+  align-items: center !important;
+  gap: 0 6px !important;
+  min-height: 26px !important;
+  padding: 0 3px !important;
+}
+
+#pantry-grid .pantry-card--compact .pantry-card__name {
+  align-self: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.05 !important;
+}
+
+#pantry-grid .pantry-card--compact .pantry-card__favorite-button,
+#pantry-grid .pantry-card--compact .pantry-card__inline-controls,
+#pantry-grid .pantry-card--compact .pantry-list-selector {
+  margin-block: 0 !important;
+}
+
+#pantry-grid .pantry-row-tags {
+  margin: 0 !important;
+}
+
+#pantry-grid .pantry-row-tags > .pantry-row-tags__list.pantry-card__tags {
+  margin: 0 0 1px !important;
+}
+
+/* Recipes: missing-threshold action lives in the same segmented page bar. */
+#page-action-bar .recipe-readiness-action {
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  min-width: max-content;
+  margin: 0 0 0 -1px !important;
+  padding: 0 11px !important;
+  border: 1px solid var(--border, #cbd0d7) !important;
+  border-radius: 0 !important;
+  background: var(--surface, #fff) !important;
+  color: var(--text, #111) !important;
+  box-shadow: none !important;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+#page-action-bar .recipe-readiness-action:hover,
+#page-action-bar .recipe-readiness-action:focus-visible {
+  background: var(--surface-muted, #eef1f4) !important;
+}
+
+html.recipes-view-active #page-action-bar #reset-filters {
+  border-radius: 0 !important;
+}
+
+html.recipes-view-active #page-action-bar #reset-filters.page-action-bar__segment-last {
+  border-radius: 0 999px 999px 0 !important;
+}
+
+/* Almost Ready is now the only Recipes dashboard group. */
+.productivity-dashboard--readiness {
+  gap: 0 !important;
+  padding: 0.75rem !important;
+}
+
+.productivity-dashboard--readiness-off:empty {
+  display: none !important;
+}
+
+.productivity-dashboard__groups--readiness {
+  display: block !important;
+}
+
+.productivity-dashboard__group--almost-ready {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.productivity-dashboard__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.productivity-dashboard__recipe-chip {
+  min-height: 30px;
+  padding: 0 0.7rem;
+  border: 1px solid var(--border, #cbd0d7);
+  border-radius: 999px;
+  background: var(--surface, #fff);
+  color: var(--text, #111);
+  box-shadow: none;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.productivity-dashboard__recipe-chip:hover,
+.productivity-dashboard__recipe-chip:focus-visible {
+  background: var(--surface-muted, #eef1f4);
+  border-color: var(--accent-1, #2563eb);
+}
+
+/* Smart Shopping is a terse, meal-plan-only Pantry surface. */
+.productivity-shopping--meal-plan-only .productivity-shopping__header {
+  align-items: center;
+}
+
+.productivity-shopping--meal-plan-only .productivity-shopping__title {
+  font-size: 0.95rem;
+}
+
+.productivity-shopping--meal-plan-only .productivity-shopping__source-pill,
+.productivity-shopping--meal-plan-only .productivity-shopping__subtitle,
+.productivity-shopping--meal-plan-only .productivity-shopping__mode-note,
+.productivity-shopping--meal-plan-only .shopping-management__summary {
+  display: none !important;
+}
+
+/* Recipe chip preview overlays the page without moving the live meal card. */
+.recipe-preview-dialog[hidden] {
+  display: none !important;
+}
+
+.recipe-preview-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 14500;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.recipe-preview-dialog__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.recipe-preview-dialog__panel {
+  position: relative;
+  width: min(94vw, 820px);
+  max-height: min(90vh, 900px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--border, #cbd0d7);
+  border-radius: 16px;
+  background: var(--surface, #fff);
+  box-shadow: 0 20px 70px rgb(0 0 0 / 0.28);
+}
+
+.recipe-preview-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 46px;
+  padding: 8px 10px 8px 14px;
+  border-bottom: 1px solid var(--border, #d7dbe0);
+}
+
+.recipe-preview-dialog__header h2 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.recipe-preview-dialog__close {
+  width: 34px;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border, #cbd0d7);
+  border-radius: 8px;
+  background: var(--surface, #fff);
+  color: var(--text, #111);
+  font: inherit;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.recipe-preview-dialog__body {
+  min-height: 0;
+  overflow: auto;
+  padding: 12px;
+  scrollbar-width: none;
+}
+
+.recipe-preview-dialog__body::-webkit-scrollbar {
+  display: none;
+}
+
+.recipe-preview-dialog .meal-card--preview {
+  margin: 0 !important;
+  pointer-events: none;
+}
+
+@media (max-width: 760px) {
+  #page-action-bar .recipe-readiness-action {
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    padding-inline: 9px !important;
+    font-size: 0.72rem;
+  }
+
+  .recipe-preview-dialog {
+    padding: 8px;
+  }
+
+  .recipe-preview-dialog__panel {
+    width: 100%;
+    max-height: 94vh;
+  }
+}
