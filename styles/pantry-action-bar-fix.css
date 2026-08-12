@@ -1,0 +1,22 @@
+/*
+  The Restock wizard stylesheet loads after the Pantry redesign layer and still owns
+  the legacy .restock-launch class. These higher-specificity rules ensure that once
+  Restock is moved into the shared page-action bar, the segmented bar owns its chrome.
+*/
+
+#page-action-bar > #pantry-restock-button.page-action-bar__button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--border, #cbd0d7);
+  border-radius: 999px 0 0 999px;
+  background: var(--surface, #fff);
+  color: var(--text, #111);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1;
+}
+
+#page-action-bar > #pantry-restock-button.page-action-bar__button:hover,
+#page-action-bar > #pantry-restock-button.page-action-bar__button:focus-visible {
+  background: var(--surface-muted, #f1f3f5);
+}
