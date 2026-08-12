@@ -44,8 +44,9 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 4. `styles/topbar-docked.css`
 5. `styles/shopping-list-sleek.css`
 6. `styles/ui-cleanup.css`
+7. `styles/topbar-hover-fix.css`
 
-`styles/ui-cleanup.css` must remain the final visual layer unless a later pass intentionally replaces it. It currently overrides the temporary theme toward neutral grayscale and fixes topbar/card contrast issues.
+`styles/topbar-hover-fix.css` must remain the final visual layer unless a later pass intentionally replaces it. It suppresses legacy pill/oval hover chrome on the primary topbar segmented navigation. `styles/ui-cleanup.css` remains the final broad reset layer before that focused topbar patch.
 
 ## Recent direct-main visual passes
 
@@ -86,6 +87,12 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 - Removed topbar button containers around settings and segment controls.
 - Improved card text contrast.
 - Standardized topbar button heights.
+
+### Topbar hover fix
+
+- Added `styles/topbar-hover-fix.css`.
+- Suppressed legacy topbar pseudo-elements, radius, shadows, transforms, and outlines that could draw the old oval/pill hover state over segmented tabs.
+- Kept the stacked mobile menu behavior separate.
 
 ## Known open follow-up
 
