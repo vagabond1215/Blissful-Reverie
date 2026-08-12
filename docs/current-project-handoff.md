@@ -34,7 +34,7 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 
 `index.html` loads `styles/app.css` as the static stylesheet entry point.
 
-`styles/app.css` is now a small import wrapper, not the legacy generated stylesheet. It imports the legacy stylesheet first, then imports the reset layers so the browser blocks first paint on the neutral visual stack:
+`styles/app.css` is now a small import wrapper, not the legacy generated stylesheet. It imports the legacy stylesheet first, then imports the reset/focused feature layers so the browser blocks first paint on the current visual stack:
 
 1. `styles/app-legacy.css`
 2. `styles/meal-plan-affordance.css`
@@ -46,12 +46,13 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 8. `styles/ui-cleanup.css`
 9. `styles/topbar-hover-fix.css`
 10. `styles/dashboard-contrast.css`
+11. `styles/shopping-management.css`
 
 `styles/app-legacy.css` is a direct copy of the previous generated `styles/app.css`. Keep it as the compatibility layer until the visual reset is consolidated.
 
-`scripts/productivity-settings.js` still de-duplicates and dynamically ensures reset and focused feature assets for compatibility with the existing startup flow. It now also loads `styles/restock-wizard.css` and `scripts/restock-wizard.js` for the guided restock interaction.
+`scripts/productivity-settings.js` still de-duplicates and dynamically ensures reset and focused feature assets for compatibility with the existing startup flow. It loads the shopping-reference module, the smart replenishment module, and the guided restock module in addition to visual-reset assets.
 
-`styles/dashboard-contrast.css` is currently the final static visual layer. It gives the productivity dashboard a light-gray workspace background and keeps the dashboard cards and shopping panel on white raised surfaces. `styles/topbar-hover-fix.css` remains the focused layer that suppresses legacy pill/oval hover chrome on the primary topbar segmented navigation. `styles/ui-cleanup.css` remains the final broad reset layer before these focused patches.
+`styles/dashboard-contrast.css` remains the focused dashboard hierarchy layer. `styles/shopping-management.css` is now the final static focused feature layer and styles Shopping settings, per-item purchase profiles, and shopping-list purchase/store metadata. `styles/topbar-hover-fix.css` remains the focused layer that suppresses legacy pill/oval hover chrome on the primary topbar segmented navigation. `styles/ui-cleanup.css` remains the broad reset layer before these focused patches.
 
 The legacy-color startup flash is currently only being reproduced on one PC Brave browser; Chrome and Brave mobile are not showing it. Defer additional flash-specific CSS changes unless the issue can be reproduced again after a fresh load/cache check.
 
@@ -111,7 +112,7 @@ The legacy-color startup flash is currently only being reproduced on one PC Brav
 ### Static visual reset wrapper
 
 - Copied the original generated `styles/app.css` blob to `styles/app-legacy.css`.
-- Replaced `styles/app.css` with an import wrapper that loads `app-legacy.css` first and all reset layers afterward.
+- Replaced `styles/app.css` with an import wrapper that loads `app-legacy.css` first and all reset/focused layers afterward.
 - This is the current strongest mitigation for legacy theme flash on page load.
 
 ## Recent product passes
@@ -150,21 +151,39 @@ Merged through PR #145 in `a91ab69`.
 - Integration coverage tests history normalization, category selection/sorting, zero-quantity handling, asset wiring, and restock CSS presence.
 - Pull-request `Validate` run #102 and merged-main `Validate` run #103 both passed.
 
+### #142 — Usage-based replenishment and store-aware shopping
+
+Merged through PR #146 in `b0179c9`.
+
+- Added `scripts/shopping-management.js` and `styles/shopping-management.css` as a companion layer over the existing smart shopping list.
+- The main settings menu now has a `Shopping` section with weekly, every-two-weeks, monthly, and custom-day shopping cadence options.
+- Shopping settings also control whether automatic recommended-stock restocks are enabled and whether lists group by category or store.
+- Pantry quantity decreases are recorded as usage events under `blissful-pantry-usage`; quantity increases/restocking are not counted as consumption.
+- Usage capture works from normal Pantry quantity edits and quantity adjustments in the guided Restock workflow.
+- The current recommendation model uses recorded consumption from the last 30 days and projects it to the selected shopping cadence. No usage history means no invented automatic target.
+- If current quantity is below the projected target, the item is automatically merged into the smart shopping list even when the selected recipe source has no missing ingredients.
+- Existing `From meal plan` and `Closest recipes` sources remain intact; usage-based restocks are additive rather than replacing recipe shopping.
+- Live shopping rows can show current quantity, recommended target, and calculated purchase quantity.
+- Each Pantry item gets a collapsed `Shopping` profile for an optional store, `Individual units` versus `Package / bulk size`, and units per package.
+- Package-mode deficits round upward to complete packages. Example coverage verifies that a 1-can deficit for a Costco 6-pack recommends buying one 6-pack / 6 cans.
+- Store assignment is free-form rather than tied to a hard-coded retailer list.
+- Smart shopping can group by Category or Store. Unassigned items remain visible under `Unassigned store` when grouping by store.
+- Duplicate recipe/restock entries are merged by ingredient where possible, preserving recipe references while adding replenishment metadata.
+- Managed copy-to-clipboard output includes live purchase/package information and store assignment where applicable while respecting the existing recipe-reference visibility setting.
+- Shopping settings persist under `blissful-shopping-settings`; per-item profiles under `blissful-shopping-item-profiles`; usage history under `blissful-pantry-usage`.
+- Existing backup version 1 is extended at runtime to include/restore those three optional shopping storage keys without invalidating older backups.
+- Integration coverage includes the monthly olives example, non-consumption on quantity increases, unit and package purchase rounding, store grouping, merged recipe/restock entries, asset wiring, and responsive CSS presence.
+- Pull-request `Validate` run #105 and merged-main `Validate` run #106 both passed.
+
 ## Current next step
 
-### Browser review of #144, then resume #142
+### Browser review of Restock + smart replenishment, then #143
 
-The guided restock implementation is merged and automated validation is green. Because the connector cannot inspect the rendered GitHub Pages application reliably, the immediate next step is a quick browser smoke test of the Restock interaction. Avoid blind visual refinements without screenshot/browser feedback.
+Both broad inventory/shopping changes are merged and automated validation is green. Because the connector cannot inspect the rendered GitHub Pages application reliably, the immediate next step is a browser smoke test of the Restock interaction and the new Shopping settings/profile/list presentation. Avoid blind visual refinements without screenshot/browser feedback.
 
-After the Restock workflow is confirmed usable, resume #142: add a separate smart-shopping source for pantry staples/common essentials and an option to include low-quantity pantry items. Keep that work separate from recipe quantity aggregation and pantry depletion modeling.
+After the browser interaction pass is confirmed usable, the next planned product follow-up is #143: recipe previews from pantry dashboard candidates.
 
 ## Known open follow-ups
-
-### #142 — Staples and low-quantity shopping list source
-
-- Add a smart-shopping mode for staples/common essentials such as pasta, cheese, eggs, meats, condiments, and other common ingredients.
-- Include a setting or toggle for low-quantity pantry items, not only missing/no-quantity items.
-- Keep separate from exact quantity aggregation and pantry depletion modeling.
 
 ### #143 — Recipe previews from pantry dashboard candidates
 
@@ -196,7 +215,7 @@ After each visual or interaction pass, hard refresh the deployed GitHub Pages ap
 - right-side topbar controls visually match the left/top segmented control height
 - recipe card text is readable in the current light theme
 - ingredient quantities are readable and not near-white on white
-- smart shopping list category columns do not collapse item names into single letters
+- smart shopping list columns do not collapse item names into single letters
 - pantry dashboard parent has enough contrast against `Cook now`, `Almost ready`, and `Shopping candidates`
 - the old magenta/green/sepia generated palette does not visibly flash during page load
 - light and dark theme modes stay legible
@@ -219,6 +238,22 @@ After each visual or interaction pass, hard refresh the deployed GitHub Pages ap
 - recipe pantry-fit behavior still updates after restock changes
 - Escape closes the dialog and focus returns to the button that opened it
 - on mobile, the left icon rail remains usable while the category contents scroll independently
+
+### Shopping management
+
+- the main settings menu contains a clearly separated `Shopping` section
+- weekly / every 2 weeks / monthly / custom cadence choices save and change recommendation targets
+- Pantry cards expose a collapsed `Shopping` profile without making the default card layout too tall or visually noisy
+- item profiles can save a free-form store such as Costco, Giant, or Walmart
+- `Individual units` and `Package / bulk size` switch correctly; package size is only shown when relevant
+- lowering a pantry quantity records usage and eventually produces a recommended stock level; increasing/restocking does not count as usage
+- an item below its target appears in the smart shopping list even when no planned-meal ingredient is missing
+- the row clearly communicates what to buy, what is on hand, and the target amount
+- package items round to whole packages rather than impossible partial packs
+- Category / Store grouping is available and store grouping places unassigned items under `Unassigned store`
+- recipe-missing and automatic-restock entries for the same ingredient do not duplicate unnecessarily
+- copy-to-clipboard includes managed purchase quantities/package information and still respects recipe-reference visibility
+- light/dark themes and mobile layout remain readable with the new controls
 
 ## Validation expectation
 
