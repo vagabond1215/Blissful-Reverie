@@ -53,6 +53,8 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 
 `styles/dashboard-contrast.css` is currently the final visual layer. It gives the productivity dashboard a light-gray workspace background and keeps the dashboard cards and shopping panel on white raised surfaces. `styles/topbar-hover-fix.css` remains the focused layer that suppresses legacy pill/oval hover chrome on the primary topbar segmented navigation. `styles/ui-cleanup.css` remains the final broad reset layer before these focused patches.
 
+The legacy-color startup flash is currently only being reproduced on one PC Brave browser; Chrome and Brave mobile are not showing it. Defer additional flash-specific CSS changes unless the issue can be reproduced again after a fresh load/cache check.
+
 ## Recent direct-main visual passes
 
 ### Clean base theme
@@ -112,15 +114,26 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 - Replaced `styles/app.css` with an import wrapper that loads `app-legacy.css` first and all reset layers afterward.
 - This is the current strongest mitigation for legacy theme flash on page load.
 
-## Known open follow-ups
+## Recent direct-main product pass
 
 ### #141 — Shopping-list recipe-reference display options
 
-- Recipe-reference notes are useful for multi-recipe lists.
-- Recipe-reference notes are redundant when a list effectively comes from one recipe.
-- Add a user-facing option later to show/hide references.
-- Copy-to-clipboard output should match the visible reference mode.
-- Do not combine this with quantity aggregation, serving scaling, date filtering, or pantry depletion modeling.
+- Added `scripts/shopping-reference-settings.js` as a focused companion module for smart-shopping reference display behavior.
+- Added a `Show recipe names` checkbox under the smart shopping list.
+- With no saved preference, references hide automatically for effectively single-recipe lists and show for multi-recipe lists.
+- An explicit show/hide choice persists in localStorage under `blissful-shopping-recipe-references`.
+- Copy-to-clipboard output follows the visible reference setting.
+- Kept quantity aggregation, serving scaling, date filtering, pantry depletion, and shopping-source logic unchanged.
+- Added wiring/pure-helper coverage to `tests/integration-wiring.test.js`.
+- GitHub Actions `Validate` passed for implementation commit `af9de8a`.
+
+## Current next step
+
+### #142 — Staples and low-quantity shopping list source
+
+Implement a separate smart-shopping source for pantry staples/common essentials and an option to include low-quantity pantry items. Keep it separate from recipe quantity aggregation and pantry depletion modeling.
+
+## Known open follow-ups
 
 ### #142 — Staples and low-quantity shopping list source
 
