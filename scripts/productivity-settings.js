@@ -57,8 +57,6 @@
     ensureDashboardContrastStylesheet();
   };
 
-  // Start fetching visual reset layers as soon as this script executes. Waiting for
-  // DOM setup can briefly expose the legacy generated palette during first paint.
   ensureVisualResetStylesheets();
 
   const ensureProductivityStylesheet = () => {
@@ -87,6 +85,7 @@
   const ensurePantryListsAssets = () => {
     ensureStylesheet('styles/pantry-lists.css');
     ensureScript('scripts/pantry-lists.js');
+    ensureScript('scripts/pantry-result-badge.js');
   };
 
   const ensureRestockAssets = () => {
@@ -131,7 +130,6 @@
     const insertionPoint = paletteGroup || holidayGroup;
     toolbar.insertBefore(advanced, insertionPoint);
 
-    // This script runs before app.js initializes, so app.js binds listeners to the moved controls.
     if (paletteGroup) {
       body.appendChild(paletteGroup);
     }
