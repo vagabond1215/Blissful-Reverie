@@ -47,6 +47,7 @@ assert(productivityStyles.includes('@media (max-width: 640px)'));
   'scripts/productivity-backup.js',
   'scripts/productivity-onboarding.js',
   'scripts/productivity-ui.js',
+  'scripts/shopping-reference-settings.js',
 ].forEach((relativePath) => {
   const content = read(relativePath);
   assert(!content.includes('style.textContent'), `${relativePath} should not embed long CSS strings`);
@@ -54,6 +55,7 @@ assert(productivityStyles.includes('@media (max-width: 640px)'));
 
 const productivitySettings = read('scripts/productivity-settings.js');
 assert(productivitySettings.includes('styles/productivity.css'));
+assert(productivitySettings.includes('scripts/shopping-reference-settings.js'));
 
 const productivityUi = read('scripts/productivity-ui.js');
 assert(!productivityUi.includes('MutationObserver'));
@@ -65,6 +67,32 @@ assert(productivityUi.includes('Add pantry items to compare closest recipes'));
 assert(productivityUi.includes('Shopping list copied.'));
 assert(productivityUi.includes('productivity-shopping__copy-status'));
 assert(productivityUi.includes('productivity-shopping__source-pill'));
+
+const shoppingReferences = require('../scripts/shopping-reference-settings.js');
+assert.equal(shoppingReferences.parseStoredPreference('show'), true);
+assert.equal(shoppingReferences.parseStoredPreference('hide'), false);
+assert.equal(shoppingReferences.parseStoredPreference(null), null);
+assert.equal(shoppingReferences.resolveReferenceVisibility(null, ['One recipe']), false);
+assert.equal(shoppingReferences.resolveReferenceVisibility(null, ['One recipe', 'Second recipe']), true);
+assert.equal(shoppingReferences.resolveReferenceVisibility(false, ['One recipe', 'Second recipe']), false);
+assert.equal(
+  shoppingReferences.buildShoppingText([
+    {
+      category: 'Produce',
+      items: [{ name: 'Spinach', recipes: ['Pasta Verde'] }],
+    },
+  ], false),
+  'Blissful Reverie shopping list\n\nProduce\n- Spinach',
+);
+assert.equal(
+  shoppingReferences.buildShoppingText([
+    {
+      category: 'Produce',
+      items: [{ name: 'Spinach', recipes: ['Pasta Verde'] }],
+    },
+  ], true),
+  'Blissful Reverie shopping list\n\nProduce\n- Spinach — for Pasta Verde',
+);
 
 const app = read('scripts/app.js');
 assert(app.includes('card.dataset.recipeId = recipe.id'));

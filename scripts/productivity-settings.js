@@ -11,6 +11,14 @@
     document.head.appendChild(link);
   };
 
+  const ensureScript = (src) => {
+    if (document.querySelector(`script[src="${src}"]`)) return;
+    const script = document.createElement('script');
+    script.src = src;
+    script.defer = true;
+    (document.body || document.head).appendChild(script);
+  };
+
   const ensureBaseThemeStylesheet = () => {
     ensureStylesheet('styles/base-theme.css');
   };
@@ -59,11 +67,11 @@
 
   const ensureMealPlanAffordanceAssets = () => {
     ensureStylesheet('styles/meal-plan-affordance.css');
-    if (document.querySelector('script[src="scripts/meal-plan-affordance-copy.js"]')) return;
-    const script = document.createElement('script');
-    script.src = 'scripts/meal-plan-affordance-copy.js';
-    script.defer = true;
-    (document.body || document.head).appendChild(script);
+    ensureScript('scripts/meal-plan-affordance-copy.js');
+  };
+
+  const ensureShoppingReferenceAssets = () => {
+    ensureScript('scripts/shopping-reference-settings.js');
   };
 
   const simplifySettings = () => {
@@ -116,6 +124,7 @@
 
   const start = () => {
     ensureMealPlanAffordanceAssets();
+    ensureShoppingReferenceAssets();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();
       return;
