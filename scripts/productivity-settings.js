@@ -91,6 +91,8 @@
   const ensureFamilyPantryRefinementAssets = () => {
     ensureStylesheet('styles/family-redesign.css');
     ensureScript('scripts/family-redesign.js');
+    ensureStylesheet('styles/family-avatar-picker.css');
+    ensureScript('scripts/family-avatar-picker.js');
     ensureStylesheet('styles/pantry-tag-refine.css');
     ensureScript('scripts/pantry-tag-refine.js');
   };
