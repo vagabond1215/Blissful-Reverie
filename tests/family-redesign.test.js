@@ -50,6 +50,15 @@ assert(familyCss.includes('.family-member-card__primary-row'));
 assert(familyCss.includes('grid-template-columns: repeat(3'));
 assert(familyCss.includes('.family-manage-dialog__trash'));
 
+const appCss = read('styles/app.css');
+const familyShellCss = read('styles/family-shell-cleanup.css');
+assert(appCss.includes("@import url('./family-shell-cleanup.css');"));
+assert(familyShellCss.includes('.family-view--refined'));
+assert(familyShellCss.includes('background: transparent !important'));
+assert(familyShellCss.includes('border: 0 !important'));
+assert(familyShellCss.includes('box-shadow: none !important'));
+assert(familyShellCss.includes('.family-panel__list'));
+
 const pantryScript = read('scripts/pantry-tag-refine.js');
 assert(pantryScript.includes("row.tagName === 'DETAILS'"));
 assert(pantryScript.includes("document.createElement('div')"));
