@@ -1,0 +1,59 @@
+/*
+  Dashboard contrast layer.
+
+  Loaded after the main visual reset layers to break up large white-on-white
+  productivity dashboard regions without changing layout or app behavior.
+*/
+
+.productivity-dashboard {
+  background: var(--clean-panel, #f9fafb) !important;
+  border-color: var(--clean-border, #d1d5db) !important;
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06) !important;
+}
+
+.productivity-dashboard__groups {
+  gap: clamp(0.75rem, 1.1vw, 1rem) !important;
+}
+
+.productivity-dashboard__group {
+  background: var(--clean-surface, #ffffff) !important;
+  border-color: var(--clean-border, #d1d5db) !important;
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06) !important;
+}
+
+.productivity-dashboard__group-title {
+  color: var(--clean-text, #111827) !important;
+  font-weight: 850 !important;
+}
+
+.productivity-dashboard__item + .productivity-dashboard__item {
+  border-block-start: 1px solid color-mix(in oklab, var(--clean-border, #d1d5db), transparent 35%) !important;
+  padding-block-start: 0.45rem !important;
+}
+
+.productivity-dashboard__empty {
+  color: var(--clean-muted, #374151) !important;
+}
+
+.productivity-dashboard .productivity-shopping {
+  background: var(--clean-surface, #ffffff) !important;
+  border-color: var(--clean-border, #d1d5db) !important;
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06) !important;
+}
+
+.productivity-shopping__category {
+  background: color-mix(in oklab, var(--clean-surface, #ffffff), var(--clean-panel, #f9fafb) 18%) !important;
+}
+
+:root[data-theme='dark'] .productivity-dashboard {
+  background: var(--clean-panel, #20242c) !important;
+}
+
+:root[data-theme='dark'] .productivity-dashboard__group,
+:root[data-theme='dark'] .productivity-dashboard .productivity-shopping {
+  background: var(--clean-surface, #171a21) !important;
+}
+
+:root[data-theme='dark'] .productivity-shopping__category {
+  background: color-mix(in oklab, var(--clean-surface, #171a21), var(--clean-panel, #20242c) 35%) !important;
+}
