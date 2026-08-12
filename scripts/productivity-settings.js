@@ -23,10 +23,15 @@
     ensureStylesheet('styles/topbar-docked.css');
   };
 
+  const ensureShoppingListSleekStylesheet = () => {
+    ensureStylesheet('styles/shopping-list-sleek.css');
+  };
+
   const ensureVisualResetStylesheets = () => {
     ensureBaseThemeStylesheet();
     ensureMealPlanSleekStylesheet();
     ensureTopbarDockedStylesheet();
+    ensureShoppingListSleekStylesheet();
   };
 
   const ensureProductivityStylesheet = () => {
