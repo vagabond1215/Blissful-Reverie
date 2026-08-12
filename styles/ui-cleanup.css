@@ -1,0 +1,331 @@
+/*
+  Final cleanup layer for the in-development visual reset.
+
+  This stylesheet is intentionally loaded last. It moves the temporary theme away
+  from sepia/warm neutrals toward neutral grayscale, removes remaining topbar
+  chrome, and improves text contrast without changing app behavior.
+*/
+
+:root,
+:root[data-theme='light'] {
+  color-scheme: light !important;
+
+  --clean-page: #f3f4f6 !important;
+  --clean-surface: #ffffff !important;
+  --clean-panel: #f9fafb !important;
+  --clean-panel-strong: #e5e7eb !important;
+  --clean-text: #111827 !important;
+  --clean-muted: #374151 !important;
+  --clean-soft: #6b7280 !important;
+  --clean-border: #d1d5db !important;
+  --clean-border-strong: #9ca3af !important;
+  --clean-button: #f9fafb !important;
+  --clean-button-hover: #eef2f7 !important;
+  --clean-button-active: #ffffff !important;
+  --clean-focus: #2563eb !important;
+
+  --base-page: var(--clean-page) !important;
+  --base-page-soft: var(--clean-panel) !important;
+  --base-surface: var(--clean-surface) !important;
+  --base-panel: var(--clean-panel) !important;
+  --base-panel-strong: var(--clean-panel-strong) !important;
+  --base-raised: var(--clean-surface) !important;
+  --base-text: var(--clean-text) !important;
+  --base-text-muted: var(--clean-muted) !important;
+  --base-text-soft: var(--clean-soft) !important;
+  --base-border: var(--clean-border) !important;
+  --base-border-strong: var(--clean-border-strong) !important;
+  --base-accent: var(--clean-text) !important;
+  --base-accent-soft: var(--clean-panel-strong) !important;
+
+  --text: var(--clean-text) !important;
+  --text-muted: var(--clean-muted) !important;
+  --layer-0: var(--clean-page) !important;
+  --layer-1: var(--clean-surface) !important;
+  --layer-2: var(--clean-panel) !important;
+  --layer-3: var(--clean-panel-strong) !important;
+  --surface-0: var(--clean-surface) !important;
+  --surface-1: var(--clean-panel) !important;
+  --surface-2: var(--clean-surface) !important;
+  --surface-3: var(--clean-panel-strong) !important;
+  --border-1: var(--clean-border) !important;
+  --border-2: var(--clean-border) !important;
+  --accent-1: var(--clean-panel-strong) !important;
+  --accent-2: var(--clean-border-strong) !important;
+  --chip-bg: var(--clean-panel-strong) !important;
+  --chip-fg: var(--clean-text) !important;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark !important;
+
+  --clean-page: #0f1115 !important;
+  --clean-surface: #171a21 !important;
+  --clean-panel: #20242c !important;
+  --clean-panel-strong: #2b3039 !important;
+  --clean-text: #f9fafb !important;
+  --clean-muted: #d1d5db !important;
+  --clean-soft: #9ca3af !important;
+  --clean-border: #374151 !important;
+  --clean-border-strong: #6b7280 !important;
+  --clean-button: #171a21 !important;
+  --clean-button-hover: #20242c !important;
+  --clean-button-active: #2b3039 !important;
+  --clean-focus: #60a5fa !important;
+
+  --base-page: var(--clean-page) !important;
+  --base-page-soft: var(--clean-panel) !important;
+  --base-surface: var(--clean-surface) !important;
+  --base-panel: var(--clean-panel) !important;
+  --base-panel-strong: var(--clean-panel-strong) !important;
+  --base-raised: var(--clean-surface) !important;
+  --base-text: var(--clean-text) !important;
+  --base-text-muted: var(--clean-muted) !important;
+  --base-text-soft: var(--clean-soft) !important;
+  --base-border: var(--clean-border) !important;
+  --base-border-strong: var(--clean-border-strong) !important;
+  --base-accent: var(--clean-text) !important;
+  --base-accent-soft: var(--clean-panel-strong) !important;
+
+  --text: var(--clean-text) !important;
+  --text-muted: var(--clean-muted) !important;
+  --layer-0: var(--clean-page) !important;
+  --layer-1: var(--clean-surface) !important;
+  --layer-2: var(--clean-panel) !important;
+  --layer-3: var(--clean-panel-strong) !important;
+  --surface-0: var(--clean-surface) !important;
+  --surface-1: var(--clean-panel) !important;
+  --surface-2: var(--clean-surface) !important;
+  --surface-3: var(--clean-panel-strong) !important;
+  --border-1: var(--clean-border) !important;
+  --border-2: var(--clean-border) !important;
+  --accent-1: var(--clean-panel-strong) !important;
+  --accent-2: var(--clean-border-strong) !important;
+  --chip-bg: var(--clean-panel-strong) !important;
+  --chip-fg: var(--clean-text) !important;
+}
+
+html,
+body,
+.app-shell,
+.layout,
+#app-layout {
+  background: var(--clean-page) !important;
+  color: var(--clean-text) !important;
+}
+
+/* Top rail: controls draw directly on the rail, not inside extra containers. */
+#recipes-page .topbar,
+.topbar {
+  background: var(--clean-surface) !important;
+  border-block-end: 1px solid var(--clean-border) !important;
+  box-shadow: none !important;
+}
+
+#recipes-page .topbar__row,
+.topbar__row {
+  gap: 0.5rem !important;
+}
+
+#recipes-page .nav-chip--settings,
+#recipes-page .settings-panel.nav-chip__settings {
+  inline-size: 2.55rem !important;
+  block-size: 2.55rem !important;
+  min-inline-size: 2.55rem !important;
+  min-block-size: 2.55rem !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#recipes-page .settings-panel__summary.settings-btn {
+  inline-size: 2.55rem !important;
+  block-size: 2.55rem !important;
+  min-inline-size: 2.55rem !important;
+  min-block-size: 2.55rem !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--clean-muted) !important;
+}
+
+#recipes-page .settings-panel__summary.settings-btn:hover,
+#recipes-page .settings-panel__summary.settings-btn:focus-visible,
+#recipes-page .settings-panel[open] .settings-panel__summary.settings-btn {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--clean-text) !important;
+}
+
+#recipes-page .nav-chip__settings-icon,
+#recipes-page .nav-chip__settings-icon svg {
+  color: currentColor !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
+
+#recipes-page .nav-chip--tabs {
+  padding: 0 !important;
+  gap: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#recipes-page .nav-chip--tabs .tab,
+#recipes-page .nav-chip--tabs a.tab,
+#recipes-page .nav-chip--tabs button.tab {
+  min-block-size: 2.55rem !important;
+  block-size: 2.55rem !important;
+  padding-inline: clamp(0.85rem, 1.2vw, 1.1rem) !important;
+  margin: 0 0 0 -1px !important;
+  border: 1px solid var(--clean-border) !important;
+  border-radius: 0 !important;
+  background: var(--clean-button) !important;
+  color: var(--clean-text) !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+#recipes-page .nav-chip--tabs .tab:first-child {
+  margin-inline-start: 0 !important;
+  border-start-start-radius: 999px !important;
+  border-end-start-radius: 999px !important;
+}
+
+#recipes-page .nav-chip--tabs .tab:last-child {
+  border-start-end-radius: 999px !important;
+  border-end-end-radius: 999px !important;
+}
+
+#recipes-page .nav-chip--tabs .tab:hover,
+#recipes-page .nav-chip--tabs .tab:focus-visible {
+  background: var(--clean-button-hover) !important;
+  border-color: var(--clean-border-strong) !important;
+  color: var(--clean-text) !important;
+  box-shadow: none !important;
+  outline: 2px solid transparent !important;
+  outline-offset: 0 !important;
+}
+
+#recipes-page .nav-chip--tabs .tab[aria-current='page'],
+#recipes-page .nav-chip--tabs .tab.is-active,
+#recipes-page .nav-chip--tabs .tab[aria-pressed='true'] {
+  background: var(--clean-button-active) !important;
+  border-color: var(--clean-border-strong) !important;
+  color: var(--clean-text) !important;
+  box-shadow: inset 0 0 0 1px var(--clean-border-strong) !important;
+}
+
+#recipes-page .nav-chip--tabs.nav-chip--open .tab {
+  margin: 0 !important;
+  border-radius: 0.65rem !important;
+}
+
+/* Match right-side controls to the same middle-ground rail height. */
+#recipes-page .settings-panel__summary.settings-btn,
+#recipes-page .nav-chip__toggle,
+#recipes-page .icon-btn,
+#recipes-page .tab,
+#recipes-page .theme-toggle,
+#recipes-page .settings-btn {
+  min-block-size: 2.55rem !important;
+}
+
+/* High-contrast card surfaces and copy. */
+.filter-panel,
+.pantry-view,
+.kitchen-view,
+.meal-plan-view,
+.productivity-dashboard,
+.productivity-shopping,
+.productivity-dashboard__group,
+.productivity-shopping__category,
+.meal-card,
+.meal-card__section,
+.meal-card__details > div,
+.meal-card__substitution-notice,
+.productivity-onboarding,
+.productivity-settings-advanced,
+.productivity-backup,
+.settings-panel__content,
+.settings-menu {
+  background: var(--clean-surface) !important;
+  color: var(--clean-text) !important;
+  border-color: var(--clean-border) !important;
+}
+
+.meal-card__header,
+.filter-section summary,
+.productivity-shopping__source-pill,
+.productivity-badge,
+.tag,
+.badge,
+.pill,
+.meal-plan-summary__stat,
+.productivity-shopping__source-option--active {
+  background: var(--clean-panel-strong) !important;
+  color: var(--clean-text) !important;
+  border-color: var(--clean-border) !important;
+}
+
+.meal-card,
+.meal-card p,
+.meal-card li,
+.meal-card span,
+.meal-card dd,
+.meal-card dt,
+.meal-card strong,
+.meal-card em,
+.productivity-dashboard,
+.productivity-shopping,
+.productivity-shopping p,
+.productivity-shopping span,
+.productivity-shopping li {
+  color: var(--clean-text) !important;
+}
+
+.meal-card small,
+.meal-card .muted,
+.meal-card [class*='meta'],
+.meal-card [class*='quantity'],
+.meal-card [class*='serving'],
+.meal-card [class*='note'],
+.productivity-dashboard__subtitle,
+.productivity-shopping__subtitle,
+.productivity-shopping__mode-note,
+.productivity-shopping__item-note,
+.productivity-shopping__source-detail,
+.productivity-shopping__copy-status {
+  color: var(--clean-muted) !important;
+}
+
+.meal-card__ingredients,
+.meal-card__instructions,
+.meal-card__equipment,
+.meal-card__allergens,
+.meal-card__nutrition,
+.meal-card__section,
+.meal-card__details > div {
+  background: var(--clean-surface) !important;
+  border-color: var(--clean-border) !important;
+}
+
+.meal-card__section-title,
+.meal-card h3,
+.meal-card h4,
+.productivity-shopping__title,
+.productivity-shopping__category-title,
+.productivity-shopping__item-name {
+  color: var(--clean-text) !important;
+  font-weight: 800 !important;
+}
+
+*:focus-visible {
+  outline-color: var(--clean-focus) !important;
+}
