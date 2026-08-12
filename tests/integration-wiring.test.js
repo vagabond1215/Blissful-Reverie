@@ -66,13 +66,13 @@ assert(productivitySettings.includes('scripts/restock-wizard.js'));
 const productivityUi = read('scripts/productivity-ui.js');
 assert(!productivityUi.includes('MutationObserver'));
 assert(productivityUi.includes('global.BlissfulProductivityUI'));
-assert(productivityUi.includes('From meal plan'));
-assert(productivityUi.includes('Closest recipes'));
-assert(productivityUi.includes('Planned meals are covered by your pantry'));
-assert(productivityUi.includes('Add pantry items to compare closest recipes'));
+assert(productivityUi.includes("title.textContent = 'Missing or Low Meal Plan Ingredients'"));
+assert(productivityUi.includes("panel.dataset.shoppingRecommendationScope = 'meal-plan'"));
+assert(!productivityUi.includes('Closest recipes'));
+assert(!productivityUi.includes('SHOPPING_SOURCE_CLOSEST'));
+assert(!productivityUi.includes('createShoppingSourceControl'));
 assert(productivityUi.includes('Shopping list copied.'));
 assert(productivityUi.includes('productivity-shopping__copy-status'));
-assert(productivityUi.includes('productivity-shopping__source-pill'));
 
 const shoppingReferences = require('../scripts/shopping-reference-settings.js');
 assert.equal(shoppingReferences.parseStoredPreference('show'), true);
