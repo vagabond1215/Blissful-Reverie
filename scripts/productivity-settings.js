@@ -74,6 +74,11 @@
     ensureScript('scripts/shopping-reference-settings.js');
   };
 
+  const ensureShoppingManagementAssets = () => {
+    ensureStylesheet('styles/shopping-management.css');
+    ensureScript('scripts/shopping-management.js');
+  };
+
   const ensureRestockAssets = () => {
     ensureStylesheet('styles/restock-wizard.css');
     ensureScript('scripts/restock-wizard.js');
@@ -130,6 +135,7 @@
   const start = () => {
     ensureMealPlanAffordanceAssets();
     ensureShoppingReferenceAssets();
+    ensureShoppingManagementAssets();
     ensureRestockAssets();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();

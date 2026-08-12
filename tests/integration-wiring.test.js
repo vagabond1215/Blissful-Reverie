@@ -48,6 +48,7 @@ assert(productivityStyles.includes('@media (max-width: 640px)'));
   'scripts/productivity-onboarding.js',
   'scripts/productivity-ui.js',
   'scripts/shopping-reference-settings.js',
+  'scripts/shopping-management.js',
   'scripts/restock-wizard.js',
 ].forEach((relativePath) => {
   const content = read(relativePath);
@@ -57,6 +58,8 @@ assert(productivityStyles.includes('@media (max-width: 640px)'));
 const productivitySettings = read('scripts/productivity-settings.js');
 assert(productivitySettings.includes('styles/productivity.css'));
 assert(productivitySettings.includes('scripts/shopping-reference-settings.js'));
+assert(productivitySettings.includes('styles/shopping-management.css'));
+assert(productivitySettings.includes('scripts/shopping-management.js'));
 assert(productivitySettings.includes('styles/restock-wizard.css'));
 assert(productivitySettings.includes('scripts/restock-wizard.js'));
 
@@ -96,6 +99,106 @@ assert.equal(
   ], true),
   'Blissful Reverie shopping list\n\nProduce\n- Spinach — for Pasta Verde',
 );
+
+const shopping = require('../scripts/shopping-management.js');
+const shoppingNow = Date.parse('2026-08-12T12:00:00.000Z');
+const usageHistory = shopping.appendUsageEvent({}, {
+  slug: 'olives',
+  before: 13,
+  after: 6,
+  unit: 'can',
+  at: '2026-08-10T12:00:00.000Z',
+  now: shoppingNow,
+});
+assert.equal(usageHistory.olives.events[0].amount, 7);
+assert.deepEqual(
+  shopping.appendUsageEvent(usageHistory, {
+    slug: 'olives',
+    before: 6,
+    after: 12,
+    unit: 'can',
+    at: '2026-08-11T12:00:00.000Z',
+    now: shoppingNow,
+  }),
+  usageHistory,
+);
+assert.equal(shopping.getRecentUsage(usageHistory.olives, 'can', { now: shoppingNow }), 7);
+assert.equal(
+  shopping.getRecommendedStock({
+    usageEntry: usageHistory.olives,
+    unit: 'can',
+    frequencyDays: 30,
+    now: shoppingNow,
+  }),
+  7,
+);
+
+const shoppingIngredients = [
+  { slug: 'olives', name: 'Olives', category: 'Condiment/Sauce' },
+];
+const unitRecommendation = shopping.buildRestockRecommendations({
+  ingredients: shoppingIngredients,
+  inventory: { olives: { quantity: '6', unit: 'can' } },
+  profiles: { olives: { store: 'Giant', purchaseMode: 'unit', packageSize: 1 } },
+  usageHistory,
+  settings: { frequencyDays: 30, groupBy: 'category', automaticRestock: true },
+  now: shoppingNow,
+})[0];
+assert.equal(unitRecommendation.recommendedQuantity, 7);
+assert.equal(unitRecommendation.currentQuantity, 6);
+assert.equal(unitRecommendation.purchaseQuantity, 1);
+assert.equal(unitRecommendation.store, 'Giant');
+
+const packageRecommendation = shopping.buildRestockRecommendations({
+  ingredients: shoppingIngredients,
+  inventory: { olives: { quantity: '6', unit: 'can' } },
+  profiles: { olives: { store: 'Costco', purchaseMode: 'package', packageSize: 6 } },
+  usageHistory,
+  settings: { frequencyDays: 30, groupBy: 'store', automaticRestock: true },
+  now: shoppingNow,
+})[0];
+assert.equal(packageRecommendation.purchasePackages, 1);
+assert.equal(packageRecommendation.purchaseQuantity, 6);
+assert.equal(shopping.getPurchaseLabel(packageRecommendation), '1 × 6-can pack (6 cans)');
+
+const mergedShoppingItems = shopping.mergeShoppingItems([
+  {
+    slug: 'olives',
+    name: 'Olives',
+    category: 'Condiment/Sauce',
+    store: '',
+    recipes: ['Mediterranean Bowl'],
+    automaticRestock: false,
+  },
+  {
+    slug: 'spinach',
+    name: 'Spinach',
+    category: 'Vegetable',
+    store: '',
+    recipes: ['Pasta Verde'],
+    automaticRestock: false,
+  },
+], [packageRecommendation], {
+  olives: { store: 'Costco', purchaseMode: 'package', packageSize: 6 },
+});
+assert.equal(mergedShoppingItems.length, 2);
+assert.deepEqual(mergedShoppingItems.find((item) => item.slug === 'olives').recipes, ['Mediterranean Bowl']);
+assert.equal(mergedShoppingItems.find((item) => item.slug === 'olives').automaticRestock, true);
+
+const storeGroups = shopping.groupManagedShoppingItems(mergedShoppingItems, 'store');
+assert.deepEqual(storeGroups.map((group) => group.label), ['Costco', 'Unassigned store']);
+assert(
+  shopping.buildManagedShoppingText(storeGroups, true).includes(
+    '- Olives — buy 1 × 6-can pack (6 cans) — have 6 / target 7 cans — for Mediterranean Bowl',
+  ),
+);
+
+const shoppingManagementStyles = read('styles/shopping-management.css');
+assert(shoppingManagementStyles.includes('.shopping-management-settings'));
+assert(shoppingManagementStyles.includes('.shopping-item-profile'));
+assert(shoppingManagementStyles.includes('.shopping-management__purchase'));
+assert(shoppingManagementStyles.includes('@media (max-width: 640px)'));
+assert(read('styles/app.css').includes("@import url('./shopping-management.css');"));
 
 const restock = require('../scripts/restock-wizard.js');
 assert.deepEqual(restock.normalizeStockHistory({ eggs: 2, milk: { count: 3, lastStockedAt: '2026-08-12' }, bad: 0 }), {
