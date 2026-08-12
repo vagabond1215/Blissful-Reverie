@@ -43,12 +43,44 @@
     select.value = getMode();
   };
 
+  const normalizeTagRow = (row) => {
+    if (!(row instanceof HTMLElement)) return row;
+    let normalized = row;
+    if (row.tagName === 'DETAILS') {
+      const replacement = document.createElement('div');
+      replacement.className = row.className;
+      Array.from(row.attributes).forEach((attribute) => {
+        if (attribute.name === 'class' || attribute.name === 'open') return;
+        replacement.setAttribute(attribute.name, attribute.value);
+      });
+      Array.from(row.childNodes).forEach((child) => {
+        if (child instanceof Element && child.matches('.pantry-row-tags__summary')) return;
+        replacement.appendChild(child);
+      });
+      row.replaceWith(replacement);
+      normalized = replacement;
+    }
+    normalized.querySelector(':scope > .pantry-row-tags__summary')?.remove();
+    return normalized;
+  };
+
+  const normalizeCardLayout = (card) => {
+    if (!(card instanceof HTMLElement)) return;
+    const header = card.querySelector('.pantry-card__header');
+    const favorite = card.querySelector('.pantry-card__favorite-button');
+    const title = card.querySelector('.pantry-card__name');
+    if (!(header instanceof HTMLElement) || !(favorite instanceof HTMLElement) || !(title instanceof HTMLElement)) return;
+    if (favorite.parentElement !== header || favorite.nextElementSibling !== title) {
+      header.insertBefore(favorite, title);
+    }
+  };
+
   const applyTagMode = () => {
     const mode = getMode();
-    document.querySelectorAll('#pantry-grid .pantry-row-tags').forEach((row) => {
+    document.querySelectorAll('#pantry-grid .pantry-card').forEach((card) => normalizeCardLayout(card));
+    document.querySelectorAll('#pantry-grid .pantry-row-tags').forEach((rawRow) => {
+      const row = normalizeTagRow(rawRow);
       if (!(row instanceof HTMLElement)) return;
-      row.querySelector('.pantry-row-tags__summary')?.remove();
-      if ('open' in row) row.open = true;
       row.hidden = mode !== 'expanded';
     });
     const button = document.getElementById('pantry-tags-action');
