@@ -74,6 +74,11 @@
     ensureScript('scripts/shopping-reference-settings.js');
   };
 
+  const ensureRestockAssets = () => {
+    ensureStylesheet('styles/restock-wizard.css');
+    ensureScript('scripts/restock-wizard.js');
+  };
+
   const simplifySettings = () => {
     const toolbar = document.getElementById('theme-toolbar');
     if (!toolbar || document.getElementById('productivity-settings-advanced')) {
@@ -125,6 +130,7 @@
   const start = () => {
     ensureMealPlanAffordanceAssets();
     ensureShoppingReferenceAssets();
+    ensureRestockAssets();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();
       return;
