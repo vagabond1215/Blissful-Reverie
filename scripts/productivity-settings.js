@@ -88,6 +88,13 @@
     ensureScript('scripts/pantry-result-badge.js');
   };
 
+  const ensureFamilyPantryRefinementAssets = () => {
+    ensureStylesheet('styles/family-redesign.css');
+    ensureScript('scripts/family-redesign.js');
+    ensureStylesheet('styles/pantry-tag-refine.css');
+    ensureScript('scripts/pantry-tag-refine.js');
+  };
+
   const ensureRestockAssets = () => {
     ensureStylesheet('styles/restock-wizard.css');
     ensureScript('scripts/restock-wizard.js');
@@ -147,6 +154,7 @@
     ensureShoppingManagementAssets();
     ensurePantryRedesignAssets();
     ensurePantryListsAssets();
+    ensureFamilyPantryRefinementAssets();
     ensureRestockAssets();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();
