@@ -1,0 +1,121 @@
+/*
+  Final topbar hover reset.
+
+  This file is intentionally tiny and loaded after the other visual reset layers.
+  It suppresses legacy pill/oval hover chrome on the primary topbar segmented
+  navigation without changing the stacked mobile menu behavior.
+*/
+
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open),
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open):hover,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open):focus-within {
+  padding: 0 !important;
+  gap: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open)::before,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open)::after,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab::before,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab::after {
+  content: none !important;
+  display: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) a.tab,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) button.tab {
+  position: relative !important;
+  z-index: 0 !important;
+  min-block-size: 2.55rem !important;
+  block-size: 2.55rem !important;
+  margin-block: 0 !important;
+  margin-inline: -1px 0 !important;
+  border: 1px solid var(--clean-border, #d1d5db) !important;
+  border-radius: 0 !important;
+  background: var(--clean-button, #f9fafb) !important;
+  color: var(--clean-text, #111827) !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  transform: none !important;
+}
+
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:first-child {
+  margin-inline-start: 0 !important;
+  border-start-start-radius: 999px !important;
+  border-end-start-radius: 999px !important;
+}
+
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:last-child {
+  border-start-end-radius: 999px !important;
+  border-end-end-radius: 999px !important;
+}
+
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:hover,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:focus,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:focus-visible {
+  z-index: 1 !important;
+  background: var(--clean-button-hover, #eef2f7) !important;
+  border-color: var(--clean-border-strong, #9ca3af) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  transform: none !important;
+}
+
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:first-child:hover,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:first-child:focus-visible {
+  border-start-start-radius: 999px !important;
+  border-end-start-radius: 999px !important;
+}
+
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:last-child:hover,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:last-child:focus-visible {
+  border-start-end-radius: 999px !important;
+  border-end-end-radius: 999px !important;
+}
+
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab[aria-current='page'],
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab.is-active,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab[aria-pressed='true'] {
+  z-index: 2 !important;
+  background: var(--clean-button-active, #fff) !important;
+  border-color: var(--clean-border-strong, #9ca3af) !important;
+  box-shadow: inset 0 0 0 1px var(--clean-border-strong, #9ca3af) !important;
+  outline: 0 !important;
+}
+
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab[aria-current='page']:hover,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab.is-active:hover,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab[aria-pressed='true']:hover {
+  background: var(--clean-button-active, #fff) !important;
+  border-color: var(--clean-border-strong, #9ca3af) !important;
+  border-radius: 0 !important;
+  box-shadow: inset 0 0 0 1px var(--clean-border-strong, #9ca3af) !important;
+}
+
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:first-child[aria-current='page'],
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:first-child.is-active,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:first-child[aria-pressed='true'],
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:first-child[aria-current='page']:hover,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:first-child.is-active:hover,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:first-child[aria-pressed='true']:hover {
+  border-start-start-radius: 999px !important;
+  border-end-start-radius: 999px !important;
+}
+
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:last-child[aria-current='page'],
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:last-child.is-active,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:last-child[aria-pressed='true'],
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:last-child[aria-current='page']:hover,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:last-child.is-active:hover,
+#recipes-page .topbar .nav-chip--tabs:not(.nav-chip--open) .tab:last-child[aria-pressed='true']:hover {
+  border-start-end-radius: 999px !important;
+  border-end-end-radius: 999px !important;
+}
