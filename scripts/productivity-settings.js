@@ -101,6 +101,13 @@
     ensureStylesheet('styles/family-dislikes.css');
     ensureScript('scripts/family-dislikes-preferences-safety.js');
     ensureScript('scripts/family-dislikes.js');
+    ensureScript('scripts/family-dislikes-click-fix.js');
+  };
+
+  const ensureTopbarInteractionAssets = () => {
+    ensureStylesheet('styles/topbar-consistency.css');
+    ensureScript('scripts/pantry-topbar-controls.js');
+    ensureScript('scripts/family-manage-fix.js');
   };
 
   const ensureRestockAssets = () => {
@@ -164,6 +171,7 @@
     ensurePantryListsAssets();
     ensureFamilyPantryRefinementAssets();
     ensureRecipeFamilyActionAssets();
+    ensureTopbarInteractionAssets();
     ensureRestockAssets();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();

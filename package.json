@@ -16,7 +16,8 @@
     "test:pantry-lists": "node tests/pantry-lists.test.js",
     "test:family-ui": "node tests/family-redesign.test.js",
     "test:recipe-family-actions": "node tests/recipe-family-actions.test.js",
-    "test": "npm run validate:data && npm run test:validation && npm run test:matching && npm run test:pantry && npm run test:productivity && npm run test:backup && npm run test:wiring && npm run test:restock-nav && npm run test:pantry-ui && npm run test:pantry-lists && npm run test:family-ui && npm run test:recipe-family-actions"
+    "test:topbar-interactions": "node tests/topbar-interaction-fixes.test.js",
+    "test": "npm run validate:data && npm run test:validation && npm run test:matching && npm run test:pantry && npm run test:productivity && npm run test:backup && npm run test:wiring && npm run test:restock-nav && npm run test:pantry-ui && npm run test:pantry-lists && npm run test:family-ui && npm run test:recipe-family-actions && npm run test:topbar-interactions"
   },
   "engines": {
     "node": ">=18"
