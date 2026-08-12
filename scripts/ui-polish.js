@@ -4,13 +4,13 @@
   let smartSelected = false;
 
   const getShoppingItemCount = (root) => (
-    root instanceof Element
+    root && typeof root.querySelectorAll === 'function'
       ? root.querySelectorAll('.productivity-shopping__item').length
       : 0
   );
 
   const buildShoppingTextFromPanel = (panel) => {
-    if (!(panel instanceof Element)) return 'No shopping items yet.';
+    if (!panel || typeof panel.querySelectorAll !== 'function') return 'No shopping items yet.';
     const lines = ['Blissful Reverie shopping list'];
     const categories = Array.from(panel.querySelectorAll('.productivity-shopping__category'));
     if (!categories.length) return 'No shopping items yet.';
@@ -34,6 +34,13 @@
   const getLiveShoppingPanel = () => document.getElementById('pantry-smart-shopping')
     || document.querySelector('#productivity-dashboard .productivity-shopping');
 
+  const getSmartSignature = (panel) => {
+    if (!(panel instanceof HTMLElement)) return '';
+    const source = String(panel.dataset.source || '').trim();
+    const text = String(panel.textContent || '').replace(/\s+/g, ' ').trim();
+    return `${source}|${getShoppingItemCount(panel)}|${text}`;
+  };
+
   const relocateSmartShopping = () => {
     const pantry = document.getElementById('pantry-view');
     const grid = document.getElementById('pantry-grid');
@@ -44,11 +51,15 @@
       if (existing instanceof HTMLElement && existing !== candidate) existing.remove();
       candidate.id = 'pantry-smart-shopping';
       candidate.classList.add('productivity-shopping--pantry');
-      pantry.insertBefore(candidate, grid);
+      if (candidate.parentElement !== pantry || candidate.nextSibling !== grid) {
+        pantry.insertBefore(candidate, grid);
+      }
       return true;
     }
     const existing = document.getElementById('pantry-smart-shopping');
-    if (existing instanceof HTMLElement && existing.parentElement !== pantry) pantry.insertBefore(existing, grid);
+    if (existing instanceof HTMLElement && (existing.parentElement !== pantry || existing.nextSibling !== grid)) {
+      pantry.insertBefore(existing, grid);
+    }
     return existing instanceof HTMLElement;
   };
 
@@ -104,14 +115,33 @@
     const editor = document.getElementById('pantry-lists-editor');
     const live = getLiveShoppingPanel();
     if (!(editor instanceof HTMLElement) || !(live instanceof HTMLElement)) return;
+    const signature = getSmartSignature(live);
+    if (
+      editor.classList.contains('pantry-lists-editor--smart')
+      && editor.dataset.smartMirrorSignature === signature
+      && editor.querySelector('.productivity-shopping--lists-mirror')
+    ) {
+      return;
+    }
     editor.innerHTML = '';
     editor.classList.add('pantry-lists-editor--smart');
+    editor.dataset.smartMirrorSignature = signature;
     const mirror = live.cloneNode(true);
     mirror.removeAttribute('id');
     mirror.classList.add('productivity-shopping--lists-mirror');
     mirror.querySelectorAll('[id]').forEach((node) => node.removeAttribute('id'));
     wireMirrorControls(mirror);
     editor.appendChild(mirror);
+  };
+
+  const clearSmartEditorState = () => {
+    smartSelected = false;
+    const editor = document.getElementById('pantry-lists-editor');
+    if (editor instanceof HTMLElement) {
+      editor.classList.remove('pantry-lists-editor--smart');
+      delete editor.dataset.smartMirrorSignature;
+    }
+    document.getElementById(SMART_ENTRY_ID)?.classList.remove('pantry-lists-sidebar__item--active');
   };
 
   const ensureSmartEntry = () => {
@@ -125,6 +155,12 @@
       button.type = 'button';
       button.id = SMART_ENTRY_ID;
       button.className = 'pantry-lists-sidebar__item pantry-lists-sidebar__item--smart';
+      const name = document.createElement('span');
+      name.className = 'pantry-lists-sidebar__name';
+      name.textContent = 'Smart Shopping';
+      const meta = document.createElement('span');
+      meta.className = 'pantry-lists-sidebar__count';
+      button.append(name, meta);
       button.addEventListener('click', (event) => {
         event.preventDefault();
         smartSelected = true;
@@ -134,19 +170,15 @@
       });
     }
     const count = getShoppingItemCount(live);
-    button.innerHTML = '';
-    const name = document.createElement('span');
-    name.className = 'pantry-lists-sidebar__name';
-    name.textContent = 'Smart Shopping';
-    const meta = document.createElement('span');
-    meta.className = 'pantry-lists-sidebar__count';
-    meta.textContent = count.toLocaleString();
-    meta.setAttribute('aria-label', `${count.toLocaleString()} live shopping ${count === 1 ? 'item' : 'items'}`);
-    button.append(name, meta);
+    const meta = button.querySelector('.pantry-lists-sidebar__count');
+    if (meta instanceof HTMLElement) {
+      const countText = count.toLocaleString();
+      if (meta.textContent !== countText) meta.textContent = countText;
+      meta.setAttribute('aria-label', `${countText} live shopping ${count === 1 ? 'item' : 'items'}`);
+    }
     button.classList.toggle('pantry-lists-sidebar__item--empty', count === 0);
     button.classList.toggle('pantry-lists-sidebar__item--active', smartSelected);
-    if (button.parentElement !== container) container.prepend(button);
-    else if (container.firstElementChild !== button) container.prepend(button);
+    if (button.parentElement !== container || container.firstElementChild !== button) container.prepend(button);
     if (smartSelected && !dialog.hidden) renderSmartEditor();
     return true;
   };
@@ -170,16 +202,23 @@
   const start = () => {
     sync();
     document.addEventListener('click', (event) => {
-      const realList = event.target instanceof Element
-        ? event.target.closest('#pantry-lists-sidebar-items .pantry-lists-sidebar__item:not(#pantry-smart-shopping-list-entry)')
-        : null;
-      if (realList) {
-        smartSelected = false;
-        document.getElementById('pantry-lists-editor')?.classList.remove('pantry-lists-editor--smart');
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest('[data-lists-close]')) {
+        clearSmartEditorState();
+        return;
       }
+      const realList = target?.closest(
+        '#pantry-lists-sidebar-items .pantry-lists-sidebar__item:not(#pantry-smart-shopping-list-entry)',
+      );
+      if (realList) clearSmartEditorState();
     }, true);
     const observer = new MutationObserver(schedule);
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'class', 'aria-pressed'] });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['hidden', 'class', 'aria-pressed'],
+    });
     global.addEventListener('storage', schedule);
   };
 
