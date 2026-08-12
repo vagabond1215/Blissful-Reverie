@@ -36,7 +36,8 @@
 
   const notifyChange = (memberId) => {
     global.dispatchEvent(new CustomEvent('blissful-family-dislikes-change', { detail: { memberId } }));
-    const card = document.querySelector(`#family-member-list .family-member-card[data-family-id="${CSS.escape(memberId)}"]`);
+    const card = Array.from(document.querySelectorAll('#family-member-list .family-member-card[data-family-id]'))
+      .find((node) => node instanceof HTMLElement && node.dataset.familyId === memberId);
     if (card instanceof HTMLElement) {
       card.classList.toggle('family-dislikes-refresh-pulse');
       global.requestAnimationFrame(() => card.classList.toggle('family-dislikes-refresh-pulse'));
