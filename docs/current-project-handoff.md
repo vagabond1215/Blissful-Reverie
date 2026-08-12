@@ -36,7 +36,7 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 
 - `styles/app.css`
 
-`screen/productivity-settings.js` dynamically loads additional visual reset and feature styles. The current intended order is:
+`scripts/productivity-settings.js` dynamically loads additional visual reset and feature styles. The current intended order is:
 
 1. `styles/meal-plan-affordance.css`
 2. `styles/base-theme.css`
