@@ -65,7 +65,7 @@
   color: var(--btn-primary-fg, #fff) !important;
 }
 
-/* Recipe page: one contiguous segmented action group with stable endcaps. */
+/* Recipe page: one contiguous segmented action group with stable dynamic endcaps. */
 html.recipes-view-active #page-action-bar.page-action-bar {
   display: inline-flex !important;
   align-items: stretch !important;
@@ -74,6 +74,13 @@ html.recipes-view-active #page-action-bar.page-action-bar {
   background: transparent !important;
   box-shadow: none !important;
   white-space: nowrap;
+  scrollbar-width: none !important;
+}
+
+html.recipes-view-active #page-action-bar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 html.recipes-view-active #page-action-bar .recipe-page-action,
@@ -91,19 +98,13 @@ html.recipes-view-active #page-action-bar .page-action-bar__segment-first {
   border-radius: 999px 0 0 999px !important;
 }
 
-html.recipes-view-active #page-action-bar .page-action-bar__segment-last {
+html.recipes-view-active #page-action-bar .page-action-bar__segment-last,
+html.recipes-view-active #page-action-bar #reset-filters.page-action-bar__segment-last {
   border-radius: 0 999px 999px 0 !important;
 }
 
 html.recipes-view-active #page-action-bar .page-action-bar__segment-first.page-action-bar__segment-last {
   border-radius: 999px !important;
-}
-
-@media (min-width: 1181px) {
-  html.recipes-view-active #page-action-bar.page-action-bar {
-    max-width: none !important;
-    overflow: visible !important;
-  }
 }
 
 /* Pantry owns the live Smart Shopping surface now. */
