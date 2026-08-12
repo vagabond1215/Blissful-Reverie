@@ -1,11 +1,63 @@
 /* Remove per-row tag disclosures and tighten compact Pantry rows. */
 
+#page-action-bar #pantry-tags-action {
+  border-radius: 0 999px 999px 0 !important;
+}
+
 #pantry-grid .pantry-row-tags__summary {
   display: none !important;
 }
 
+#pantry-grid .pantry-card--compact.pantry-card {
+  grid-template-columns: 26px minmax(150px, 1fr) auto auto !important;
+  gap: 2px 6px !important;
+  padding: 2px 3px !important;
+}
+
+#pantry-grid .pantry-card--compact .pantry-card__header-actions {
+  display: contents !important;
+}
+
+#pantry-grid .pantry-card--compact .pantry-card__favorite-button {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  justify-self: start;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+}
+
+#pantry-grid .pantry-card--compact .pantry-card__name {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  line-height: 1.12 !important;
+}
+
+#pantry-grid .pantry-card--compact .pantry-card__inline-controls {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  justify-self: end;
+}
+
+#pantry-grid .pantry-list-selector {
+  grid-column: 4 !important;
+  grid-row: 1 !important;
+  justify-self: end;
+  height: 26px !important;
+  min-height: 26px !important;
+}
+
+#pantry-grid .pantry-card--compact .pantry-card__inline-input {
+  height: 26px !important;
+  min-height: 26px !important;
+  padding-block: 0 !important;
+}
+
 #pantry-grid .pantry-row-tags {
-  margin: 1px 0 1px 24px !important;
+  grid-column: 2 / -1 !important;
+  grid-row: 2 !important;
+  min-width: 0;
+  margin: 1px 0 !important;
   padding: 0 !important;
 }
 
@@ -13,32 +65,28 @@
   margin: 1px 0 !important;
 }
 
-#pantry-grid .pantry-card--compact.pantry-card {
-  gap: 2px 6px !important;
-  padding: 3px 3px !important;
-}
-
-#pantry-grid .pantry-card--compact .pantry-card__favorite-button {
-  width: 26px !important;
-  height: 26px !important;
-  min-width: 26px !important;
-}
-
-#pantry-grid .pantry-card--compact .pantry-card__inline-input,
-#pantry-grid .pantry-list-selector {
-  height: 26px !important;
-  min-height: 26px !important;
-}
-
-#pantry-grid .pantry-card--compact .pantry-card__inline-input {
-  padding-block: 0 !important;
-}
-
-#pantry-grid .pantry-card--compact .pantry-card__name {
-  line-height: 1.12 !important;
-}
-
 #pantry-grid .pantry-category--card > .pantry-category__list {
   padding-top: 0 !important;
   padding-bottom: 2px !important;
+}
+
+@media (max-width: 760px) {
+  #pantry-grid .pantry-card--compact.pantry-card {
+    grid-template-columns: 26px minmax(90px, 1fr) auto !important;
+  }
+
+  #pantry-grid .pantry-card--compact .pantry-card__inline-controls {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+  }
+
+  #pantry-grid .pantry-list-selector {
+    grid-column: 3 !important;
+    grid-row: 2 !important;
+  }
+
+  #pantry-grid .pantry-row-tags {
+    grid-column: 2 / -1 !important;
+    grid-row: 3 !important;
+  }
 }
