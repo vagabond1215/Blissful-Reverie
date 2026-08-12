@@ -2,6 +2,10 @@
 
 Blissful Reverie is a static, local-first meal planning workspace. It runs entirely in the browser with no backend, account, or build step.
 
+## Current Project Handoff
+
+Before continuing active design or connector work, read `docs/current-project-handoff.md`. It records the current visual reset direction, direct-`main` workflow preference, known follow-ups, stylesheet load order, and browser review checklist.
+
 ## Setup
 
 1. Clone or download the repository.
