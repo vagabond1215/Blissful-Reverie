@@ -27,11 +27,16 @@
     ensureStylesheet('styles/shopping-list-sleek.css');
   };
 
+  const ensureUiCleanupStylesheet = () => {
+    ensureStylesheet('styles/ui-cleanup.css');
+  };
+
   const ensureVisualResetStylesheets = () => {
     ensureBaseThemeStylesheet();
     ensureMealPlanSleekStylesheet();
     ensureTopbarDockedStylesheet();
     ensureShoppingListSleekStylesheet();
+    ensureUiCleanupStylesheet();
   };
 
   const ensureProductivityStylesheet = () => {
