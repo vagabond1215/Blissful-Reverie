@@ -49,6 +49,10 @@
     ensureDashboardContrastStylesheet();
   };
 
+  // Start fetching visual reset layers as soon as this script executes. Waiting for
+  // DOM setup can briefly expose the legacy generated palette during first paint.
+  ensureVisualResetStylesheets();
+
   const ensureProductivityStylesheet = () => {
     ensureStylesheet('styles/productivity.css');
   };
