@@ -99,6 +99,7 @@
     ensureStylesheet('styles/recipe-page-actions.css');
     ensureScript('scripts/recipe-page-actions.js');
     ensureStylesheet('styles/family-dislikes.css');
+    ensureScript('scripts/family-dislikes-preferences-safety.js');
     ensureScript('scripts/family-dislikes.js');
   };
 
