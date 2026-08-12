@@ -1,0 +1,175 @@
+/* Late visual polish for favorites, dialogs, Smart Shopping, and page-action geometry. */
+
+/* Favorite controls on content cards are hearts, not circular buttons. */
+.pantry-card__favorite-button,
+.meal-card__favorite-button {
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--base-text-soft, #8c8378) !important;
+  opacity: 0.52;
+  font-size: 1.35rem !important;
+  line-height: 1 !important;
+  transform: none !important;
+  transition: color 120ms ease, opacity 120ms ease, transform 120ms ease !important;
+}
+
+.pantry-card__favorite-button span {
+  font-size: 1.35rem !important;
+  line-height: 1 !important;
+}
+
+.pantry-card__favorite-button:hover,
+.meal-card__favorite-button:hover {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--base-accent, #6f6254) !important;
+  opacity: 0.82;
+  transform: scale(1.08) !important;
+}
+
+.pantry-card__favorite-button--active,
+.pantry-card__favorite-button[aria-pressed='true'],
+.meal-card__favorite-button--active,
+.meal-card__favorite-button[aria-pressed='true'] {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--base-accent, #6f6254) !important;
+  opacity: 1;
+}
+
+.pantry-card__favorite-button:focus-visible,
+.meal-card__favorite-button:focus-visible {
+  outline: 2px solid var(--base-focus, #2563eb) !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
+}
+
+/* The dark primary action in the recipe planning dialog needs an explicit light foreground. */
+.schedule-dialog__button--primary {
+  background: var(--btn-primary-bg, #24211d) !important;
+  border-color: var(--btn-primary-bg, #24211d) !important;
+  color: var(--btn-primary-fg, #fff) !important;
+}
+
+.schedule-dialog__button--primary:hover,
+.schedule-dialog__button--primary:focus-visible {
+  color: var(--btn-primary-fg, #fff) !important;
+}
+
+/* Recipe page: one contiguous segmented action group with stable endcaps. */
+html.recipes-view-active #page-action-bar.page-action-bar {
+  display: inline-flex !important;
+  align-items: stretch !important;
+  flex-wrap: nowrap !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  white-space: nowrap;
+}
+
+html.recipes-view-active #page-action-bar .recipe-page-action,
+html.recipes-view-active #page-action-bar .recipe-family-page-action {
+  width: 38px !important;
+  min-width: 38px !important;
+  flex: 0 0 38px !important;
+  margin-left: -1px !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+html.recipes-view-active #page-action-bar .page-action-bar__segment-first {
+  margin-left: 0 !important;
+  border-radius: 999px 0 0 999px !important;
+}
+
+html.recipes-view-active #page-action-bar .page-action-bar__segment-last {
+  border-radius: 0 999px 999px 0 !important;
+}
+
+html.recipes-view-active #page-action-bar .page-action-bar__segment-first.page-action-bar__segment-last {
+  border-radius: 999px !important;
+}
+
+@media (min-width: 1181px) {
+  html.recipes-view-active #page-action-bar.page-action-bar {
+    max-width: none !important;
+    overflow: visible !important;
+  }
+}
+
+/* Pantry owns the live Smart Shopping surface now. */
+#pantry-smart-shopping.productivity-shopping {
+  width: 100%;
+  margin: 0 0 12px;
+}
+
+.pantry-lists-editor--smart {
+  padding: clamp(12px, 1.6vw, 20px) !important;
+}
+
+.pantry-lists-editor--smart .productivity-shopping {
+  margin: 0;
+}
+
+/* Use a real SVG close glyph so the visual center matches the hit target. */
+.pantry-lists-dialog__close {
+  display: inline-grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+}
+
+.pantry-lists-dialog__close svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* Family destructive actions are icon actions, not framed utility buttons. */
+.family-manage-dialog__trash {
+  width: 38px !important;
+  height: 38px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--base-danger, #b8453c) !important;
+  box-shadow: none !important;
+}
+
+.family-manage-dialog__trash svg {
+  width: 22px !important;
+  height: 22px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+.family-manage-dialog__trash:hover,
+.family-manage-dialog__trash:focus-visible {
+  border: 0 !important;
+  background: transparent !important;
+  color: color-mix(in srgb, var(--base-danger, #b8453c) 82%, #000 18%) !important;
+  box-shadow: none !important;
+  transform: scale(1.08);
+}
+
+.family-manage-dialog__trash:focus-visible {
+  outline: 2px solid var(--base-focus, #2563eb) !important;
+  outline-offset: 2px !important;
+}
