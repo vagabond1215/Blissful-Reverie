@@ -110,14 +110,19 @@
     ensureScript('scripts/family-manage-fix.js');
   };
 
+  // Legacy Kitchen-mutating runtime retired: scripts/restock-wizard.js and scripts/restock-pantry-nav.js.
   const ensureRestockAssets = () => {
     ensureStylesheet('styles/restock-wizard.css');
-    ensureScript('scripts/restock-wizard.js');
-    ensureScript('scripts/restock-pantry-nav.js');
+    ensureScript('scripts/restock-pantry-only.js');
   };
 
   const ensureWorkspaceFlowAssets = () => {
     ensureStylesheet('styles/workspace-flow-fix.css');
+  };
+
+  const ensureUiPolishAssets = () => {
+    ensureStylesheet('styles/ui-polish.css');
+    ensureScript('scripts/ui-polish.js');
   };
 
   const simplifySettings = () => {
@@ -178,6 +183,7 @@
     ensureTopbarInteractionAssets();
     ensureRestockAssets();
     ensureWorkspaceFlowAssets();
+    ensureUiPolishAssets();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();
       return;
