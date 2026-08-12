@@ -40,16 +40,20 @@ assert.equal(lists.getPurchaseUnit({}), 'each');
 const loader = read('scripts/productivity-settings.js');
 assert(loader.includes('styles/pantry-lists.css'));
 assert(loader.includes('scripts/pantry-lists.js'));
+assert(loader.includes('scripts/pantry-result-badge.js'));
 
 const script = read('scripts/pantry-lists.js');
 assert(script.includes("button.textContent = 'Lists'"));
 assert(script.includes("placeholder.textContent = 'List'"));
 assert(script.includes("nameInput.placeholder = 'Defaults to store name'"));
 assert(script.includes("chrome.id = 'pantry-topbar-search'"));
-assert(script.includes("badge.id = 'pantry-result-badge'"));
 assert(script.includes("card.querySelectorAll('.shopping-item-profile').forEach((node) => node.remove())"));
 assert(!script.includes('Buy as'));
 assert(!script.includes('Units per package'));
+
+const badgeScript = read('scripts/pantry-result-badge.js');
+assert(badgeScript.includes("badge.id = 'pantry-result-badge-live'"));
+assert(badgeScript.includes("if (badge.textContent !== text) badge.textContent = text"));
 
 const css = read('styles/pantry-lists.css');
 assert(css.includes('.pantry-topbar-search'));
