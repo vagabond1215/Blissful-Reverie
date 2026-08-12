@@ -31,12 +31,17 @@
     ensureStylesheet('styles/ui-cleanup.css');
   };
 
+  const ensureTopbarHoverFixStylesheet = () => {
+    ensureStylesheet('styles/topbar-hover-fix.css');
+  };
+
   const ensureVisualResetStylesheets = () => {
     ensureBaseThemeStylesheet();
     ensureMealPlanSleekStylesheet();
     ensureTopbarDockedStylesheet();
     ensureShoppingListSleekStylesheet();
     ensureUiCleanupStylesheet();
+    ensureTopbarHoverFixStylesheet();
   };
 
   const ensureProductivityStylesheet = () => {
