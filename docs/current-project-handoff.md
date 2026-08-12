@@ -45,8 +45,9 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 5. `styles/shopping-list-sleek.css`
 6. `styles/ui-cleanup.css`
 7. `styles/topbar-hover-fix.css`
+8. `styles/dashboard-contrast.css`
 
-`styles/topbar-hover-fix.css` must remain the final visual layer unless a later pass intentionally replaces it. It suppresses legacy pill/oval hover chrome on the primary topbar segmented navigation. `styles/ui-cleanup.css` remains the final broad reset layer before that focused topbar patch.
+`styles/dashboard-contrast.css` is currently the final visual layer. It gives the productivity dashboard a light-gray workspace background and keeps the dashboard cards and shopping panel on white raised surfaces. `styles/topbar-hover-fix.css` remains the focused layer that suppresses legacy pill/oval hover chrome on the primary topbar segmented navigation. `styles/ui-cleanup.css` remains the final broad reset layer before these focused patches.
 
 ## Recent direct-main visual passes
 
@@ -94,6 +95,13 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 - Suppressed legacy topbar pseudo-elements, radius, shadows, transforms, and outlines that could draw the old oval/pill hover state over segmented tabs.
 - Kept the stacked mobile menu behavior separate.
 
+### Dashboard contrast
+
+- Added `styles/dashboard-contrast.css`.
+- Breaks up the pantry dashboard by setting the parent dashboard as a light-gray workspace.
+- Keeps `Cook now`, `Almost ready`, `Shopping candidates`, and the smart shopping list on white raised surfaces.
+- Adds dark-mode inversions for the same hierarchy.
+
 ## Known open follow-up
 
 Issue #141 tracks smart shopping-list recipe-reference display options.
@@ -129,6 +137,7 @@ After each visual pass, hard refresh the deployed GitHub Pages app and inspect:
 - recipe card text is readable in the current light theme
 - ingredient quantities are readable and not near-white on white
 - smart shopping list category columns do not collapse item names into single letters
+- pantry dashboard parent has enough contrast against `Cook now`, `Almost ready`, and `Shopping candidates`
 - light and dark theme modes stay legible
 - meal-plan view retains functional date navigation, family filters, and D/W/M switching
 - no console errors after navigation between Recipes, Kitchen, Pantry, Meal Plan, and Family
