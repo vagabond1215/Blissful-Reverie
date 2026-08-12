@@ -9,7 +9,7 @@
   let scheduled = false;
 
   const isRecipesActive = () => {
-    const view = document.getElementById('meals-view');
+    const view = document.getElementById('meal-view');
     return view instanceof HTMLElement && !view.hidden;
   };
 
