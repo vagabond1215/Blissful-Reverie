@@ -1,0 +1,189 @@
+/* Family avatar selection matrix. */
+
+body.family-avatar-picker-open {
+  overflow: hidden;
+}
+
+.family-avatar-picker[hidden] {
+  display: none !important;
+}
+
+.family-avatar-picker {
+  position: fixed;
+  inset: 0;
+  z-index: 13100;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.family-avatar-picker__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.family-avatar-picker__panel {
+  position: relative;
+  width: min(92vw, 480px);
+  max-height: min(84vh, 640px);
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--border, #d8d0c4);
+  border-radius: 14px;
+  background: var(--surface, #fff);
+  color: var(--text, #24211d);
+  box-shadow: 0 18px 60px rgb(0 0 0 / 0.22);
+}
+
+.family-avatar-picker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 10px;
+}
+
+.family-avatar-picker__eyebrow {
+  margin: 0 0 2px;
+  color: var(--text-muted, #6f6860);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.family-avatar-picker__header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.family-avatar-picker__close {
+  width: 34px;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text, #24211d);
+  cursor: pointer;
+}
+
+.family-avatar-picker__close:hover,
+.family-avatar-picker__close:focus-visible {
+  background: var(--surface-muted, #f1ece2);
+}
+
+.family-avatar-picker__close svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.family-avatar-picker__hint {
+  margin: 0;
+  padding: 0 16px 12px;
+  color: var(--text-muted, #6f6860);
+  font-size: 0.78rem;
+}
+
+.family-avatar-picker__grid {
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  gap: 8px;
+  padding: 0 16px 16px;
+}
+
+.family-avatar-picker__option {
+  min-width: 0;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  padding: 8px 5px;
+  border: 1px solid var(--border, #d8d0c4);
+  border-radius: 11px;
+  background: var(--surface, #fff);
+  color: var(--text, #24211d);
+  font: inherit;
+  cursor: pointer;
+}
+
+.family-avatar-picker__option:hover,
+.family-avatar-picker__option:focus-visible {
+  border-color: var(--base-border-strong, #b9afa1);
+  background: var(--surface-muted, #f1ece2);
+}
+
+.family-avatar-picker__option:focus-visible {
+  outline: 2px solid var(--base-focus, #2563eb);
+  outline-offset: 2px;
+}
+
+.family-avatar-picker__option--selected,
+.family-avatar-picker__option[aria-selected='true'] {
+  border-color: var(--base-accent, #6f6254);
+  background: var(--base-accent-soft, #e9e1d5);
+  box-shadow: inset 0 0 0 1px var(--base-accent, #6f6254);
+}
+
+.family-avatar-picker__glyph {
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.family-avatar-picker__option[data-avatar-kind='initials'] .family-avatar-picker__glyph {
+  display: grid;
+  place-items: center;
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 50%;
+  background: #d9dde2;
+  color: #3f4650;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.family-avatar-picker__option-label {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--text-muted, #6f6860);
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .family-avatar-picker {
+    padding: 8px;
+  }
+
+  .family-avatar-picker__panel {
+    width: min(100%, 420px);
+    max-height: calc(100dvh - 16px);
+  }
+
+  .family-avatar-picker__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+    padding-inline: 12px;
+  }
+
+  .family-avatar-picker__header,
+  .family-avatar-picker__hint {
+    padding-inline: 12px;
+  }
+}
