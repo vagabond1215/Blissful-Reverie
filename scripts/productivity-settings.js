@@ -35,6 +35,10 @@
     ensureStylesheet('styles/topbar-hover-fix.css');
   };
 
+  const ensureDashboardContrastStylesheet = () => {
+    ensureStylesheet('styles/dashboard-contrast.css');
+  };
+
   const ensureVisualResetStylesheets = () => {
     ensureBaseThemeStylesheet();
     ensureMealPlanSleekStylesheet();
@@ -42,6 +46,7 @@
     ensureShoppingListSleekStylesheet();
     ensureUiCleanupStylesheet();
     ensureTopbarHoverFixStylesheet();
+    ensureDashboardContrastStylesheet();
   };
 
   const ensureProductivityStylesheet = () => {
