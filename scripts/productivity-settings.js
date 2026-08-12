@@ -95,6 +95,13 @@
     ensureScript('scripts/pantry-tag-refine.js');
   };
 
+  const ensureRecipeFamilyActionAssets = () => {
+    ensureStylesheet('styles/recipe-page-actions.css');
+    ensureScript('scripts/recipe-page-actions.js');
+    ensureStylesheet('styles/family-dislikes.css');
+    ensureScript('scripts/family-dislikes.js');
+  };
+
   const ensureRestockAssets = () => {
     ensureStylesheet('styles/restock-wizard.css');
     ensureScript('scripts/restock-wizard.js');
@@ -155,6 +162,7 @@
     ensurePantryRedesignAssets();
     ensurePantryListsAssets();
     ensureFamilyPantryRefinementAssets();
+    ensureRecipeFamilyActionAssets();
     ensureRestockAssets();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();
