@@ -48,6 +48,7 @@ assert(productivityStyles.includes('@media (max-width: 640px)'));
   'scripts/productivity-onboarding.js',
   'scripts/productivity-ui.js',
   'scripts/shopping-reference-settings.js',
+  'scripts/restock-wizard.js',
 ].forEach((relativePath) => {
   const content = read(relativePath);
   assert(!content.includes('style.textContent'), `${relativePath} should not embed long CSS strings`);
@@ -56,6 +57,8 @@ assert(productivityStyles.includes('@media (max-width: 640px)'));
 const productivitySettings = read('scripts/productivity-settings.js');
 assert(productivitySettings.includes('styles/productivity.css'));
 assert(productivitySettings.includes('scripts/shopping-reference-settings.js'));
+assert(productivitySettings.includes('styles/restock-wizard.css'));
+assert(productivitySettings.includes('scripts/restock-wizard.js'));
 
 const productivityUi = read('scripts/productivity-ui.js');
 assert(!productivityUi.includes('MutationObserver'));
@@ -93,6 +96,38 @@ assert.equal(
   ], true),
   'Blissful Reverie shopping list\n\nProduce\n- Spinach — for Pasta Verde',
 );
+
+const restock = require('../scripts/restock-wizard.js');
+assert.deepEqual(restock.normalizeStockHistory({ eggs: 2, milk: { count: 3, lastStockedAt: '2026-08-12' }, bad: 0 }), {
+  eggs: { count: 2, lastStockedAt: '' },
+  milk: { count: 3, lastStockedAt: '2026-08-12' },
+});
+assert.equal(restock.getCategoryIcon('Vegetable'), '🥕');
+assert.equal(restock.getCategoryIcon('Unmapped Category'), '📦');
+assert.equal(restock.isPositiveQuantity('1.5'), true);
+assert.equal(restock.isPositiveQuantity('0'), false);
+assert.equal(restock.sanitizeDraftEntry({ quantity: '2', unit: '' }).unit, 'each');
+assert.equal(restock.sanitizeDraftEntry({ quantity: '0', unit: 'cup' }), null);
+
+const restockCategories = restock.buildRestockCategories({
+  ingredients: [
+    { slug: 'spinach', name: 'Spinach', category: 'Vegetable' },
+    { slug: 'carrot', name: 'Carrot', category: 'Vegetable' },
+    { slug: 'milk', name: 'Milk', category: 'Dairy' },
+    { slug: 'unused', name: 'Unused', category: 'Dairy' },
+  ],
+  inventory: { spinach: { quantity: '1', unit: 'bag' } },
+  favorites: ['milk'],
+  history: { carrot: { count: 4, lastStockedAt: '' }, spinach: { count: 1, lastStockedAt: '' } },
+});
+assert.deepEqual(restockCategories.map((group) => group.category), ['Vegetable', 'Dairy']);
+assert.deepEqual(restockCategories[0].items.map((item) => item.slug), ['carrot', 'spinach']);
+assert.deepEqual(restockCategories[1].items.map((item) => item.slug), ['milk']);
+
+const restockStyles = read('styles/restock-wizard.css');
+assert(restockStyles.includes('.restock-wizard__rail'));
+assert(restockStyles.includes('.restock-wizard__button--primary'));
+assert(restockStyles.includes('@media (max-width: 760px)'));
 
 const app = read('scripts/app.js');
 assert(app.includes('card.dataset.recipeId = recipe.id'));
