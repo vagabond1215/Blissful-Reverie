@@ -51,11 +51,17 @@ assert(familyCss.includes('grid-template-columns: repeat(3'));
 assert(familyCss.includes('.family-manage-dialog__trash'));
 
 const pantryScript = read('scripts/pantry-tag-refine.js');
-assert(pantryScript.includes("row.querySelector('.pantry-row-tags__summary')?.remove()"));
+assert(pantryScript.includes("row.tagName === 'DETAILS'"));
+assert(pantryScript.includes("document.createElement('div')"));
+assert(pantryScript.includes('row.replaceWith(replacement)'));
+assert(pantryScript.includes('header.insertBefore(favorite, title)'));
 assert(pantryScript.includes("event.stopImmediatePropagation()"));
+assert(!pantryScript.includes("row.querySelector('.pantry-row-tags__summary')?.remove()"));
 
 const pantryCss = read('styles/pantry-tag-refine.css');
-assert(pantryCss.includes('padding: 3px 3px'));
-assert(pantryCss.includes('.pantry-row-tags__summary'));
+assert(pantryCss.includes('padding: 2px 3px'));
+assert(pantryCss.includes('grid-template-columns: 26px minmax(150px, 1fr) auto auto'));
+assert(pantryCss.includes('#page-action-bar #pantry-tags-action'));
+assert(pantryCss.includes('grid-column: 2 / -1'));
 
 console.log('Family and Pantry refinement tests passed.');
