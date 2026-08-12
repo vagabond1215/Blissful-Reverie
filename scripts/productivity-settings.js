@@ -79,6 +79,11 @@
     ensureScript('scripts/shopping-management.js');
   };
 
+  const ensurePantryRedesignAssets = () => {
+    ensureStylesheet('styles/pantry-redesign.css');
+    ensureScript('scripts/pantry-redesign.js');
+  };
+
   const ensureRestockAssets = () => {
     ensureStylesheet('styles/restock-wizard.css');
     ensureScript('scripts/restock-wizard.js');
@@ -137,6 +142,7 @@
     ensureMealPlanAffordanceAssets();
     ensureShoppingReferenceAssets();
     ensureShoppingManagementAssets();
+    ensurePantryRedesignAssets();
     ensureRestockAssets();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();
