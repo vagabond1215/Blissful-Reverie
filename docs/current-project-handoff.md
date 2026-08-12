@@ -32,24 +32,26 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 
 ## Current visual stylesheet stack
 
-`index.html` still loads the legacy stylesheet first:
+`index.html` loads `styles/app.css` as the static stylesheet entry point.
 
-- `styles/app.css`
+`styles/app.css` is now a small import wrapper, not the legacy generated stylesheet. It imports the legacy stylesheet first, then imports the reset layers so the browser blocks first paint on the neutral visual stack:
 
-`scripts/productivity-settings.js` dynamically loads additional visual reset and feature styles. It now starts fetching the visual reset stylesheets immediately when the script executes, before waiting for DOM simplification, to reduce flashes of the old magenta/green/sepia generated palette during page load. The current intended order is:
+1. `styles/app-legacy.css`
+2. `styles/meal-plan-affordance.css`
+3. `styles/productivity.css`
+4. `styles/base-theme.css`
+5. `styles/meal-plan-sleek.css`
+6. `styles/topbar-docked.css`
+7. `styles/shopping-list-sleek.css`
+8. `styles/ui-cleanup.css`
+9. `styles/topbar-hover-fix.css`
+10. `styles/dashboard-contrast.css`
 
-1. `styles/meal-plan-affordance.css`
-2. `styles/base-theme.css`
-3. `styles/meal-plan-sleek.css`
-4. `styles/topbar-docked.css`
-5. `styles/shopping-list-sleek.css`
-6. `styles/ui-cleanup.css`
-7. `styles/topbar-hover-fix.css`
-8. `styles/dashboard-contrast.css`
+`styles/app-legacy.css` is a direct copy of the previous generated `styles/app.css`. Keep it as the compatibility layer until the visual reset is consolidated.
+
+`scripts/productivity-settings.js` still de-duplicates and dynamically ensures the same reset/feature stylesheets for compatibility with the existing settings startup flow. Those dynamic loads should not be the source of first paint; the static `styles/app.css` wrapper is now responsible for preventing the old magenta/green/sepia palette flash.
 
 `styles/dashboard-contrast.css` is currently the final visual layer. It gives the productivity dashboard a light-gray workspace background and keeps the dashboard cards and shopping panel on white raised surfaces. `styles/topbar-hover-fix.css` remains the focused layer that suppresses legacy pill/oval hover chrome on the primary topbar segmented navigation. `styles/ui-cleanup.css` remains the final broad reset layer before these focused patches.
-
-If the old generated palette still flashes on first paint, the next stronger fix is to add the reset stylesheet links directly in `index.html` after `styles/app.css` so the browser blocks first paint on the neutral visual stack instead of relying on JavaScript injection.
 
 ## Recent direct-main visual passes
 
@@ -104,23 +106,33 @@ If the old generated palette still flashes on first paint, the next stronger fix
 - Keeps `Cook now`, `Almost ready`, `Shopping candidates`, and the smart shopping list on white raised surfaces.
 - Adds dark-mode inversions for the same hierarchy.
 
-### Visual reset startup timing
+### Static visual reset wrapper
 
-- Updated `scripts/productivity-settings.js` so `ensureVisualResetStylesheets()` runs immediately at script execution.
-- This reduces the page-load flash of the legacy generated palette before DOM-ready setup.
-- Keep the de-duplicating stylesheet loader because it also prevents duplicate links when the later startup path runs.
+- Copied the original generated `styles/app.css` blob to `styles/app-legacy.css`.
+- Replaced `styles/app.css` with an import wrapper that loads `app-legacy.css` first and all reset layers afterward.
+- This is the current strongest mitigation for legacy theme flash on page load.
 
-## Known open follow-up
+## Known open follow-ups
 
-Issue #141 tracks smart shopping-list recipe-reference display options.
-
-Intent:
+### #141 — Shopping-list recipe-reference display options
 
 - Recipe-reference notes are useful for multi-recipe lists.
 - Recipe-reference notes are redundant when a list effectively comes from one recipe.
 - Add a user-facing option later to show/hide references.
 - Copy-to-clipboard output should match the visible reference mode.
 - Do not combine this with quantity aggregation, serving scaling, date filtering, or pantry depletion modeling.
+
+### #142 — Staples and low-quantity shopping list source
+
+- Add a smart-shopping mode for staples/common essentials such as pasta, cheese, eggs, meats, condiments, and other common ingredients.
+- Include a setting or toggle for low-quantity pantry items, not only missing/no-quantity items.
+- Keep separate from exact quantity aggregation and pantry depletion modeling.
+
+### #143 — Recipe previews from pantry dashboard candidates
+
+- Preferred behavior is an accessible hover/focus preview card for entries under `Cook now`, `Almost ready`, and `Shopping candidates`.
+- Preview must stay inside the viewport, avoid covering the dish name, and support keyboard access.
+- A simpler clickable-link fallback is acceptable but not preferred.
 
 ## Visual work principles from user direction
 
