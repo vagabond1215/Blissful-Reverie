@@ -82,6 +82,7 @@
   const ensureRestockAssets = () => {
     ensureStylesheet('styles/restock-wizard.css');
     ensureScript('scripts/restock-wizard.js');
+    ensureScript('scripts/restock-pantry-nav.js');
   };
 
   const simplifySettings = () => {
