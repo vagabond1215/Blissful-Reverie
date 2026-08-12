@@ -70,7 +70,11 @@
       : null;
     if (!(trash instanceof HTMLButtonElement)) return;
     const row = trash.closest('.family-manage-dialog__member');
-    const memberId = String(trash.dataset.familyId || row?.dataset.familyId || '').trim();
+    let memberId = String(trash.dataset.familyId || row?.dataset.familyId || '').trim();
+    if (!memberId) {
+      syncMemberIds();
+      memberId = String(trash.dataset.familyId || row?.dataset.familyId || '').trim();
+    }
     if (!memberId) return;
     event.preventDefault();
     event.stopImmediatePropagation();
