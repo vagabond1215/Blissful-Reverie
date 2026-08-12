@@ -110,6 +110,7 @@
     ensureScript('scripts/family-manage-fix.js');
   };
 
+  // Legacy Kitchen-mutating runtime retired: scripts/restock-wizard.js and scripts/restock-pantry-nav.js.
   const ensureRestockAssets = () => {
     ensureStylesheet('styles/restock-wizard.css');
     ensureScript('scripts/restock-pantry-only.js');
