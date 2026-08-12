@@ -49,13 +49,13 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 
 `styles/app-legacy.css` is a direct copy of the previous generated `styles/app.css`. Keep it as the compatibility layer until the visual reset is consolidated.
 
-`scripts/productivity-settings.js` still de-duplicates and dynamically ensures the same reset/feature stylesheets for compatibility with the existing settings startup flow. Those dynamic loads should not be the source of first paint; the static `styles/app.css` wrapper is now responsible for preventing the old magenta/green/sepia palette flash.
+`scripts/productivity-settings.js` still de-duplicates and dynamically ensures reset and focused feature assets for compatibility with the existing startup flow. It now also loads `styles/restock-wizard.css` and `scripts/restock-wizard.js` for the guided restock interaction.
 
-`styles/dashboard-contrast.css` is currently the final visual layer. It gives the productivity dashboard a light-gray workspace background and keeps the dashboard cards and shopping panel on white raised surfaces. `styles/topbar-hover-fix.css` remains the focused layer that suppresses legacy pill/oval hover chrome on the primary topbar segmented navigation. `styles/ui-cleanup.css` remains the final broad reset layer before these focused patches.
+`styles/dashboard-contrast.css` is currently the final static visual layer. It gives the productivity dashboard a light-gray workspace background and keeps the dashboard cards and shopping panel on white raised surfaces. `styles/topbar-hover-fix.css` remains the focused layer that suppresses legacy pill/oval hover chrome on the primary topbar segmented navigation. `styles/ui-cleanup.css` remains the final broad reset layer before these focused patches.
 
 The legacy-color startup flash is currently only being reproduced on one PC Brave browser; Chrome and Brave mobile are not showing it. Defer additional flash-specific CSS changes unless the issue can be reproduced again after a fresh load/cache check.
 
-## Recent direct-main visual passes
+## Recent visual passes
 
 ### Clean base theme
 
@@ -114,7 +114,7 @@ The legacy-color startup flash is currently only being reproduced on one PC Brav
 - Replaced `styles/app.css` with an import wrapper that loads `app-legacy.css` first and all reset layers afterward.
 - This is the current strongest mitigation for legacy theme flash on page load.
 
-## Recent direct-main product pass
+## Recent product passes
 
 ### #141 — Shopping-list recipe-reference display options
 
@@ -125,13 +125,38 @@ The legacy-color startup flash is currently only being reproduced on one PC Brav
 - Copy-to-clipboard output follows the visible reference setting.
 - Kept quantity aggregation, serving scaling, date filtering, pantry depletion, and shopping-source logic unchanged.
 - Added wiring/pure-helper coverage to `tests/integration-wiring.test.js`.
-- GitHub Actions `Validate` passed for implementation commit `af9de8a`.
+
+### #144 — Guided pantry restock workflow
+
+Merged through PR #145 in `a91ab69`.
+
+- Added `scripts/restock-wizard.js` and `styles/restock-wizard.css`.
+- The old primary-nav `Kitchen` destination is repurposed at runtime into a `Restock` action; the legacy Kitchen view is hidden from primary use.
+- A second `Restock` button is injected into the Pantry page header.
+- Either trigger opens the same near-full-screen modal instead of navigating away.
+- The modal displays one ingredient category at a time to avoid a dense all-pantry form.
+- A vertical icon rail on the left provides direct category jumps.
+- Every category step includes `Next` and `Finish`; `Finish` saves the current category and closes immediately, so the user does not need to visit later categories.
+- `Next` or a manual category jump saves the current category before moving.
+- The guide is built from current pantry stock, pantry favorites, and lightweight stock history.
+- Stock history persists under `blissful-pantry-stock-history`; repeated positive stock adjustments increase an item's history count and sort frequent items higher within their category.
+- Existing positive pantry inventory is seeded into history on first use so already-stocked items appear immediately.
+- Blank or zero quantities in the restock guide remove the item from current pantry inventory rather than storing a zero-quantity entry that recipe matching could mistake for available stock.
+- Regular Pantry quantity changes also contribute to lightweight stocking history.
+- Existing `kitchenInventory`/equipment data remains in saved application state for backward compatibility; only the exposed Kitchen navigation flow changed.
+- A saved legacy `activeView: "kitchen"` is redirected to Pantry.
+- The dialog supports Escape-to-close, focus restoration, a keyboard-accessible icon rail, focus trapping, and a mobile layout that keeps the category rail vertical.
+- Closing with the X, backdrop, or Escape does not save uncommitted edits on the current category. Categories already committed through Next/manual navigation remain saved.
+- Integration coverage tests history normalization, category selection/sorting, zero-quantity handling, asset wiring, and restock CSS presence.
+- Pull-request `Validate` run #102 and merged-main `Validate` run #103 both passed.
 
 ## Current next step
 
-### #142 — Staples and low-quantity shopping list source
+### Browser review of #144, then resume #142
 
-Implement a separate smart-shopping source for pantry staples/common essentials and an option to include low-quantity pantry items. Keep it separate from recipe quantity aggregation and pantry depletion modeling.
+The guided restock implementation is merged and automated validation is green. Because the connector cannot inspect the rendered GitHub Pages application reliably, the immediate next step is a quick browser smoke test of the Restock interaction. Avoid blind visual refinements without screenshot/browser feedback.
+
+After the Restock workflow is confirmed usable, resume #142: add a separate smart-shopping source for pantry staples/common essentials and an option to include low-quantity pantry items. Keep that work separate from recipe quantity aggregation and pantry depletion modeling.
 
 ## Known open follow-ups
 
@@ -158,9 +183,11 @@ Implement a separate smart-shopping source for pantry staples/common essentials 
 - Prefer direct drawing of controls on parent surfaces when it reduces visual clutter.
 - Treat user screenshots as the primary source for visual defects because connector cannot reliably inspect the rendered GitHub Pages site.
 
-## Browser review checklist for the current visual reset
+## Browser review checklist
 
-After each visual pass, hard refresh the deployed GitHub Pages app and inspect:
+After each visual or interaction pass, hard refresh the deployed GitHub Pages app and inspect:
+
+### General visual reset
 
 - topbar settings gear draws directly on the rail, without an extra button box
 - topbar nav tabs render as one segmented group with flat internal edges
@@ -174,10 +201,29 @@ After each visual pass, hard refresh the deployed GitHub Pages app and inspect:
 - the old magenta/green/sepia generated palette does not visibly flash during page load
 - light and dark theme modes stay legible
 - meal-plan view retains functional date navigation, family filters, and D/W/M switching
-- no console errors after navigation between Recipes, Kitchen, Pantry, Meal Plan, and Family
+- no console errors after navigation between Recipes, Pantry, Meal Plan, Family, and Restock
+
+### Guided Restock
+
+- the top bar shows `Restock` instead of exposing the old Kitchen destination
+- Pantry also has a visible `Restock` action
+- either Restock trigger opens the same near-full-screen dialog
+- only one ingredient category is shown in the main panel at a time
+- category icons remain in a vertical rail on the left and can be used to jump directly between categories
+- the active category icon is visibly distinguishable
+- item rows show current quantities/units and previously/frequently stocked context without becoming cramped
+- `Next` saves the current category and moves forward
+- `Finish` saves the current category and closes from any category
+- clearing or entering zero for an item removes it from current pantry stock after save
+- returning to Pantry reflects restock changes immediately
+- recipe pantry-fit behavior still updates after restock changes
+- Escape closes the dialog and focus returns to the button that opened it
+- on mobile, the left icon rail remains usable while the category contents scroll independently
 
 ## Validation expectation
 
 For direct-main connector commits, verify GitHub Actions `Validate` on the latest `main` commit. The workflow runs `npm test`.
+
+For broad interaction changes, use a feature branch/PR so pull-request validation runs before merge.
 
 If the connector cannot inspect the live visual result, stop and ask for screenshot feedback rather than making blind visual refinements.
