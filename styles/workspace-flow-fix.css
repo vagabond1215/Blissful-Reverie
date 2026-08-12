@@ -1,0 +1,207 @@
+/* Flat document-flow workspaces and responsive page-action grouping. */
+
+/* Recipes: keep all page-specific controls in one fluid middle rail. */
+html.recipes-view-active #page-action-bar.page-action-bar {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  max-width: min(44vw, 680px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+  overscroll-behavior-inline: contain;
+}
+
+html.recipes-view-active #page-action-bar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+html.recipes-view-active .recipe-topbar-search {
+  flex: 0 1 330px;
+  min-width: 220px;
+  margin-left: 0 !important;
+}
+
+#page-action-bar #recipe-family-filter[hidden] {
+  display: none !important;
+}
+
+#page-action-bar #recipe-family-filter.recipe-family-filter--page-actions:not([hidden]) {
+  display: contents !important;
+}
+
+#page-action-bar .recipe-family-page-action {
+  width: 40px !important;
+  min-width: 40px !important;
+  height: var(--topbar-segment-height, 38px) !important;
+  min-height: var(--topbar-segment-height, 38px) !important;
+  max-height: var(--topbar-segment-height, 38px) !important;
+  margin: 0 0 0 -1px !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 1px solid var(--border, #cbd0d7) !important;
+  border-radius: 0 !important;
+  background: var(--surface, #fff) !important;
+  color: var(--text, #111) !important;
+  box-shadow: none !important;
+  font: inherit;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+#page-action-bar .recipe-family-page-action:hover,
+#page-action-bar .recipe-family-page-action:focus-visible,
+#page-action-bar .recipe-family-page-action[aria-pressed="true"],
+#page-action-bar .recipe-family-filter__button--active {
+  background: var(--surface-muted, #eef1f4) !important;
+}
+
+/* JS assigns these to the actual visible first/last controls, including dynamic family members. */
+#page-action-bar .page-action-bar__segment-first {
+  margin-left: 0 !important;
+  border-radius: 999px 0 0 999px !important;
+}
+
+#page-action-bar .page-action-bar__segment-last {
+  border-radius: 0 999px 999px 0 !important;
+}
+
+#page-action-bar .page-action-bar__segment-first.page-action-bar__segment-last {
+  border-radius: 999px !important;
+}
+
+/* Reset is only the right end when there are no family-member controls after it. */
+#page-action-bar #reset-filters {
+  border-radius: 0 !important;
+}
+
+/* Family: remove the legacy fixed viewport so normal document scrolling owns the page. */
+#family-view.family-view--refined {
+  position: static !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#family-view.family-view--refined .family-view__body,
+#family-view.family-view--refined .family-panel,
+#family-view.family-view--refined .family-panel__list,
+#family-view.family-view--refined #family-member-list {
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#family-view.family-view--refined .family-panel__list,
+#family-view.family-view--refined #family-member-list {
+  padding-right: 0 !important;
+}
+
+#family-view.family-view--refined .family-member-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Pantry: category cards are the surfaces; the Pantry view itself is not another card/viewport. */
+#pantry-view {
+  position: static !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#pantry-grid[data-card-flow="vertical"] {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+#pantry-grid[data-card-flow="vertical"] .pantry-category--card {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+#pantry-grid[data-card-flow="vertical"] .pantry-category--card > .pantry-category__list {
+  max-height: none !important;
+  overflow: visible !important;
+  overscroll-behavior: auto !important;
+}
+
+/* Horizontal mode remains touch/trackpad scrollable, but does not draw desktop scrollbar chrome. */
+#pantry-grid[data-card-flow="horizontal"],
+#pantry-grid[data-card-flow="horizontal"] .pantry-category__list {
+  scrollbar-width: none !important;
+}
+
+#pantry-grid[data-card-flow="horizontal"]::-webkit-scrollbar,
+#pantry-grid[data-card-flow="horizontal"] .pantry-category__list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* On Pantry and Family, keep scrolling functional while removing visual scrollbar chrome. */
+html:has(#pantry-view:not([hidden])),
+html:has(#family-view:not([hidden])),
+body:has(#pantry-view:not([hidden])),
+body:has(#family-view:not([hidden])) {
+  scrollbar-width: none;
+}
+
+html:has(#pantry-view:not([hidden]))::-webkit-scrollbar,
+html:has(#family-view:not([hidden]))::-webkit-scrollbar,
+body:has(#pantry-view:not([hidden]))::-webkit-scrollbar,
+body:has(#family-view:not([hidden]))::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  html.recipes-view-active #page-action-bar.page-action-bar {
+    max-width: calc(100vw - 32px) !important;
+    order: 10;
+  }
+
+  html.recipes-view-active .recipe-topbar-search {
+    flex-basis: 100%;
+    min-width: 0;
+    order: 20;
+  }
+}
+
+@media (max-width: 760px) {
+  #page-action-bar .recipe-family-page-action {
+    width: 38px !important;
+    min-width: 38px !important;
+  }
+}
