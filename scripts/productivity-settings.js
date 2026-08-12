@@ -116,6 +116,10 @@
     ensureScript('scripts/restock-pantry-nav.js');
   };
 
+  const ensureWorkspaceFlowAssets = () => {
+    ensureStylesheet('styles/workspace-flow-fix.css');
+  };
+
   const simplifySettings = () => {
     const toolbar = document.getElementById('theme-toolbar');
     if (!toolbar || document.getElementById('productivity-settings-advanced')) {
@@ -173,6 +177,7 @@
     ensureRecipeFamilyActionAssets();
     ensureTopbarInteractionAssets();
     ensureRestockAssets();
+    ensureWorkspaceFlowAssets();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();
       return;

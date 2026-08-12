@@ -46,6 +46,43 @@
     return chip;
   };
 
+  const ensureRecipeFamilyActions = () => {
+    const bar = ensurePageActionBar();
+    const family = document.getElementById('recipe-family-filter');
+    if (!bar || !(family instanceof HTMLElement)) return null;
+    const chip = document.getElementById('recipe-action-chip');
+    const desiredAnchor = chip instanceof HTMLElement ? chip.nextSibling : null;
+    if (family.parentElement !== bar || (chip instanceof HTMLElement && chip.nextSibling !== family)) {
+      bar.insertBefore(family, desiredAnchor && desiredAnchor.parentElement === bar ? desiredAnchor : null);
+    }
+    family.classList.add('recipe-family-filter--page-actions');
+    if (!isRecipesActive()) family.hidden = true;
+    family.querySelectorAll('.recipe-family-filter__button').forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) return;
+      button.classList.add(
+        'page-action-bar__button',
+        'page-action-bar__button--icon',
+        'recipe-family-page-action',
+      );
+    });
+    return family;
+  };
+
+  const syncActionEndcaps = () => {
+    const bar = document.getElementById('page-action-bar');
+    if (!(bar instanceof HTMLElement)) return;
+    const buttons = Array.from(bar.querySelectorAll('button')).filter((button) => (
+      button instanceof HTMLButtonElement
+      && !button.hidden
+      && !button.closest('[hidden]')
+    ));
+    buttons.forEach((button) => {
+      button.classList.remove('page-action-bar__segment-first', 'page-action-bar__segment-last');
+    });
+    buttons[0]?.classList.add('page-action-bar__segment-first');
+    buttons[buttons.length - 1]?.classList.add('page-action-bar__segment-last');
+  };
+
   const ensureRecipeSearch = () => {
     const row = document.querySelector('#recipes-page .topbar__row');
     const source = document.getElementById('filter-search');
@@ -101,8 +138,10 @@
     const active = isRecipesActive();
     document.documentElement.classList.toggle('recipes-view-active', active);
     ensureRecipeActions();
+    ensureRecipeFamilyActions();
     ensureRecipeSearch();
     updateBadge();
+    syncActionEndcaps();
   };
 
   const schedule = () => {
@@ -117,7 +156,12 @@
   const start = () => {
     sync();
     const observer = new MutationObserver(() => schedule());
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'class', 'aria-pressed'] });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['hidden', 'class', 'aria-pressed'],
+    });
     global.addEventListener('blissful-family-dislikes-change', schedule);
   };
 
