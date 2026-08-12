@@ -1,264 +1,197 @@
 # Current project handoff
 
-This file exists so another project chat can inspect the repository and continue the current work without relying on hidden chat history.
+This file is the repository-level continuation note for future project chats. It should describe the current product state, current validation state, and immediate next step rather than preserve obsolete UI behavior.
 
 ## Current development posture
 
 - The site is still in development and is not intended for public use yet.
-- Prefer direct connector commits to `main` when the change is small, reversible, and safe.
-- Avoid branches unless the change is risky, broad, hard to review, or blocked by `main` protections.
-- Runtime functionality must not degrade while visual work is in progress.
-- Visual continuity with the old GPT/Codex-generated theme is not required.
+- Prefer direct connector commits to `main` for small, reversible changes.
+- Use a feature branch and PR for broad interaction changes.
+- Preserve runtime behavior while visual cleanup continues.
+- Visual continuity with the old generated burgundy/teal/brown/gold theme is not required.
+- Treat screenshots/browser feedback as the source of truth for visual defects because the connector cannot reliably inspect the rendered application.
 
 ## Current visual direction
 
-The old generated burgundy/teal/brown/gold theme is intentionally being replaced.
+The active direction is a clean grayscale baseline with reduced chrome:
 
-Current short-term target:
-
-- clean grayscale baseline
-- light mode: white, light gray, mid gray, dark gray, black
-- dark mode: inverted grayscale surfaces and text
-- no sepia/warm cast for the temporary base
-- lower visual noise
+- white/light-gray/mid-gray/dark-gray/black in light mode
+- inverted grayscale surfaces/text in dark mode
+- flatter shadows and lighter borders
 - fewer nested containers
-- lighter borders
-- flatter shadows
-- clearer text contrast
-- simple segmented controls
-- preserve behavior while visual layers are reset
+- compact segmented controls
+- strong text contrast
+- lower vertical density where controls remain readable
 
-Deep theme research and curated palettes may happen later. Until then, do not attempt to preserve the old token names semantically; old token names may remain as compatibility aliases only.
+The legacy-color startup flash has only been reproduced on one PC Brave browser. Chrome and Brave mobile did not reproduce it. Do not add more flash-specific CSS unless the problem reproduces after a fresh cache/site-data check or new screenshots show it clearly.
 
-## Current visual stylesheet stack
+## Stylesheet/runtime structure
 
-`index.html` loads `styles/app.css` as the static stylesheet entry point.
+`index.html` loads `styles/app.css` as the static stylesheet entry point. `styles/app.css` is an import wrapper over the legacy compatibility layer plus focused reset/feature layers.
 
-`styles/app.css` is now a small import wrapper, not the legacy generated stylesheet. It imports the legacy stylesheet first, then imports the reset/focused feature layers so the browser blocks first paint on the current visual stack:
+Important current layers include:
 
-1. `styles/app-legacy.css`
-2. `styles/meal-plan-affordance.css`
-3. `styles/productivity.css`
-4. `styles/base-theme.css`
-5. `styles/meal-plan-sleek.css`
-6. `styles/topbar-docked.css`
-7. `styles/shopping-list-sleek.css`
-8. `styles/ui-cleanup.css`
-9. `styles/topbar-hover-fix.css`
-10. `styles/dashboard-contrast.css`
-11. `styles/shopping-management.css`
+- `styles/app-legacy.css` — compatibility copy of the old generated stylesheet
+- `styles/base-theme.css` — grayscale base
+- `styles/meal-plan-sleek.css`
+- `styles/topbar-docked.css`
+- `styles/shopping-list-sleek.css`
+- `styles/ui-cleanup.css`
+- `styles/topbar-hover-fix.css`
+- `styles/dashboard-contrast.css`
+- `styles/shopping-management.css`
+- `styles/pantry-tag-refine.css`
+- `styles/recipe-page-actions.css`
+- `styles/shopping-readiness-refine.css`
 
-`styles/app-legacy.css` is a direct copy of the previous generated `styles/app.css`. Keep it as the compatibility layer until the visual reset is consolidated.
+`scripts/productivity-settings.js` dynamically ensures focused compatibility assets in the existing startup flow. New UI work should prefer changing the owning renderer/module rather than stacking another DOM patch when the behavior can be simplified at the source.
 
-`scripts/productivity-settings.js` still de-duplicates and dynamically ensures reset and focused feature assets for compatibility with the existing startup flow. It loads the shopping-reference module, the smart replenishment module, and the guided restock module in addition to visual-reset assets.
+## Current Pantry / Smart Shopping behavior
 
-`styles/dashboard-contrast.css` remains the focused dashboard hierarchy layer. `styles/shopping-management.css` is now the final static focused feature layer and styles Shopping settings, per-item purchase profiles, and shopping-list purchase/store metadata. `styles/topbar-hover-fix.css` remains the focused layer that suppresses legacy pill/oval hover chrome on the primary topbar segmented navigation. `styles/ui-cleanup.css` remains the broad reset layer before these focused patches.
+Smart Shopping now has one responsibility: planned-meal shopping.
 
-The legacy-color startup flash is currently only being reproduced on one PC Brave browser; Chrome and Brave mobile are not showing it. Defer additional flash-specific CSS changes unless the issue can be reproduced again after a fresh load/cache check.
+- Panel label: `Missing or Low Meal Plan Ingredients`.
+- The old shopping source selector is removed.
+- `Closest recipes` is no longer a Smart Shopping source.
+- Missing ingredients come from current planned recipes using the existing substitution-aware pantry-fit logic.
+- If substitutions are enabled and an allowed substitute is on hand, the requested ingredient does not count as missing.
+- Usage-based low-stock recommendations are retained only when that ingredient belongs to the current meal plan.
+- Unrelated pantry restock recommendations are filtered out of this list.
+- Category/store grouping remains available.
+- Recipe-reference visibility remains available and still controls copied output.
+- Store/package purchase metadata remains available through the shopping-management layer.
+- Smart Shopping still has a live entry/mirror in Pantry Lists.
+- Redundant missing-count/source/restock-cycle prose was removed from the panel header.
 
-## Recent visual passes
+Compact Pantry rows were also tightened vertically. Item names and controls no longer carry the previous excess vertical padding; favorite, quantity, unit, and List controls remain usable, and tags can still occupy the secondary row.
 
-### Clean base theme
+## Current Recipes readiness behavior
 
-- Added `styles/base-theme.css`.
-- Flattened legacy glass/gradient/burgundy/teal/brown theme output.
-- De-emphasized advanced theme controls without deleting them.
+The old three-group pantry recipe dashboard was simplified.
 
-### Meal-plan sleek pass
+- `Cook now` was removed because the Recipes Pantry-only filter already serves that use case.
+- `Shopping candidates` was removed as a separate group.
+- `Almost ready` is the only readiness candidate surface.
+- The Recipes top action bar has a readiness threshold that cycles:
+  - `Off`
+  - `1 ingredient`
+  - `2 ingredients`
+- Default threshold is `2 ingredients`.
+- `Almost ready` contains recipes whose substitution-aware missing count is between 1 and the active threshold.
+- Allowed on-hand substitutions do not count as missing when substitutions are enabled.
+- Recipe names are compact chips.
+- Activating a chip opens an overlay containing a cloned meal card.
+- The live recipe card is not moved, and opening/closing the preview does not intentionally change page layout or scroll position.
+- The preview is keyboard-activatable and dismissible.
 
-- Added `styles/meal-plan-sleek.css`.
-- Reduced meal-plan padding and nested chrome.
-- Standardized meal-plan date/family/D-W-M selector heights.
-- Converted Day/Week/Month display to D/W/M.
+This revised interaction superseded the older #143 hover-preview proposal.
 
-### Docked topbar
+## Recent merged product passes
 
-- Added `styles/topbar-docked.css`.
-- Docked top navigation to a full-width top rail.
-- Repositioned settings/mobile popovers to open downward inside the viewport.
+### #141 — Shopping recipe-reference display
 
-### Segmented nav cleanup
-
-- Refined topbar settings/menu overlap.
-- Converted top nav to a segmented-control model with flat internal edges.
-
-### Shopping-list formatting
-
-- Added `styles/shopping-list-sleek.css`.
-- Made shopping-list categories wider and item rows readable.
-- Stacked recipe notes under ingredient names.
-
-### Final grayscale cleanup
-
-- Added `styles/ui-cleanup.css`.
-- Replaced the temporary sepia look with grayscale light/dark tokens.
-- Removed topbar button containers around settings and segment controls.
-- Improved card text contrast.
-- Standardized topbar button heights.
-
-### Topbar hover fix
-
-- Added `styles/topbar-hover-fix.css`.
-- Suppressed legacy topbar pseudo-elements, radius, shadows, transforms, and outlines that could draw the old oval/pill hover state over segmented tabs.
-- Kept the stacked mobile menu behavior separate.
-
-### Dashboard contrast
-
-- Added `styles/dashboard-contrast.css`.
-- Breaks up the pantry dashboard by setting the parent dashboard as a light-gray workspace.
-- Keeps `Cook now`, `Almost ready`, `Shopping candidates`, and the smart shopping list on white raised surfaces.
-- Adds dark-mode inversions for the same hierarchy.
-
-### Static visual reset wrapper
-
-- Copied the original generated `styles/app.css` blob to `styles/app-legacy.css`.
-- Replaced `styles/app.css` with an import wrapper that loads `app-legacy.css` first and all reset/focused layers afterward.
-- This is the current strongest mitigation for legacy theme flash on page load.
-
-## Recent product passes
-
-### #141 — Shopping-list recipe-reference display options
-
-- Added `scripts/shopping-reference-settings.js` as a focused companion module for smart-shopping reference display behavior.
-- Added a `Show recipe names` checkbox under the smart shopping list.
-- With no saved preference, references hide automatically for effectively single-recipe lists and show for multi-recipe lists.
-- An explicit show/hide choice persists in localStorage under `blissful-shopping-recipe-references`.
-- Copy-to-clipboard output follows the visible reference setting.
-- Kept quantity aggregation, serving scaling, date filtering, pantry depletion, and shopping-source logic unchanged.
-- Added wiring/pure-helper coverage to `tests/integration-wiring.test.js`.
-
-### #144 — Guided pantry restock workflow
-
-Merged through PR #145 in `a91ab69`.
-
-- Added `scripts/restock-wizard.js` and `styles/restock-wizard.css`.
-- The old primary-nav `Kitchen` destination is repurposed at runtime into a `Restock` action; the legacy Kitchen view is hidden from primary use.
-- A second `Restock` button is injected into the Pantry page header.
-- Either trigger opens the same near-full-screen modal instead of navigating away.
-- The modal displays one ingredient category at a time to avoid a dense all-pantry form.
-- A vertical icon rail on the left provides direct category jumps.
-- Every category step includes `Next` and `Finish`; `Finish` saves the current category and closes immediately, so the user does not need to visit later categories.
-- `Next` or a manual category jump saves the current category before moving.
-- The guide is built from current pantry stock, pantry favorites, and lightweight stock history.
-- Stock history persists under `blissful-pantry-stock-history`; repeated positive stock adjustments increase an item's history count and sort frequent items higher within their category.
-- Existing positive pantry inventory is seeded into history on first use so already-stocked items appear immediately.
-- Blank or zero quantities in the restock guide remove the item from current pantry inventory rather than storing a zero-quantity entry that recipe matching could mistake for available stock.
-- Regular Pantry quantity changes also contribute to lightweight stocking history.
-- Existing `kitchenInventory`/equipment data remains in saved application state for backward compatibility; only the exposed Kitchen navigation flow changed.
-- A saved legacy `activeView: "kitchen"` is redirected to Pantry.
-- The dialog supports Escape-to-close, focus restoration, a keyboard-accessible icon rail, focus trapping, and a mobile layout that keeps the category rail vertical.
-- Closing with the X, backdrop, or Escape does not save uncommitted edits on the current category. Categories already committed through Next/manual navigation remain saved.
-- Integration coverage tests history normalization, category selection/sorting, zero-quantity handling, asset wiring, and restock CSS presence.
-- Pull-request `Validate` run #102 and merged-main `Validate` run #103 both passed.
+- Added `scripts/shopping-reference-settings.js`.
+- `Show recipe names` can be persisted in localStorage.
+- Automatic default hides references for effectively one-recipe lists and shows them for multi-recipe lists.
+- Copy output follows the visible reference mode.
 
 ### #142 — Usage-based replenishment and store-aware shopping
 
-Merged through PR #146 in `b0179c9`.
+Merged through PR #146.
 
-- Added `scripts/shopping-management.js` and `styles/shopping-management.css` as a companion layer over the existing smart shopping list.
-- The main settings menu now has a `Shopping` section with weekly, every-two-weeks, monthly, and custom-day shopping cadence options.
-- Shopping settings also control whether automatic recommended-stock restocks are enabled and whether lists group by category or store.
-- Pantry quantity decreases are recorded as usage events under `blissful-pantry-usage`; quantity increases/restocking are not counted as consumption.
-- Usage capture works from normal Pantry quantity edits and quantity adjustments in the guided Restock workflow.
-- The current recommendation model uses recorded consumption from the last 30 days and projects it to the selected shopping cadence. No usage history means no invented automatic target.
-- If current quantity is below the projected target, the item is automatically merged into the smart shopping list even when the selected recipe source has no missing ingredients.
-- Existing `From meal plan` and `Closest recipes` sources remain intact; usage-based restocks are additive rather than replacing recipe shopping.
-- Live shopping rows can show current quantity, recommended target, and calculated purchase quantity.
-- Each Pantry item gets a collapsed `Shopping` profile for an optional store, `Individual units` versus `Package / bulk size`, and units per package.
-- Package-mode deficits round upward to complete packages. Example coverage verifies that a 1-can deficit for a Costco 6-pack recommends buying one 6-pack / 6 cans.
-- Store assignment is free-form rather than tied to a hard-coded retailer list.
-- Smart shopping can group by Category or Store. Unassigned items remain visible under `Unassigned store` when grouping by store.
-- Duplicate recipe/restock entries are merged by ingredient where possible, preserving recipe references while adding replenishment metadata.
-- Managed copy-to-clipboard output includes live purchase/package information and store assignment where applicable while respecting the existing recipe-reference visibility setting.
-- Shopping settings persist under `blissful-shopping-settings`; per-item profiles under `blissful-shopping-item-profiles`; usage history under `blissful-pantry-usage`.
-- Existing backup version 1 is extended at runtime to include/restore those three optional shopping storage keys without invalidating older backups.
-- Integration coverage includes the monthly olives example, non-consumption on quantity increases, unit and package purchase rounding, store grouping, merged recipe/restock entries, asset wiring, and responsive CSS presence.
-- Pull-request `Validate` run #105 and merged-main `Validate` run #106 both passed.
+- Added `scripts/shopping-management.js` and `styles/shopping-management.css`.
+- Shopping cadence, category/store grouping, usage history, recommended stock, store profiles, package sizes, and managed copy output are supported.
+- Pantry quantity decreases can build usage history; restocking/increases are not counted as consumption.
+- The original general automatic-restock engine still exists, but the Smart Shopping presentation now filters those recommendations to current meal-plan ingredients.
+
+### #144 — Guided Pantry restock
+
+Merged through PR #145.
+
+- Restock is the primary exposed stock-entry workflow instead of the old Kitchen destination.
+- Restock opens a near-full-screen category-by-category dialog.
+- Next/category navigation commits the current category; Finish saves and closes.
+- Zero/blank quantities remove current pantry stock rather than storing misleading zero-quantity entries.
+- Existing equipment/Kitchen data remains in stored state for backward compatibility.
+
+### #167 / PR #168 — Shopping ownership + Recipes readiness simplification
+
+Merged to `main` as `075aff10d3097f1238d9d4f399ad72f29ca71993`.
+
+- Removed the Smart Shopping source selector and closest-recipes shopping behavior.
+- Renamed Smart Shopping to `Missing or Low Meal Plan Ingredients`.
+- Removed redundant Smart Shopping explanatory prose.
+- Scoped low-stock recommendations to ingredients referenced by planned meals.
+- Removed `Cook now` and merged the former shopping-candidate concept into `Almost ready`.
+- Added the Recipes `Off / 1 ingredient / 2 ingredients` threshold.
+- Added recipe-name chips and cloned meal-card overlay previews.
+- Tightened compact Pantry row padding.
+- Added `tests/shopping-readiness-refine.test.js` plus updated wiring expectations.
+- PR Validate and merged-main Validate both passed.
+
+### #143 — Recipe previews
+
+Closed as completed because the revised #167/#168 UX replaced the original three-dashboard-group hover-preview concept with keyboard-activatable recipe chips and a non-layout-shifting overlay preview.
+
+## Current issue state
+
+There are no open GitHub issues at the time of this handoff refresh.
+
+Do not invent a new implementation target solely to keep development moving. Use browser feedback and the next explicit product request to establish the next issue/step.
 
 ## Current next step
 
-### Browser review of Restock + smart replenishment, then #143
+### Browser smoke test of the merged Shopping / Almost Ready pass
 
-Both broad inventory/shopping changes are merged and automated validation is green. Because the connector cannot inspect the rendered GitHub Pages application reliably, the immediate next step is a browser smoke test of the Restock interaction and the new Shopping settings/profile/list presentation. Avoid blind visual refinements without screenshot/browser feedback.
+Hard refresh the deployed app and verify the merged interaction in both desktop and mobile layouts. The highest-value checks are:
 
-After the browser interaction pass is confirmed usable, the next planned product follow-up is #143: recipe previews from pantry dashboard candidates.
+#### Pantry density
 
-## Known open follow-ups
+- compact item rows are visibly shorter vertically
+- item names do not have extra blank space above them
+- favorite, quantity, unit, and List controls remain aligned and usable
+- tag rows do not create accidental large gaps
 
-### #143 — Recipe previews from pantry dashboard candidates
+#### Smart Shopping
 
-- Preferred behavior is an accessible hover/focus preview card for entries under `Cook now`, `Almost ready`, and `Shopping candidates`.
-- Preview must stay inside the viewport, avoid covering the dish name, and support keyboard access.
-- A simpler clickable-link fallback is acceptable but not preferred.
+- panel reads `Missing or Low Meal Plan Ingredients`
+- no source chooser is present
+- no `Closest recipes` option is present
+- old missing-count/source/shopping-cycle explanatory paragraphs are gone
+- planned-meal missing ingredients appear automatically
+- an on-hand allowed substitute prevents the original ingredient from being counted as missing when substitutions are enabled
+- low-stock rows appear only for ingredients used by the current meal plan
+- unrelated usage-based restocks do not leak into Smart Shopping
+- Category / Store grouping still works
+- recipe-reference visibility still works
+- Copy list matches the visible/managed list
+- Lists still exposes Smart Shopping correctly
 
-## Visual work principles from user direction
+#### Recipes / Almost Ready
 
-- The user has no attachment to the current colors, theme names, or old visual conventions.
-- Functionality matters more than preserving old visual output.
-- It is acceptable to remove, override, or neutralize generated-theme styling.
-- Favor clean, clear, less busy UI.
-- Prefer standard grayscale or another simple neutral baseline until deeper palette research is done.
-- Remove redundant containers where possible, especially containers that only wrap a full child container.
-- Prefer direct drawing of controls on parent surfaces when it reduces visual clutter.
-- Treat user screenshots as the primary source for visual defects because connector cannot reliably inspect the rendered GitHub Pages site.
+- there is no separate `Cook now` dashboard group
+- there is no separate `Shopping candidates` group
+- `Almost ready` is the only readiness candidate area
+- the top-bar readiness control cycles `Off` → `1 ingredient` → `2 ingredients` → `Off`
+- Off hides readiness candidates
+- 1 ingredient only shows recipes missing exactly one ingredient
+- 2 ingredients shows recipes missing one or two ingredients
+- substitution-aware counts match the recipe-card pantry status
+- recipe names render as compact chips
+- clicking/keyboard-activating a chip opens a recipe-card preview overlay
+- opening/closing the preview does not visibly move the underlying recipe grid or change its scroll position
+- Escape/close behavior works and focus returns sensibly
 
-## Browser review checklist
+#### General regression
 
-After each visual or interaction pass, hard refresh the deployed GitHub Pages app and inspect:
-
-### General visual reset
-
-- topbar settings gear draws directly on the rail, without an extra button box
-- topbar nav tabs render as one segmented group with flat internal edges
-- topbar hover state does not create stray oval or duplicate button surfaces
-- left settings menu opens downward and remains inside viewport
-- right-side topbar controls visually match the left/top segmented control height
-- recipe card text is readable in the current light theme
-- ingredient quantities are readable and not near-white on white
-- smart shopping list columns do not collapse item names into single letters
-- pantry dashboard parent has enough contrast against `Cook now`, `Almost ready`, and `Shopping candidates`
-- the old magenta/green/sepia generated palette does not visibly flash during page load
-- light and dark theme modes stay legible
-- meal-plan view retains functional date navigation, family filters, and D/W/M switching
-- no console errors after navigation between Recipes, Pantry, Meal Plan, Family, and Restock
-
-### Guided Restock
-
-- the top bar shows `Restock` instead of exposing the old Kitchen destination
-- Pantry also has a visible `Restock` action
-- either Restock trigger opens the same near-full-screen dialog
-- only one ingredient category is shown in the main panel at a time
-- category icons remain in a vertical rail on the left and can be used to jump directly between categories
-- the active category icon is visibly distinguishable
-- item rows show current quantities/units and previously/frequently stocked context without becoming cramped
-- `Next` saves the current category and moves forward
-- `Finish` saves the current category and closes from any category
-- clearing or entering zero for an item removes it from current pantry stock after save
-- returning to Pantry reflects restock changes immediately
-- recipe pantry-fit behavior still updates after restock changes
-- Escape closes the dialog and focus returns to the button that opened it
-- on mobile, the left icon rail remains usable while the category contents scroll independently
-
-### Shopping management
-
-- the main settings menu contains a clearly separated `Shopping` section
-- weekly / every 2 weeks / monthly / custom cadence choices save and change recommendation targets
-- Pantry cards expose a collapsed `Shopping` profile without making the default card layout too tall or visually noisy
-- item profiles can save a free-form store such as Costco, Giant, or Walmart
-- `Individual units` and `Package / bulk size` switch correctly; package size is only shown when relevant
-- lowering a pantry quantity records usage and eventually produces a recommended stock level; increasing/restocking does not count as usage
-- an item below its target appears in the smart shopping list even when no planned-meal ingredient is missing
-- the row clearly communicates what to buy, what is on hand, and the target amount
-- package items round to whole packages rather than impossible partial packs
-- Category / Store grouping is available and store grouping places unassigned items under `Unassigned store`
-- recipe-missing and automatic-restock entries for the same ingredient do not duplicate unnecessarily
-- copy-to-clipboard includes managed purchase quantities/package information and still respects recipe-reference visibility
-- light/dark themes and mobile layout remain readable with the new controls
+- no console errors while moving among Recipes, Pantry, Meal Plan, Family, and Restock
+- light/dark modes remain legible
+- topbar segmented controls remain stable
+- the legacy generated color palette does not visibly flash on a normal fresh load
 
 ## Validation expectation
 
-For direct-main connector commits, verify GitHub Actions `Validate` on the latest `main` commit. The workflow runs `npm test`.
-
-For broad interaction changes, use a feature branch/PR so pull-request validation runs before merge.
-
-If the connector cannot inspect the live visual result, stop and ask for screenshot feedback rather than making blind visual refinements.
+- Small direct-main connector commits: verify GitHub Actions `Validate` on the resulting `main` commit.
+- Broad interaction changes: use a feature branch/PR and require PR `Validate` before merge, then verify merged-main `Validate`.
+- `Validate` runs `npm test`.
+- If a problem is visual-only and the connector cannot inspect it, stop patching blindly and request screenshot/browser evidence.
