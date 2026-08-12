@@ -1,0 +1,44 @@
+/* Remove per-row tag disclosures and tighten compact Pantry rows. */
+
+#pantry-grid .pantry-row-tags__summary {
+  display: none !important;
+}
+
+#pantry-grid .pantry-row-tags {
+  margin: 1px 0 1px 24px !important;
+  padding: 0 !important;
+}
+
+#pantry-grid .pantry-row-tags > .pantry-row-tags__list.pantry-card__tags {
+  margin: 1px 0 !important;
+}
+
+#pantry-grid .pantry-card--compact.pantry-card {
+  gap: 2px 6px !important;
+  padding: 3px 3px !important;
+}
+
+#pantry-grid .pantry-card--compact .pantry-card__favorite-button {
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+}
+
+#pantry-grid .pantry-card--compact .pantry-card__inline-input,
+#pantry-grid .pantry-list-selector {
+  height: 26px !important;
+  min-height: 26px !important;
+}
+
+#pantry-grid .pantry-card--compact .pantry-card__inline-input {
+  padding-block: 0 !important;
+}
+
+#pantry-grid .pantry-card--compact .pantry-card__name {
+  line-height: 1.12 !important;
+}
+
+#pantry-grid .pantry-category--card > .pantry-category__list {
+  padding-top: 0 !important;
+  padding-bottom: 2px !important;
+}
