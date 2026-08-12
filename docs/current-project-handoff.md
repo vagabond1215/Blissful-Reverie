@@ -36,7 +36,7 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 
 - `styles/app.css`
 
-`scripts/productivity-settings.js` dynamically loads additional visual reset and feature styles. The current intended order is:
+`scripts/productivity-settings.js` dynamically loads additional visual reset and feature styles. It now starts fetching the visual reset stylesheets immediately when the script executes, before waiting for DOM simplification, to reduce flashes of the old magenta/green/sepia generated palette during page load. The current intended order is:
 
 1. `styles/meal-plan-affordance.css`
 2. `styles/base-theme.css`
@@ -48,6 +48,8 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 8. `styles/dashboard-contrast.css`
 
 `styles/dashboard-contrast.css` is currently the final visual layer. It gives the productivity dashboard a light-gray workspace background and keeps the dashboard cards and shopping panel on white raised surfaces. `styles/topbar-hover-fix.css` remains the focused layer that suppresses legacy pill/oval hover chrome on the primary topbar segmented navigation. `styles/ui-cleanup.css` remains the final broad reset layer before these focused patches.
+
+If the old generated palette still flashes on first paint, the next stronger fix is to add the reset stylesheet links directly in `index.html` after `styles/app.css` so the browser blocks first paint on the neutral visual stack instead of relying on JavaScript injection.
 
 ## Recent direct-main visual passes
 
@@ -102,6 +104,12 @@ Deep theme research and curated palettes may happen later. Until then, do not at
 - Keeps `Cook now`, `Almost ready`, `Shopping candidates`, and the smart shopping list on white raised surfaces.
 - Adds dark-mode inversions for the same hierarchy.
 
+### Visual reset startup timing
+
+- Updated `scripts/productivity-settings.js` so `ensureVisualResetStylesheets()` runs immediately at script execution.
+- This reduces the page-load flash of the legacy generated palette before DOM-ready setup.
+- Keep the de-duplicating stylesheet loader because it also prevents duplicate links when the later startup path runs.
+
 ## Known open follow-up
 
 Issue #141 tracks smart shopping-list recipe-reference display options.
@@ -138,6 +146,7 @@ After each visual pass, hard refresh the deployed GitHub Pages app and inspect:
 - ingredient quantities are readable and not near-white on white
 - smart shopping list category columns do not collapse item names into single letters
 - pantry dashboard parent has enough contrast against `Cook now`, `Almost ready`, and `Shopping candidates`
+- the old magenta/green/sepia generated palette does not visibly flash during page load
 - light and dark theme modes stay legible
 - meal-plan view retains functional date navigation, family filters, and D/W/M switching
 - no console errors after navigation between Recipes, Kitchen, Pantry, Meal Plan, and Family
