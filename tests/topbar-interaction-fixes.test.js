@@ -33,7 +33,7 @@ assert.deepEqual(familyManage.removeMemberFromState(familyState, 'a'), {
 });
 
 const token = { kind: 'ingredient', key: 'fruit-lemon', label: 'Lemon' };
-const dislikeState = dislikesFix.addTokenToState(
+let dislikeState = dislikesFix.toggleTokenInState(
   { members: { a: [] } },
   'a',
   token,
@@ -41,6 +41,14 @@ const dislikeState = dislikesFix.addTokenToState(
   dislikes.normalizeTokenList,
 );
 assert.deepEqual(dislikeState.members.a, [token]);
+dislikeState = dislikesFix.toggleTokenInState(
+  dislikeState,
+  'a',
+  token,
+  dislikes.normalizeState,
+  dislikes.normalizeTokenList,
+);
+assert.deepEqual(dislikeState.members.a, []);
 
 const loader = read('scripts/productivity-settings.js');
 assert(loader.includes('styles/topbar-consistency.css'));
@@ -75,6 +83,7 @@ const dislikesScript = read('scripts/family-dislikes-click-fix.js');
 assert(dislikesScript.includes("event.target.closest('.family-dislikes__add')"));
 assert(dislikesScript.includes('renderChoices(root)'));
 assert(dislikesScript.includes('event.stopImmediatePropagation()'));
+assert(dislikesScript.includes('toggleTokenInState'));
 
 const restockNav = read('scripts/restock-pantry-nav.js');
 assert(restockNav.includes("target.dataset.viewTarget = KITCHEN_VIEW"));
