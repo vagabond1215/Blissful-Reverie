@@ -1,0 +1,67 @@
+schema_version: 1
+
+repository:
+  name: vagabond1215/Blissful-Reverie
+  default_branch: main
+
+project:
+  title: Blissful Reverie Meal Planner
+  type: local-first-browser-application
+  phase: active-development
+  assurance_tier: B
+  public_use: false
+
+authority:
+  instructions: AGENTS.md
+  handoff: docs/current-project-handoff.md
+  readme: README.md
+  quality_gates: docs/QUALITY_GATES.md
+  performance_budget: docs/PERFORMANCE_BUDGET.md
+
+tools:
+  github_connector:
+    repository_inspection: preferred
+    documentation: preferred
+    tiny_complete_source_edits: allowed
+  repository_capable_execution:
+    browser_or_runtime_changes: required
+    broad_multi_file_implementation: required
+    executable_validation: required_when_connector_cannot_run_it
+  heavy_agent_modes:
+    routine_work: exception-only
+  principle: least-powerful-safe-tool
+
+git:
+  small_reversible_change: direct-main-allowed
+  broad_interaction_or_layout_change: feature-branch-pr
+  persistence_model_change: feature-branch-pr
+  force_push: forbidden
+  default_branch_protected: false
+
+validation:
+  aggregate: npm test
+  hosted_check: Validate
+  implementation_changes:
+    focused_checks: required
+    aggregate_check: required
+  browser_changes:
+    browser_smoke: required
+  visual_only_defects:
+    browser_evidence: required
+
+modules:
+  - web-ui
+  - local-persistence
+
+quality:
+  accessibility_and_keyboard: required-for-interaction-changes
+  resource_lifecycle_review: required-for-long-lived-ui-resources
+  performance_budget: docs/PERFORMANCE_BUDGET.md
+  hard_performance_thresholds: baseline-required-first
+
+constraints:
+  - static browser application with no backend or account service
+  - user data is browser-local and compatibility-sensitive
+  - stable ingredient and recipe identifiers must not be renamed without migration
+  - do not invent screenshot-only navigation, account, notification, or product behavior
+  - browser screenshots and explicit browser feedback are authoritative for visual defects
