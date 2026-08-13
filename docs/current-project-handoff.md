@@ -1,197 +1,142 @@
 # Current project handoff
 
-This file is the repository-level continuation note for future project chats. It should describe the current product state, current validation state, and immediate next step rather than preserve obsolete UI behavior.
+This is the repository-level continuation note for future Blissful Reverie project chats. It should describe the current product state, current validation state, and immediate browser-review priorities. Do not reintroduce behavior described only in old issues or conversation history when it conflicts with this file and the current source.
 
-## Current development posture
+## Development posture
 
-- The site is still in development and is not intended for public use yet.
-- Prefer direct connector commits to `main` for small, reversible changes.
-- Use a feature branch and PR for broad interaction changes.
-- Preserve runtime behavior while visual cleanup continues.
-- Visual continuity with the old generated burgundy/teal/brown/gold theme is not required.
-- Treat screenshots/browser feedback as the source of truth for visual defects because the connector cannot reliably inspect the rendered application.
+- The site is still in active development and is not intended for public use yet.
+- Treat screenshots and browser feedback as the source of truth for visual defects.
+- Prefer direct `main` commits only for small, reversible corrections.
+- Use a feature branch/PR for broad interaction or layout changes.
+- Run the focused regression test plus full `npm test`; broad changes require PR Validate and merged-main Validate.
+- Preserve existing local-first state and compatibility unless a product request explicitly changes the data model.
 
-## Current visual direction
+## Primary application destinations
 
-The active direction is a clean grayscale baseline with reduced chrome:
+The live primary navigation remains:
 
-- white/light-gray/mid-gray/dark-gray/black in light mode
-- inverted grayscale surfaces/text in dark mode
-- flatter shadows and lighter borders
-- fewer nested containers
-- compact segmented controls
-- strong text contrast
-- lower vertical density where controls remain readable
+- Recipes
+- Kitchen
+- Pantry
+- Meal Plan
+- Family
 
-The legacy-color startup flash has only been reproduced on one PC Brave browser. Chrome and Brave mobile did not reproduce it. Do not add more flash-specific CSS unless the problem reproduces after a fresh cache/site-data check or new screenshots show it clearly.
+Kitchen is a real destination and must remain independently navigable. Restock is a Pantry workflow, not a Kitchen replacement and not its own primary navigation destination.
 
-## Stylesheet/runtime structure
+Do not add mock-only navigation destinations, account controls, notification controls, or other decorative screenshot elements unless they have defined Blissful Reverie behavior.
 
-`index.html` loads `styles/app.css` as the static stylesheet entry point. `styles/app.css` is an import wrapper over the legacy compatibility layer plus focused reset/feature layers.
+## Pantry workspace
 
-Important current layers include:
+PR #175 / issue #174 reconciled the Pantry mockup from a separate project thread into the actual repository.
 
-- `styles/app-legacy.css` — compatibility copy of the old generated stylesheet
-- `styles/base-theme.css` — grayscale base
-- `styles/meal-plan-sleek.css`
-- `styles/topbar-docked.css`
-- `styles/shopping-list-sleek.css`
-- `styles/ui-cleanup.css`
-- `styles/topbar-hover-fix.css`
-- `styles/dashboard-contrast.css`
-- `styles/shopping-management.css`
-- `styles/pantry-tag-refine.css`
-- `styles/recipe-page-actions.css`
-- `styles/shopping-readiness-refine.css`
+Current Pantry presentation:
 
-`scripts/productivity-settings.js` dynamically ensures focused compatibility assets in the existing startup flow. New UI work should prefer changing the owning renderer/module rather than stacking another DOM patch when the behavior can be simplified at the source.
+- Pantry search remains in the top-right search area.
+- The left rail is dedicated to Pantry filtering and is presented as separate `Categories`, `Tags`, and `Allergens` cards.
+- Filter options retain the existing `pantryFilters.categories/tags/allergens` state and app filtering behavior.
+- Filter cards show per-option counts and use progressive `Show more / Show less` disclosure.
+- The vertical Pantry view is one continuous flat ingredient list; category section headings and category-card chrome are visually flattened.
+- Nested category-list vertical scrollbars are removed in the vertical flow so the document is the scrolling surface.
+- The Pantry header shows `Pantry` and the live item count as a compact `N items` badge.
+- `+ Add Item` opens the existing Pantry Restock workflow.
+- The header overflow affordance exposes the existing live Pantry action bar as a native popover rather than duplicating action state.
+- Existing Lists, stock filtering, alphabetical/use sorting, favorites-only, and tags controls remain the owning controls underneath that overflow behavior.
+- Compact Pantry rows remain `favorite | ingredient | quantity | unit | List` on the primary line.
+- Tags consume a secondary line only when tags are enabled.
+- Existing shopping/list/store/usage-history data and persistence remain intact.
 
-## Current Pantry / Smart Shopping behavior
+The separate-thread screenshot included additional primary tabs and bell/profile decoration. Those were not added because the audit found no backing implementation or defined product behavior for them.
 
-Smart Shopping now has one responsibility: planned-meal shopping.
+## Smart Shopping
 
-- Panel label: `Missing or Low Meal Plan Ingredients`.
-- The old shopping source selector is removed.
-- `Closest recipes` is no longer a Smart Shopping source.
-- Missing ingredients come from current planned recipes using the existing substitution-aware pantry-fit logic.
-- If substitutions are enabled and an allowed substitute is on hand, the requested ingredient does not count as missing.
-- Usage-based low-stock recommendations are retained only when that ingredient belongs to the current meal plan.
-- Unrelated pantry restock recommendations are filtered out of this list.
-- Category/store grouping remains available.
-- Recipe-reference visibility remains available and still controls copied output.
-- Store/package purchase metadata remains available through the shopping-management layer.
-- Smart Shopping still has a live entry/mirror in Pantry Lists.
-- Redundant missing-count/source/restock-cycle prose was removed from the panel header.
+Smart Shopping is a Pantry-owned, meal-plan-specific surface.
 
-Compact Pantry rows were also tightened vertically. Item names and controls no longer carry the previous excess vertical padding; favorite, quantity, unit, and List controls remain usable, and tags can still occupy the secondary row.
+- Label: `Missing or Low Meal Plan Ingredients`.
+- Missing ingredients come from currently planned recipes.
+- Allowed substitutions already on hand do not count as missing when substitutions are enabled.
+- Usage-based low-stock recommendations are retained only when the ingredient belongs to the current meal plan.
+- Unrelated general pantry restock recommendations are filtered out of Smart Shopping.
+- The old Shopping source selector and `Closest recipes` source are removed.
+- Redundant source/missing-count/shopping-cycle explanatory prose is removed.
+- Category/store grouping, recipe-reference visibility, copy behavior, store metadata, and the Smart Shopping entry in Lists remain available.
 
-## Current Recipes readiness behavior
+## Recipes discovery and recipe previews
 
-The old three-group pantry recipe dashboard was simplified.
+The old `Cook now`, `Shopping candidates`, and missing-count `Almost ready` dashboard concepts are retired.
 
-- `Cook now` was removed because the Recipes Pantry-only filter already serves that use case.
-- `Shopping candidates` was removed as a separate group.
-- `Almost ready` is the only readiness candidate surface.
-- The Recipes top action bar has a readiness threshold that cycles:
-  - `Off`
-  - `1 ingredient`
-  - `2 ingredients`
-- Default threshold is `2 ingredients`.
-- `Almost ready` contains recipes whose substitution-aware missing count is between 1 and the active threshold.
-- Allowed on-hand substitutions do not count as missing when substitutions are enabled.
-- Recipe names are compact chips.
-- Activating a chip opens an overlay containing a cloned meal card.
-- The live recipe card is not moved, and opening/closing the preview does not intentionally change page layout or scroll position.
-- The preview is keyboard-activatable and dismissible.
+Current discovery surface:
 
-This revised interaction superseded the older #143 hover-preview proposal.
+- Label: `Discover new meals:`.
+- It is always on; there is no Off / 1 ingredient / 2 ingredients threshold control.
+- A recipe qualifies only when its substitution-aware pantry fit has zero missing ingredients.
+- When substitutions are enabled, an allowed substitute already on hand counts as coverage.
+- A recipe is treated as previously made when it appears on a past-dated meal-plan entry.
+- Today/future meal-plan entries do not count as made yet.
+- Previously made recipes are excluded from Discover new meals.
+- Discovery recipe names are compact interactive chips.
+- Activating a chip opens a recipe-card overlay without moving the live recipe card or intentionally changing underlying page position.
+- The preview `Plan & shop` action forwards to the live recipe card scheduling workflow and restores the underlying scroll position.
 
-## Recent merged product passes
+Recipe-card ingredient lines use a fixed measurement/name grid so ingredient names align consistently. At the existing 641–920px single-wide-card range, Ingredients and Instructions render side-by-side; narrow mobile cards stack those sections.
 
-### #141 — Shopping recipe-reference display
+## Family
 
-- Added `scripts/shopping-reference-settings.js`.
-- `Show recipe names` can be persisted in localStorage.
-- Automatic default hides references for effectively one-recipe lists and shows them for multi-recipe lists.
-- Copy output follows the visible reference mode.
+Current Family behavior includes:
 
-### #142 — Usage-based replenishment and store-aware shopping
+- `Manage Family` in the page-specific top-bar action area.
+- Add/remove member management is centralized in that dialog.
+- Trash removal requires permanent-data-loss confirmation.
+- Birthday uses Month + Day selectors rather than a native year/date picker; February 29 remains representable.
+- The primary member row is avatar, name, calorie target, birthday month, and birthday day.
+- Diet, Allergies, and Dislikes are arranged as the secondary member fields.
+- Clicking a member avatar opens a matrix picker containing initials and the available avatar choices; it does not cycle icons.
+- Dislikes uses the ingredient catalog as clickable/searchable chips. Selected ingredient chips can be clicked again to remove them.
+- Family dislike state continues to participate in recipe/scheduling conflict behavior.
 
-Merged through PR #146.
+## Top-bar conventions
 
-- Added `scripts/shopping-management.js` and `styles/shopping-management.css`.
-- Shopping cadence, category/store grouping, usage history, recommended stock, store profiles, package sizes, and managed copy output are supported.
-- Pantry quantity decreases can build usage history; restocking/increases are not counted as consumption.
-- The original general automatic-restock engine still exists, but the Smart Shopping presentation now filters those recommendations to current meal-plan ingredients.
+- The left segmented primary navigation and page-specific controls are separate concepts.
+- Page-specific controls use the shared dynamic/action area and consistent compact height.
+- Pantry uses its mockup-derived header overflow for Pantry-specific actions while keeping the live existing controls as the owning state/action implementation.
+- Recipes page actions and family-member recipe toggles share the Recipes dynamic action area.
+- Page search belongs at the top-right where implemented rather than consuming the left filter rail.
 
-### #144 — Guided Pantry restock
+## Validation and latest state
 
-Merged through PR #145.
+- PR #175 is merged/completed.
+- Issue #174 is closed as completed.
+- PR Validate #153 passed the full `npm test` suite.
+- The merged-main Pantry workspace commit is `a52d5a0d16b711ae0d3f6475bed7ab5cb3f2d2d0`.
+- Main Validate #154 passed on that commit.
+- `npm test` includes the focused Pantry workspace regression suite in addition to existing data, matching, Pantry, productivity, backup, wiring, Restock, Lists, Family, Recipes/Family, top-bar, UI shopping, and discovery tests.
 
-- Restock is the primary exposed stock-entry workflow instead of the old Kitchen destination.
-- Restock opens a near-full-screen category-by-category dialog.
-- Next/category navigation commits the current category; Finish saves and closes.
-- Zero/blank quantities remove current pantry stock rather than storing misleading zero-quantity entries.
-- Existing equipment/Kitchen data remains in stored state for backward compatibility.
+## Immediate next step
 
-### #167 / PR #168 — Shopping ownership + Recipes readiness simplification
+Do a browser smoke test after a hard refresh, with the Pantry screenshot as the visual reference.
 
-Merged to `main` as `075aff10d3097f1238d9d4f399ad72f29ca71993`.
+Highest-value checks:
 
-- Removed the Smart Shopping source selector and closest-recipes shopping behavior.
-- Renamed Smart Shopping to `Missing or Low Meal Plan Ingredients`.
-- Removed redundant Smart Shopping explanatory prose.
-- Scoped low-stock recommendations to ingredients referenced by planned meals.
-- Removed `Cook now` and merged the former shopping-candidate concept into `Almost ready`.
-- Added the Recipes `Off / 1 ingredient / 2 ingredients` threshold.
-- Added recipe-name chips and cloned meal-card overlay previews.
-- Tightened compact Pantry row padding.
-- Added `tests/shopping-readiness-refine.test.js` plus updated wiring expectations.
-- PR Validate and merged-main Validate both passed.
+### Pantry
 
-### #143 — Recipe previews
+- left rail presents separate Categories / Tags / Allergens cards with readable counts
+- Show more / Show less does not hide currently selected filters
+- top-right Pantry search remains functional
+- Pantry header shows the live item count
+- `+ Add Item` opens Restock
+- `⋮` exposes the existing Pantry controls and those controls still change Lists/stock/sort/favorites/tags correctly
+- category headings/borders no longer split the ingredient list into cards in vertical mode
+- rows remain compact and aligned
+- optional tags only add height beneath the relevant row
+- no nested vertical scrollbar appears inside the Pantry list
+- Smart Shopping still appears in the intended Pantry/Lists locations
 
-Closed as completed because the revised #167/#168 UX replaced the original three-dashboard-group hover-preview concept with keyboard-activatable recipe chips and a non-layout-shifting overlay preview.
+### Regression
 
-## Current issue state
-
-There are no open GitHub issues at the time of this handoff refresh.
-
-Do not invent a new implementation target solely to keep development moving. Use browser feedback and the next explicit product request to establish the next issue/step.
-
-## Current next step
-
-### Browser smoke test of the merged Shopping / Almost Ready pass
-
-Hard refresh the deployed app and verify the merged interaction in both desktop and mobile layouts. The highest-value checks are:
-
-#### Pantry density
-
-- compact item rows are visibly shorter vertically
-- item names do not have extra blank space above them
-- favorite, quantity, unit, and List controls remain aligned and usable
-- tag rows do not create accidental large gaps
-
-#### Smart Shopping
-
-- panel reads `Missing or Low Meal Plan Ingredients`
-- no source chooser is present
-- no `Closest recipes` option is present
-- old missing-count/source/shopping-cycle explanatory paragraphs are gone
-- planned-meal missing ingredients appear automatically
-- an on-hand allowed substitute prevents the original ingredient from being counted as missing when substitutions are enabled
-- low-stock rows appear only for ingredients used by the current meal plan
-- unrelated usage-based restocks do not leak into Smart Shopping
-- Category / Store grouping still works
-- recipe-reference visibility still works
-- Copy list matches the visible/managed list
-- Lists still exposes Smart Shopping correctly
-
-#### Recipes / Almost Ready
-
-- there is no separate `Cook now` dashboard group
-- there is no separate `Shopping candidates` group
-- `Almost ready` is the only readiness candidate area
-- the top-bar readiness control cycles `Off` → `1 ingredient` → `2 ingredients` → `Off`
-- Off hides readiness candidates
-- 1 ingredient only shows recipes missing exactly one ingredient
-- 2 ingredients shows recipes missing one or two ingredients
-- substitution-aware counts match the recipe-card pantry status
-- recipe names render as compact chips
-- clicking/keyboard-activating a chip opens a recipe-card preview overlay
-- opening/closing the preview does not visibly move the underlying recipe grid or change its scroll position
-- Escape/close behavior works and focus returns sensibly
-
-#### General regression
-
-- no console errors while moving among Recipes, Pantry, Meal Plan, Family, and Restock
+- Kitchen loads as its own page
+- Recipes Discover new meals chips open previews and preview Plan & shop works
+- Family avatar picker and Dislikes ingredient chips work
+- Manage Family removal confirms once and removes reliably
+- moving among Recipes, Kitchen, Pantry, Meal Plan, and Family produces no console errors
 - light/dark modes remain legible
-- topbar segmented controls remain stable
-- the legacy generated color palette does not visibly flash on a normal fresh load
 
-## Validation expectation
-
-- Small direct-main connector commits: verify GitHub Actions `Validate` on the resulting `main` commit.
-- Broad interaction changes: use a feature branch/PR and require PR `Validate` before merge, then verify merged-main `Validate`.
-- `Validate` runs `npm test`.
-- If a problem is visual-only and the connector cannot inspect it, stop patching blindly and request screenshot/browser evidence.
+If the deployed Pantry differs materially from the supplied screenshot after a hard refresh, use a new browser screenshot to drive the next visual correction rather than adding speculative CSS.
