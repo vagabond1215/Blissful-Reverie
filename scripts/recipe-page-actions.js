@@ -1,27 +1,7 @@
 ;(function (global) {
-  const READINESS_STORAGE_KEY = 'blissful-recipe-readiness-limit';
   const normalizeCount = (value) => Math.max(0, Number.parseInt(String(value ?? 0), 10) || 0);
   const formatResultCount = (value) => normalizeCount(value).toLocaleString();
-  const normalizeReadinessLimit = (value, fallback = 2) => {
-    const number = Number.parseInt(String(value ?? ''), 10);
-    return number === 0 || number === 1 || number === 2 ? number : fallback;
-  };
-  const nextReadinessLimit = (value) => {
-    const current = normalizeReadinessLimit(value, 2);
-    return current === 0 ? 1 : current === 1 ? 2 : 0;
-  };
-  const formatReadinessLabel = (value) => {
-    const current = normalizeReadinessLimit(value, 2);
-    return current === 0 ? 'Off' : current === 1 ? '1 ingredient' : '2 ingredients';
-  };
-  const api = {
-    READINESS_STORAGE_KEY,
-    normalizeCount,
-    formatResultCount,
-    normalizeReadinessLimit,
-    nextReadinessLimit,
-    formatReadinessLabel,
-  };
+  const api = { normalizeCount, formatResultCount };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   global.BlissfulRecipePageActions = Object.assign({}, global.BlissfulRecipePageActions || {}, api);
   if (typeof document === 'undefined') return;
@@ -31,20 +11,6 @@
   const isRecipesActive = () => {
     const view = document.getElementById('meal-view');
     return view instanceof HTMLElement && !view.hidden;
-  };
-
-  const getReadinessLimit = () => {
-    try {
-      return normalizeReadinessLimit(global.localStorage?.getItem?.(READINESS_STORAGE_KEY), 2);
-    } catch (error) {
-      return 2;
-    }
-  };
-
-  const setReadinessLimit = (value) => {
-    const normalized = normalizeReadinessLimit(value, 2);
-    try { global.localStorage?.setItem?.(READINESS_STORAGE_KEY, String(normalized)); } catch (error) { /* session-only fallback */ }
-    return normalized;
   };
 
   const ensurePageActionBar = () => {
@@ -80,51 +46,13 @@
     return chip;
   };
 
-  const ensureReadinessAction = () => {
-    const bar = ensurePageActionBar();
-    if (!bar) return null;
-    let button = document.getElementById('recipe-readiness-action');
-    if (!(button instanceof HTMLButtonElement)) {
-      button = document.createElement('button');
-      button.type = 'button';
-      button.id = 'recipe-readiness-action';
-      button.className = 'page-action-bar__button recipe-readiness-action';
-      button.addEventListener('click', () => {
-        const next = setReadinessLimit(nextReadinessLimit(getReadinessLimit()));
-        button.textContent = formatReadinessLabel(next);
-        button.dataset.readinessLimit = String(next);
-        button.setAttribute('aria-label', `Almost Ready: ${formatReadinessLabel(next)}`);
-        button.title = `Almost Ready: ${formatReadinessLabel(next)} missing threshold`;
-        global.dispatchEvent(new CustomEvent('blissful-recipe-readiness-change', { detail: { limit: next } }));
-        schedule();
-      });
-    }
-    const chip = document.getElementById('recipe-action-chip');
-    const family = document.getElementById('recipe-family-filter');
-    if (button.parentElement !== bar) {
-      const anchor = family?.parentElement === bar ? family : (chip?.nextSibling || null);
-      bar.insertBefore(button, anchor);
-    } else if (chip instanceof HTMLElement && chip.nextSibling !== button) {
-      bar.insertBefore(button, chip.nextSibling);
-    }
-    const limit = getReadinessLimit();
-    button.textContent = formatReadinessLabel(limit);
-    button.dataset.readinessLimit = String(limit);
-    button.setAttribute('aria-label', `Almost Ready: ${formatReadinessLabel(limit)}`);
-    button.title = `Almost Ready: ${formatReadinessLabel(limit)} missing threshold`;
-    button.hidden = !isRecipesActive();
-    return button;
-  };
-
   const ensureRecipeFamilyActions = () => {
     const bar = ensurePageActionBar();
     const family = document.getElementById('recipe-family-filter');
     if (!bar || !(family instanceof HTMLElement)) return null;
-    const readiness = document.getElementById('recipe-readiness-action');
     const chip = document.getElementById('recipe-action-chip');
-    const anchorNode = readiness instanceof HTMLElement ? readiness : chip;
-    const desiredAnchor = anchorNode instanceof HTMLElement ? anchorNode.nextSibling : null;
-    if (family.parentElement !== bar || (anchorNode instanceof HTMLElement && anchorNode.nextSibling !== family)) {
+    const desiredAnchor = chip instanceof HTMLElement ? chip.nextSibling : null;
+    if (family.parentElement !== bar || (chip instanceof HTMLElement && chip.nextSibling !== family)) {
       bar.insertBefore(family, desiredAnchor && desiredAnchor.parentElement === bar ? desiredAnchor : null);
     }
     family.classList.add('recipe-family-filter--page-actions');
@@ -201,8 +129,8 @@
   const sync = () => {
     const active = isRecipesActive();
     document.documentElement.classList.toggle('recipes-view-active', active);
+    document.getElementById('recipe-readiness-action')?.remove();
     ensureRecipeActions();
-    ensureReadinessAction();
     ensureRecipeFamilyActions();
     ensureRecipeSearch();
     updateBadge();
@@ -228,9 +156,6 @@
       attributeFilter: ['hidden', 'class', 'aria-pressed'],
     });
     global.addEventListener('blissful-family-dislikes-change', schedule);
-    global.addEventListener('storage', (event) => {
-      if (event.key === READINESS_STORAGE_KEY) schedule();
-    });
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
