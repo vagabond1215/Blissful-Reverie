@@ -1,0 +1,39 @@
+html.pantry-workspace-active #page-action-bar[popover]:popover-open {
+  position: fixed !important;
+  inset: 92px 24px auto auto !important;
+  z-index: 16000 !important;
+  width: min(230px, calc(100vw - 32px));
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 2px !important;
+  margin: 0 !important;
+  padding: 5px !important;
+  border: 1px solid var(--border, #d2d7de) !important;
+  border-radius: 9px !important;
+  background: var(--surface, #fff) !important;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 15%) !important;
+  transform: none !important;
+}
+html.pantry-workspace-active #page-action-bar[popover]:popover-open #pantry-restock-button {
+  display: none !important;
+}
+html.pantry-workspace-active #page-action-bar[popover]:popover-open > .page-action-bar__button {
+  width: 100% !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0 !important;
+  padding: 0 10px !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-align: left;
+}
+html.pantry-workspace-active #page-action-bar[popover]:popover-open > .page-action-bar__button:hover,
+html.pantry-workspace-active #page-action-bar[popover]:popover-open > .page-action-bar__button:focus-visible,
+html.pantry-workspace-active #page-action-bar[popover]:popover-open > .page-action-bar__button[aria-pressed='true'] {
+  background: var(--surface-muted, #eef1f4) !important;
+}
