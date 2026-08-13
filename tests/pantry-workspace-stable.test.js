@@ -4,6 +4,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const workspace = require('../scripts/pantry-workspace-core.js');
+const refine = require('../scripts/pantry-workspace-refine.js');
 
 const sample = [
   { category: 'Pasta', tags: ['Vegan', 'Contains Gluten'] },
@@ -15,6 +16,13 @@ assert.deepEqual(workspace.countOptions(sample, 'tags'), { vegan: 2, organic: 1,
 assert.deepEqual(workspace.countOptions(sample, 'allergens'), { 'contains gluten': 1, 'contains dairy': 1 });
 assert.deepEqual(workspace.visibleIndexes([{ selected: false }, { selected: false }, { selected: false }, { selected: true }], 2, false), [0, 1, 3]);
 assert.deepEqual(workspace.visibleIndexes([{}, {}, {}], 2, true), [0, 1, 2]);
+assert.equal(refine.SEARCH_PLACEHOLDER, 'Search...');
+assert.equal(refine.CATEGORY_SELECTOR, '#ingredient-options input[type="checkbox"]:checked');
+assert.deepEqual(refine.getCheckedValues([
+  { checked: true, value: 'Pasta' },
+  { checked: false, value: 'Dairy' },
+  { checked: true, value: 'Vegetable' },
+]), ['Pasta', 'Vegetable']);
 
 const bootstrap = read('scripts/pantry-workspace.js');
 assert(bootstrap.includes('scripts/pantry-workspace-core.js'));
@@ -31,6 +39,11 @@ assert(header.includes("pantry-restock-button')?.click()"));
 assert(header.includes("more.id = 'pantry-workspace-overflow'"));
 const actions = read('scripts/pantry-workspace-actions.js');
 assert(actions.includes('scripts/pantry-workspace-popover.js'));
+assert(actions.includes('scripts/pantry-workspace-refine.js'));
+const refineSource = read('scripts/pantry-workspace-refine.js');
+assert(refineSource.includes('requestAnimationFrame(clearNextCategory)'));
+assert(refineSource.includes('stopImmediatePropagation()'));
+assert(refineSource.includes("search.placeholder = SEARCH_PLACEHOLDER"));
 const popover = read('scripts/pantry-workspace-popover.js');
 assert(popover.includes("bar.setAttribute('popover', 'auto')"));
 assert(popover.includes('bar.togglePopover()'));
@@ -43,6 +56,12 @@ assert(css.includes('#pantry-grid .pantry-category--card'));
 assert(css.includes('display: contents !important'));
 const actionsCss = read('styles/pantry-workspace-actions.css');
 assert(actionsCss.includes('pantry-workspace-popover.css'));
+assert(actionsCss.includes('pantry-workspace-row-controls.css'));
+const rowControlsCss = read('styles/pantry-workspace-row-controls.css');
+assert(rowControlsCss.includes('border-bottom: 1px solid'));
+assert(rowControlsCss.includes('border: 0 !important'));
+assert(rowControlsCss.includes('width: 52px !important'));
+assert(rowControlsCss.includes('width: 94px !important'));
 const popoverCss = read('styles/pantry-workspace-popover.css');
 assert(popoverCss.includes('#page-action-bar[popover]:popover-open'));
 assert(popoverCss.includes('#pantry-restock-button'));
