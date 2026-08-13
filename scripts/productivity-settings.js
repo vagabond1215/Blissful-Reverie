@@ -137,7 +137,9 @@
 
   const ensurePantryWorkspaceAssets = () => {
     ensureStylesheet('styles/pantry-workspace.css');
+    ensureStylesheet('styles/pantry-workspace-actions.css');
     ensureScript('scripts/pantry-workspace.js');
+    ensureScript('scripts/pantry-workspace-actions.js');
   };
 
   const simplifySettings = () => {
