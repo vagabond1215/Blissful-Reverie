@@ -1,0 +1,76 @@
+/* Focused browser correction for Pantry filter cards. */
+html.pantry-workspace-active .pantry-workspace__filter-card > summary {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+html.pantry-workspace-active .pantry-workspace__filter-card:not([open]) {
+  padding-bottom: 0 !important;
+}
+
+html.pantry-workspace-active .pantry-workspace__filter-card > summary::before {
+  content: none !important;
+  display: none !important;
+}
+
+html.pantry-workspace-active .pantry-workspace__filter-card > summary::after {
+  content: '' !important;
+  order: 3;
+  width: 0.55rem;
+  height: 0.55rem;
+  flex: 0 0 0.55rem;
+  margin-left: auto;
+  border: 0 !important;
+  border-right: 1.5px solid currentColor !important;
+  border-bottom: 1.5px solid currentColor !important;
+  transform: rotate(45deg) !important;
+  transition: transform 0.16s ease;
+}
+
+html.pantry-workspace-active .pantry-workspace__filter-card[open] > summary::after {
+  transform: rotate(-135deg) !important;
+}
+
+html.pantry-workspace-active #ingredient-summary::after {
+  margin-left: 6px;
+}
+
+html.pantry-workspace-active .pantry-workspace__filter-card .filter-section__content {
+  margin: 0 !important;
+  padding: 2px 0 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+html.pantry-workspace-active .pantry-workspace__show-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0 !important;
+}
+
+html.pantry-workspace-active .pantry-workspace__show-more::before {
+  content: 'Show more';
+  font-size: 0.72rem;
+}
+
+html.pantry-workspace-active .pantry-workspace__show-more[aria-expanded='true']::before {
+  content: 'Show less';
+}
+
+html.pantry-workspace-active .pantry-workspace__show-more::after {
+  content: '';
+  width: 0.38rem;
+  height: 0.38rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.16s ease;
+}
+
+html.pantry-workspace-active .pantry-workspace__show-more[aria-expanded='true']::after {
+  transform: rotate(-135deg);
+}
