@@ -95,6 +95,7 @@
     ensureScript('scripts/family-avatar-picker.js');
     ensureStylesheet('styles/pantry-tag-refine.css');
     ensureScript('scripts/pantry-tag-refine.js');
+    ensureScript('scripts/pantry-density-fix.js');
   };
 
   const ensureRecipeFamilyActionAssets = () => {
@@ -131,6 +132,7 @@
     ensureStylesheet('styles/shopping-readiness-refine.css');
     ensureStylesheet('styles/recipe-card-layout.css');
     ensureScript('scripts/meal-plan-shopping-refine.js');
+    ensureScript('scripts/discovery-preview-actions.js');
   };
 
   const simplifySettings = () => {
