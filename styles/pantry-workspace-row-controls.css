@@ -1,0 +1,64 @@
+/* Compact Pantry row controls: keep native inputs/selects, reduce chrome. */
+html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-card__inline-controls {
+  gap: 4px !important;
+}
+
+html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-card__inline-input,
+html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-list-selector {
+  min-height: 26px !important;
+  height: 26px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--border-strong, #a9b0ba) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text, #111) !important;
+  font: inherit;
+  font-size: 0.76rem !important;
+  line-height: 1 !important;
+}
+
+html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-card__inline-input {
+  padding: 0 4px 1px !important;
+}
+
+html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-card__inline-input--quantity {
+  width: 52px !important;
+  text-align: right;
+}
+
+html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-card__inline-input--unit {
+  width: 72px !important;
+}
+
+html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-list-selector {
+  width: 94px !important;
+  min-width: 94px !important;
+  padding: 0 18px 1px 4px !important;
+}
+
+html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-card__inline-input:hover,
+html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-list-selector:hover {
+  border-bottom-color: var(--text-muted, #59616b) !important;
+}
+
+html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-card__inline-input:focus,
+html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-list-selector:focus {
+  border-bottom-color: var(--text, #111) !important;
+}
+
+@media (max-width: 900px) {
+  html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-card__inline-input--quantity {
+    width: 48px !important;
+  }
+
+  html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-card__inline-input--unit {
+    width: 64px !important;
+  }
+
+  html.pantry-workspace-active #pantry-grid .pantry-card--compact .pantry-list-selector {
+    width: 86px !important;
+    min-width: 86px !important;
+  }
+}
