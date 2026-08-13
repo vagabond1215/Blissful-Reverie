@@ -1,0 +1,57 @@
+/* Recipe-card ingredient alignment and single-column wide-card compaction. */
+
+/* Ingredient rows are a real measurement/name grid so long measurements never shift names. */
+#meal-grid .meal-card .ingredient-list li,
+.recipe-preview-dialog .meal-card .ingredient-list li {
+  display: grid !important;
+  grid-template-columns: 8.75rem minmax(0, 1fr);
+  column-gap: 0.55rem;
+  align-items: baseline;
+  min-width: 0;
+}
+
+#meal-grid .meal-card .ingredient-quantity,
+.recipe-preview-dialog .meal-card .ingredient-quantity {
+  width: auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+#meal-grid .meal-card .ingredient-name,
+.recipe-preview-dialog .meal-card .ingredient-name {
+  min-width: 0;
+  margin: 0 !important;
+}
+
+/* At the existing 920px layout breakpoint the recipe grid becomes one wide card.
+   Use that extra inline space by placing Instructions beside Ingredients. */
+@media (min-width: 641px) and (max-width: 920px) {
+  #meal-grid .meal-card {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-auto-flow: row dense;
+    align-items: start;
+    column-gap: 1rem;
+  }
+
+  #meal-grid .meal-card > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  #meal-grid .meal-card > .meal-card__section:has(> .ingredient-list) {
+    grid-column: 1;
+  }
+
+  #meal-grid .meal-card > .meal-card__section:has(> .instruction-list) {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 640px) {
+  #meal-grid .meal-card .ingredient-list li,
+  .recipe-preview-dialog .meal-card .ingredient-list li {
+    grid-template-columns: 7rem minmax(0, 1fr);
+    column-gap: 0.45rem;
+  }
+}

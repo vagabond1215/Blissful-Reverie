@@ -9,20 +9,32 @@ const recipeActions = require('../scripts/recipe-page-actions.js');
 const shoppingRefine = require('../scripts/meal-plan-shopping-refine.js');
 const tools = require('../scripts/productivity-tools.js');
 
-assert.equal(productivityUi.normalizeReadinessLimit('0'), 0);
-assert.equal(productivityUi.normalizeReadinessLimit('1'), 1);
-assert.equal(productivityUi.normalizeReadinessLimit('2'), 2);
-assert.equal(productivityUi.normalizeReadinessLimit('9'), 2);
+const mealHistory = {
+  '2026-08-10': [
+    { recipeId: 'past-b' },
+    { recipeId: 'past-a' },
+    { recipeId: 'past-a' },
+  ],
+  '2026-08-12': [{ recipeId: 'today' }],
+  '2026-08-13': [{ recipeId: 'future' }],
+  invalid: [{ recipeId: 'bad-date' }],
+};
+assert.deepEqual(
+  productivityUi.collectPastMealPlanRecipeIds(mealHistory, '2026-08-12'),
+  ['past-a', 'past-b'],
+);
 
-const entries = [
-  { recipe: { id: 'ready' }, fit: { missing: [] } },
-  { recipe: { id: 'one' }, fit: { missing: ['a'] } },
-  { recipe: { id: 'two' }, fit: { missing: ['a', 'b'] } },
-  { recipe: { id: 'three' }, fit: { missing: ['a', 'b', 'c'] } },
+const discoveryEntries = [
+  { recipe: { id: 'ready-new' }, fit: { total: 3, missing: [] } },
+  { recipe: { id: 'ready-swap' }, fit: { total: 2, missing: [], substituted: [{ requested: 'a', substitute: 'b' }] } },
+  { recipe: { id: 'made-before' }, fit: { total: 3, missing: [] } },
+  { recipe: { id: 'missing-one' }, fit: { total: 3, missing: ['a'] } },
+  { recipe: { id: 'unknown' }, fit: { total: 0, missing: [] } },
 ];
-assert.deepEqual(productivityUi.filterReadinessEntries(entries, 0), []);
-assert.deepEqual(productivityUi.filterReadinessEntries(entries, 1).map(({ recipe }) => recipe.id), ['one']);
-assert.deepEqual(productivityUi.filterReadinessEntries(entries, 2).map(({ recipe }) => recipe.id), ['one', 'two']);
+assert.deepEqual(
+  productivityUi.filterDiscoveryEntries(discoveryEntries, new Set(['made-before'])).map(({ recipe }) => recipe.id),
+  ['ready-new', 'ready-swap'],
+);
 
 const planned = [{ id: 'a' }, { id: 'b' }];
 const matches = new Map([
@@ -31,13 +43,9 @@ const matches = new Map([
 ]);
 assert.deepEqual(productivityUi.collectPlannedIngredientSlugs(planned, matches), ['egg', 'olive-oil', 'quinoa']);
 
-assert.equal(recipeActions.normalizeReadinessLimit('bad'), 2);
-assert.equal(recipeActions.nextReadinessLimit(0), 1);
-assert.equal(recipeActions.nextReadinessLimit(1), 2);
-assert.equal(recipeActions.nextReadinessLimit(2), 0);
-assert.equal(recipeActions.formatReadinessLabel(0), 'Off');
-assert.equal(recipeActions.formatReadinessLabel(1), '1 ingredient');
-assert.equal(recipeActions.formatReadinessLabel(2), '2 ingredients');
+assert.equal(recipeActions.normalizeCount('19'), 19);
+assert.equal(recipeActions.normalizeCount('bad'), 0);
+assert.equal(recipeActions.formatResultCount(1234), '1,234');
 
 const allowed = shoppingRefine.parseAllowedSlugs('["olives","milk"]');
 assert.equal(allowed.has('olives'), true);
@@ -65,33 +73,53 @@ const withoutSubstitution = tools.analyzeRecipePantryFit({
 assert.equal(withSubstitution.missing.length, 0);
 assert.equal(withSubstitution.substituted.length, 1);
 assert.equal(withoutSubstitution.missing.length, 1);
+assert.equal(
+  productivityUi.filterDiscoveryEntries([{ recipe: { id: 'sub-test' }, fit: withSubstitution }], []).length,
+  1,
+);
 
 const productivityScript = read('scripts/productivity-ui.js');
+assert(productivityScript.includes("heading.textContent = 'Discover new meals:'"));
+assert(productivityScript.includes('collectPastMealPlanRecipeIds'));
+assert(productivityScript.includes("const MEAL_PLAN_STORAGE_KEY = 'blissful-meal-plan'"));
 assert(productivityScript.includes("title.textContent = 'Missing or Low Meal Plan Ingredients'"));
 assert(productivityScript.includes("panel.dataset.shoppingRecommendationScope = 'meal-plan'"));
 assert(productivityScript.includes('productivity-dashboard__recipe-chip'));
 assert(productivityScript.includes('recipe-preview-dialog'));
+assert(!productivityScript.includes('filterReadinessEntries'));
+assert(!productivityScript.includes('READINESS_STORAGE_KEY'));
 assert(!productivityScript.includes("createDashboardGroup('Cook now'"));
 assert(!productivityScript.includes("createDashboardGroup('Shopping candidates'"));
-assert(!productivityScript.includes("SHOPPING_SOURCE_CLOSEST"));
-assert(!productivityScript.includes("createShoppingSourceControl"));
+assert(!productivityScript.includes('SHOPPING_SOURCE_CLOSEST'));
+assert(!productivityScript.includes('createShoppingSourceControl'));
 
 const actionScript = read('scripts/recipe-page-actions.js');
-assert(actionScript.includes('recipe-readiness-action'));
-assert(actionScript.includes('blissful-recipe-readiness-change'));
+assert(!actionScript.includes('ensureReadinessAction'));
+assert(!actionScript.includes('blissful-recipe-readiness-change'));
+assert(!actionScript.includes('READINESS_STORAGE_KEY'));
+assert(actionScript.includes("document.getElementById('recipe-readiness-action')?.remove()"));
 
 const refineScript = read('scripts/meal-plan-shopping-refine.js');
 assert(refineScript.includes('shoppingRecommendationSlugs'));
-assert(refineScript.includes("event.stopImmediatePropagation()"));
-assert(refineScript.includes(".shopping-management__summary"));
+assert(refineScript.includes('event.stopImmediatePropagation()'));
+assert(refineScript.includes('.shopping-management__summary'));
 
 const loader = read('scripts/productivity-settings.js');
 assert(loader.includes('styles/shopping-readiness-refine.css'));
+assert(loader.includes('styles/recipe-card-layout.css'));
 assert(loader.includes('scripts/meal-plan-shopping-refine.js'));
 
-const css = read('styles/shopping-readiness-refine.css');
-assert(css.includes('padding: 0 3px !important'));
-assert(css.includes('.productivity-dashboard__recipe-chip'));
-assert(css.includes('.recipe-preview-dialog'));
+const refineCss = read('styles/shopping-readiness-refine.css');
+assert(refineCss.includes('padding: 0 3px !important'));
+assert(refineCss.includes('.productivity-dashboard__group--discover'));
+assert(refineCss.includes('.productivity-dashboard__recipe-chip'));
+assert(refineCss.includes('.recipe-preview-dialog'));
+assert(!refineCss.includes('.recipe-readiness-action'));
 
-console.log('Shopping and recipe readiness refinement tests passed.');
+const layoutCss = read('styles/recipe-card-layout.css');
+assert(layoutCss.includes('grid-template-columns: 8.75rem minmax(0, 1fr)'));
+assert(layoutCss.includes('@media (min-width: 641px) and (max-width: 920px)'));
+assert(layoutCss.includes(':has(> .ingredient-list)'));
+assert(layoutCss.includes(':has(> .instruction-list)'));
+
+console.log('Shopping, discovery, and recipe-card layout refinement tests passed.');
