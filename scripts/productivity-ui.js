@@ -1,19 +1,31 @@
 ;(function (global) {
-  const READINESS_STORAGE_KEY = 'blissful-recipe-readiness-limit';
+  const MEAL_PLAN_STORAGE_KEY = 'blissful-meal-plan';
   const SHOPPING_ITEM_LIMIT = 18;
   const COPY_RESET_DELAY_MS = 2200;
 
-  const normalizeReadinessLimit = (value, fallback = 2) => {
-    const number = Number.parseInt(String(value ?? ''), 10);
-    return number === 0 || number === 1 || number === 2 ? number : fallback;
+  const isIsoDateKey = (value) => /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''));
+
+  const collectPastMealPlanRecipeIds = (mealPlan, todayKey) => {
+    const result = new Set();
+    const source = mealPlan && typeof mealPlan === 'object' && !Array.isArray(mealPlan) ? mealPlan : {};
+    const today = isIsoDateKey(todayKey) ? todayKey : '';
+    Object.entries(source).forEach(([dateKey, entries]) => {
+      if (!today || !isIsoDateKey(dateKey) || dateKey >= today || !Array.isArray(entries)) return;
+      entries.forEach((entry) => {
+        const recipeId = typeof entry?.recipeId === 'string' ? entry.recipeId.trim() : '';
+        if (recipeId) result.add(recipeId);
+      });
+    });
+    return Array.from(result).sort();
   };
 
-  const filterReadinessEntries = (entries, limit) => {
-    const threshold = normalizeReadinessLimit(limit);
-    if (!threshold) return [];
-    return (Array.isArray(entries) ? entries : []).filter(({ fit }) => {
-      const count = Array.isArray(fit?.missing) ? fit.missing.length : 0;
-      return count >= 1 && count <= threshold;
+  const filterDiscoveryEntries = (entries, madeRecipeIds) => {
+    const made = madeRecipeIds instanceof Set
+      ? madeRecipeIds
+      : new Set(Array.from(madeRecipeIds || []).map((value) => String(value || '').trim()).filter(Boolean));
+    return (Array.isArray(entries) ? entries : []).filter(({ recipe, fit }) => {
+      const missing = Array.isArray(fit?.missing) ? fit.missing.length : 0;
+      return Boolean(recipe?.id) && Number(fit?.total) > 0 && missing === 0 && !made.has(recipe.id);
     });
   };
 
@@ -30,7 +42,7 @@
     return Array.from(slugs).sort();
   };
 
-  const helperApi = { READINESS_STORAGE_KEY, normalizeReadinessLimit, filterReadinessEntries, collectPlannedIngredientSlugs };
+  const helperApi = { collectPastMealPlanRecipeIds, filterDiscoveryEntries, collectPlannedIngredientSlugs };
   if (typeof module !== 'undefined' && module.exports) module.exports = helperApi;
   global.BlissfulProductivityUIHelpers = Object.assign({}, global.BlissfulProductivityUIHelpers || {}, helperApi);
 
@@ -55,13 +67,24 @@
     return getRecipes().find((recipe) => recipe?.id === recipeId) || null;
   };
 
-  const getReadinessLimit = () => {
+  const getLocalTodayKey = () => {
+    const now = new Date();
+    const year = String(now.getFullYear()).padStart(4, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const readMealPlanHistory = () => {
     try {
-      return normalizeReadinessLimit(global.localStorage?.getItem?.(READINESS_STORAGE_KEY), 2);
+      const parsed = JSON.parse(global.localStorage?.getItem?.(MEAL_PLAN_STORAGE_KEY) || '{}');
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
     } catch (error) {
-      return 2;
+      return {};
     }
   };
+
+  const getMadeRecipeIds = () => new Set(collectPastMealPlanRecipeIds(readMealPlanHistory(), getLocalTodayKey()));
 
   const statusLabels = new Map([
     ['ready', 'Ready to cook'],
@@ -133,10 +156,7 @@
   const buildDashboardItems = () => getRecipes()
     .map((recipe) => ({ recipe, fit: getRecipeFit(recipe) }))
     .filter((entry) => entry.fit.total > 0)
-    .sort((a, b) => {
-      const missingDiff = a.fit.missing.length - b.fit.missing.length;
-      return missingDiff || String(a.recipe.name || '').localeCompare(String(b.recipe.name || ''));
-    });
+    .sort((a, b) => String(a.recipe.name || '').localeCompare(String(b.recipe.name || '')));
 
   const findLiveMealCard = (recipeId) => Array.from(document.querySelectorAll('#meal-grid .meal-card'))
     .find((card) => card instanceof HTMLElement && card.dataset.recipeId === recipeId) || null;
@@ -190,30 +210,29 @@
     return true;
   };
 
-  const createReadinessGroup = (entries, limit) => {
+  const createDiscoveryGroup = (entries) => {
     const section = document.createElement('section');
-    section.className = 'productivity-dashboard__group productivity-dashboard__group--almost-ready';
+    section.className = 'productivity-dashboard__group productivity-dashboard__group--discover';
     const heading = document.createElement('h3');
     heading.className = 'productivity-dashboard__group-title';
-    heading.textContent = 'Almost ready';
+    heading.textContent = 'Discover new meals:';
     section.appendChild(heading);
     if (!entries.length) {
       const empty = document.createElement('p');
       empty.className = 'productivity-dashboard__empty';
-      empty.textContent = `No recipes are within ${limit} missing ingredient${limit === 1 ? '' : 's'} right now.`;
+      empty.textContent = 'No new fully stocked recipes right now.';
       section.appendChild(empty);
       return section;
     }
     const list = document.createElement('div');
     list.className = 'productivity-dashboard__chips';
-    entries.forEach(({ recipe, fit }) => {
-      const missing = Array.isArray(fit.missing) ? fit.missing.length : 0;
+    entries.forEach(({ recipe }) => {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'productivity-dashboard__recipe-chip';
       chip.textContent = recipe.name;
-      chip.title = `${recipe.name} · missing ${missing} ingredient${missing === 1 ? '' : 's'}`;
-      chip.setAttribute('aria-label', `Preview ${recipe.name}; missing ${missing} ingredient${missing === 1 ? '' : 's'}`);
+      chip.title = `${recipe.name} · all ingredients on hand · not previously made`;
+      chip.setAttribute('aria-label', `Preview ${recipe.name}; all ingredients on hand and not previously made`);
       chip.addEventListener('click', () => openRecipePreview(recipe, chip));
       list.appendChild(chip);
     });
@@ -379,21 +398,16 @@
     if (!mealView || !mealGrid) return;
     document.getElementById('productivity-dashboard')?.remove();
 
-    const limit = getReadinessLimit();
     const entries = buildDashboardItems();
-    const almostReady = filterReadinessEntries(entries, limit);
+    const discoveries = filterDiscoveryEntries(entries, getMadeRecipeIds());
     const dashboard = document.createElement('section');
-    dashboard.className = 'productivity-dashboard productivity-dashboard--readiness';
+    dashboard.className = 'productivity-dashboard productivity-dashboard--discovery';
     dashboard.id = 'productivity-dashboard';
-    dashboard.setAttribute('aria-label', 'Recipe readiness and meal-plan shopping');
-    if (limit > 0) {
-      const groups = document.createElement('div');
-      groups.className = 'productivity-dashboard__groups productivity-dashboard__groups--readiness';
-      groups.appendChild(createReadinessGroup(almostReady, limit));
-      dashboard.appendChild(groups);
-    } else {
-      dashboard.classList.add('productivity-dashboard--readiness-off');
-    }
+    dashboard.setAttribute('aria-label', 'Recipe discovery and meal-plan shopping');
+    const groups = document.createElement('div');
+    groups.className = 'productivity-dashboard__groups productivity-dashboard__groups--discovery';
+    groups.appendChild(createDiscoveryGroup(discoveries));
+    dashboard.appendChild(groups);
     dashboard.appendChild(createShoppingPanel());
     mealView.insertBefore(dashboard, mealGrid);
   };
@@ -410,9 +424,6 @@
   };
 
   global.BlissfulProductivityUI = Object.assign({}, global.BlissfulProductivityUI || {}, { render });
-  global.addEventListener?.('blissful-recipe-readiness-change', () => {
-    if (currentContext) refreshProductivityUi();
-  });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !document.getElementById('recipe-preview-dialog')?.hidden) closeRecipePreview();
   });
