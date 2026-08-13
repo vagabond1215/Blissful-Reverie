@@ -4,18 +4,26 @@
     return String(card?.dataset?.recipeId || '').trim();
   };
 
-  const findLiveScheduleButton = (recipeId, root = document) => {
-    const id = String(recipeId || '').trim();
-    if (!id || !root?.querySelectorAll) return null;
-    return Array.from(root.querySelectorAll('#meal-grid .meal-card[data-recipe-id]'))
-      .find((card) => card instanceof HTMLElement && card.dataset.recipeId === id)
-      ?.querySelector('.meal-card__schedule-button') || null;
-  };
-
   const api = { getRecipeIdFromPreviewButton };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   global.BlissfulDiscoveryPreviewActions = Object.assign({}, global.BlissfulDiscoveryPreviewActions || {}, api);
   if (typeof document === 'undefined') return;
+
+  const findLiveScheduleButton = (recipeId) => {
+    const id = String(recipeId || '').trim();
+    if (!id) return null;
+    return Array.from(document.querySelectorAll('#meal-grid .meal-card[data-recipe-id]'))
+      .find((card) => card instanceof HTMLElement && card.dataset.recipeId === id)
+      ?.querySelector('.meal-card__schedule-button') || null;
+  };
+
+  const enablePreviewScheduleButtons = () => {
+    document.querySelectorAll('#recipe-preview-dialog .meal-card--preview .meal-card__schedule-button').forEach((button) => {
+      if (!(button instanceof HTMLElement)) return;
+      button.style.setProperty('pointer-events', 'auto', 'important');
+      button.style.setProperty('cursor', 'pointer', 'important');
+    });
+  };
 
   const forwardPlanAndShop = (event) => {
     const button = event.target instanceof Element
@@ -40,7 +48,10 @@
   };
 
   const start = () => {
+    enablePreviewScheduleButtons();
     document.addEventListener('click', forwardPlanAndShop, true);
+    const observer = new MutationObserver(() => enablePreviewScheduleButtons());
+    observer.observe(document.body, { childList: true, subtree: true });
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
