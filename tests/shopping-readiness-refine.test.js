@@ -8,6 +8,9 @@ const productivityUi = require('../scripts/productivity-ui.js');
 const recipeActions = require('../scripts/recipe-page-actions.js');
 const shoppingRefine = require('../scripts/meal-plan-shopping-refine.js');
 const tools = require('../scripts/productivity-tools.js');
+const familyDislikes = require('../scripts/family-dislikes.js');
+const dislikePicker = require('../scripts/family-dislikes-click-fix.js');
+const previewActions = require('../scripts/discovery-preview-actions.js');
 
 const mealHistory = {
   '2026-08-10': [
@@ -78,6 +81,41 @@ assert.equal(
   1,
 );
 
+const ingredientCatalog = [
+  { kind: 'category', key: 'dairy', label: 'Dairy' },
+  ...Array.from({ length: 125 }, (_, index) => ({
+    kind: 'ingredient',
+    key: `ingredient-${index}`,
+    label: index === 42 ? 'Whole Milk' : `Ingredient ${index}`,
+    search: index === 42 ? ['whole milk', 'milk'] : [`ingredient ${index}`],
+  })),
+];
+assert.equal(dislikePicker.filterIngredientTokens(ingredientCatalog, '').length, 125);
+assert.deepEqual(dislikePicker.filterIngredientTokens(ingredientCatalog, 'milk').map((token) => token.key), ['ingredient-42']);
+
+const dislikeToken = { kind: 'ingredient', key: 'ingredient-42', label: 'Whole Milk' };
+let dislikeState = dislikePicker.toggleTokenInState(
+  { version: 1, members: {} },
+  'member-1',
+  dislikeToken,
+  familyDislikes.normalizeState,
+  familyDislikes.normalizeTokenList,
+);
+assert.deepEqual(dislikeState.members['member-1'], [dislikeToken]);
+dislikeState = dislikePicker.toggleTokenInState(
+  dislikeState,
+  'member-1',
+  dislikeToken,
+  familyDislikes.normalizeState,
+  familyDislikes.normalizeTokenList,
+);
+assert.deepEqual(dislikeState.members['member-1'], []);
+
+const fakePreviewButton = {
+  closest: () => ({ dataset: { recipeId: 'recipe-42' } }),
+};
+assert.equal(previewActions.getRecipeIdFromPreviewButton(fakePreviewButton), 'recipe-42');
+
 const productivityScript = read('scripts/productivity-ui.js');
 assert(productivityScript.includes("heading.textContent = 'Discover new meals:'"));
 assert(productivityScript.includes('collectPastMealPlanRecipeIds'));
@@ -104,10 +142,29 @@ assert(refineScript.includes('shoppingRecommendationSlugs'));
 assert(refineScript.includes('event.stopImmediatePropagation()'));
 assert(refineScript.includes('.shopping-management__summary'));
 
+const dislikeScript = read('scripts/family-dislikes-click-fix.js');
+assert(dislikeScript.includes(".filter((token) => token?.kind === 'ingredient')"));
+assert(!dislikeScript.includes('choices.slice('));
+assert(dislikeScript.includes("button.setAttribute('aria-pressed'"));
+assert(dislikeScript.includes('toggleTokenInState'));
+
+const previewScript = read('scripts/discovery-preview-actions.js');
+assert(previewScript.includes("#recipe-preview-dialog .meal-card--preview .meal-card__schedule-button"));
+assert(previewScript.includes("button.style.setProperty('pointer-events', 'auto', 'important')"));
+assert(previewScript.includes('liveButton.click()'));
+assert(previewScript.includes('global.scrollTo(scrollX, scrollY)'));
+
+const densityScript = read('scripts/pantry-density-fix.js');
+assert(densityScript.includes("card.style.setProperty('grid-template-rows', '26px auto', 'important')"));
+assert(densityScript.includes("card.style.setProperty('padding', '0 3px', 'important')"));
+assert(densityScript.includes("row.style.setProperty('margin', row.hidden ? '0' : '0 0 2px', 'important')"));
+
 const loader = read('scripts/productivity-settings.js');
 assert(loader.includes('styles/shopping-readiness-refine.css'));
 assert(loader.includes('styles/recipe-card-layout.css'));
 assert(loader.includes('scripts/meal-plan-shopping-refine.js'));
+assert(loader.includes('scripts/discovery-preview-actions.js'));
+assert(loader.includes('scripts/pantry-density-fix.js'));
 
 const refineCss = read('styles/shopping-readiness-refine.css');
 assert(refineCss.includes('padding: 0 3px !important'));
@@ -122,4 +179,4 @@ assert(layoutCss.includes('@media (min-width: 641px) and (max-width: 920px)'));
 assert(layoutCss.includes(':has(> .ingredient-list)'));
 assert(layoutCss.includes(':has(> .instruction-list)'));
 
-console.log('Shopping, discovery, and recipe-card layout refinement tests passed.');
+console.log('Shopping, discovery, dislikes, preview actions, and recipe-card layout refinement tests passed.');
