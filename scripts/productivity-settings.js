@@ -129,6 +129,7 @@
 
   const ensureShoppingReadinessRefinementAssets = () => {
     ensureStylesheet('styles/shopping-readiness-refine.css');
+    ensureStylesheet('styles/recipe-card-layout.css');
     ensureScript('scripts/meal-plan-shopping-refine.js');
   };
 
