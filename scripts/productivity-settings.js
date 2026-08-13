@@ -135,6 +135,11 @@
     ensureScript('scripts/discovery-preview-actions.js');
   };
 
+  const ensurePantryWorkspaceAssets = () => {
+    ensureStylesheet('styles/pantry-workspace.css');
+    ensureScript('scripts/pantry-workspace.js');
+  };
+
   const simplifySettings = () => {
     const toolbar = document.getElementById('theme-toolbar');
     if (!toolbar || document.getElementById('productivity-settings-advanced')) {
@@ -195,6 +200,7 @@
     ensureWorkspaceFlowAssets();
     ensureUiPolishAssets();
     ensureShoppingReadinessRefinementAssets();
+    ensurePantryWorkspaceAssets();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();
       return;
