@@ -1,4 +1,4 @@
-/* Meal-plan shopping ownership, Almost Ready chips, recipe preview, and denser Pantry rows. */
+/* Meal-plan shopping ownership, Discover New Meals chips, recipe preview, and denser Pantry rows. */
 
 /* Pantry rows: remove the remaining top/bottom air while preserving 26px controls. */
 #pantry-grid .pantry-card--compact.pantry-card {
@@ -29,55 +29,17 @@
   margin: 0 0 1px !important;
 }
 
-/* Recipes: missing-threshold action lives in the same segmented page bar. */
-#page-action-bar .recipe-readiness-action {
-  height: 38px !important;
-  min-height: 38px !important;
-  max-height: 38px !important;
-  min-width: max-content;
-  margin: 0 0 0 -1px !important;
-  padding: 0 11px !important;
-  border: 1px solid var(--border, #cbd0d7) !important;
-  border-radius: 0 !important;
-  background: var(--surface, #fff) !important;
-  color: var(--text, #111) !important;
-  box-shadow: none !important;
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 700;
-  white-space: nowrap;
-  cursor: pointer;
-  box-sizing: border-box;
-}
-
-#page-action-bar .recipe-readiness-action:hover,
-#page-action-bar .recipe-readiness-action:focus-visible {
-  background: var(--surface-muted, #eef1f4) !important;
-}
-
-html.recipes-view-active #page-action-bar #reset-filters {
-  border-radius: 0 !important;
-}
-
-html.recipes-view-active #page-action-bar #reset-filters.page-action-bar__segment-last {
-  border-radius: 0 999px 999px 0 !important;
-}
-
-/* Almost Ready is now the only Recipes dashboard group. */
-.productivity-dashboard--readiness {
+/* Discover New Meals is the single Recipes dashboard group. */
+.productivity-dashboard--discovery {
   gap: 0 !important;
   padding: 0.75rem !important;
 }
 
-.productivity-dashboard--readiness-off:empty {
-  display: none !important;
-}
-
-.productivity-dashboard__groups--readiness {
+.productivity-dashboard__groups--discovery {
   display: block !important;
 }
 
-.productivity-dashboard__group--almost-ready {
+.productivity-dashboard__group--discover {
   padding: 0 !important;
   border: 0 !important;
   background: transparent !important;
@@ -206,14 +168,6 @@ html.recipes-view-active #page-action-bar #reset-filters.page-action-bar__segmen
 }
 
 @media (max-width: 760px) {
-  #page-action-bar .recipe-readiness-action {
-    height: 36px !important;
-    min-height: 36px !important;
-    max-height: 36px !important;
-    padding-inline: 9px !important;
-    font-size: 0.72rem;
-  }
-
   .recipe-preview-dialog {
     padding: 8px;
   }
