@@ -62,7 +62,7 @@ assert(invalidIngredient.errors.some((error) => error.includes("duplicates the d
 assert(invalidIngredient.errors.some((error) => error.includes("alias 'same' is duplicated")));
 assert(invalidIngredient.errors.some((error) => error.includes("packageUnit 'cup'")));
 assert(invalidIngredient.errors.some((error) => error.includes('stockUnit must be a recognized non-package unit')));
-assert(invalidIngredient.errors.some((error) => error.includes('purchaseUnit must be a recognized package unit')));
+assert(invalidIngredient.errors.some((error) => error.includes('purchaseUnit must be a recognized purchase/package unit')));
 assert(invalidIngredient.errors.some((error) => error.includes('unitsPerPurchase must be positive')));
 
 const validRecipe = admission.validateCuratedRecipe({
@@ -122,12 +122,13 @@ const customInvalid = admission.validateCustomIngredient({
   packagePurchasing: true,
 });
 assert(customInvalid.errors.some((error) => error.includes('stockUnit must be a recognized non-package unit')));
-assert(customInvalid.errors.some((error) => error.includes('purchaseUnit must be a recognized package unit')));
+assert(customInvalid.errors.some((error) => error.includes('purchaseUnit must be a recognized purchase/package unit')));
 assert(customInvalid.errors.some((error) => error.includes('unitsPerPurchase must be positive')));
 
 assert.equal(admission.isStockUnit('cup'), true);
 assert.equal(admission.isStockUnit('box'), false);
 assert.equal(admission.isPurchaseUnit('box'), true);
+assert.equal(admission.isPurchaseUnit('each'), true);
 assert.equal(admission.isPurchaseUnit('cup'), false);
 assert.equal(units.normalizeRecipeUnit('tablespoons', 2).unit, 'tbsp');
 
@@ -137,4 +138,38 @@ assert(criteria.includes('Curated recipe admission'));
 assert(criteria.includes('User-created/custom ingredients'));
 assert(criteria.includes('Promotion from custom to canonical'));
 
-console.log('Catalog admission and custom ingredient validation tests passed.');
+// Run the current effective catalog through the same validators used for future additions.
+global.window = global;
+require('../data/ingredients.js');
+require('../data/recipes.js');
+require('../scripts/ingredient-matching.js');
+const catalogIngredients = global.BLISSFUL_INGREDIENTS || [];
+const catalogRecipes = global.BLISSFUL_RECIPES || [];
+const catalogMatching = global.BlissfulMatching || {};
+const catalogErrors = [];
+
+catalogIngredients.forEach((ingredient) => {
+  const result = admission.validateCuratedIngredient(ingredient, {
+    existingIngredients: catalogIngredients,
+    allowedCategories: allowedIngredientCategories,
+    inventoryProfiles: units.DEFAULT_PROFILES,
+  });
+  result.errors.forEach((error) => catalogErrors.push(`ingredient ${ingredient.slug || ingredient.name}: ${error}`));
+});
+
+catalogRecipes.forEach((recipe) => {
+  const result = admission.validateCuratedRecipe(recipe, {
+    ingredients: catalogIngredients,
+    existingRecipes: catalogRecipes,
+    matching: catalogMatching,
+  });
+  result.errors.forEach((error) => catalogErrors.push(`recipe ${recipe.id || recipe.name}: ${error}`));
+});
+
+assert.equal(
+  catalogErrors.length,
+  0,
+  `Curated catalog admission failures (${catalogErrors.length}):\n${catalogErrors.slice(0, 60).join('\n')}${catalogErrors.length > 60 ? `\n...${catalogErrors.length - 60} more` : ''}`,
+);
+
+console.log(`Catalog admission and custom ingredient validation tests passed for ${catalogIngredients.length} ingredients and ${catalogRecipes.length} recipes.`);
