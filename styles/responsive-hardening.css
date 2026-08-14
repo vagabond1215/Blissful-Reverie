@@ -67,9 +67,14 @@
     flex: 0 0 auto !important;
   }
 
-  /* Pantry search is intentionally desktop/tablet-only until a compact drawer exists. */
+  /* Topbar search chrome is too wide for phones; keep recipe search in the filter tray. */
+  html.recipes-view-active #recipes-page .recipe-topbar-search,
   html.pantry-workspace-active #recipes-page .pantry-topbar-search {
     display: none !important;
+  }
+
+  html.recipes-view-active #filter-panel .input-group--search {
+    display: block !important;
   }
 
   html #app-layout.layout {
