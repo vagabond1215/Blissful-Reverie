@@ -43,6 +43,8 @@
     if (name.includes('bouillon')) return 'jar';
     if (name.includes('powdered milk')) return 'box';
     if (name.includes('coconut milk') && !name.includes('beverage')) return 'can';
+    if (name.includes('buttermilk')) return 'carton';
+    if (name.includes('clarified butter')) return 'jar';
     if (name.includes('egg') && !hasAny(name, ['egg noodles', 'eggplant'])) return 'carton';
     if (
       name.includes('butter')
@@ -55,7 +57,7 @@
         ? 'carton'
         : 'jug';
     }
-    if (hasAny(name, ['heavy cream', 'half-and-half', 'half and half', 'buttermilk', 'whipping cream'])) return 'carton';
+    if (hasAny(name, ['heavy cream', 'half-and-half', 'half and half', 'whipping cream'])) return 'carton';
     if (hasAny(name, ['yogurt', 'sour cream', 'cottage cheese', 'ricotta', 'skyr', 'quark', 'crème fraîche', 'creme fraiche'])) return 'tub';
     if (name.includes('cream cheese')) return 'pack';
     if (hasAny(name, ['ghee', 'coconut oil', 'shortening'])) return 'jar';
