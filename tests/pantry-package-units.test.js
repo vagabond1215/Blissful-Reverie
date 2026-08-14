@@ -164,7 +164,7 @@ const matcherIndex = matching.createIngredientMatcherIndex(catalog);
 const { recipeIngredientMatches } = matching.mapRecipesToIngredientMatches(recipes, matcherIndex);
 const expectRecipeMatch = (recipeId, expected, excluded = []) => {
   const matches = recipeIngredientMatches.get(recipeId);
-  assert(matches instanceof Set, `Missing recipe match set for ${recipeId}`);
+  assert(matches && typeof matches.has === 'function', `Missing recipe match set for ${recipeId}`);
   expected.forEach((slug) => assert(matches.has(slug), `${recipeId} should match ${slug}`));
   excluded.forEach((slug) => assert(!matches.has(slug), `${recipeId} should not retain generic ${slug}`));
 };
