@@ -11,6 +11,7 @@
     'scripts/pantry-inventory-units-runtime.js',
     'scripts/shopping-inventory-units-sync.js',
     'scripts/ingredient-process-runtime.js',
+    'scripts/pantry-item-settings.js',
     'scripts/recipe-inventory-runtime.js',
   ];
   const load = (index) => {
