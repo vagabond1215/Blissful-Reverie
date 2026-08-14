@@ -9,6 +9,7 @@
     'scripts/pantry-package-unit-runtime.js',
     'scripts/pantry-package-unit-migration.js',
     'scripts/pantry-inventory-units-runtime.js',
+    'scripts/shopping-inventory-units-sync.js',
     'scripts/ingredient-process-runtime.js',
     'scripts/recipe-inventory-runtime.js',
   ];
