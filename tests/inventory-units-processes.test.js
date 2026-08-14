@@ -3,6 +3,8 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const units = require('../scripts/inventory-units-core.js');
+const rebase = require('../scripts/inventory-units-rebase.js');
+const shoppingSync = require('../scripts/shopping-inventory-units-sync.js');
 
 assert.equal(units.normalizeUnit('tablespoons'), 'tbsp');
 assert.equal(units.normalizeUnit('lbs'), 'pound');
@@ -37,6 +39,15 @@ used = units.consumeIngredient({ inventory: purchase.inventory, slug: 'dairy-but
 assert.equal(used.ok, true);
 assert.deepEqual(used.inventory['dairy-butter-salted'], { quantity: 2, unit: 'stick' });
 
+const rebasedButter = rebase.rebaseProfile(butter, 'tbsp');
+assert(rebasedButter, 'Butter should rebase from sticks to tablespoons');
+assert.equal(rebasedButter.stockUnit, 'tbsp');
+assert.equal(rebasedButter.purchaseUnit, 'box');
+assert.equal(rebasedButter.unitsPerPurchase, 32);
+assert.equal(units.convertQuantity(1, 'box', 'tbsp', rebasedButter), 32);
+assert.equal(units.convertQuantity(1, 'cup', 'tbsp', rebasedButter), 16);
+assert(Math.abs(units.convertQuantity(4, 'oz', 'tbsp', rebasedButter) - 8) < 1e-8);
+
 const buttermilk = units.resolveProfile('dairy-buttermilk', {});
 assert.equal(buttermilk.stockUnit, 'cup');
 assert.equal(buttermilk.purchaseUnit, 'carton');
@@ -49,6 +60,29 @@ assert.deepEqual(purchase.inventory['dairy-buttermilk'], { quantity: 4, unit: 'c
 used = units.consumeIngredient({ inventory: { 'dairy-buttermilk': { quantity: 1, unit: 'carton' } }, slug: 'dairy-buttermilk', quantity: 1, unit: 'cup', profile: buttermilk });
 assert.equal(used.ok, true);
 assert.deepEqual(used.inventory['dairy-buttermilk'], { quantity: 3, unit: 'cup' });
+
+const rebasedButtermilk = rebase.rebaseProfile(buttermilk, 'quart');
+assert(rebasedButtermilk, 'Buttermilk should rebase from cups to quarts');
+assert.equal(rebasedButtermilk.stockUnit, 'quart');
+assert.equal(rebasedButtermilk.purchaseUnit, 'carton');
+assert(Math.abs(rebasedButtermilk.unitsPerPurchase - 1) < 1e-8);
+assert(Math.abs(units.convertQuantity(1, 'carton', 'quart', rebasedButtermilk) - 1) < 1e-8);
+
+const syncedShoppingProfiles = shoppingSync.syncShoppingProfiles(
+  { 'dairy-butter-salted': { store: 'Giant', purchaseMode: 'unit', packageSize: 1 } },
+  { 'dairy-butter-salted': rebasedButter },
+);
+assert.equal(syncedShoppingProfiles['dairy-butter-salted'].store, 'Giant');
+assert.equal(syncedShoppingProfiles['dairy-butter-salted'].purchaseMode, 'package');
+assert.equal(syncedShoppingProfiles['dairy-butter-salted'].packageSize, 32);
+
+const normalizedUsage = shoppingSync.normalizeUsageToStock({
+  'dairy-butter-salted': {
+    events: [{ at: '2026-08-13T12:00:00.000Z', amount: 0.25, unit: 'cup' }],
+  },
+}, { 'dairy-butter-salted': rebasedButter });
+assert.equal(normalizedUsage['dairy-butter-salted'].events[0].unit, 'tbsp');
+assert.equal(normalizedUsage['dairy-butter-salted'].events[0].amount, 4);
 
 assert.deepEqual(units.normalizeRecipeUnit('tablespoons', 3), { quantity: 3, unit: 'tbsp' });
 assert.deepEqual(units.normalizeRecipeUnit('large', 2), { quantity: 2, unit: 'each' });
