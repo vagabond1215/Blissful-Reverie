@@ -3,6 +3,8 @@
   const sources = [
     'scripts/pantry-workspace-popover.js',
     'scripts/pantry-workspace-refine.js',
+    'scripts/pantry-package-defaults-core.js',
+    'scripts/pantry-package-unit-runtime.js',
   ];
   const load = (index) => {
     if (index >= sources.length) return;
