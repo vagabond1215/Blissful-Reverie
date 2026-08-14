@@ -1,29 +1,37 @@
-# Next 10 product tasks
+# Next 10 product tasks — historical roadmap
 
-This document records the implemented state of the recovery roadmap on PR #118.
+This document records the recovery roadmap that began around PR #118. It is retained as implementation history, not as the current handoff or source of truth for what the UI should expose today.
 
-## Status
+## Completed recovery work
 
-1. **Recipe and ingredient schema validation** - implemented with reusable validation in `scripts/data-validation.js` and the `npm run validate:data` CLI.
-2. **Ingredient and pantry matching tests** - implemented across matching, pantry-fit, validation edge-case, productivity, and application-wiring tests.
-3. **Export/import backup** - implemented with tested localStorage backup and restore helpers plus compact Local backup import/export controls inside Settings.
-4. **Dashboard summary** - implemented above the recipe grid with Cook now, Almost ready, and Shopping candidates groups.
-5. **Missing-ingredient counts** - implemented on recipe cards and dashboard entries using live pantry state and the app substitution graph.
-6. **Shopping list generation** - implemented as a categorized smart shopping panel with planned-meal and closest-recipe source modes, recipe references, compact empty states, and copy feedback.
-7. **Add recipe to meal plan from cards** - implemented by the existing calendar action on every recipe card.
-8. **Generated recipe labels** - implemented on recipe cards for curated recipes, generated templates, and ingredient ideas.
-9. **Move theme controls deeper into settings** - implemented with the native keyboard-accessible `Advanced appearance` disclosure. Controls retain their existing IDs and event handlers.
-10. **First-run setup** - implemented for valid missing-state detection, starter pantry/preferences, schema-compatible persistence, and same-page application.
+1. **Recipe and ingredient schema validation** — reusable validation and the `npm run validate:data` CLI.
+2. **Ingredient and pantry matching tests** — matching, pantry-fit, validation edge cases, productivity, and application wiring.
+3. **Export/import backup** — localStorage backup and restore helpers plus Settings controls.
+4. **Recipe readiness analysis** — pantry-fit and missing-ingredient analysis used by planning/shopping workflows.
+5. **Meal-plan scheduling from recipes** — calendar actions and schedule flow.
+6. **Generated-content labeling** — curated recipes, generated templates, and ingredient ideas can be distinguished in code/data.
+7. **Settings consolidation** — advanced appearance controls moved deeper into Settings.
+8. **First-run setup** — starter pantry/preferences and schema-compatible persistence.
+9. **Pantry workspace refinement** — compact rows, list assignment, Restock, tag/filter controls, and item settings.
+10. **Family workspace refinement** — compact member editing and family-management interactions.
 
-## Integration
+## Current architecture notes
 
-The application shell loads data, matching, productivity helpers, settings, onboarding, productivity UI, theme diagnostics, and the main app explicitly in `index.html`.
+The application is still a static local-first app with a large `scripts/app.js` core and several feature runtimes loaded around it. New work should avoid adding another parallel UI layer when an existing runtime can be simplified or retired.
 
-`scripts/app.js` calls the productivity renderer with live recipes, match maps, substitution data, and pantry state after it renders recipe cards. This avoids mutation observers, duplicate matching indexes, and localStorage polling while keeping the large app shell changes small.
+The old Dashboard summary and shopping-source-mode concepts described by earlier versions of this roadmap are no longer acceptance requirements. Current browser validation should follow `docs/browser-smoke-test-checklist.md` and the rendered product, not historical roadmap wording.
 
-## Follow-up candidates
+## Current priorities
 
-- Define shopping-list quantity aggregation and serving-size policy before changing the shopping-list algorithm.
-- Audit meal-plan workflow friction after shopping-list integration before changing meal-plan behavior.
-- Create a repeatable browser smoke-test checklist for future productivity UI work.
-- Split additional app-shell domains into tested modules only when a focused feature change requires it.
+- Keep light/dark theme aliases consistent across late-loaded feature styles.
+- Keep the 375 px layout within the viewport and move dense filter/search UI into compact mobile treatments.
+- Paginate or virtualize recipe results and render expensive recipe details only when needed.
+- Keep Pantry unit/process controls dialog-owned instead of creating hidden per-row panels.
+- Treat generated ingredient ideas as discovery content rather than equal-trust canonical recipes.
+- Centralize persistent localStorage keys and backup validation.
+- Replace source-string assertions with behavioral tests as touched areas are refactored.
+- Keep documentation synchronized with the current Pantry, Family, Lists, Restock, and recipe workflows.
+
+## Handoff rule
+
+Do not use a PR number in this file as a "latest PR" marker. Git history and the active pull-request list are the authoritative record for current repository state.
