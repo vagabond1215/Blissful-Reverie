@@ -32,6 +32,10 @@ html.pantry-workspace-active #page-action-bar[popover]:popover-open > .page-acti
   box-shadow: none !important;
   text-align: left;
 }
+/* The generic rule above must not override another page's hidden action state. */
+html.pantry-workspace-active #page-action-bar[popover]:popover-open > .page-action-bar__button:not(.pantry-page-action):not(#pantry-lists-action):not(#pantry-tags-action) {
+  display: none !important;
+}
 html.pantry-workspace-active #page-action-bar[popover]:popover-open > .page-action-bar__button:hover,
 html.pantry-workspace-active #page-action-bar[popover]:popover-open > .page-action-bar__button:focus-visible,
 html.pantry-workspace-active #page-action-bar[popover]:popover-open > .page-action-bar__button[aria-pressed='true'] {
