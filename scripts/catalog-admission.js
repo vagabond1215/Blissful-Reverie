@@ -2,6 +2,8 @@
   const units = global.BlissfulInventoryUnits
     || (typeof require === 'function' ? require('./inventory-units-core.js') : {});
 
+  const ADMISSION_VERSION = 1;
+  const LEGACY_BASELINE_COUNTS = Object.freeze({ ingredients: 554, recipes: 314 });
   const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
   const isRecord = (value) => value && typeof value === 'object' && !Array.isArray(value);
   const clean = (value) => String(value || '').trim();
@@ -191,10 +193,76 @@
     return { errors, warnings };
   };
 
+  const validateCatalogGrowth = ({
+    ingredients = [],
+    recipes = [],
+    matching = global.BlissfulMatching || {},
+    allowedCategories = null,
+    inventoryProfiles = units.DEFAULT_PROFILES || {},
+    baselineCounts = LEGACY_BASELINE_COUNTS,
+  } = {}) => {
+    const errors = [];
+    const warnings = [];
+    const ingredientList = Array.isArray(ingredients) ? ingredients : [];
+    const recipeList = Array.isArray(recipes) ? recipes : [];
+    const baselineIngredients = Number(baselineCounts?.ingredients) || 0;
+    const baselineRecipes = Number(baselineCounts?.recipes) || 0;
+
+    if (ingredientList.length < baselineIngredients) {
+      add(errors, `canonical ingredient count fell below legacy baseline ${baselineIngredients}.`);
+    }
+    if (recipeList.length < baselineRecipes) {
+      add(errors, `curated recipe count fell below legacy baseline ${baselineRecipes}.`);
+    }
+
+    const admittedIngredients = ingredientList.filter((item) => Number(item?.admissionVersion) >= ADMISSION_VERSION);
+    const admittedRecipes = recipeList.filter((item) => Number(item?.admissionVersion) >= ADMISSION_VERSION);
+    const expectedIngredientAdmissions = Math.max(0, ingredientList.length - baselineIngredients);
+    const expectedRecipeAdmissions = Math.max(0, recipeList.length - baselineRecipes);
+
+    if (admittedIngredients.length !== expectedIngredientAdmissions) {
+      add(
+        errors,
+        `expected ${expectedIngredientAdmissions} versioned curated ingredient admission(s), found ${admittedIngredients.length}; every net-new canonical ingredient must set admissionVersion: ${ADMISSION_VERSION}.`,
+      );
+    }
+    if (admittedRecipes.length !== expectedRecipeAdmissions) {
+      add(
+        errors,
+        `expected ${expectedRecipeAdmissions} versioned curated recipe admission(s), found ${admittedRecipes.length}; every net-new curated recipe must set admissionVersion: ${ADMISSION_VERSION}.`,
+      );
+    }
+
+    admittedIngredients.forEach((ingredient) => {
+      const result = validateCuratedIngredient(ingredient, {
+        existingIngredients: ingredientList,
+        inventoryProfiles,
+        allowedCategories,
+      });
+      result.errors.forEach((error) => add(errors, `ingredient ${clean(ingredient.slug) || clean(ingredient.name)}: ${error}`));
+      result.warnings.forEach((warning) => add(warnings, `ingredient ${clean(ingredient.slug) || clean(ingredient.name)}: ${warning}`));
+    });
+
+    admittedRecipes.forEach((recipe) => {
+      const result = validateCuratedRecipe(recipe, {
+        ingredients: ingredientList,
+        existingRecipes: recipeList,
+        matching,
+      });
+      result.errors.forEach((error) => add(errors, `recipe ${clean(recipe.id) || clean(recipe.name)}: ${error}`));
+      result.warnings.forEach((warning) => add(warnings, `recipe ${clean(recipe.id) || clean(recipe.name)}: ${warning}`));
+    });
+
+    return { errors, warnings, admittedIngredients, admittedRecipes };
+  };
+
   const api = {
+    ADMISSION_VERSION,
+    LEGACY_BASELINE_COUNTS,
     validateCuratedIngredient,
     validateCuratedRecipe,
     validateCustomIngredient,
+    validateCatalogGrowth,
     validateInventoryProfile,
     isStockUnit,
     isPurchaseUnit,
