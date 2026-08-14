@@ -24,7 +24,6 @@
     { key: 'blissful-family-dislikes', encoding: 'json', validate: isRecord },
     { key: 'blissful-onboarding-dismissed', encoding: 'raw', validate: anyRaw },
     { key: 'blissful-pantry-unit-preferences', encoding: 'json', validate: isRecord },
-    { key: 'blissful-pantry-unit-migration-v1', encoding: 'raw', validate: anyRaw },
   ];
 
   const registry = new Map(definitions.map((definition) => [definition.key, Object.freeze({ ...definition })]));
