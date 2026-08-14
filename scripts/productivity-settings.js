@@ -47,6 +47,10 @@
     ensureStylesheet('styles/dashboard-contrast.css');
   };
 
+  const ensureThemeFoundationStylesheet = () => {
+    ensureStylesheet('styles/theme-foundation.css');
+  };
+
   const ensureVisualResetStylesheets = () => {
     ensureBaseThemeStylesheet();
     ensureMealPlanSleekStylesheet();
@@ -55,6 +59,7 @@
     ensureUiCleanupStylesheet();
     ensureTopbarHoverFixStylesheet();
     ensureDashboardContrastStylesheet();
+    ensureThemeFoundationStylesheet();
   };
 
   ensureVisualResetStylesheets();
@@ -142,6 +147,10 @@
     ensureScript('scripts/pantry-workspace-actions.js');
   };
 
+  const ensureResponsiveHardeningStylesheet = () => {
+    ensureStylesheet('styles/responsive-hardening.css');
+  };
+
   const simplifySettings = () => {
     const toolbar = document.getElementById('theme-toolbar');
     if (!toolbar || document.getElementById('productivity-settings-advanced')) {
@@ -203,6 +212,7 @@
     ensureUiPolishAssets();
     ensureShoppingReadinessRefinementAssets();
     ensurePantryWorkspaceAssets();
+    ensureResponsiveHardeningStylesheet();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();
       return;

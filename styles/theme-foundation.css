@@ -1,0 +1,211 @@
+/*
+  Canonical warm-kitchen theme foundation.
+
+  This layer is intentionally small: components should migrate toward these tokens,
+  while legacy aliases remain mapped here so late feature styles stay theme-aware.
+*/
+
+:root,
+:root[data-theme='light'] {
+  color-scheme: light !important;
+
+  /* Brand and status */
+  --brand-primary: #6d3b58 !important;
+  --brand-soft: #eadce5 !important;
+  --brand-accent: #b05e3c !important;
+  --brand-accent-soft: #f4ded3 !important;
+  --brand-success: #447a50 !important;
+  --brand-success-soft: #dde9dd !important;
+  --brand-warning: #b05e3c !important;
+  --brand-danger: #a33f3f !important;
+
+  /* Background and surfaces */
+  --surface-page: #f6f0e5 !important;
+  --surface-card: #fffcf7 !important;
+  --surface-panel: #f3eadf !important;
+  --surface-panel-strong: #e8dccf !important;
+  --surface-raised: #fffdf9 !important;
+
+  /* Text */
+  --text-primary: #2b2522 !important;
+  --text-secondary: #5f5650 !important;
+  --text-muted: #756a63 !important;
+  --text-inverse: #fffdf9 !important;
+
+  /* Borders and focus */
+  --border-subtle: #d8cbbe !important;
+  --border-strong: #aa998c !important;
+  --focus-ring: #2563eb !important;
+
+  /* Shape and elevation */
+  --radius-sm: 8px !important;
+  --radius-md: 12px !important;
+  --radius-lg: 16px !important;
+  --shadow-card: 0 1px 3px rgb(43 37 34 / 10%) !important;
+  --shadow-popover: 0 18px 44px rgb(43 37 34 / 18%) !important;
+
+  --main-contrast: #fffdf9 !important;
+  --surface-overlay: rgb(255 252 247 / 94%) !important;
+  --surface-overlay-soft: rgb(255 252 247 / 88%) !important;
+  --surface-overlay-strong: rgb(255 252 247 / 97%) !important;
+  --overlay-backdrop: rgb(43 37 34 / 28%) !important;
+  --overlay-backdrop-strong: rgb(43 37 34 / 42%) !important;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark !important;
+
+  /* Brand and status */
+  --brand-primary: #d29ab9 !important;
+  --brand-soft: #4a3040 !important;
+  --brand-accent: #e28b60 !important;
+  --brand-accent-soft: #4c2e24 !important;
+  --brand-success: #7daa82 !important;
+  --brand-success-soft: #2d4230 !important;
+  --brand-warning: #e28b60 !important;
+  --brand-danger: #e07272 !important;
+
+  /* Background and surfaces */
+  --surface-page: #181412 !important;
+  --surface-card: #211b1d !important;
+  --surface-panel: #2b2426 !important;
+  --surface-panel-strong: #392f32 !important;
+  --surface-raised: #30282a !important;
+
+  /* Text */
+  --text-primary: #f7eee7 !important;
+  --text-secondary: #d2c3ba !important;
+  --text-muted: #bdafa7 !important;
+  --text-inverse: #fff8f4 !important;
+
+  /* Borders and focus */
+  --border-subtle: #493c40 !important;
+  --border-strong: #725f66 !important;
+  --focus-ring: #60a5fa !important;
+
+  /* Shape and elevation */
+  --radius-sm: 8px !important;
+  --radius-md: 12px !important;
+  --radius-lg: 16px !important;
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 28%) !important;
+  --shadow-popover: 0 18px 44px rgb(0 0 0 / 42%) !important;
+
+  --main-contrast: #211b1d !important;
+  --surface-overlay: rgb(33 27 29 / 94%) !important;
+  --surface-overlay-soft: rgb(33 27 29 / 88%) !important;
+  --surface-overlay-strong: rgb(33 27 29 / 97%) !important;
+  --overlay-backdrop: rgb(0 0 0 / 48%) !important;
+  --overlay-backdrop-strong: rgb(0 0 0 / 62%) !important;
+}
+
+:root,
+:root[data-theme='light'],
+:root[data-theme='dark'] {
+  /* Cleanup/reset aliases */
+  --clean-page: var(--surface-page) !important;
+  --clean-surface: var(--surface-card) !important;
+  --clean-panel: var(--surface-panel) !important;
+  --clean-panel-strong: var(--surface-panel-strong) !important;
+  --clean-text: var(--text-primary) !important;
+  --clean-muted: var(--text-secondary) !important;
+  --clean-soft: var(--text-muted) !important;
+  --clean-border: var(--border-subtle) !important;
+  --clean-border-strong: var(--border-strong) !important;
+  --clean-button: var(--surface-card) !important;
+  --clean-button-hover: var(--surface-panel) !important;
+  --clean-button-active: var(--surface-raised) !important;
+  --clean-focus: var(--focus-ring) !important;
+
+  /* Base reset aliases */
+  --base-page: var(--surface-page) !important;
+  --base-page-soft: var(--surface-panel) !important;
+  --base-surface: var(--surface-card) !important;
+  --base-panel: var(--surface-panel) !important;
+  --base-panel-strong: var(--surface-panel-strong) !important;
+  --base-raised: var(--surface-raised) !important;
+  --base-text: var(--text-primary) !important;
+  --base-text-muted: var(--text-secondary) !important;
+  --base-text-soft: var(--text-muted) !important;
+  --base-border: var(--border-subtle) !important;
+  --base-border-strong: var(--border-strong) !important;
+  --base-accent: var(--brand-primary) !important;
+  --base-accent-soft: var(--brand-soft) !important;
+  --base-focus: var(--focus-ring) !important;
+  --base-success: var(--brand-success) !important;
+  --base-warning: var(--brand-warning) !important;
+  --base-danger: var(--brand-danger) !important;
+
+  /* Canonical-to-legacy compatibility aliases used by newer feature sheets. */
+  --bg: var(--surface-page) !important;
+  --neutral: var(--surface-page) !important;
+  --surface: var(--surface-card) !important;
+  --surface-muted: var(--surface-panel) !important;
+  --surface-subtle: var(--surface-panel) !important;
+  --surface-elevated: var(--surface-raised) !important;
+  --text: var(--text-primary) !important;
+  --text-soft: var(--text-muted) !important;
+  --border: var(--border-subtle) !important;
+  --border-muted: var(--border-subtle) !important;
+  --main: var(--brand-primary) !important;
+  --brand: var(--brand-primary) !important;
+
+  --layer-0: var(--surface-page) !important;
+  --layer-1: var(--surface-card) !important;
+  --layer-2: var(--surface-panel) !important;
+  --layer-3: var(--surface-panel-strong) !important;
+  --surface-0: var(--surface-card) !important;
+  --surface-1: var(--surface-panel) !important;
+  --surface-2: var(--surface-raised) !important;
+  --surface-3: var(--surface-panel-strong) !important;
+  --border-1: var(--border-subtle) !important;
+  --border-2: var(--border-subtle) !important;
+  --accent-1: var(--brand-success-soft) !important;
+  --accent-2: var(--brand-accent-soft) !important;
+  --chip-bg: var(--brand-soft) !important;
+  --chip-fg: var(--text-primary) !important;
+
+  --success: var(--brand-success) !important;
+  --warning: var(--brand-warning) !important;
+  --danger: var(--brand-danger) !important;
+  --info: var(--focus-ring) !important;
+  --color-success: var(--brand-success) !important;
+  --color-warning: var(--brand-warning) !important;
+  --color-danger: var(--brand-danger) !important;
+  --color-focus-ring: var(--focus-ring) !important;
+
+  --color-background: var(--surface-page) !important;
+  --color-layout-background: var(--surface-page) !important;
+  --color-panel: var(--surface-card) !important;
+  --color-surface: var(--surface-card) !important;
+  --color-surface-elevated: var(--surface-raised) !important;
+  --color-surface-soft: var(--surface-panel) !important;
+  --color-surface-highlight: var(--brand-soft) !important;
+  --color-text-primary: var(--text-primary) !important;
+  --color-text-strong: var(--text-primary) !important;
+  --color-text-secondary: var(--text-secondary) !important;
+  --color-text-tertiary: var(--text-muted) !important;
+  --color-text-muted: var(--text-muted) !important;
+  --color-text-soft: var(--text-muted) !important;
+  --color-text-instruction: var(--text-secondary) !important;
+  --color-text-inline: var(--brand-primary) !important;
+  --color-tag-text: var(--text-primary) !important;
+  --color-text-inverse: var(--text-inverse) !important;
+  --color-text-badge: var(--text-primary) !important;
+  --color-text-emphasis: var(--text-primary) !important;
+  --color-gunmetal: var(--text-primary) !important;
+  --color-border: var(--border-subtle) !important;
+  --color-border-muted: var(--border-subtle) !important;
+  --color-border-soft: var(--border-subtle) !important;
+  --color-border-strong: var(--border-strong) !important;
+
+  --glass-background: var(--surface-page) !important;
+  --glass-surface: var(--surface-card) !important;
+  --glass-elevated: var(--surface-raised) !important;
+  --glass-border: var(--border-subtle) !important;
+  --surface-hover-subtle: var(--surface-panel) !important;
+  --surface-hover-strong: var(--surface-panel-strong) !important;
+
+  --radius: var(--radius-md) !important;
+  --shadow-1: var(--shadow-card) !important;
+  --shadow-2: var(--shadow-popover) !important;
+}
