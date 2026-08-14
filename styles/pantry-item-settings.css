@@ -1,0 +1,199 @@
+/* Keep Pantry rows single-line: legacy inline disclosure panels remain available to old runtimes but consume no layout space. */
+html.pantry-workspace-active #pantry-grid .pantry-unit-profile,
+html.pantry-workspace-active #pantry-grid .ingredient-processes {
+  display: none !important;
+}
+
+html.pantry-workspace-active #pantry-grid .pantry-item-settings__trigger {
+  flex: 0 0 26px;
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  min-height: 26px;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-grid;
+  place-items: center;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-muted, #59616b);
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+html.pantry-workspace-active #pantry-grid .pantry-item-settings__trigger:hover,
+html.pantry-workspace-active #pantry-grid .pantry-item-settings__trigger:focus-visible {
+  color: var(--text, #111);
+  outline: 1px solid var(--border-strong, #a9b0ba);
+  outline-offset: -3px;
+}
+
+.pantry-item-settings[hidden] {
+  display: none !important;
+}
+
+.pantry-item-settings {
+  position: fixed;
+  inset: 0;
+  z-index: 17000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.pantry-item-settings__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 34%);
+}
+
+.pantry-item-settings__panel {
+  position: relative;
+  z-index: 1;
+  width: min(720px, calc(100vw - 32px));
+  max-height: min(86vh, 760px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--border, #d2d7de);
+  border-radius: 12px;
+  background: var(--surface, #fff);
+  box-shadow: 0 20px 60px rgb(0 0 0 / 24%);
+}
+
+.pantry-item-settings__header {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border, #d2d7de);
+}
+
+.pantry-item-settings__header h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.pantry-item-settings__close {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pantry-item-settings__body {
+  overflow: auto;
+  padding: 14px 16px 18px;
+}
+
+.pantry-item-settings__section {
+  display: grid;
+  gap: 10px;
+  padding: 4px 0 16px;
+}
+
+.pantry-item-settings__section + .pantry-item-settings__section {
+  padding-top: 16px;
+  border-top: 1px solid var(--border, #d2d7de);
+}
+
+.pantry-item-settings__section h3 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.pantry-item-settings__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pantry-item-settings__field {
+  display: grid;
+  gap: 4px;
+  font-size: 0.76rem;
+}
+
+.pantry-item-settings__select,
+.pantry-item-settings__number,
+.pantry-item-settings__purchase-count {
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  box-sizing: border-box;
+}
+
+.pantry-item-settings__relationship,
+.pantry-item-settings__status,
+.pantry-item-settings__muted {
+  margin: 0;
+  font-size: 0.76rem;
+}
+
+.pantry-item-settings__muted,
+.pantry-item-settings__status {
+  color: var(--text-muted, #59616b);
+}
+
+.pantry-item-settings__conversions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pantry-item-settings__conversion {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--border, #d2d7de);
+  border-radius: 999px;
+  font-size: 0.73rem;
+  white-space: nowrap;
+}
+
+.pantry-item-settings__purchase-row {
+  display: grid;
+  grid-template-columns: minmax(80px, 0.28fr) minmax(130px, 0.72fr);
+  gap: 8px;
+}
+
+.pantry-item-settings__add {
+  min-height: 34px;
+}
+
+.pantry-item-settings__processes {
+  display: grid;
+  gap: 10px;
+}
+
+.pantry-item-settings__processes .ingredient-process {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .pantry-item-settings {
+    padding: 10px;
+  }
+
+  .pantry-item-settings__panel {
+    width: min(100%, calc(100vw - 20px));
+    max-height: calc(100vh - 20px);
+  }
+
+  .pantry-item-settings__grid,
+  .pantry-item-settings__purchase-row {
+    grid-template-columns: 1fr;
+  }
+}
