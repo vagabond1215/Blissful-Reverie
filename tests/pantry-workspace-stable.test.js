@@ -5,6 +5,8 @@ const root = path.resolve(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const workspace = require('../scripts/pantry-workspace-core.js');
 const refine = require('../scripts/pantry-workspace-refine.js');
+const inventoryUnits = require('../scripts/inventory-units-core.js');
+const itemSettings = require('../scripts/pantry-item-settings.js');
 
 const sample = [
   { category: 'Pasta', tags: ['Vegan', 'Contains Gluten'] },
@@ -23,6 +25,15 @@ assert.deepEqual(refine.getCheckedValues([
   { checked: false, value: 'Dairy' },
   { checked: true, value: 'Vegetable' },
 ]), ['Pasta', 'Vegetable']);
+
+const butterConversions = itemSettings.buildConversionRows(inventoryUnits.DEFAULT_PROFILES['dairy-butter-salted']);
+const tablespoonConversion = butterConversions.find((entry) => entry.unit === 'tbsp');
+assert(tablespoonConversion, 'Butter settings should expose tablespoon conversion.');
+assert(Math.abs(tablespoonConversion.quantity - 8) < 1e-8, 'One butter stick should convert to eight tablespoons.');
+assert.deepEqual(itemSettings.processesForSlug('output-a', [
+  { id: 'one', output: { slug: 'output-a' } },
+  { id: 'two', output: { slug: 'output-b' } },
+]), [{ id: 'one', output: { slug: 'output-a' } }]);
 
 const bootstrap = read('scripts/pantry-workspace.js');
 assert(bootstrap.includes('scripts/pantry-workspace-core.js'));
@@ -50,12 +61,20 @@ assert(!actions.includes('scripts/pantry-package-unit-migration.js'));
 assert(actions.includes('scripts/pantry-inventory-units-runtime.js'));
 assert(actions.includes('scripts/shopping-inventory-units-sync.js'));
 assert(actions.includes('scripts/ingredient-process-runtime.js'));
+assert(actions.includes('scripts/pantry-item-settings.js'));
+assert(actions.indexOf('scripts/pantry-item-settings.js') > actions.indexOf('scripts/ingredient-process-runtime.js'));
 assert(actions.includes('scripts/recipe-inventory-runtime.js'));
 const inventoryRuntime = read('scripts/pantry-inventory-units-runtime.js');
 assert(inventoryRuntime.includes("unit?.group !== 'package'"));
 assert(inventoryRuntime.includes("purchaseText.textContent = 'Buy as'"));
 assert(inventoryRuntime.includes('changeStockUnit'));
 assert(inventoryRuntime.includes('rebaseProfile'));
+const itemSettingsSource = read('scripts/pantry-item-settings.js');
+assert(itemSettingsSource.includes("trigger.textContent = '⚙'"));
+assert(itemSettingsSource.includes("purchaseHeading.textContent = 'Purchasing & conversions'"));
+assert(itemSettingsSource.includes("heading.textContent = 'Make this ingredient'"));
+assert(itemSettingsSource.includes('core.executeProcess'));
+assert(itemSettingsSource.includes('core.addPurchase'));
 const legacyPreferences = read('scripts/inventory-unit-legacy-preferences.js');
 assert(legacyPreferences.includes('blissful-pantry-unit-preferences'));
 assert(legacyPreferences.includes('migratePreferenceMap'));
@@ -80,11 +99,17 @@ const actionsCss = read('styles/pantry-workspace-actions.css');
 assert(actionsCss.includes('pantry-workspace-popover.css'));
 assert(actionsCss.includes('pantry-workspace-row-controls.css'));
 assert(actionsCss.includes('pantry-inventory-units.css'));
+assert(actionsCss.includes('pantry-item-settings.css'));
 const unitCss = read('styles/pantry-inventory-units.css');
 assert(unitCss.includes('.pantry-card__unit-select'));
 assert(unitCss.includes('.pantry-unit-profile'));
 assert(unitCss.includes('.ingredient-processes'));
 assert(unitCss.includes('.recipe-inventory-action'));
+const itemSettingsCss = read('styles/pantry-item-settings.css');
+assert(itemSettingsCss.includes('.pantry-item-settings__trigger'));
+assert(itemSettingsCss.includes('#pantry-grid .pantry-unit-profile'));
+assert(itemSettingsCss.includes('#pantry-grid .ingredient-processes'));
+assert(itemSettingsCss.includes('display: none !important'));
 const rowControlsCss = read('styles/pantry-workspace-row-controls.css');
 assert(rowControlsCss.includes('border-bottom: 1px solid'));
 assert(rowControlsCss.includes('border: 0 !important'));
@@ -93,6 +118,8 @@ assert(rowControlsCss.includes('width: 94px !important'));
 const popoverCss = read('styles/pantry-workspace-popover.css');
 assert(popoverCss.includes('#page-action-bar[popover]:popover-open'));
 assert(popoverCss.includes('#pantry-restock-button'));
+assert(popoverCss.includes(':not(.pantry-page-action):not(#pantry-lists-action):not(#pantry-tags-action)'));
+assert(popoverCss.includes('display: none !important'));
 
 const loader = read('scripts/productivity-settings.js');
 assert(loader.includes("styles/pantry-workspace.css"));
