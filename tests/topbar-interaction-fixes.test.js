@@ -3,7 +3,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const rootDir = path.resolve(__dirname, '..');
-const read = (relativePath) => fs.readFileSync(path.join(rootDir, relativePath), 'utf8');
+const read = (relativePath) => fs
+  .readFileSync(path.join(rootDir, relativePath), 'utf8')
+  .replace(/\r\n?/g, '\n');
 
 const pantry = require('../scripts/pantry-topbar-controls.js');
 const familyManage = require('../scripts/family-manage-fix.js');
