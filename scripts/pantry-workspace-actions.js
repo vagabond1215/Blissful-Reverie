@@ -5,6 +5,7 @@
     'scripts/pantry-workspace-refine.js',
     'scripts/pantry-package-defaults-core.js',
     'scripts/pantry-package-unit-runtime.js',
+    'scripts/pantry-package-unit-migration.js',
   ];
   const load = (index) => {
     if (index >= sources.length) return;
