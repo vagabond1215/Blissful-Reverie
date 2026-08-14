@@ -101,42 +101,28 @@ Current Family behavior includes:
 - Recipes page actions and family-member recipe toggles share the Recipes dynamic action area.
 - Page search belongs at the top-right where implemented rather than consuming the left filter rail.
 
-## Validation and latest state
+## August 2026 integration state
 
-- PR #175 is merged/completed.
-- Issue #174 is closed as completed.
-- PR Validate #153 passed the full `npm test` suite.
-- The merged-main Pantry workspace commit is `a52d5a0d16b711ae0d3f6475bed7ab5cb3f2d2d0`.
-- Main Validate #154 passed on that commit.
-- `npm test` includes the focused Pantry workspace regression suite in addition to existing data, matching, Pantry, productivity, backup, wiring, Restock, Lists, Family, Recipes/Family, top-bar, UI shopping, and discovery tests.
+The current integration combines the warm-kitchen theme/mobile hardening, row-only Pantry runtime, and centralized persistence work, then completes the render-scale pass:
+
+- Recipes render 24 summary cards per page and expose total-match metadata independently of the cards currently mounted.
+- Ingredients, instructions, equipment, allergens, nutrition, substitutions, and notes are built on the first expansion of one recipe; filter/search changes return the new result set to a collapsed, lazy state.
+- Pantry renders no hidden `.pantry-unit-profile` or `.ingredient-processes` trees. Quantity plus the validated row unit is the visible source of truth; item settings owns compatible conversions and processes.
+- Visible `Buy as` controls are retired. Package conversion fields remain internal only for legacy/profile compatibility.
+- The persistence registry loads before productivity backup tools and directly owns 21 meaningful keys, validation, unknown-key exclusion, and transactional rollback.
+- Feature runtimes no longer wrap `createBackup()` / `restoreBackup()` independently.
+- The full local `npm test` suite passes with 554 validated ingredients and 314 curated recipes. The existing warning that 258 canonical ingredients are not used by curated recipes before runtime coverage generation remains informational.
+
+Measured desktop browser state after a hard refresh:
+
+- Recipes: 664 total matches, 24 mounted cards, 0 initial detail bodies, about 3,176 DOM elements, and about 7,310 CSS px document height at 1440 × 900.
+- Opening one recipe creates exactly one detail body; changing search/filter state clears expanded detail state.
+- Pantry: 554 rows, 0 hidden unit-profile panels, 0 hidden process panels, and about 24,841 DOM elements at 1440 × 900.
+- Light recipe card colors measured `rgb(255, 252, 247)` / `rgb(43, 37, 34)`; dark cards and item settings measured `rgb(33, 27, 29)` / `rgb(247, 238, 231)`.
+- Pantry item settings trapped Tab/Shift+Tab, closed with Escape, restored trigger focus, and created process UI only inside the open dialog.
 
 ## Immediate next step
 
-Do a browser smoke test after a hard refresh, with the Pantry screenshot as the visual reference.
+Complete the remaining browser matrix from `docs/browser-smoke-test-checklist.md`, especially both 375 px light/dark passes and Lists, Restock, Kitchen, Meal Plan, Family/Manage Family, and Settings/Backup. Record `scrollWidth` versus 375 px, mobile document height, focus-ring visibility, and console status. Browser automation was interrupted after the desktop core checks above, so those remaining cells must not be treated as accepted yet.
 
-Highest-value checks:
-
-### Pantry
-
-- left rail presents separate Categories / Tags / Allergens cards with readable counts
-- Show more / Show less does not hide currently selected filters
-- top-right Pantry search remains functional
-- Pantry header shows the live item count
-- `+ Add Item` opens Restock
-- `⋮` exposes the existing Pantry controls and those controls still change Lists/stock/sort/favorites/tags correctly
-- category headings/borders no longer split the ingredient list into cards in vertical mode
-- rows remain compact and aligned
-- optional tags only add height beneath the relevant row
-- no nested vertical scrollbar appears inside the Pantry list
-- Smart Shopping still appears in the intended Pantry/Lists locations
-
-### Regression
-
-- Kitchen loads as its own page
-- Recipes Discover new meals chips open previews and preview Plan & shop works
-- Family avatar picker and Dislikes ingredient chips work
-- Manage Family removal confirms once and removes reliably
-- moving among Recipes, Kitchen, Pantry, Meal Plan, and Family produces no console errors
-- light/dark modes remain legible
-
-If the deployed Pantry differs materially from the supplied screenshot after a hard refresh, use a new browser screenshot to drive the next visual correction rather than adding speculative CSS.
+Generated `Ingredient Spotlight` / `Spotlight Skillet` entries still share the runtime recipe catalog path. Separating generated ideas from the trusted curated catalog remains a follow-up because that change affects planning, matching, and shopping behavior beyond this render-scale integration.

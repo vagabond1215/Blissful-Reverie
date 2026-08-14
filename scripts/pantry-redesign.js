@@ -546,39 +546,8 @@
   };
 
   const extendBackupTools = () => {
-    const tools = global.BlissfulProductivity;
-    if (!tools || tools.__pantryViewBackupExtended) return false;
-    if (typeof tools.createBackup !== 'function' || typeof tools.restoreBackup !== 'function') return false;
-    const originalCreateBackup = tools.createBackup.bind(tools);
-    const originalRestoreBackup = tools.restoreBackup.bind(tools);
-    tools.createBackup = (storage = global.localStorage) => {
-      const backup = originalCreateBackup(storage);
-      backup.data = isRecord(backup.data) ? backup.data : {};
-      MANAGED_BACKUP_KEYS.forEach((key) => {
-        try {
-          const value = storage?.getItem?.(key);
-          if (value !== null && value !== undefined) backup.data[key] = value;
-        } catch (error) {}
-      });
-      return backup;
-    };
-    tools.restoreBackup = (backup, storage = global.localStorage) => {
-      const extras = [];
-      MANAGED_BACKUP_KEYS.forEach((key) => {
-        if (!Object.prototype.hasOwnProperty.call(backup?.data || {}, key)) return;
-        const raw = backup.data[key];
-        if (typeof raw !== 'string') throw new Error(`Backup data for ${key} is invalid.`);
-        let parsed;
-        try { parsed = JSON.parse(raw); } catch (error) { throw new Error(`Backup data for ${key} is invalid.`); }
-        normalizeSettings(parsed);
-        extras.push([key, raw]);
-      });
-      const result = originalRestoreBackup(backup, storage);
-      extras.forEach(([key, raw]) => storage?.setItem?.(key, raw));
-      return result;
-    };
-    tools.__pantryViewBackupExtended = true;
-    return true;
+    const registry = global.BlissfulPersistenceRegistry?.registry;
+    return MANAGED_BACKUP_KEYS.every((key) => registry?.has?.(key));
   };
 
   const bindEvents = () => {

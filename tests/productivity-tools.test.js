@@ -24,7 +24,16 @@ const backup = tools.createBackup(storage);
 assert.equal(backup.app, 'Blissful Reverie');
 assert.equal(backup.version, 1);
 assert.equal(typeof backup.exportedAt, 'string');
-assert.deepEqual(Object.keys(backup.data).sort(), [...tools.BACKUP_KEYS].sort());
+assert.deepEqual(Object.keys(backup.data).sort(), [
+  'blissful-app-state',
+  'blissful-favorites',
+  'blissful-holiday-themes',
+  'blissful-meal-plan',
+  'blissful-measurement',
+  'blissful-pantry-favorites',
+  'blissful-theme',
+]);
+assert(tools.BACKUP_KEYS.includes('blissful-pantry-stock-history'));
 assert.equal(backup.data['blissful-app-state'], JSON.stringify({ activeView: 'meals' }));
 assert.equal(backup.data['blissful-meal-plan'], JSON.stringify({ '2026-06-09': [] }));
 assert.equal(backup.data['blissful-favorites'], JSON.stringify(['recipe-a']));

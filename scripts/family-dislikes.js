@@ -394,30 +394,7 @@
   }
 
   const extendBackup = () => {
-    const tools = global.BlissfulProductivity;
-    if (!tools || tools.__familyDislikesBackupExtended) return Boolean(tools?.__familyDislikesBackupExtended);
-    if (typeof tools.createBackup !== 'function' || typeof tools.restoreBackup !== 'function') return false;
-    const originalCreate = tools.createBackup.bind(tools);
-    const originalRestore = tools.restoreBackup.bind(tools);
-    tools.createBackup = (storage = global.localStorage) => {
-      const backup = originalCreate(storage);
-      backup.data = isRecord(backup.data) ? backup.data : {};
-      const raw = storage?.getItem?.(STORAGE_KEY);
-      if (raw !== null && raw !== undefined) backup.data[STORAGE_KEY] = raw;
-      return backup;
-    };
-    tools.restoreBackup = (backup, storage = global.localStorage) => {
-      const raw = backup?.data?.[STORAGE_KEY];
-      if (raw !== undefined) {
-        if (typeof raw !== 'string') throw new Error(`Backup data for ${STORAGE_KEY} is invalid.`);
-        normalizeState(JSON.parse(raw));
-      }
-      const result = originalRestore(backup, storage);
-      if (raw !== undefined) storage?.setItem?.(STORAGE_KEY, raw);
-      return result;
-    };
-    tools.__familyDislikesBackupExtended = true;
-    return true;
+    return Boolean(global.BlissfulPersistenceRegistry?.registry?.has?.(STORAGE_KEY));
   };
 
   const cleanupRemovedMembers = () => {

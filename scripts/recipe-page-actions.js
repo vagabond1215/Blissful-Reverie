@@ -115,11 +115,9 @@
   const updateBadge = () => {
     const badge = document.getElementById('recipe-result-badge');
     if (!(badge instanceof HTMLElement)) return;
-    const cards = Array.from(document.querySelectorAll('#meal-grid .meal-card'));
-    const visible = cards.filter((card) => card instanceof HTMLElement
-      && !card.hidden
-      && !card.classList.contains('meal-card--family-disliked')).length;
-    const text = formatResultCount(visible);
+    const grid = document.getElementById('meal-grid');
+    const totalResults = grid instanceof HTMLElement ? grid.dataset.totalResults : 0;
+    const text = formatResultCount(totalResults);
     if (badge.textContent !== text) badge.textContent = text;
     const label = `${text} recipe results`;
     badge.setAttribute('aria-label', label);
@@ -156,6 +154,7 @@
       attributeFilter: ['hidden', 'class', 'aria-pressed'],
     });
     global.addEventListener('blissful-family-dislikes-change', schedule);
+    global.addEventListener('blissful-recipe-results-change', schedule);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });

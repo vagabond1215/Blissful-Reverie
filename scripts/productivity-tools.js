@@ -6,9 +6,11 @@
   const THEME_STORAGE_KEY = 'blissful-theme';
   const HOLIDAY_THEME_STORAGE_KEY = 'blissful-holiday-themes';
   const MEASUREMENT_STORAGE_KEY = 'blissful-measurement';
+  const persistenceRegistry = global.BlissfulPersistenceRegistry
+    || (typeof require === 'function' ? require('./persistence-registry-runtime.js') : null);
 
   const BACKUP_VERSION = 1;
-  const BACKUP_KEYS = [
+  const CORE_BACKUP_KEYS = [
     APP_STATE_STORAGE_KEY,
     MEAL_PLAN_STORAGE_KEY,
     FAVORITES_STORAGE_KEY,
@@ -17,6 +19,7 @@
     HOLIDAY_THEME_STORAGE_KEY,
     MEASUREMENT_STORAGE_KEY,
   ];
+  const BACKUP_KEYS = persistenceRegistry?.keys || CORE_BACKUP_KEYS;
   const isRecord = (value) => (
     value && typeof value === 'object' && !Array.isArray(value)
   );
@@ -215,15 +218,16 @@
       .filter(Boolean);
 
   const createBackup = (storage = global.localStorage) => {
-    const data = {};
-    BACKUP_KEYS.forEach((key) => {
-      try {
-        const value = storage?.getItem?.(key);
-        if (value !== null && value !== undefined) data[key] = value;
-      } catch (error) {
-        // Ignore unavailable storage keys so backup remains best-effort.
-      }
-    });
+    const data = typeof persistenceRegistry?.collectData === 'function'
+      ? persistenceRegistry.collectData(storage)
+      : Object.fromEntries(CORE_BACKUP_KEYS.flatMap((key) => {
+        try {
+          const value = storage?.getItem?.(key);
+          return value === null || value === undefined ? [] : [[key, value]];
+        } catch (error) {
+          return [];
+        }
+      }));
     return {
       app: 'Blissful Reverie',
       version: BACKUP_VERSION,
@@ -246,7 +250,11 @@
       throw new Error('Backup data is missing or invalid.');
     }
 
-    return BACKUP_KEYS
+    if (typeof persistenceRegistry?.getBackupEntries === 'function') {
+      return persistenceRegistry.getBackupEntries(backup);
+    }
+
+    return CORE_BACKUP_KEYS
       .filter((key) => Object.prototype.hasOwnProperty.call(backup.data, key))
       .map((key) => {
         const value = backup.data[key];
@@ -268,6 +276,9 @@
 
   const restoreBackup = (backup, storage = global.localStorage) => {
     const entries = getBackupEntries(backup);
+    if (typeof persistenceRegistry?.restoreEntries === 'function') {
+      return persistenceRegistry.restoreEntries(entries, storage);
+    }
     if (!storage || typeof storage.setItem !== 'function') {
       throw new Error('Backup storage is unavailable.');
     }
@@ -500,4 +511,5 @@
     module.exports = api;
   }
   global.BlissfulProductivity = Object.assign({}, global.BlissfulProductivity || {}, api);
+  persistenceRegistry?.install?.(global.BlissfulProductivity);
 })(typeof window !== 'undefined' ? window : globalThis);

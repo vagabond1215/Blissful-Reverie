@@ -57,7 +57,7 @@ assert(recipeScript.includes("document.getElementById('recipe-action-chip')"));
 assert(recipeScript.includes("bar.appendChild(chip)"));
 assert(recipeScript.includes("input.id = 'recipe-topbar-search-input'"));
 assert(recipeScript.includes("badge.id = 'recipe-result-badge'"));
-assert(recipeScript.includes("meal-card--family-disliked"));
+assert(recipeScript.includes('grid.dataset.totalResults'));
 
 const recipeCss = read('styles/recipe-page-actions.css');
 assert(recipeCss.includes('#page-action-bar[hidden]'));
@@ -72,7 +72,7 @@ assert(familyScript.includes("textarea.hidden = true"));
 assert(familyScript.includes('blissful-family-dislikes'));
 assert(familyScript.includes('schedule-dialog__member.schedule-dialog__member--active'));
 assert(familyScript.includes("warning.id = 'schedule-dialog-dislike-warning'"));
-assert(familyScript.includes('__familyDislikesBackupExtended'));
+assert(familyScript.includes('BlissfulPersistenceRegistry'));
 
 const familyCss = read('styles/family-dislikes.css');
 assert(familyCss.includes('.family-dislikes__tokens'));

@@ -108,6 +108,7 @@
   };
 
   const ensureRecipeFamilyActionAssets = () => {
+    ensureStylesheet('styles/recipe-pagination.css');
     ensureStylesheet('styles/recipe-page-actions.css');
     ensureScript('scripts/recipe-page-actions.js');
     ensureStylesheet('styles/family-dislikes.css');

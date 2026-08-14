@@ -148,7 +148,8 @@ expectRecipeMatch('maple-dijon-holiday-ham', ['meat-ham-spiral-cut'], ['meat-ham
 const loader = read('scripts/pantry-workspace-actions.js');
 assert(loader.includes('scripts/pantry-package-defaults-core.js'));
 assert(loader.includes('scripts/inventory-unit-legacy-preferences.js'));
-assert(loader.includes('scripts/pantry-inventory-units-runtime.js'));
+assert(loader.includes('scripts/pantry-inventory-units-row-runtime.js'));
+assert(!loader.includes('scripts/pantry-inventory-units-runtime.js'));
 assert(!loader.includes('scripts/pantry-package-unit-runtime.js'), 'Legacy package unit writer must not load');
 assert(!loader.includes('scripts/pantry-package-unit-migration.js'), 'Legacy package migration must not load');
 const legacyMigration = read('scripts/inventory-unit-legacy-preferences.js');

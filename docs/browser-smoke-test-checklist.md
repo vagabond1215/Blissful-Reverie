@@ -52,10 +52,12 @@ Record:
 
 - number of matching recipes
 - number of recipe cards initially in the DOM
+- number of detailed recipe bodies initially built
 - approximate total DOM element count after first render
+- approximate document height at the 375 px viewport
 - whether changing filters causes a long main-thread stall
 
-Initial DOM card count should be bounded by pagination/virtualization rather than equal to the entire matching catalog.
+Initial DOM card count should be bounded by pagination/virtualization rather than equal to the entire matching catalog. Detailed bodies should be absent until their individual recipe is expanded.
 
 ## Pantry
 
@@ -146,7 +148,9 @@ Before finishing, verify:
 - Console errors/warnings:
 - Document scroll width at 375:
 - Initial recipe cards in DOM / matching recipes:
+- Detailed recipe bodies initially built:
 - Approx. total DOM elements:
+- Approx. mobile document height:
 - Recipes/search/filters:
 - Pantry/Lists/Restock/item settings:
 - Family:

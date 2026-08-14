@@ -43,7 +43,7 @@ Ingredient slugs and the `pantryInventory` state remain the canonical inventory 
 
 ## UI ownership
 
-The compact Pantry row owns quantity plus the validated inventory-unit selector. Advanced conversion/process configuration belongs in the Pantry item-settings dialog. Per-row hidden unit/process panels are legacy runtime behavior and should not be recreated.
+The compact Pantry row owns quantity plus the validated inventory-unit selector. Advanced compatible conversions and ingredient processes belong in the Pantry item-settings dialog. Package/purchase metadata remains internal compatibility data; there is no second visible `Buy as` control. Pantry Lists, Restock, and shopping displays use the Pantry row's inventory unit. Per-row hidden unit/process panels are retired behavior and should not be recreated.
 
 ## Backup and restore
 

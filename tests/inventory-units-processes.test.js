@@ -91,11 +91,10 @@ assert(migratedLegacy.skipped.some((entry) => entry.slug === 'dairy-buttermilk' 
 
 const syncedShoppingProfiles = shoppingSync.syncShoppingProfiles(
   { 'dairy-butter-salted': { store: 'Giant', purchaseMode: 'unit', packageSize: 1 } },
-  { 'dairy-butter-salted': rebasedButter },
 );
 assert.equal(syncedShoppingProfiles['dairy-butter-salted'].store, 'Giant');
-assert.equal(syncedShoppingProfiles['dairy-butter-salted'].purchaseMode, 'package');
-assert.equal(syncedShoppingProfiles['dairy-butter-salted'].packageSize, 32);
+assert.equal(syncedShoppingProfiles['dairy-butter-salted'].purchaseMode, 'unit');
+assert.equal(syncedShoppingProfiles['dairy-butter-salted'].packageSize, 1);
 
 const normalizedUsage = shoppingSync.normalizeUsageToStock({
   'dairy-butter-salted': {

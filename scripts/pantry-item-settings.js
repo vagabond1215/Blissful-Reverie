@@ -99,20 +99,6 @@
     return state.pantryInventory;
   };
 
-  const savePurchaseProfile = (slug, purchaseUnit, unitsPerPurchase) => {
-    const profiles = getProfiles();
-    const current = profileFor(slug);
-    const next = core.normalizeProfile?.({
-      ...current,
-      purchaseUnit: core.normalizeUnit?.(purchaseUnit) || '',
-      unitsPerPurchase: Number(unitsPerPurchase) > 0 ? Number(unitsPerPurchase) : current.unitsPerPurchase,
-    }) || current;
-    profiles[slug] = next;
-    writeJson(PROFILE_KEY, profiles);
-    global.dispatchEvent?.(new CustomEvent('blissful-inventory-unit-profile-change', { detail: { slug, profile: next } }));
-    return next;
-  };
-
   const recordUsage = (changes) => {
     const append = global.BlissfulShopping?.appendUsageEvent;
     if (typeof append !== 'function' || !Array.isArray(changes) || !changes.length) return;
@@ -172,22 +158,6 @@
       select.appendChild(group);
     });
     select.value = core.normalizeUnit?.(profile.stockUnit) || profile.stockUnit || '';
-  };
-
-  const appendPackageOptions = (select, currentValue) => {
-    select.textContent = '';
-    const blank = document.createElement('option');
-    blank.value = '';
-    blank.textContent = 'Not configured';
-    select.appendChild(blank);
-    const groups = core.getUnitGroups?.() || {};
-    (groups.package || []).forEach((unit) => {
-      const option = document.createElement('option');
-      option.value = unit.id;
-      option.textContent = unit.label;
-      select.appendChild(option);
-    });
-    select.value = core.normalizeUnit?.(currentValue) || '';
   };
 
   const renderConversions = (container, profile) => {
@@ -302,66 +272,17 @@
     stockStatus.setAttribute('aria-live', 'polite');
     unitSection.append(unitHeading, stockLabel, stockStatus);
 
-    const purchaseSection = document.createElement('section');
-    purchaseSection.className = 'pantry-item-settings__section';
-    const purchaseHeading = document.createElement('h3');
-    purchaseHeading.textContent = 'Purchasing & conversions';
-    const purchaseGrid = document.createElement('div');
-    purchaseGrid.className = 'pantry-item-settings__grid';
-
-    const packageLabel = document.createElement('label');
-    packageLabel.className = 'pantry-item-settings__field';
-    const packageText = document.createElement('span');
-    packageText.textContent = 'Buy as';
-    const purchase = document.createElement('select');
-    purchase.className = 'pantry-item-settings__select';
-    appendPackageOptions(purchase, profile.purchaseUnit);
-    packageLabel.append(packageText, purchase);
-
-    const sizeLabel = document.createElement('label');
-    sizeLabel.className = 'pantry-item-settings__field';
-    const sizeText = document.createElement('span');
-    sizeText.textContent = 'Stock units per purchase';
-    const size = document.createElement('input');
-    size.type = 'number';
-    size.min = '0.001';
-    size.step = '0.001';
-    size.className = 'pantry-item-settings__number';
-    size.value = formatNumber(profile.unitsPerPurchase);
-    sizeLabel.append(sizeText, size);
-    purchaseGrid.append(packageLabel, sizeLabel);
-
-    const relationship = document.createElement('p');
-    relationship.className = 'pantry-item-settings__relationship';
+    const conversionSection = document.createElement('section');
+    conversionSection.className = 'pantry-item-settings__section';
+    const conversionHeading = document.createElement('h3');
+    conversionHeading.textContent = 'Compatible unit conversions';
     const conversionList = document.createElement('div');
     conversionList.className = 'pantry-item-settings__conversions';
-
-    const addRow = document.createElement('div');
-    addRow.className = 'pantry-item-settings__purchase-row';
-    const count = document.createElement('input');
-    count.type = 'number';
-    count.min = '0.001';
-    count.step = '1';
-    count.value = '1';
-    count.className = 'pantry-item-settings__purchase-count';
-    count.setAttribute('aria-label', `Number of purchases for ${ingredientName(slug)}`);
-    const add = document.createElement('button');
-    add.type = 'button';
-    add.className = 'pantry-item-settings__add';
-    addRow.append(count, add);
-    const purchaseStatus = document.createElement('p');
-    purchaseStatus.className = 'pantry-item-settings__status';
-    purchaseStatus.setAttribute('aria-live', 'polite');
+    conversionSection.append(conversionHeading, conversionList);
 
     const refreshProfileDisplay = () => {
       profile = profileFor(slug);
       appendStockOptions(stock, slug, profile);
-      appendPackageOptions(purchase, profile.purchaseUnit);
-      size.value = formatNumber(profile.unitsPerPurchase);
-      const purchaseLabelText = profile.purchaseUnit || 'purchase unit';
-      relationship.textContent = `1 ${purchaseLabelText} = ${formatNumber(profile.unitsPerPurchase)} ${profile.stockUnit}`;
-      add.disabled = !profile.purchaseUnit;
-      add.textContent = profile.purchaseUnit ? `Add ${profile.purchaseUnit}` : 'Add purchase';
       renderConversions(conversionList, profile);
     };
 
@@ -379,38 +300,7 @@
       refreshProfileDisplay();
     });
 
-    const savePurchase = () => {
-      const next = savePurchaseProfile(slug, purchase.value, size.value);
-      profile = next;
-      relationship.textContent = `1 ${next.purchaseUnit || 'purchase unit'} = ${formatNumber(next.unitsPerPurchase)} ${next.stockUnit}`;
-      add.disabled = !next.purchaseUnit;
-      add.textContent = next.purchaseUnit ? `Add ${next.purchaseUnit}` : 'Add purchase';
-      renderConversions(conversionList, next);
-      purchaseStatus.textContent = 'Purchase conversion saved.';
-    };
-    purchase.addEventListener('change', savePurchase);
-    size.addEventListener('change', savePurchase);
-
-    add.addEventListener('click', () => {
-      const currentProfile = profileFor(slug);
-      const result = core.addPurchase?.({
-        inventory: getInventory(),
-        slug,
-        purchaseQuantity: Number(count.value) || 1,
-        profile: currentProfile,
-      });
-      if (!result?.ok) {
-        purchaseStatus.textContent = result?.reason === 'missing-purchase-unit'
-          ? 'Choose a purchase unit first.'
-          : 'This purchase cannot be converted to the current inventory unit.';
-        return;
-      }
-      commitInventory(result.inventory);
-      purchaseStatus.textContent = `Added ${formatNumber(result.delta)} ${result.stockUnit} to Pantry.`;
-    });
-
-    purchaseSection.append(purchaseHeading, purchaseGrid, relationship, conversionList, addRow, purchaseStatus);
-    body.append(unitSection, purchaseSection);
+    body.append(unitSection, conversionSection);
 
     const processes = processesForSlug(slug, global.BLISSFUL_INGREDIENT_PROCESSES);
     if (processes.length) {

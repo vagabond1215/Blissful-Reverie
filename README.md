@@ -58,7 +58,7 @@ npm run test:wiring
 - `scripts/productivity-backup.js` adds compact local JSON backup import and export controls inside Settings.
 - `scripts/app.js` owns in-memory state, localStorage persistence, recipe rendering, filters, pantry, family, and meal planning.
 
-User data remains in browser localStorage. The primary state key is `blissful-app-state`; meal plans, favorites, theme preferences, holiday settings, and measurement preferences use separate version-stable keys. There is no network synchronization.
+User data remains in browser localStorage. The primary state key is `blissful-app-state`; meal plans, favorites, appearance, Pantry Lists, Restock history, inventory-unit profiles, and related preferences use separate version-stable keys inventoried by `scripts/persistence-registry-runtime.js`. Backup creation and transactional restore use that registry directly. There is no network synchronization.
 
 ## Data Schema
 

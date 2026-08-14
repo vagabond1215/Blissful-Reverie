@@ -22,20 +22,11 @@
     return result;
   };
 
-  const syncShoppingProfiles = (shoppingProfiles, unitProfiles) => {
+  const syncShoppingProfiles = (shoppingProfiles) => {
     const source = isRecord(shoppingProfiles) ? shoppingProfiles : {};
     const result = {};
     Object.entries(source).forEach(([slug, profile]) => {
       result[slug] = isRecord(profile) ? { ...profile } : {};
-    });
-    Object.entries(effectiveProfiles(unitProfiles)).forEach(([slug, unitProfile]) => {
-      const profile = core.normalizeProfile?.(unitProfile);
-      if (!profile?.purchaseUnit || !(Number(profile.unitsPerPurchase) > 0)) return;
-      result[slug] = {
-        ...(isRecord(result[slug]) ? result[slug] : {}),
-        purchaseMode: 'package',
-        packageSize: round(profile.unitsPerPurchase),
-      };
     });
     return result;
   };

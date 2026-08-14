@@ -226,30 +226,8 @@
   const enhanceAll = () => document.querySelectorAll('#pantry-grid .pantry-card').forEach(enhanceCard);
 
   const extendBackupTools = () => {
-    const tools = global.BlissfulProductivity;
-    if (!tools || tools.__inventoryUnitsBackupExtended) return Boolean(tools?.__inventoryUnitsBackupExtended);
-    if (typeof tools.createBackup !== 'function' || typeof tools.restoreBackup !== 'function') return false;
-    const originalCreate = tools.createBackup.bind(tools);
-    const originalRestore = tools.restoreBackup.bind(tools);
-    tools.createBackup = (storage = global.localStorage) => {
-      const backup = originalCreate(storage);
-      backup.data = isRecord(backup.data) ? backup.data : {};
-      [PROFILE_KEY, MIGRATION_KEY].forEach((key) => {
-        const raw = storage?.getItem?.(key);
-        if (raw !== null && raw !== undefined) backup.data[key] = raw;
-      });
-      return backup;
-    };
-    tools.restoreBackup = (backup, storage = global.localStorage) => {
-      const result = originalRestore(backup, storage);
-      [PROFILE_KEY, MIGRATION_KEY].forEach((key) => {
-        const raw = backup?.data?.[key];
-        if (typeof raw === 'string') storage?.setItem?.(key, raw);
-      });
-      return result;
-    };
-    tools.__inventoryUnitsBackupExtended = true;
-    return true;
+    const registry = global.BlissfulPersistenceRegistry?.registry;
+    return Boolean(registry?.has?.(PROFILE_KEY) && registry?.has?.(MIGRATION_KEY));
   };
 
   const api = {

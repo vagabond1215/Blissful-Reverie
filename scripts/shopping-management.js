@@ -515,52 +515,28 @@
     store.className = 'shopping-item-profile__input';
     storeLabel.appendChild(store);
 
-    const modeLabel = document.createElement('label');
-    modeLabel.className = 'shopping-item-profile__field';
-    modeLabel.innerHTML = '<span>Buy as</span>';
-    const mode = document.createElement('select');
-    mode.className = 'shopping-item-profile__select';
-    mode.innerHTML = '<option value="unit">Individual units</option><option value="package">Package / bulk size</option>';
-    modeLabel.appendChild(mode);
-
-    const packageLabel = document.createElement('label');
-    packageLabel.className = 'shopping-item-profile__field shopping-item-profile__package';
-    packageLabel.innerHTML = '<span>Units per package</span>';
-    const packageSize = document.createElement('input');
-    packageSize.type = 'number';
-    packageSize.min = '0.01';
-    packageSize.step = '0.01';
-    packageSize.className = 'shopping-item-profile__input';
-    packageLabel.appendChild(packageSize);
-
     const recommendation = document.createElement('p');
     recommendation.className = 'shopping-item-profile__recommendation';
-    body.append(storeLabel, modeLabel, packageLabel, recommendation);
+    body.append(storeLabel, recommendation);
     details.appendChild(body);
     card.appendChild(details);
 
     const load = () => {
       const profile = getProfiles()[ingredient.slug] || { store: '', purchaseMode: 'unit', packageSize: 1 };
       store.value = profile.store;
-      mode.value = profile.purchaseMode;
-      packageSize.value = formatNumber(profile.packageSize || 1);
-      packageLabel.hidden = mode.value !== 'package';
       updateProfileRecommendation(card, ingredient.slug);
     };
     const save = () => {
       const profiles = getProfiles();
       profiles[ingredient.slug] = {
+        ...(isRecord(profiles[ingredient.slug]) ? profiles[ingredient.slug] : {}),
         store: store.value.trim(),
-        purchaseMode: mode.value === 'package' ? 'package' : 'unit',
-        packageSize: positiveNumber(packageSize.value, 1),
       };
       setProfiles(profiles);
       load();
       refreshShoppingPanels();
     };
     store.addEventListener('change', save);
-    mode.addEventListener('change', save);
-    packageSize.addEventListener('change', save);
     load();
   };
 
@@ -868,41 +844,8 @@
   };
 
   const extendBackupTools = () => {
-    const tools = global.BlissfulProductivity;
-    if (!tools || tools.__shoppingBackupExtended) return false;
-    if (typeof tools.createBackup !== 'function' || typeof tools.restoreBackup !== 'function') return false;
-    const originalCreateBackup = tools.createBackup.bind(tools);
-    const originalRestoreBackup = tools.restoreBackup.bind(tools);
-    tools.createBackup = (storage = global.localStorage) => {
-      const backup = originalCreateBackup(storage);
-      backup.data = isRecord(backup.data) ? backup.data : {};
-      MANAGED_BACKUP_KEYS.forEach((key) => {
-        try {
-          const value = storage?.getItem?.(key);
-          if (value !== null && value !== undefined) backup.data[key] = value;
-        } catch (error) {
-          // Keep base backup usable when optional shopping data cannot be read.
-        }
-      });
-      return backup;
-    };
-    tools.restoreBackup = (backup, storage = global.localStorage) => {
-      const extras = [];
-      MANAGED_BACKUP_KEYS.forEach((key) => {
-        if (!Object.prototype.hasOwnProperty.call(backup?.data || {}, key)) return;
-        const raw = backup.data[key];
-        if (typeof raw !== 'string') throw new Error(`Backup data for ${key} is invalid.`);
-        let parsed;
-        try { parsed = JSON.parse(raw); } catch (error) { throw new Error(`Backup data for ${key} is invalid.`); }
-        if (!isRecord(parsed)) throw new Error(`Backup data for ${key} is invalid.`);
-        extras.push([key, raw]);
-      });
-      const result = originalRestoreBackup(backup, storage);
-      extras.forEach(([key, raw]) => storage?.setItem?.(key, raw));
-      return result;
-    };
-    tools.__shoppingBackupExtended = true;
-    return true;
+    const registry = global.BlissfulPersistenceRegistry?.registry;
+    return MANAGED_BACKUP_KEYS.every((key) => registry?.has?.(key));
   };
 
   const enhanceWithin = (root) => {

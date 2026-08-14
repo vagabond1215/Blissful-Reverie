@@ -1,8 +1,7 @@
 ;(function (global) {
   const isRecord = (value) => value && typeof value === 'object' && !Array.isArray(value);
   const isStringArray = (value) => Array.isArray(value) && value.every((entry) => typeof entry === 'string');
-  const anyJson = () => true;
-  const anyRaw = (value) => typeof value === 'string';
+  const isRaw = (value) => typeof value === 'string';
 
   const definitions = [
     { key: 'blissful-app-state', encoding: 'json', validate: isRecord },
@@ -14,15 +13,17 @@
     { key: 'blissful-measurement', encoding: 'raw', validate: (value) => value === 'imperial' || value === 'metric' },
     { key: 'blissful-shopping-settings', encoding: 'json', validate: isRecord },
     { key: 'blissful-shopping-item-profiles', encoding: 'json', validate: isRecord },
+    { key: 'blissful-shopping-recipe-references', encoding: 'raw', validate: (value) => ['show', 'hide', 'true', 'false'].includes(value) },
     { key: 'blissful-pantry-usage', encoding: 'json', validate: isRecord },
     { key: 'blissful-pantry-stock-history', encoding: 'json', validate: isRecord },
     { key: 'blissful-inventory-unit-profiles', encoding: 'json', validate: isRecord },
-    { key: 'blissful-inventory-unit-schema-v1', encoding: 'raw', validate: anyRaw },
+    { key: 'blissful-inventory-unit-schema-v1', encoding: 'raw', validate: (value) => value === 'done' },
+    { key: 'blissful-inventory-legacy-unit-preferences-v1', encoding: 'raw', validate: (value) => value === 'done' },
     { key: 'blissful-pantry-view-settings', encoding: 'json', validate: isRecord },
     { key: 'blissful-pantry-favorites-only', encoding: 'raw', validate: (value) => value === 'true' || value === 'false' },
     { key: 'blissful-pantry-lists', encoding: 'json', validate: isRecord },
     { key: 'blissful-family-dislikes', encoding: 'json', validate: isRecord },
-    { key: 'blissful-onboarding-dismissed', encoding: 'raw', validate: anyRaw },
+    { key: 'blissful-onboarding-dismissed', encoding: 'raw', validate: (value) => value === 'true' },
     { key: 'blissful-pantry-unit-preferences', encoding: 'json', validate: isRecord },
   ];
 
@@ -41,98 +42,85 @@
 
   const validateStoredValue = (key, raw) => {
     const definition = registry.get(key);
-    if (!definition) return true;
+    if (!definition) return false;
     const parsed = parseStoredValue(definition, raw);
-    if (!(definition.validate || anyJson)(parsed)) {
-      throw new Error(`Backup data for ${key} is invalid.`);
-    }
+    if (!definition.validate(parsed)) throw new Error(`Backup data for ${key} is invalid.`);
     return true;
   };
 
   const collectData = (storage) => {
     const data = {};
     keys.forEach((key) => {
+      let raw;
       try {
-        const raw = storage?.getItem?.(key);
-        if (raw !== null && raw !== undefined) {
-          validateStoredValue(key, raw);
-          data[key] = raw;
-        }
+        raw = storage?.getItem?.(key);
       } catch (error) {
-        if (error?.message?.startsWith?.('Backup data for ')) throw error;
+        return;
       }
+      if (raw === null || raw === undefined) return;
+      validateStoredValue(key, raw);
+      data[key] = raw;
     });
     return data;
   };
 
   const getBackupEntries = (backup) => {
-    const data = backup?.data;
-    if (!isRecord(data)) throw new Error('Backup data is missing or invalid.');
+    if (!isRecord(backup?.data)) throw new Error('Backup data is missing or invalid.');
     return keys
-      .filter((key) => Object.prototype.hasOwnProperty.call(data, key))
+      .filter((key) => Object.prototype.hasOwnProperty.call(backup.data, key))
       .map((key) => {
-        const raw = data[key];
+        const raw = backup.data[key];
         validateStoredValue(key, raw);
         return [key, raw];
       });
   };
 
-  const install = (tools = global.BlissfulProductivity) => {
-    if (!tools || tools.__persistenceRegistryInstalled) return Boolean(tools?.__persistenceRegistryInstalled);
-    if (typeof tools.createBackup !== 'function' || typeof tools.restoreBackup !== 'function') return false;
-    const originalCreate = tools.createBackup.bind(tools);
-    const originalRestore = tools.restoreBackup.bind(tools);
-
-    tools.createBackup = (storage = global.localStorage) => {
-      const backup = originalCreate(storage);
-      backup.data = isRecord(backup.data) ? backup.data : {};
-      Object.assign(backup.data, collectData(storage));
-      return backup;
-    };
-
-    tools.restoreBackup = (backup, storage = global.localStorage) => {
-      const entries = getBackupEntries(backup);
-      if (!storage || typeof storage.setItem !== 'function') {
-        throw new Error('Backup storage is unavailable.');
+  const restoreEntries = (entries, storage) => {
+    if (!storage || typeof storage.setItem !== 'function') throw new Error('Backup storage is unavailable.');
+    const previous = new Map();
+    entries.forEach(([key]) => {
+      try {
+        previous.set(key, storage.getItem?.(key) ?? null);
+      } catch (error) {
+        previous.set(key, null);
       }
-      const previous = new Map();
-      entries.forEach(([key]) => {
+    });
+
+    try {
+      entries.forEach(([key, raw]) => storage.setItem(key, raw));
+    } catch (error) {
+      entries.slice().reverse().forEach(([key]) => {
         try {
-          previous.set(key, storage.getItem?.(key) ?? null);
-        } catch (error) {
-          previous.set(key, null);
+          const raw = previous.get(key);
+          if (raw === null || raw === undefined) storage.removeItem?.(key);
+          else storage.setItem(key, raw);
+        } catch (rollbackError) {
+          // Best effort: preserve the original storage error for the caller.
         }
       });
-
-      try {
-        originalRestore(backup, storage);
-        entries.forEach(([key, raw]) => storage.setItem(key, raw));
-      } catch (error) {
-        entries.slice().reverse().forEach(([key]) => {
-          try {
-            const raw = previous.get(key);
-            if (raw === null || raw === undefined) storage.removeItem?.(key);
-            else storage.setItem(key, raw);
-          } catch (rollbackError) {}
-        });
-        throw error;
-      }
-      return true;
-    };
-
-    tools.__persistenceRegistryInstalled = true;
-    tools.persistenceKeys = keys;
+      throw new Error('Unable to restore backup.');
+    }
     return true;
   };
 
-  const api = { definitions, registry, keys, validateStoredValue, collectData, getBackupEntries, install };
+  const install = (tools = global.BlissfulProductivity) => {
+    if (!tools) return false;
+    tools.persistenceKeys = keys;
+    tools.__persistenceRegistryInstalled = true;
+    return true;
+  };
+
+  const api = {
+    definitions,
+    registry,
+    keys,
+    validateStoredValue,
+    collectData,
+    getBackupEntries,
+    restoreEntries,
+    install,
+  };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   global.BlissfulPersistenceRegistry = Object.assign({}, global.BlissfulPersistenceRegistry || {}, api);
-
-  if (typeof document === 'undefined') return;
-  if (install()) return;
-  const retry = () => {
-    if (!install()) global.requestAnimationFrame(retry);
-  };
-  global.requestAnimationFrame(retry);
+  install();
 })(typeof window !== 'undefined' ? window : globalThis);

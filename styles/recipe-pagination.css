@@ -1,0 +1,76 @@
+.recipe-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+}
+
+.recipe-pagination__button,
+.meal-card__details-toggle {
+  min-height: 2.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.recipe-pagination__button {
+  padding: 0.55rem 0.9rem;
+}
+
+.recipe-pagination__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.recipe-pagination__status {
+  min-width: min(15rem, 42vw);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.meal-card__disclosure {
+  border-top: 1px solid var(--border);
+}
+
+.meal-card__details-toggle {
+  display: block;
+  margin: 0.85rem;
+  padding: 0.65rem 0.9rem;
+  list-style: none;
+  text-align: center;
+}
+
+.meal-card__details-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.meal-card__details-toggle::after {
+  content: ' +';
+}
+
+.meal-card__disclosure[open] > .meal-card__details-toggle::after {
+  content: ' −';
+}
+
+.meal-card__detail-body {
+  display: contents;
+}
+
+@media (max-width: 480px) {
+  .recipe-pagination {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .recipe-pagination__status {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-width: 0;
+  }
+}

@@ -7651,16 +7651,182 @@
     }
   };
 
-  const createMealCard = (recipe) => {
-    const card = document.createElement('article');
-    card.className = 'meal-card';
-    card.dataset.recipeId = recipe.id;
+  const RECIPE_PAGE_SIZE = 24;
+  let recipePage = 1;
+  let recipeFilterSignature = '';
+  const expandedRecipeIds = new Set();
+
+  const buildMealCardDetails = (recipe, currentServings, scale) => {
+    const body = document.createElement('div');
+    body.className = 'meal-card__detail-body';
+    body.dataset.recipeDetailsBuilt = 'true';
 
     const filters = ensureMealFilters();
     const substitutionsAllowed = Boolean(filters.substitutionsAllowed);
     const pantryEvaluation = substitutionsAllowed
       ? evaluatePantryMatch(recipe, { allowSubstitutions: true })
       : null;
+
+    const ingredientSection = document.createElement('section');
+    ingredientSection.className = 'meal-card__section';
+    const ingredientHeading = document.createElement('h4');
+    ingredientHeading.textContent = 'Ingredients';
+    ingredientSection.appendChild(ingredientHeading);
+    if (substitutionsAllowed && pantryEvaluation && pantryEvaluation.substitutions.length) {
+      const substitutionNotice = document.createElement('div');
+      substitutionNotice.className = 'meal-card__substitution-notice';
+      const substitutionTitle = document.createElement('span');
+      substitutionTitle.className = 'meal-card__substitution-title';
+      substitutionTitle.textContent =
+        pantryEvaluation.substitutions.length === 1 ? 'Using a substitute' : 'Using substitutes';
+      substitutionNotice.appendChild(substitutionTitle);
+      const substitutionList = document.createElement('ul');
+      substitutionList.className = 'meal-card__substitution-list';
+      pantryEvaluation.substitutions.forEach((entry) => {
+        if (!entry) return;
+        const item = document.createElement('li');
+        const requiredName = entry.required?.name || entry.requiredSlug || 'Required ingredient';
+        const substituteName = entry.substitute?.name || entry.substituteSlug || 'Alternative';
+        const labelPrefix = entry.familyLabel ? `${entry.familyLabel}: ` : '';
+        item.textContent = `${labelPrefix}${requiredName} → ${substituteName}`;
+        substitutionList.appendChild(item);
+      });
+      substitutionNotice.appendChild(substitutionList);
+      ingredientSection.appendChild(substitutionNotice);
+    }
+    const ingredientList = document.createElement('ul');
+    ingredientList.className = 'ingredient-list';
+    recipe.ingredients.forEach((ingredient) => {
+      const item = document.createElement('li');
+      const quantity = document.createElement('span');
+      quantity.className = 'ingredient-quantity';
+      const rawQuantity = ingredient.quantity;
+      const scaledQuantity = typeof rawQuantity === 'number' ? rawQuantity * scale : rawQuantity;
+      const measurement = formatIngredientMeasurement(scaledQuantity, ingredient.unit);
+      quantity.textContent = [measurement.quantityText, measurement.unitText]
+        .filter(Boolean)
+        .join(' ');
+      const name = document.createElement('span');
+      name.className = 'ingredient-name';
+      name.textContent = ingredient.item;
+      item.append(quantity, name);
+      ingredientList.appendChild(item);
+    });
+    ingredientSection.appendChild(ingredientList);
+    body.appendChild(ingredientSection);
+
+    const instructionSection = document.createElement('section');
+    instructionSection.className = 'meal-card__section';
+    const instructionHeading = document.createElement('h4');
+    instructionHeading.textContent = 'Instructions';
+    instructionSection.appendChild(instructionHeading);
+    const instructionList = document.createElement('ol');
+    instructionList.className = 'instruction-list';
+    recipe.instructions.forEach((step) => {
+      const item = document.createElement('li');
+      item.textContent = step;
+      instructionList.appendChild(item);
+    });
+    instructionSection.appendChild(instructionList);
+    body.appendChild(instructionSection);
+
+    const details = document.createElement('section');
+    details.className = 'meal-card__details';
+    const equipmentBlock = document.createElement('div');
+    const equipmentHeading = document.createElement('h4');
+    equipmentHeading.textContent = 'Equipment';
+    equipmentBlock.appendChild(equipmentHeading);
+    const equipmentList = document.createElement('ul');
+    equipmentList.className = 'inline-list';
+    (recipe.equipment || []).forEach((item) => {
+      const listItem = document.createElement('li');
+      listItem.textContent = item;
+      equipmentList.appendChild(listItem);
+    });
+    equipmentBlock.appendChild(equipmentList);
+    details.appendChild(equipmentBlock);
+
+    const allergenBlock = document.createElement('div');
+    const allergenHeading = document.createElement('h4');
+    allergenHeading.textContent = 'Allergens';
+    allergenBlock.appendChild(allergenHeading);
+    const allergenList = document.createElement('ul');
+    allergenList.className = 'inline-list';
+    const allergens = Array.isArray(recipe.allergens) ? recipe.allergens : [];
+    (allergens.length ? allergens : ['None']).forEach((allergen) => {
+      const item = document.createElement('li');
+      item.className = 'badge badge-soft';
+      item.textContent = allergen === 'None' ? allergen : formatAllergenLabel(allergen);
+      allergenList.appendChild(item);
+    });
+    allergenBlock.appendChild(allergenList);
+    details.appendChild(allergenBlock);
+    body.appendChild(details);
+
+    if (recipe.nutritionPerServing) {
+      const nutritionSection = document.createElement('section');
+      nutritionSection.className = 'meal-card__section nutrition';
+      const nutritionHeading = document.createElement('h4');
+      nutritionHeading.textContent = 'Nutrition';
+      nutritionSection.appendChild(nutritionHeading);
+      const grid = document.createElement('div');
+      grid.className = 'nutrition-grid';
+      Object.entries(recipe.nutritionPerServing).forEach(([key, value]) => {
+        const cell = document.createElement('div');
+        const label = document.createElement('span');
+        label.className = 'nutrition-label';
+        label.textContent = key;
+        const perServing = document.createElement('span');
+        perServing.className = 'nutrition-value';
+        perServing.textContent = `${value} / serving`;
+        const total = document.createElement('span');
+        total.className = 'nutrition-total';
+        total.textContent = `${Math.round(value * currentServings * 10) / 10} total`;
+        cell.append(label, perServing, total);
+        grid.appendChild(cell);
+      });
+      nutritionSection.appendChild(grid);
+      body.appendChild(nutritionSection);
+    }
+
+    const footer = document.createElement('footer');
+    footer.className = 'meal-card__footer';
+    const notesButton = document.createElement('button');
+    notesButton.type = 'button';
+    const syncNotes = () => {
+      const isOpen = Boolean(state.openNotes[recipe.id]);
+      notesButton.textContent = isOpen ? 'Hide notes' : 'Add notes';
+      notesButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      footer.querySelector('textarea')?.remove();
+      if (!isOpen) return;
+      const textarea = document.createElement('textarea');
+      textarea.value = state.notes[recipe.id] || '';
+      textarea.placeholder = 'Add personal notes, timing adjustments, or plating ideas';
+      textarea.setAttribute('aria-label', `Notes for ${recipe.name}`);
+      textarea.addEventListener('input', (event) => {
+        state.notes[recipe.id] = event.target.value;
+        persistAppState();
+      });
+      footer.appendChild(textarea);
+    };
+    notesButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (state.openNotes[recipe.id]) delete state.openNotes[recipe.id];
+      else state.openNotes[recipe.id] = true;
+      persistAppState();
+      syncNotes();
+      footer.querySelector('textarea')?.focus();
+    });
+    footer.appendChild(notesButton);
+    syncNotes();
+    body.appendChild(footer);
+    return body;
+  };
+
+  const createMealCard = (recipe) => {
+    const card = document.createElement('article');
+    card.className = 'meal-card';
+    card.dataset.recipeId = recipe.id;
 
     const favorite = isRecipeFavorite(recipe.id);
     if (favorite) {
@@ -7792,171 +7958,32 @@
     header.appendChild(headerActions);
     card.appendChild(header);
 
-    const ingredientSection = document.createElement('section');
-    ingredientSection.className = 'meal-card__section';
-    const ingredientHeading = document.createElement('h4');
-    ingredientHeading.textContent = 'Ingredients';
-    ingredientSection.appendChild(ingredientHeading);
-    if (substitutionsAllowed && pantryEvaluation && pantryEvaluation.substitutions.length) {
-      const substitutionNotice = document.createElement('div');
-      substitutionNotice.className = 'meal-card__substitution-notice';
-      const substitutionTitle = document.createElement('span');
-      substitutionTitle.className = 'meal-card__substitution-title';
-      substitutionTitle.textContent =
-        pantryEvaluation.substitutions.length === 1 ? 'Using a substitute' : 'Using substitutes';
-      substitutionNotice.appendChild(substitutionTitle);
-      const substitutionList = document.createElement('ul');
-      substitutionList.className = 'meal-card__substitution-list';
-      pantryEvaluation.substitutions.forEach((entry) => {
-        if (!entry) return;
-        const item = document.createElement('li');
-        const requiredName = entry.required?.name || entry.requiredSlug || 'Required ingredient';
-        const substituteName = entry.substitute?.name || entry.substituteSlug || 'Alternative';
-        const labelPrefix = entry.familyLabel ? `${entry.familyLabel}: ` : '';
-        item.textContent = `${labelPrefix}${requiredName} → ${substituteName}`;
-        substitutionList.appendChild(item);
-      });
-      substitutionNotice.appendChild(substitutionList);
-      ingredientSection.appendChild(substitutionNotice);
-    }
-    const ingredientList = document.createElement('ul');
-    ingredientList.className = 'ingredient-list';
-    recipe.ingredients.forEach((ingredient) => {
-      const item = document.createElement('li');
-      const quantity = document.createElement('span');
-      quantity.className = 'ingredient-quantity';
-      const rawQuantity = ingredient.quantity;
-      const scaledQuantity =
-        typeof rawQuantity === 'number' ? rawQuantity * scale : rawQuantity;
-      const measurement = formatIngredientMeasurement(scaledQuantity, ingredient.unit);
-      quantity.textContent = [measurement.quantityText, measurement.unitText]
-        .filter(Boolean)
-        .join(' ');
-      const name = document.createElement('span');
-      name.className = 'ingredient-name';
-      name.textContent = ingredient.item;
-      item.appendChild(quantity);
-      item.appendChild(name);
-      ingredientList.appendChild(item);
-    });
-    ingredientSection.appendChild(ingredientList);
-    card.appendChild(ingredientSection);
+    const disclosure = document.createElement('details');
+    disclosure.className = 'meal-card__disclosure';
+    const summary = document.createElement('summary');
+    summary.className = 'meal-card__details-toggle';
+    summary.textContent = 'View recipe details';
+    disclosure.appendChild(summary);
 
-    const instructionSection = document.createElement('section');
-    instructionSection.className = 'meal-card__section';
-    const instructionHeading = document.createElement('h4');
-    instructionHeading.textContent = 'Instructions';
-    instructionSection.appendChild(instructionHeading);
-    const instructionList = document.createElement('ol');
-    instructionList.className = 'instruction-list';
-    recipe.instructions.forEach((step) => {
-      const li = document.createElement('li');
-      li.textContent = step;
-      instructionList.appendChild(li);
-    });
-    instructionSection.appendChild(instructionList);
-    card.appendChild(instructionSection);
-
-    const details = document.createElement('section');
-    details.className = 'meal-card__details';
-
-    const equipmentBlock = document.createElement('div');
-    const equipmentHeading = document.createElement('h4');
-    equipmentHeading.textContent = 'Equipment';
-    equipmentBlock.appendChild(equipmentHeading);
-    const equipmentList = document.createElement('ul');
-    equipmentList.className = 'inline-list';
-    (recipe.equipment || []).forEach((item) => {
-      const li = document.createElement('li');
-      li.textContent = item;
-      equipmentList.appendChild(li);
-    });
-    equipmentBlock.appendChild(equipmentList);
-    details.appendChild(equipmentBlock);
-
-    const allergenBlock = document.createElement('div');
-    const allergenHeading = document.createElement('h4');
-    allergenHeading.textContent = 'Allergens';
-    allergenBlock.appendChild(allergenHeading);
-    const allergenList = document.createElement('ul');
-    allergenList.className = 'inline-list';
-    if ((recipe.allergens || []).length) {
-      recipe.allergens.forEach((allergen) => {
-        const li = document.createElement('li');
-        li.className = 'badge badge-soft';
-        li.textContent = formatAllergenLabel(allergen);
-        allergenList.appendChild(li);
-      });
-    } else {
-      const li = document.createElement('li');
-      li.className = 'badge badge-soft';
-      li.textContent = 'None';
-      allergenList.appendChild(li);
-    }
-    allergenBlock.appendChild(allergenList);
-    details.appendChild(allergenBlock);
-    card.appendChild(details);
-
-    if (recipe.nutritionPerServing) {
-      const nutritionSection = document.createElement('section');
-      nutritionSection.className = 'meal-card__section nutrition';
-      const nutritionHeading = document.createElement('h4');
-      nutritionHeading.textContent = 'Nutrition';
-      nutritionSection.appendChild(nutritionHeading);
-      const grid = document.createElement('div');
-      grid.className = 'nutrition-grid';
-      const totalNutrition = {};
-      Object.entries(recipe.nutritionPerServing).forEach(([key, value]) => {
-        totalNutrition[key] = Math.round(value * currentServings * 10) / 10;
-      });
-      Object.entries(recipe.nutritionPerServing).forEach(([key, value]) => {
-        const cell = document.createElement('div');
-        const labelEl = document.createElement('span');
-        labelEl.className = 'nutrition-label';
-        labelEl.textContent = key;
-        const valueEl = document.createElement('span');
-        valueEl.className = 'nutrition-value';
-        valueEl.textContent = `${value} / serving`;
-        cell.appendChild(labelEl);
-        cell.appendChild(valueEl);
-        if (totalNutrition[key] !== undefined) {
-          const totalEl = document.createElement('span');
-          totalEl.className = 'nutrition-total';
-          totalEl.textContent = `${totalNutrition[key]} total`;
-          cell.appendChild(totalEl);
-        }
-        grid.appendChild(cell);
-      });
-      nutritionSection.appendChild(grid);
-      card.appendChild(nutritionSection);
-    }
-
-    const footer = document.createElement('footer');
-    footer.className = 'meal-card__footer';
-    const notesButton = document.createElement('button');
-    notesButton.type = 'button';
-    const isOpen = Boolean(state.openNotes[recipe.id]);
-    notesButton.textContent = isOpen ? 'Hide notes' : 'Add notes';
-    notesButton.addEventListener('click', () => {
-      if (state.openNotes[recipe.id]) {
-        delete state.openNotes[recipe.id];
+    const buildDetails = () => {
+      if (disclosure.querySelector('[data-recipe-details-built="true"]')) return;
+      disclosure.appendChild(buildMealCardDetails(recipe, currentServings, scale));
+    };
+    disclosure.addEventListener('toggle', () => {
+      if (disclosure.open) {
+        expandedRecipeIds.add(recipe.id);
+        buildDetails();
       } else {
-        state.openNotes[recipe.id] = true;
+        expandedRecipeIds.delete(recipe.id);
       }
-      renderApp();
+      summary.textContent = disclosure.open ? 'Hide recipe details' : 'View recipe details';
     });
-    footer.appendChild(notesButton);
-    if (isOpen) {
-      const textarea = document.createElement('textarea');
-      textarea.value = state.notes[recipe.id] || '';
-      textarea.placeholder = 'Add personal notes, timing adjustments, or plating ideas';
-      textarea.addEventListener('input', (event) => {
-        state.notes[recipe.id] = event.target.value;
-        persistAppState();
-      });
-      footer.appendChild(textarea);
+    if (expandedRecipeIds.has(recipe.id)) {
+      disclosure.open = true;
+      summary.textContent = 'Hide recipe details';
+      buildDetails();
     }
-    card.appendChild(footer);
+    card.appendChild(disclosure);
 
     return card;
   };
@@ -8064,15 +8091,89 @@
     return card;
   };
 
+  const ensureRecipePaginationControls = (pageState) => {
+    let navigation = document.getElementById('recipe-pagination');
+    if (!(navigation instanceof HTMLElement)) {
+      navigation = document.createElement('nav');
+      navigation.id = 'recipe-pagination';
+      navigation.className = 'recipe-pagination';
+      navigation.setAttribute('aria-label', 'Recipe result pages');
+
+      const previous = document.createElement('button');
+      previous.type = 'button';
+      previous.className = 'recipe-pagination__button';
+      previous.dataset.recipePageAction = 'previous';
+      previous.textContent = 'Previous';
+      previous.addEventListener('click', () => {
+        recipePage = Math.max(1, recipePage - 1);
+        renderMeals();
+        elements.mealGrid?.scrollIntoView?.({ block: 'start' });
+      });
+
+      const status = document.createElement('span');
+      status.className = 'recipe-pagination__status';
+      status.setAttribute('aria-live', 'polite');
+
+      const next = document.createElement('button');
+      next.type = 'button';
+      next.className = 'recipe-pagination__button';
+      next.dataset.recipePageAction = 'next';
+      next.textContent = 'Next';
+      next.addEventListener('click', () => {
+        recipePage += 1;
+        renderMeals();
+        elements.mealGrid?.scrollIntoView?.({ block: 'start' });
+      });
+
+      navigation.append(previous, status, next);
+      elements.mealGrid.insertAdjacentElement('afterend', navigation);
+    }
+
+    const previous = navigation.querySelector('[data-recipe-page-action="previous"]');
+    const next = navigation.querySelector('[data-recipe-page-action="next"]');
+    const status = navigation.querySelector('.recipe-pagination__status');
+    navigation.hidden = pageState.totalItems === 0;
+    if (previous instanceof HTMLButtonElement) previous.disabled = pageState.currentPage <= 1;
+    if (next instanceof HTMLButtonElement) next.disabled = pageState.currentPage >= pageState.pageCount;
+    if (status instanceof HTMLElement) {
+      const start = pageState.totalItems ? pageState.startIndex + 1 : 0;
+      status.textContent = `Showing ${start.toLocaleString()}–${pageState.endIndex.toLocaleString()} of ${pageState.totalItems.toLocaleString()} · Page ${pageState.currentPage} of ${pageState.pageCount}`;
+    }
+    return navigation;
+  };
+
   const renderMeals = () => {
     if (!elements.mealGrid) {
       return;
     }
     const filters = ensureMealFilters();
     const filteredRecipes = recipes.filter((recipe) => matchesMealFilters(recipe));
+    const nextFilterSignature = JSON.stringify(filters);
+    if (recipeFilterSignature && recipeFilterSignature !== nextFilterSignature) {
+      recipePage = 1;
+      expandedRecipeIds.clear();
+    }
+    recipeFilterSignature = nextFilterSignature;
+    const pagination = window.BlissfulRecipePagination?.paginateItems?.(
+      filteredRecipes,
+      recipePage,
+      RECIPE_PAGE_SIZE,
+    ) || {
+      items: filteredRecipes.slice(0, RECIPE_PAGE_SIZE),
+      currentPage: 1,
+      pageCount: 1,
+      pageSize: RECIPE_PAGE_SIZE,
+      totalItems: filteredRecipes.length,
+      startIndex: 0,
+      endIndex: Math.min(filteredRecipes.length, RECIPE_PAGE_SIZE),
+    };
+    recipePage = pagination.currentPage;
     elements.mealGrid.innerHTML = '';
-    if (filteredRecipes.length) {
-      filteredRecipes.forEach((recipe) => {
+    elements.mealGrid.dataset.totalResults = String(pagination.totalItems);
+    elements.mealGrid.dataset.page = String(pagination.currentPage);
+    elements.mealGrid.dataset.pageSize = String(pagination.pageSize);
+    if (pagination.items.length) {
+      pagination.items.forEach((recipe) => {
         elements.mealGrid.appendChild(createMealCard(recipe));
       });
     } else {
@@ -8093,6 +8194,14 @@
       empty.appendChild(paragraph);
       elements.mealGrid.appendChild(empty);
     }
+    ensureRecipePaginationControls(pagination);
+    window.dispatchEvent(new CustomEvent('blissful-recipe-results-change', {
+      detail: {
+        totalResults: pagination.totalItems,
+        page: pagination.currentPage,
+        pageSize: pagination.pageSize,
+      },
+    }));
 
     const productivityUi = window.BlissfulProductivityUI;
     if (productivityUi && typeof productivityUi.render === 'function') {
