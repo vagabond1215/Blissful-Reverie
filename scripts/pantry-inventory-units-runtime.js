@@ -32,6 +32,7 @@
     ? core.normalizeProfiles(readJson(PROFILE_KEY, {}))
     : {};
   const setCustomProfiles = (profiles) => writeJson(PROFILE_KEY, profiles);
+  const hasCustomProfile = (slug) => Boolean(getCustomProfiles()[slug]);
 
   const hasSeededProfile = (slug) => Boolean(core.DEFAULT_PROFILES && core.DEFAULT_PROFILES[slug]);
   const profileFor = (slug) => {
@@ -80,7 +81,15 @@
     Object.keys(inventory).forEach((slug) => {
       if (!hasSeededProfile(slug) && !custom[slug]) return;
       const profile = core.resolveProfile(slug, custom);
-      const normalized = core.normalizeInventoryEntry(inventory[slug], profile);
+      let normalized = core.normalizeInventoryEntry(inventory[slug], profile);
+      if (normalized && !normalized.convertible) {
+        const legacyUnit = core.getUnit?.(inventory[slug]?.unit);
+        const quantity = Number(inventory[slug]?.quantity);
+        if (legacyUnit?.group === 'package' && profile.purchaseUnit && Number.isFinite(quantity) && quantity >= 0) {
+          const migrated = core.addPurchase({ inventory: {}, slug, purchaseQuantity: quantity, profile });
+          normalized = migrated.ok ? { ...migrated.inventory[slug], convertible: true } : normalized;
+        }
+      }
       if (!normalized) return;
       if (!normalized.convertible) {
         warnings.push({ slug, unit: clean(inventory[slug]?.unit) });
@@ -104,17 +113,25 @@
     return { changed, warnings };
   };
 
-  const appendUnitOptions = (select, currentValue = '') => {
+  const getStockUnitOptions = (slug, profile) => {
+    const configured = hasSeededProfile(slug) || hasCustomProfile(slug);
+    const source = configured && typeof core.getSelectableUnits === 'function'
+      ? core.getSelectableUnits(profile)
+      : (core.UNIT_REGISTRY || []);
+    return source.filter((unit) => unit?.group !== 'package');
+  };
+
+  const appendStockOptions = (select, slug, profile, currentValue = '') => {
     if (!(select instanceof HTMLSelectElement)) return;
     select.textContent = '';
-    const groups = core.getUnitGroups?.() || {};
-    const labels = { count: 'Count', volume: 'Volume', mass: 'Mass', package: 'Packages' };
-    ['count', 'volume', 'mass', 'package'].forEach((groupName) => {
-      const entries = Array.isArray(groups[groupName]) ? groups[groupName] : [];
-      if (!entries.length) return;
+    const entries = getStockUnitOptions(slug, profile);
+    const labels = { count: 'Count', volume: 'Volume', mass: 'Mass' };
+    ['count', 'volume', 'mass'].forEach((groupName) => {
+      const groupEntries = entries.filter((unit) => unit.group === groupName);
+      if (!groupEntries.length) return;
       const group = document.createElement('optgroup');
       group.label = labels[groupName] || groupName;
-      entries.forEach((unit) => {
+      groupEntries.forEach((unit) => {
         const option = document.createElement('option');
         option.value = unit.id;
         option.textContent = unit.label;
@@ -123,7 +140,8 @@
       select.appendChild(group);
     });
     const normalized = core.normalizeUnit?.(currentValue);
-    if (normalized) select.value = normalized;
+    const valid = normalized && entries.some((unit) => unit.id === normalized);
+    select.value = valid ? normalized : (profile?.stockUnit || entries[0]?.id || '');
   };
 
   const appendPackageOptions = (select, currentValue = '') => {
@@ -144,28 +162,45 @@
     if (normalized) select.value = normalized;
   };
 
-  const syncOriginalUnitInput = (input, unit) => {
-    if (!(input instanceof HTMLInputElement)) return;
-    const normalized = core.normalizeUnit?.(unit);
-    if (!normalized) return;
-    input.value = normalized;
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new Event('change', { bubbles: true }));
-  };
-
-  const saveProfileFields = (slug, { purchaseUnit, unitsPerPurchase, stockUnit } = {}) => {
+  const saveProfileFields = (slug, { purchaseUnit, unitsPerPurchase } = {}) => {
     const profiles = getCustomProfiles();
     const existing = profileFor(slug);
-    const seeded = hasSeededProfile(slug);
     const next = core.normalizeProfile({
-      stockUnit: seeded ? existing.stockUnit : (core.normalizeUnit(stockUnit) || existing.stockUnit),
+      ...existing,
       purchaseUnit: core.normalizeUnit(purchaseUnit) || '',
       unitsPerPurchase: Number(unitsPerPurchase) > 0 ? Number(unitsPerPurchase) : existing.unitsPerPurchase,
-      equivalentsToStock: existing.equivalentsToStock,
-    }, seeded ? core.DEFAULT_PROFILES[slug] : null);
+    });
     profiles[slug] = next;
     setCustomProfiles(profiles);
+    global.dispatchEvent?.(new CustomEvent('blissful-inventory-unit-profile-change', { detail: { slug, profile: next } }));
     return next;
+  };
+
+  const changeStockUnit = (slug, targetUnit) => {
+    const target = core.normalizeUnit?.(targetUnit);
+    const targetDefinition = core.getUnit?.(target);
+    if (!target || !targetDefinition || targetDefinition.group === 'package') return { ok: false, reason: 'invalid-stock-unit' };
+    const currentProfile = profileFor(slug);
+    if (target === currentProfile.stockUnit) return { ok: true, profile: currentProfile };
+    let nextProfile = core.rebaseProfile?.(currentProfile, target) || null;
+    const inventory = { ...getInventory() };
+    const entry = isRecord(inventory[slug]) ? inventory[slug] : null;
+    if (!nextProfile) {
+      if (entry && Number(entry.quantity) > 0) return { ok: false, reason: 'incompatible-stock-unit' };
+      nextProfile = core.normalizeProfile({ ...currentProfile, stockUnit: target, equivalentsToStock: {} });
+    }
+    if (entry) {
+      const oldStockQuantity = core.toStockQuantity?.(entry.quantity, entry.unit, currentProfile);
+      const nextQuantity = oldStockQuantity === null ? null : core.fromStockQuantity?.(oldStockQuantity, target, currentProfile);
+      if (nextQuantity === null || !Number.isFinite(Number(nextQuantity))) return { ok: false, reason: 'incompatible-stock-unit' };
+      inventory[slug] = { quantity: Number(formatNumber(nextQuantity)), unit: target };
+    }
+    const profiles = getCustomProfiles();
+    profiles[slug] = nextProfile;
+    setCustomProfiles(profiles);
+    if (entry) commitInventory(inventory);
+    else global.dispatchEvent?.(new CustomEvent('blissful-inventory-unit-profile-change', { detail: { slug, profile: nextProfile } }));
+    return { ok: true, profile: nextProfile, inventory };
   };
 
   const ensureUnitDetails = (card, slug) => {
@@ -235,11 +270,9 @@
 
     const load = () => {
       const profile = profileFor(slug);
-      appendUnitOptions(stock, profile.stockUnit);
-      stock.disabled = hasSeededProfile(slug);
-      stock.title = stock.disabled
-        ? 'This ingredient has an exact conversion bridge. Choose a display unit above without changing the normalized stock unit.'
-        : 'Unit used for normalized inventory math.';
+      appendStockOptions(stock, slug, profile, profile.stockUnit);
+      stock.disabled = false;
+      stock.title = 'Unit used for normalized inventory math. Only convertible stock units are offered once a profile is configured.';
       appendPackageOptions(purchase, profile.purchaseUnit);
       size.value = formatNumber(profile.unitsPerPurchase);
       relationship.textContent = buildProfileSummary(profile);
@@ -247,20 +280,25 @@
       add.textContent = profile.purchaseUnit ? `Add ${profile.purchaseUnit}` : 'Add purchase';
     };
 
-    const save = () => {
-      const next = saveProfileFields(slug, {
-        stockUnit: stock.value,
-        purchaseUnit: purchase.value,
-        unitsPerPurchase: size.value,
-      });
+    stock.addEventListener('change', () => {
+      const result = changeStockUnit(slug, stock.value);
+      if (!result.ok) {
+        status.textContent = 'That stock unit cannot be converted from the current Pantry quantity.';
+        load();
+        return;
+      }
+      relationship.textContent = buildProfileSummary(result.profile);
+      status.textContent = `Stock unit changed to ${result.profile.stockUnit}.`;
+    });
+    const savePurchase = () => {
+      const next = saveProfileFields(slug, { purchaseUnit: purchase.value, unitsPerPurchase: size.value });
       relationship.textContent = buildProfileSummary(next);
       add.disabled = !next.purchaseUnit;
       add.textContent = next.purchaseUnit ? `Add ${next.purchaseUnit}` : 'Add purchase';
-      status.textContent = 'Unit profile saved.';
+      status.textContent = 'Purchase profile saved.';
     };
-    stock.addEventListener('change', save);
-    purchase.addEventListener('change', save);
-    size.addEventListener('change', save);
+    purchase.addEventListener('change', savePurchase);
+    size.addEventListener('change', savePurchase);
 
     add.addEventListener('click', () => {
       const profile = profileFor(slug);
@@ -292,21 +330,24 @@
     if (!(select instanceof HTMLSelectElement)) {
       select = document.createElement('select');
       select.className = 'pantry-card__inline-input pantry-card__unit-select';
-      select.setAttribute('aria-label', original.getAttribute('aria-label') || `Unit for ${slug}`);
+      select.setAttribute('aria-label', original.getAttribute('aria-label') || `Stock unit for ${slug}`);
       original.insertAdjacentElement('beforebegin', select);
       original.hidden = true;
       original.setAttribute('aria-hidden', 'true');
       original.tabIndex = -1;
-      select.addEventListener('change', () => syncOriginalUnitInput(original, select.value));
+      select.addEventListener('change', () => {
+        const result = changeStockUnit(slug, select.value);
+        if (!result.ok) {
+          appendStockOptions(select, slug, profileFor(slug), profileFor(slug).stockUnit);
+        }
+      });
     }
     const inventoryEntry = getInventory()[slug];
     const profile = profileFor(slug);
-    const current = core.normalizeUnit(inventoryEntry?.unit)
-      || (hasSeededProfile(slug) ? profile.stockUnit : core.normalizeUnit(original.value))
-      || profile.stockUnit
-      || 'each';
-    if (document.activeElement !== select) appendUnitOptions(select, current);
-    select.title = 'Validated pantry unit. Purchase packages are configured separately under Units & purchasing.';
+    const current = core.normalizeUnit(inventoryEntry?.unit) || profile.stockUnit || 'each';
+    if (document.activeElement !== select) appendStockOptions(select, slug, profile, current);
+    original.value = current;
+    select.title = 'Validated normalized stock unit. Purchase packages are configured separately under Units & purchasing.';
     ensureUnitDetails(card, slug);
   };
 
@@ -339,7 +380,7 @@
     return true;
   };
 
-  const api = { buildProfileSummary, profileFor, migrateKnownProfiles };
+  const api = { buildProfileSummary, profileFor, migrateKnownProfiles, changeStockUnit, getStockUnitOptions };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   global.BlissfulPantryInventoryUnits = Object.assign({}, global.BlissfulPantryInventoryUnits || {}, api);
   if (typeof document === 'undefined') return;
