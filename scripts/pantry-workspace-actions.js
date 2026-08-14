@@ -8,10 +8,10 @@
     'data/ingredient-processes.js',
     'scripts/pantry-package-defaults-core.js',
     'scripts/inventory-unit-legacy-preferences.js',
-    'scripts/pantry-inventory-units-runtime.js',
+    'scripts/pantry-inventory-units-row-runtime.js',
     'scripts/shopping-inventory-units-sync.js',
-    'scripts/ingredient-process-runtime.js',
     'scripts/pantry-item-settings.js',
+    'scripts/pantry-item-settings-focus-trap.js',
     'scripts/recipe-inventory-runtime.js',
   ];
   const load = (index) => {
