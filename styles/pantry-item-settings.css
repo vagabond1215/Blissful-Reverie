@@ -4,6 +4,12 @@ html.pantry-workspace-active #pantry-grid .ingredient-processes {
   display: none !important;
 }
 
+html.pantry-workspace-active #pantry-grid .pantry-card__unit-select {
+  width: 76px !important;
+  min-width: 76px !important;
+  max-width: 76px !important;
+}
+
 html.pantry-workspace-active #pantry-grid .pantry-item-settings__trigger {
   flex: 0 0 26px;
   width: 26px;
@@ -180,6 +186,14 @@ html.pantry-workspace-active #pantry-grid .pantry-item-settings__trigger:focus-v
 
 .pantry-item-settings__processes .ingredient-process {
   margin: 0;
+}
+
+@media (max-width: 900px) {
+  html.pantry-workspace-active #pantry-grid .pantry-card__unit-select {
+    width: 68px !important;
+    min-width: 68px !important;
+    max-width: 68px !important;
+  }
 }
 
 @media (max-width: 640px) {
