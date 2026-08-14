@@ -28,6 +28,7 @@ const matching = {
 };
 
 const validIngredient = admission.validateCuratedIngredient({
+  admissionVersion: 1,
   slug: 'dairy-test-milk',
   name: 'Test Milk',
   category: 'Dairy',
@@ -41,6 +42,7 @@ const validIngredient = admission.validateCuratedIngredient({
 assert.deepEqual(validIngredient.errors, []);
 
 const invalidIngredient = admission.validateCuratedIngredient({
+  admissionVersion: 1,
   slug: 'grain-test',
   name: 'Test Grain',
   category: 'Not A Category',
@@ -66,6 +68,7 @@ assert(invalidIngredient.errors.some((error) => error.includes('purchaseUnit mus
 assert(invalidIngredient.errors.some((error) => error.includes('unitsPerPurchase must be positive')));
 
 const validRecipe = admission.validateCuratedRecipe({
+  admissionVersion: 1,
   id: 'test-grain-bowl',
   name: 'Test Grain Bowl',
   baseServings: 2,
@@ -81,6 +84,7 @@ const validRecipe = admission.validateCuratedRecipe({
 assert.deepEqual(validRecipe.errors, []);
 
 const invalidRecipe = admission.validateCuratedRecipe({
+  admissionVersion: 1,
   id: 'bad-recipe',
   name: 'Bad Recipe',
   baseServings: 2,
@@ -137,8 +141,9 @@ assert(criteria.includes('Curated ingredient admission'));
 assert(criteria.includes('Curated recipe admission'));
 assert(criteria.includes('User-created/custom ingredients'));
 assert(criteria.includes('Promotion from custom to canonical'));
+assert(criteria.includes('admissionVersion: 1'));
 
-// Run the current effective catalog through the same validators used for future additions.
+// The current catalog is a grandfathered baseline. Net-new entries must be versioned and strict-valid.
 global.window = global;
 require('../data/ingredients.js');
 require('../data/recipes.js');
@@ -146,30 +151,55 @@ require('../scripts/ingredient-matching.js');
 const catalogIngredients = global.BLISSFUL_INGREDIENTS || [];
 const catalogRecipes = global.BLISSFUL_RECIPES || [];
 const catalogMatching = global.BlissfulMatching || {};
-const catalogErrors = [];
 
-catalogIngredients.forEach((ingredient) => {
-  const result = admission.validateCuratedIngredient(ingredient, {
-    existingIngredients: catalogIngredients,
-    allowedCategories: allowedIngredientCategories,
-    inventoryProfiles: units.DEFAULT_PROFILES,
-  });
-  result.errors.forEach((error) => catalogErrors.push(`ingredient ${ingredient.slug || ingredient.name}: ${error}`));
+const currentGate = admission.validateCatalogGrowth({
+  ingredients: catalogIngredients,
+  recipes: catalogRecipes,
+  matching: catalogMatching,
+  allowedCategories: allowedIngredientCategories,
 });
+assert.deepEqual(currentGate.errors, []);
+assert.equal(currentGate.admittedIngredients.length, 0);
+assert.equal(currentGate.admittedRecipes.length, 0);
 
-catalogRecipes.forEach((recipe) => {
-  const result = admission.validateCuratedRecipe(recipe, {
-    ingredients: catalogIngredients,
-    existingRecipes: catalogRecipes,
-    matching: catalogMatching,
-  });
-  result.errors.forEach((error) => catalogErrors.push(`recipe ${recipe.id || recipe.name}: ${error}`));
+const newIngredient = {
+  admissionVersion: 1,
+  slug: 'dairy-test-cultured-milk',
+  name: 'Test Cultured Milk',
+  category: 'Dairy',
+  tags: ['Contains Dairy'],
+  packageUnit: 'carton',
+};
+const newRecipe = {
+  admissionVersion: 1,
+  id: 'catalog-admission-test-grain',
+  name: 'Catalog Admission Test Grain',
+  baseServings: 2,
+  ingredients: [{ item: 'test grain', quantity: 1, unit: 'cup' }],
+  instructions: ['Cook the grain.'],
+  equipment: [],
+  tags: [],
+  allergens: [],
+};
+const syntheticGate = admission.validateCatalogGrowth({
+  ingredients: [...ingredients, newIngredient],
+  recipes: [newRecipe],
+  matching,
+  allowedCategories: allowedIngredientCategories,
+  baselineCounts: { ingredients: ingredients.length, recipes: 0 },
 });
+assert.deepEqual(syntheticGate.errors, []);
+assert.equal(syntheticGate.admittedIngredients.length, 1);
+assert.equal(syntheticGate.admittedRecipes.length, 1);
 
-assert.equal(
-  catalogErrors.length,
-  0,
-  `Curated catalog admission failures (${catalogErrors.length}):\n${catalogErrors.slice(0, 60).join('\n')}${catalogErrors.length > 60 ? `\n...${catalogErrors.length - 60} more` : ''}`,
-);
+const missingVersionGate = admission.validateCatalogGrowth({
+  ingredients: [...ingredients, { ...newIngredient, admissionVersion: undefined }],
+  recipes: [{ ...newRecipe, admissionVersion: undefined }],
+  matching,
+  allowedCategories: allowedIngredientCategories,
+  baselineCounts: { ingredients: ingredients.length, recipes: 0 },
+});
+assert(missingVersionGate.errors.some((error) => error.includes('every net-new canonical ingredient must set admissionVersion: 1')));
+assert(missingVersionGate.errors.some((error) => error.includes('every net-new curated recipe must set admissionVersion: 1')));
 
-console.log(`Catalog admission and custom ingredient validation tests passed for ${catalogIngredients.length} ingredients and ${catalogRecipes.length} recipes.`);
+console.log(`Catalog admission and custom ingredient validation tests passed; legacy baseline is ${catalogIngredients.length} ingredients and ${catalogRecipes.length} recipes.`);
