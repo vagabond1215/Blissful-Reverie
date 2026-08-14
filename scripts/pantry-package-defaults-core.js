@@ -29,6 +29,7 @@
 
     if (hasAny(text, ['canned ', 'canned-'])) return 'can';
     if (hasAny(text, ['frozen ', 'frozen-'])) return hasAny(name, ['pizza', 'waffle', 'pancake', 'meal', 'lasagna']) ? 'box' : 'bag';
+    if (name.includes('coconut milk') && !name.includes('beverage')) return 'can';
     if (name.includes('egg') && !hasAny(name, ['egg noodles', 'eggplant'])) return 'carton';
     if (name.includes('butter') && !hasAny(name, ['peanut butter', 'almond butter', 'cashew butter', 'sunflower butter'])) return name.includes('spread') ? 'tub' : 'box';
     if (name.includes('milk')) return category === 'dairy alternative' || hasAny(name, ['almond', 'oat', 'soy', 'pea', 'coconut']) ? 'carton' : 'jug';
