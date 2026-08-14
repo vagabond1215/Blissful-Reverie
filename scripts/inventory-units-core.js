@@ -309,13 +309,13 @@
     if (['small', 'medium', 'large', 'whole', 'item', 'items', 'pepper', 'peppers', 'potato', 'potatoes', 'avocado', 'avocados', 'cucumber', 'cucumbers', 'shallot', 'shallots', 'jalapeño', 'jalapeno'].includes(raw)) {
       return { quantity: Number(quantity), unit: 'each' };
     }
+    const packagePrefix = raw.match(/^(cans?|jars?|bottles?|boxes?|bags?|packs?|cartons?|pouches?)\b/i);
+    if (packagePrefix) return { quantity: Number(quantity), unit: normalizeUnit(packagePrefix[1]) };
     const eachWeight = raw.match(/\((\d+(?:\.\d+)?)\s*(ounces?|oz|grams?|g)\s+each\)/i);
     if (eachWeight) {
       const parsedUnit = normalizeUnit(eachWeight[2]);
       return { quantity: Number(quantity) * Number(eachWeight[1]), unit: parsedUnit || '' };
     }
-    const packagePrefix = raw.match(/^(cans?|jars?|bottles?|boxes?|bags?|packs?|cartons?|pouches?)\b/i);
-    if (packagePrefix) return { quantity: Number(quantity), unit: normalizeUnit(packagePrefix[1]) };
     return { quantity: Number(quantity), unit: '' };
   };
 
