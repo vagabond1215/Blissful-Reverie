@@ -3,9 +3,14 @@
   const sources = [
     'scripts/pantry-workspace-popover.js',
     'scripts/pantry-workspace-refine.js',
+    'scripts/inventory-units-core.js',
+    'data/ingredient-processes.js',
     'scripts/pantry-package-defaults-core.js',
     'scripts/pantry-package-unit-runtime.js',
     'scripts/pantry-package-unit-migration.js',
+    'scripts/pantry-inventory-units-runtime.js',
+    'scripts/ingredient-process-runtime.js',
+    'scripts/recipe-inventory-runtime.js',
   ];
   const load = (index) => {
     if (index >= sources.length) return;
