@@ -18,7 +18,7 @@
 
   const isPurchaseUnit = (value) => {
     const unit = typeof units.getUnit === 'function' ? units.getUnit(value) : null;
-    return Boolean(unit && unit.group === 'package');
+    return Boolean(unit && (unit.group === 'package' || unit.id === 'each'));
   };
 
   const validateAliases = (ingredient, errors) => {
@@ -48,7 +48,7 @@
     }
     if (!isStockUnit(profile.stockUnit)) add(errors, `${prefix} stockUnit must be a recognized non-package unit.`);
     if (profile.purchaseUnit && !isPurchaseUnit(profile.purchaseUnit)) {
-      add(errors, `${prefix} purchaseUnit must be a recognized package unit.`);
+      add(errors, `${prefix} purchaseUnit must be a recognized purchase/package unit.`);
     }
     if (profile.purchaseUnit && !finitePositive(profile.unitsPerPurchase)) {
       add(errors, `${prefix} unitsPerPurchase must be positive when purchaseUnit is configured.`);
@@ -177,7 +177,7 @@
     const packageEnabled = Boolean(ingredient.packagePurchasing || clean(ingredient.purchaseUnit));
     if (packageEnabled) {
       if (!isPurchaseUnit(ingredient.purchaseUnit)) {
-        add(errors, 'custom ingredient purchaseUnit must be a recognized package unit when package purchasing is enabled.');
+        add(errors, 'custom ingredient purchaseUnit must be a recognized purchase/package unit when package purchasing is enabled.');
       }
       if (!finitePositive(ingredient.unitsPerPurchase)) {
         add(errors, 'custom ingredient unitsPerPurchase must be positive when package purchasing is enabled.');
