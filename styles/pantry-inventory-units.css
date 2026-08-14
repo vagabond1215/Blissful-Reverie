@@ -1,0 +1,141 @@
+.pantry-card__unit-select {
+  min-width: 7.25rem;
+}
+
+.pantry-card__inline-input--unit[hidden] {
+  display: none !important;
+}
+
+.pantry-unit-profile {
+  margin: 0.5rem 0.75rem 0.75rem;
+  border-top: 1px solid var(--border-color, rgba(127, 127, 127, 0.22));
+  padding-top: 0.5rem;
+}
+
+.pantry-unit-profile > summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.pantry-unit-profile__body {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.55rem;
+  align-items: end;
+}
+
+.pantry-unit-profile__field {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+}
+
+.pantry-unit-profile__select,
+.pantry-unit-profile__number,
+.pantry-unit-profile__purchase-count {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pantry-unit-profile__relationship,
+.pantry-unit-profile__status {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.75rem;
+  opacity: 0.82;
+}
+
+.pantry-unit-profile__purchase-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(5rem, 0.35fr) minmax(8rem, 0.65fr);
+  gap: 0.5rem;
+}
+
+.pantry-unit-profile__add {
+  min-height: 2rem;
+}
+
+@media (max-width: 720px) {
+  .pantry-unit-profile__body {
+    grid-template-columns: 1fr;
+  }
+
+  .pantry-unit-profile__relationship,
+  .pantry-unit-profile__status,
+  .pantry-unit-profile__purchase-row {
+    grid-column: 1;
+  }
+}
+
+.ingredient-processes {
+  margin: 0 0.75rem 0.75rem;
+  border-top: 1px solid var(--border-color, rgba(127, 127, 127, 0.22));
+  padding-top: 0.5rem;
+}
+
+.ingredient-processes > summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.ingredient-processes__body {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+}
+
+.ingredient-process {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.65rem;
+  border: 1px solid var(--border-color, rgba(127, 127, 127, 0.22));
+  border-radius: 0.65rem;
+}
+
+.ingredient-process__title,
+.ingredient-process__yield,
+.ingredient-process__status {
+  margin: 0;
+}
+
+.ingredient-process__title {
+  font-size: 0.9rem;
+}
+
+.ingredient-process__yield,
+.ingredient-process__inputs,
+.ingredient-process__steps,
+.ingredient-process__status {
+  font-size: 0.76rem;
+}
+
+.ingredient-process__inputs,
+.ingredient-process__steps {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.ingredient-process__make {
+  justify-self: start;
+}
+
+.recipe-inventory-action {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.6rem;
+}
+
+.recipe-inventory-action__button {
+  width: 100%;
+}
+
+.recipe-inventory-action__status {
+  min-height: 1em;
+  font-size: 0.72rem;
+  opacity: 0.78;
+}
