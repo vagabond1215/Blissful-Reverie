@@ -4,6 +4,8 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const units = require('../scripts/inventory-units-core.js');
 const rebase = require('../scripts/inventory-units-rebase.js');
+const packageDefaults = require('../scripts/pantry-package-defaults-core.js');
+const legacyPreferences = require('../scripts/inventory-unit-legacy-preferences.js');
 const shoppingSync = require('../scripts/shopping-inventory-units-sync.js');
 
 assert.equal(units.normalizeUnit('tablespoons'), 'tbsp');
@@ -52,6 +54,7 @@ const buttermilk = units.resolveProfile('dairy-buttermilk', {});
 assert.equal(buttermilk.stockUnit, 'cup');
 assert.equal(buttermilk.purchaseUnit, 'carton');
 assert.equal(buttermilk.unitsPerPurchase, 4);
+assert.equal(packageDefaults.getDefaultPackageUnit({ slug: 'dairy-buttermilk', name: 'Buttermilk', category: 'Dairy' }), 'carton');
 assert(Math.abs(units.convertQuantity(1, 'quart', 'cup', buttermilk) - 4) < 1e-8);
 assert.equal(units.resolveProfile('dairy-buttermilk', { 'dairy-buttermilk': { unitsPerPurchase: 2 } }).unitsPerPurchase, 2);
 purchase = units.addPurchase({ inventory: {}, slug: 'dairy-buttermilk', purchaseQuantity: 1, profile: buttermilk });
@@ -67,6 +70,24 @@ assert.equal(rebasedButtermilk.stockUnit, 'quart');
 assert.equal(rebasedButtermilk.purchaseUnit, 'carton');
 assert(Math.abs(rebasedButtermilk.unitsPerPurchase - 1) < 1e-8);
 assert(Math.abs(units.convertQuantity(1, 'carton', 'quart', rebasedButtermilk) - 1) < 1e-8);
+
+const migratedLegacy = legacyPreferences.migratePreferenceMap({
+  preferences: {
+    'dairy-butter-salted': 'cup',
+    'dairy-buttermilk': 'box',
+    'grain-rice-jasmine': 'pound',
+  },
+  profiles: {},
+  ingredients: [{ slug: 'grain-rice-jasmine', name: 'Rice (Jasmine)', category: 'Grain' }],
+  packageCore: packageDefaults,
+});
+assert.equal(migratedLegacy.profiles['dairy-butter-salted'].stockUnit, 'cup');
+assert.equal(migratedLegacy.profiles['dairy-butter-salted'].purchaseUnit, 'box');
+assert.equal(migratedLegacy.profiles['dairy-butter-salted'].unitsPerPurchase, 2);
+assert.equal(migratedLegacy.profiles['dairy-buttermilk'], undefined, 'Legacy package-shaped stock choices should be skipped');
+assert.equal(migratedLegacy.profiles['grain-rice-jasmine'].stockUnit, 'pound');
+assert.equal(migratedLegacy.profiles['grain-rice-jasmine'].purchaseUnit, 'bag');
+assert(migratedLegacy.skipped.some((entry) => entry.slug === 'dairy-buttermilk' && entry.unit === 'box'));
 
 const syncedShoppingProfiles = shoppingSync.syncShoppingProfiles(
   { 'dairy-butter-salted': { store: 'Giant', purchaseMode: 'unit', packageSize: 1 } },
