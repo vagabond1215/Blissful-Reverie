@@ -1,12 +1,14 @@
-# Pantry package units
+# Pantry inventory and package units
 
-Implemented by PR #181 / issue #180.
+The Pantry unit model has evolved beyond the original package-default implementation from PR #181 / issue #180. This document describes the current compatibility model.
 
-## Default model
+## Current model
 
-Every canonical ingredient resolves to a non-empty common U.S. retail package-form default through `scripts/pantry-package-defaults-core.js`.
+Canonical ingredients can still resolve a common U.S. retail package-form default through `scripts/pantry-package-defaults-core.js`, but Pantry inventory is tracked with validated stock units from `scripts/inventory-units-core.js`.
 
-Representative defaults include:
+The visible Pantry row unit control represents the inventory/stock unit. Package forms are conversion metadata used when a package quantity must be translated into that stock unit; they are not a second competing row-level quantity unit.
+
+Representative package defaults include:
 
 - pasta: `box`
 - eggs: `carton`
@@ -20,47 +22,47 @@ Representative defaults include:
 - plant milk: `carton`
 - cooking coconut milk: `can`
 
-These are product defaults, not immutable standards. Retail packaging varies by store and brand, so user choice always wins.
+Retail packaging varies by store and brand, so defaults are hints rather than immutable standards.
 
-Available package suggestions include `each`, `pack`, `bag`, `box`, `case`, `carton`, `tub`, `bunch`, `tray`, `jar`, `can`, `bottle`, `pouch`, `loaf`, `jug`, `canister`, and `clamshell`, alongside the existing measurement units.
+## Inventory-unit profiles
 
-## Precedence
+Active custom conversion profiles are stored under `blissful-inventory-unit-profiles`. A profile can define:
 
-Unit resolution priority is:
+- the stock unit used for normalized Pantry inventory math;
+- an optional package/purchase unit used for conversion;
+- the number of stock units represented by one package;
+- compatible equivalents used when converting recipe or inventory quantities.
 
-1. remembered per-ingredient user preference
-2. existing saved Pantry inventory unit
-3. common package default
+`blissful-pantry-unit-preferences` belongs to the legacy package-unit preference model and is retained only as migration/compatibility data where the migration runtime still encounters it.
 
-Preferences are stored under `blissful-pantry-unit-preferences` and use canonical ingredient slugs as keys. Explicit choices including `each` are meaningful and must be preserved.
+## Presence semantics
 
-## Inventory compatibility
+A package default, unit preference, or conversion profile by itself must never make an ingredient count as on hand. Pantry presence requires inventory quantity/state, not merely unit metadata.
 
-A package default by itself must never make an ingredient count as on hand.
+Ingredient slugs and the `pantryInventory` state remain the canonical inventory identity/state surface.
 
-When a quantity is entered, the visible preferred/default unit is saved with the Pantry inventory quantity. When quantity is cleared, the unit preference remains in the separate preference store while the inventory entry returns to the legacy empty/`each` shape.
+## UI ownership
 
-Older unit-only Pantry entries are migrated into the preference store and their empty inventory record is cleared so they no longer satisfy pantry-fit presence checks merely because a unit was saved.
-
-Ingredient slugs and the existing `pantryInventory` schema are unchanged.
+The compact Pantry row owns quantity plus the validated inventory-unit selector. Advanced conversion/process configuration belongs in the Pantry item-settings dialog. Per-row hidden unit/process panels are legacy runtime behavior and should not be recreated.
 
 ## Backup and restore
 
-The Pantry package-unit runtime extends the existing local backup/export and restore/import flow to include `blissful-pantry-unit-preferences`.
+Backup coverage should come from the centralized persistence registry. Relevant keys include the app state, inventory-unit profiles, legacy unit-preference migration data when present, Pantry Lists, usage data, and Restock stock history.
 
 ## Validation
 
-`tests/pantry-package-units.test.js` is invoked through the existing Pantry workspace test target. It loads the real ingredient catalog, verifies every canonical ingredient receives a supported non-empty package unit, checks representative package rules, and verifies preference precedence including an explicit remembered `each`.
+`tests/pantry-package-units.test.js` and `tests/inventory-units-processes.test.js` cover package defaults, unit normalization/conversion, profile rebasing, purchase conversion, recipe consumption, and ingredient processes.
 
-Merged-main Validate #162 passed and reported package-unit coverage for all 528 current canonical ingredients.
+The August 2026 repository audit validation reported **554 canonical ingredients**. Do not hard-code this count into application behavior; validation output is the source of truth as the catalog changes.
 
 ## Browser acceptance
 
 A hard-refresh browser smoke test should verify:
 
-- untouched ingredients show sensible defaults;
-- changing one ingredient's unit persists after navigation and refresh;
-- choosing `each` persists and overrides the common default;
-- entering quantity stores the visible unit;
-- clearing quantity preserves the preference without making the ingredient on hand;
-- backup export/import round-trips preferences.
+- untouched ingredients resolve sensible units/defaults;
+- changing a Pantry inventory unit persists and preserves convertible quantity;
+- package metadata does not independently mark an item as on hand;
+- quantity clearing does not create false Pantry presence;
+- item settings renders advanced conversions/processes only when opened;
+- no hidden per-row `.pantry-unit-profile` or `.ingredient-processes` panels are created;
+- backup export/import round-trips inventory-unit and migration data that exists in localStorage.

@@ -64,6 +64,10 @@
 
   ensureVisualResetStylesheets();
 
+  const ensurePersistenceRegistryAssets = () => {
+    ensureScript('scripts/persistence-registry-runtime.js');
+  };
+
   const ensureProductivityStylesheet = () => {
     ensureStylesheet('styles/productivity.css');
   };
@@ -199,6 +203,7 @@
   };
 
   const start = () => {
+    ensurePersistenceRegistryAssets();
     ensureMealPlanAffordanceAssets();
     ensureShoppingReferenceAssets();
     ensureShoppingManagementAssets();

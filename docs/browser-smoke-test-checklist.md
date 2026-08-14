@@ -1,175 +1,161 @@
 # Browser smoke-test checklist
 
-Use this checklist for productivity UI, meal-planning, pantry, backup, settings, onboarding, and smart shopping-list changes. It is intended for manual browser verification alongside automated `npm test` coverage.
+Use this checklist for recipe, pantry, family, meal-plan, backup/settings, and local-persistence changes. Run it alongside automated tests; source-string assertions are not a substitute for this browser pass.
 
 ## When to run
 
-Run this checklist for pull requests that touch any of these areas:
+Run the checklist for pull requests that touch `scripts/app.js`, feature runtimes, persistence/backup code, shared theme/layout CSS, or recipe, Pantry, Family, Meal Plan, Lists, Restock, Settings, or search/filter behavior.
 
-- `scripts/app.js`
-- `scripts/productivity-ui.js`
-- `scripts/productivity-tools.js`
-- `scripts/productivity-backup.js`
-- `scripts/productivity-settings.js`
-- `scripts/productivity-onboarding.js`
-- `styles/app.css`
-- `styles/productivity.css`
-- recipe, ingredient, pantry, meal-plan, backup, onboarding, settings, or shopping-list behavior
-
-Docs-only changes do not need this checklist unless they document browser behavior.
+Docs-only changes do not need a browser pass unless they document browser behavior.
 
 ## Setup
 
 1. Start from a clean checkout of the PR branch.
-2. Install dependencies if needed.
-3. Run the automated checks requested by the PR.
-4. Start the local app.
-5. Open the browser developer console before interacting with the app.
-6. Begin from a representative localStorage state or create one during the test.
+2. Run `npm test` and any focused tests for the changed area.
+3. Start the local app.
+4. Open the browser developer console before interacting.
+5. Test with representative localStorage data, including non-empty Pantry, Family, Lists, and Restock history where applicable.
+6. Record browser, viewport, theme, DOM count observations, and console status in the PR.
 
-Record the browser, viewport sizes, and whether the console stayed clean in the PR body.
+## Required matrix
 
-## Baseline render
+Check each primary surface at:
 
-- The app loads without a blank screen.
-- The console shows no uncaught errors.
-- Recipe cards render.
-- Dashboard summary renders above the recipe grid.
-- Recipe readiness badges render on cards and dashboard entries.
-- Navigation between Meals, Pantry, Kitchen, Family, and Meal Plan views works.
-- Light/dark mode controls still work.
-- Advanced appearance settings can open and close.
+- desktop: approximately 1440 px wide, light mode
+- desktop: approximately 1440 px wide, dark mode
+- mobile: 375 px wide, light mode
+- mobile: 375 px wide, dark mode
 
-## Onboarding
+Use 768 px/tablet when a change specifically affects breakpoint transitions.
 
-- First-run onboarding appears only when appropriate for missing or invalid starter state.
-- Starter pantry/preferences can be applied without a page error.
-- Dismissing or completing onboarding does not block recipe rendering.
-- Existing valid state does not unexpectedly reset.
+## Baseline render and navigation
 
-## Backup controls
+- App loads without a blank screen or uncaught console error.
+- Recipes, Kitchen, Pantry, Meal Plan, and Family navigation works.
+- The active tab is visible and keyboard reachable.
+- Light/dark mode switches without white-on-white or dark-on-dark surfaces.
+- Focus rings remain visibly high contrast.
+- No page has document-level horizontal overflow at 375 px.
 
-- Settings includes the Local backup disclosure.
-- Export backup downloads a JSON backup file or shows a clear success message.
-- Import backup opens the file picker.
-- Invalid backup input shows a clear failure state and does not crash the page.
-- Successful import shows confirmation and reload behavior as expected.
+## Recipes
 
-## Pantry and substitutions
+- Search updates results and the result badge.
+- Ingredient, tag, allergy, equipment, family, favorites, Pantry-only, and substitution filters still affect results where applicable.
+- Mobile filter UI is bounded and does not place thousands of pixels of controls before recipe content.
+- Recipe cards show enough summary information to choose a recipe without requiring every expensive detail to be rendered up front.
+- Opening a recipe/detail surface exposes ingredients, instructions, equipment, allergens, nutrition, notes, serving controls, favorite action, and scheduling behavior as applicable.
+- Calendar/schedule action opens and closes cleanly and preserves keyboard focus.
 
-- Pantry search and filters still work.
-- Marking pantry items as owned updates recipe readiness.
-- Quantity and unit edits persist visually after interaction.
-- Favorite pantry item controls still toggle.
-- Substitutions can be enabled or disabled where available.
-- When substitutions are enabled, acceptable owned substitutes affect readiness and missing-ingredient lists.
+### Recipe scale check
 
-## Meal plan
+Record:
 
-- Recipe cards expose the calendar action for adding recipes to the meal plan.
-- The schedule dialog opens, validates date and time, and closes cleanly.
-- Family member and guest controls in the schedule dialog remain usable.
-- Added meals appear in day, week, and month meal-plan views as applicable.
-- Removing planned entries works where remove controls are shown.
-- Empty meal-plan states are understandable and non-broken.
-- Meal-plan family filters and macro summary controls remain usable when family members exist.
+- number of matching recipes
+- number of recipe cards initially in the DOM
+- approximate total DOM element count after first render
+- whether changing filters causes a long main-thread stall
 
-## Smart shopping list
+Initial DOM card count should be bounded by pagination/virtualization rather than equal to the entire matching catalog.
 
-Test both source modes.
+## Pantry
 
-### From meal plan
+- Pantry search/filter controls work on desktop.
+- Mobile Pantry does not place the topbar search off-screen; the compact mobile treatment remains usable.
+- Quantity edits persist.
+- The existing unit dropdown is the inventory-unit control used by row behavior.
+- Favorite, stock-state, sort, Tags, Lists, Restock, and item-settings actions remain usable.
+- List selector assigns/removes an item without changing unrelated fields.
+- Lists dialog shows list name/store behavior correctly; an omitted list name falls back to store name.
+- Empty lists are visually de-emphasized and item counts reflect unique items.
+- Item Settings opens with one dialog-owned unit/process UI; there are no hidden `.pantry-unit-profile` or `.ingredient-processes` panels created per Pantry row.
+- Item Settings closes on Escape, restores focus, and traps Tab/Shift+Tab while open.
 
-- Add at least two recipes to the meal plan.
-- Open the smart shopping list.
-- Confirm From meal plan is selected by default when valid planned recipes exist.
-- Confirm missing ingredients come from planned recipes.
-- Confirm recipe references appear for missing ingredients where expected.
-- Add pantry items that satisfy at least one missing planned ingredient.
-- Confirm owned ingredients disappear from the missing list.
-- Enable substitutions when available and confirm substituted owned ingredients affect the missing list.
-- Remove all planned meals and confirm the empty state is clear and non-broken.
+## Restock
 
-### Closest recipes
+- Restock opens from Pantry, not Kitchen.
+- Existing stock history affects the intended Restock ordering/history display.
+- Completing Restock updates Pantry quantities without losing units.
+- `blissful-pantry-stock-history` survives backup export/import.
 
-- Switch to Closest recipes.
-- Confirm recipe-based missing ingredients still render.
-- Confirm pantry updates affect this source mode.
-- Confirm copy-list behavior still includes visible items from this source.
+## Family
 
-### Copy feedback
+- Family cards are readable in light and dark modes.
+- Name, target, birthday, allergy/diet/preference controls remain usable.
+- Manage Family dialog opens/closes, restores focus, and does not overflow the mobile viewport.
+- Removing a member updates related member filters without corrupting Pantry or Meal Plan state.
 
-- Copy a non-empty shopping list.
-- Confirm visible copy feedback appears.
-- Confirm repeated copy attempts do not duplicate controls or produce console errors.
-- Confirm empty states do not offer misleading copy success.
+## Meal Plan
 
-## Responsive layout
+- Scheduling a recipe adds it to the intended date.
+- Day, week, and month views remain usable.
+- Family member and guest attendance controls work.
+- Removing planned entries works where controls are shown.
+- Family filters and macro summary controls remain usable when family members exist.
 
-Check at least these widths:
+## Lists and shopping data
 
-- narrow mobile width around 375 px
-- medium tablet width around 768 px
-- desktop width at 1024 px or wider
+- Pantry Lists are the current list-management surface; do not require retired shopping-source-mode controls.
+- Instacart/default list behavior remains intact.
+- Creating a list with no explicit name uses its store name for display.
+- Per-item store data and list membership survive navigation and reload.
 
-For each width:
+## Backup and persistence
 
-- No controls overlap.
-- Source-mode controls remain usable.
-- Shopping-list category groups remain readable.
-- Meal-plan controls remain reachable.
-- Settings and backup disclosures remain usable.
+- Settings exposes Local backup controls.
+- Export produces valid Blissful Reverie JSON.
+- Backup includes meaningful registered local data, including Pantry Lists, shopping settings/profiles, Pantry usage, inventory-unit profiles, family dislikes, Pantry view settings, and Restock stock history when present.
+- Invalid registered values are rejected before restore mutates storage.
+- Successful import restores the registered values and reload behavior remains understandable.
+- Failed restore does not leave a partially applied registered-data set.
 
 ## Accessibility smoke
 
-- Keyboard focus reaches source-mode controls, copy controls, settings disclosures, backup controls, and meal-plan actions.
-- Toggle buttons expose the expected pressed/selected state.
-- Status messages for backup and copy feedback are perceivable.
+- Keyboard focus reaches topbar navigation, search/filter actions, Lists, Restock, item settings, Family management, backup controls, and Meal Plan actions.
+- Toggle buttons expose pressed/selected state.
+- Dynamic status messages remain perceivable.
 - Dialogs close with Escape where supported.
-- No focus trap or hidden-control dead end is introduced.
+- Modal dialogs trap focus while open and restore focus on close.
+- Hidden controls are not keyboard reachable.
 
 ## Regression sweep
 
-Before finishing, verify these surfaces still work:
+Before finishing, verify:
 
-- dashboard summary
-- recipe readiness badges
-- meal filters
-- pantry filters
-- kitchen inventory toggles
-- family member controls
-- meal-plan add/remove flow
+- recipe search and filters
+- Pantry search/filter/sort/favorites
+- Pantry quantities and units
+- Lists and Restock
+- item-settings unit/process operations
+- Kitchen inventory toggles
+- Family member editing/management
+- Meal Plan add/remove flow
 - onboarding
-- backup import/export controls
-- settings disclosures
-- theme controls
-- smart shopping-list source switching
+- backup import/export
+- settings/theme controls
 
 ## PR reporting template
-
-Include this section in PR bodies after running the checklist:
 
 ```md
 ## Browser smoke test
 
 - Browser:
-- Viewports checked:
-- Console errors: none / describe
-- Dashboard and badges:
-- Onboarding:
-- Backup controls:
-- Settings/theme controls:
-- Pantry updates:
-- Substitutions:
-- Meal-plan add/remove:
-- Smart shopping list — From meal plan:
-- Smart shopping list — Closest recipes:
-- Copy feedback:
-- Responsive layout:
-- Accessibility smoke:
+- Desktop light (1440): pass/fail
+- Desktop dark (1440): pass/fail
+- Mobile light (375): pass/fail
+- Mobile dark (375): pass/fail
+- Console errors/warnings:
+- Document scroll width at 375:
+- Initial recipe cards in DOM / matching recipes:
+- Approx. total DOM elements:
+- Recipes/search/filters:
+- Pantry/Lists/Restock/item settings:
+- Family:
+- Meal Plan:
+- Backup/persistence:
+- Keyboard/focus:
 - Notes/caveats:
 ```
 
 ## Known limits
 
-This checklist is manual. It does not replace automated validation, data tests, or focused unit/integration tests. If a browser smoke run finds a bug, fix that bug in a separate focused implementation branch unless it is directly caused by the current PR.
+This is a manual smoke checklist. It does not replace automated validation, data tests, targeted behavioral tests, or performance profiling. When a smoke run reveals a regression caused by the current change, fix it in the same focused branch before merge.
