@@ -22,9 +22,18 @@
   min-block-size: var(--dock-height, 4.25rem) !important;
 }
 
+#recipes-page .nav-chip--settings,
+#recipes-page .settings-panel.nav-chip__settings,
+#recipes-page .settings-panel__summary.settings-btn {
+  inline-size: 42px !important;
+  block-size: 42px !important;
+  min-inline-size: 42px !important;
+  min-block-size: 42px !important;
+}
+
 #recipes-page .nav-chip__settings-icon {
-  inline-size: 1.5rem !important;
-  block-size: 1.5rem !important;
+  inline-size: 24px !important;
+  block-size: 24px !important;
   color: var(--main, var(--text, #2b2522)) !important;
   opacity: 1 !important;
 }
@@ -215,18 +224,9 @@ body.shop-view-active #page-action-bar {
     min-block-size: 3.75rem !important;
   }
 
-  #recipes-page .nav-chip--settings,
-  #recipes-page .settings-panel.nav-chip__settings,
-  #recipes-page .settings-panel__summary.settings-btn {
-    inline-size: 42px !important;
-    block-size: 42px !important;
-    min-inline-size: 42px !important;
-    min-block-size: 42px !important;
-  }
-
   #recipes-page .nav-chip__settings-icon {
-    inline-size: 1.35rem !important;
-    block-size: 1.35rem !important;
+    inline-size: 22px !important;
+    block-size: 22px !important;
   }
 
   #shop-view {
