@@ -1,0 +1,189 @@
+/* Shop-only outlined shopping-list hierarchy with aligned quantity/unit columns. */
+
+#shop-view .productivity-shopping[data-shopping-recommendation-scope='meal-plan'].shop-list-outline {
+  gap: 0.9rem !important;
+  padding: clamp(0.85rem, 1.6vw, 1.15rem) !important;
+  border: 1px solid color-mix(in srgb, var(--base-border, #d8d0c4) 92%, transparent) !important;
+  border-radius: 0.95rem !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__header {
+  align-items: center !important;
+  padding: 0 0 0.75rem !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--base-border, #d8d0c4) 80%, transparent) !important;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__title {
+  margin: 0 !important;
+  font-size: clamp(0.95rem, 1.35vw, 1.08rem) !important;
+  line-height: 1.25 !important;
+  color: var(--base-text, #24211d) !important;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__copy {
+  border: 1px solid var(--base-border, #d8d0c4) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__copy:hover,
+#shop-view .shop-list-outline .productivity-shopping__copy:focus-visible {
+  background: color-mix(in srgb, var(--base-surface-muted, #f5f1eb) 62%, transparent) !important;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__categories {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)) !important;
+  gap: clamp(0.75rem, 1.15vw, 1rem) !important;
+  align-items: start !important;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__category {
+  min-width: 0 !important;
+  display: block !important;
+  padding: 0 !important;
+  border: 1px solid color-mix(in srgb, var(--base-border, #d8d0c4) 88%, transparent) !important;
+  border-radius: 0.8rem !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__category-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  min-height: 2.65rem !important;
+  margin: 0 !important;
+  padding: 0.62rem 0.78rem !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--base-border, #d8d0c4) 78%, transparent) !important;
+  background: color-mix(in srgb, var(--base-surface-muted, #f5f1eb) 46%, transparent) !important;
+  color: var(--base-text, #24211d) !important;
+  font-size: 0.86rem !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  letter-spacing: 0.015em !important;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__category-title::before {
+  content: attr(data-category-icon);
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 1.45rem;
+  width: 1.45rem;
+  height: 1.45rem;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__list {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0.28rem 0.72rem 0.38rem 1rem !important;
+  list-style: none !important;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__item.shop-list-item {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(2.4rem, auto) minmax(3.4rem, auto) !important;
+  align-items: baseline !important;
+  justify-content: stretch !important;
+  column-gap: 0.55rem !important;
+  row-gap: 0.18rem !important;
+  min-width: 0 !important;
+  padding: 0.5rem 0.08rem !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--base-text, #24211d) !important;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__item.shop-list-item + .productivity-shopping__item.shop-list-item {
+  border-top: 1px solid color-mix(in srgb, var(--base-border, #d8d0c4) 65%, transparent) !important;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__item-name {
+  grid-column: 1 !important;
+  min-width: 0 !important;
+  padding-inline-start: 0.3rem !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  color: var(--base-text, #24211d) !important;
+  font-size: 0.86rem !important;
+  font-weight: 650 !important;
+  line-height: 1.25 !important;
+}
+
+#shop-view .shop-list-outline .shop-list-item__quantity {
+  grid-column: 2 !important;
+  justify-self: end !important;
+  min-width: 2.2rem !important;
+  color: var(--base-text, #24211d) !important;
+  font-size: 0.82rem !important;
+  font-weight: 750 !important;
+  line-height: 1.25 !important;
+  text-align: right !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+#shop-view .shop-list-outline .shop-list-item__unit {
+  grid-column: 3 !important;
+  justify-self: start !important;
+  min-width: 3.4rem !important;
+  color: var(--base-text-muted, #6f6860) !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  white-space: normal !important;
+}
+
+#shop-view .shop-list-outline .shop-list-item__unit[data-combined='true'] {
+  grid-column: 2 / 4 !important;
+  justify-self: end !important;
+  max-width: 12rem !important;
+  text-align: right !important;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__item-note,
+#shop-view .shop-list-outline .shopping-management__store {
+  grid-column: 1 / -1 !important;
+  margin: 0 !important;
+  padding-inline-start: 0.3rem !important;
+  color: var(--base-text-muted, #6f6860) !important;
+  font-size: 0.72rem !important;
+  line-height: 1.3 !important;
+  text-align: left !important;
+}
+
+#shop-view .shop-list-outline .productivity-shopping__item-note:empty {
+  display: none !important;
+}
+
+#shop-view .shop-list-outline .shopping-management__purchase[data-shop-outline-hidden='true'] {
+  display: none !important;
+}
+
+@media (min-width: 80rem) {
+  #shop-view .shop-list-outline .productivity-shopping__categories {
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  #shop-view .shop-list-outline .productivity-shopping__categories {
+    grid-template-columns: 1fr !important;
+  }
+
+  #shop-view .shop-list-outline .productivity-shopping__item.shop-list-item {
+    grid-template-columns: minmax(0, 1fr) minmax(2rem, auto) minmax(3rem, auto) !important;
+    column-gap: 0.45rem !important;
+  }
+
+  #shop-view .shop-list-outline .productivity-shopping__list {
+    padding-inline: 0.65rem 0.55rem !important;
+  }
+}
