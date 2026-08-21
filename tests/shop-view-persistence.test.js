@@ -1,5 +1,6 @@
 const assert = require('node:assert/strict');
 const persistence = require('../scripts/shop-view-persistence.js');
+const outline = require('../scripts/shop-list-outline.js');
 
 const values = new Map();
 const storage = {
@@ -20,6 +21,24 @@ assert.equal(persistence.normalizeGroupBy('store'), 'store');
 assert.equal(persistence.normalizeGroupBy('anything-else'), 'category');
 assert.equal(persistence.nextGroupBy('category'), 'store');
 assert.equal(persistence.nextGroupBy('store'), 'category');
+
+assert.equal(outline.normalizeMeasureUnit('tablespoons'), 'tbsp');
+assert.equal(outline.normalizeMeasureUnit('cups'), 'cup');
+assert.equal(outline.formatQuantity(0.5), '½');
+assert.equal(outline.formatQuantity(1.125), '1⅛');
+assert.deepEqual(
+  outline.aggregateMeasures([
+    { quantity: 1, unit: 'cup' },
+    { quantity: 2, unit: 'tablespoons' },
+  ]),
+  [{ quantity: 1.125, unit: 'cup', quantityLabel: '1⅛', unitLabel: 'cups' }],
+);
+assert.equal(outline.getCategoryIcon('Vegetable'), '🥕');
+assert.equal(outline.getCategoryIcon('Any Store', 'store'), '🏬');
+assert.deepEqual(
+  outline.parsePurchaseMeasure('Buy 2 cups · have 0 · target 2 cups'),
+  { quantityLabel: '2', unitLabel: 'cups' },
+);
 
 const workspace = {
   GROUP_DEFINITIONS: [{
