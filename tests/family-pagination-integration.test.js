@@ -1,5 +1,6 @@
 const assert = require('node:assert/strict');
 const integration = require('../scripts/family-pagination-integration.js');
+const safety = require('../scripts/family-dislikes-preferences-safety.js');
 
 const recipes = [
   { id: 'chicken-soup' },
@@ -43,6 +44,30 @@ assert.deepEqual(
   ['sam', 'lee'],
 );
 assert.deepEqual(integration.resolveActiveMemberIds([true], []), []);
+
+const repairedStartup = safety.preserveMountedIndependentDislikes({
+  initialState: state,
+  currentState: { version: 1, members: {} },
+  familyMembers: [{ id: 'sam' }, { id: 'lee' }],
+});
+assert.deepEqual(repairedStartup.restoredIds, ['sam', 'lee']);
+assert.deepEqual(repairedStartup.state.members, state.members);
+
+const intentionalClear = safety.preserveMountedIndependentDislikes({
+  initialState: state,
+  currentState: { version: 1, members: { sam: [], lee: state.members.lee } },
+  familyMembers: [{ id: 'sam' }, { id: 'lee' }],
+});
+assert.deepEqual(intentionalClear.restoredIds, [], 'An explicit empty dislike list must not be mistaken for startup data loss.');
+assert.deepEqual(intentionalClear.state.members.sam, []);
+
+const removedMember = safety.preserveMountedIndependentDislikes({
+  initialState: state,
+  currentState: { version: 1, members: {} },
+  familyMembers: [{ id: 'lee' }],
+});
+assert.deepEqual(removedMember.restoredIds, ['lee']);
+assert.equal(Object.prototype.hasOwnProperty.call(removedMember.state.members, 'sam'), false, 'A member removed from app state should not be restored.');
 
 assert.deepEqual(
   integration.filterRecipesForActiveDislikes({ recipes, memberIds: [], state, recipeIngredientMatches, ingredientBySlug }).map((recipe) => recipe.id),
