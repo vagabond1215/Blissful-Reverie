@@ -49,11 +49,71 @@
   padding: 0 !important;
 }
 
-#page-action-bar .pantry-page-action--state {
-  min-width: 68px;
-  padding-inline: 11px !important;
-  font-size: 0.76rem;
+/*
+  Pantry's stock/sort/favorites controls are dynamic middle segments. Keep them on
+  the same fixed geometry as the standardized icon actions, overlap adjacent borders
+  by one pixel, and explicitly own pointer interaction so later topbar chrome cannot
+  sit invisibly above them.
+*/
+#recipes-page #page-action-bar > #pantry-stock-cycle-action,
+#recipes-page #page-action-bar > #pantry-sort-action,
+#recipes-page #page-action-bar > #pantry-favorites-action {
+  position: relative !important;
+  z-index: 1;
+  width: 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+  margin-left: -1px !important;
+  padding: 0 !important;
+  border: 1px solid var(--border, #cbd0d7) !important;
+  border-radius: 0 !important;
+  background: var(--surface, #fff) !important;
+  color: var(--text, #111) !important;
+  box-shadow: none !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  transform: none !important;
+  touch-action: manipulation;
 }
+
+#recipes-page #page-action-bar > #pantry-stock-cycle-action:hover,
+#recipes-page #page-action-bar > #pantry-stock-cycle-action:focus-visible,
+#recipes-page #page-action-bar > #pantry-sort-action:hover,
+#recipes-page #page-action-bar > #pantry-sort-action:focus-visible,
+#recipes-page #page-action-bar > #pantry-favorites-action:hover,
+#recipes-page #page-action-bar > #pantry-favorites-action:focus-visible {
+  z-index: 3;
+  border-color: var(--border-strong, var(--border, #aeb5bf)) !important;
+  background: var(--surface-muted, #eef1f4) !important;
+  transform: none !important;
+}
+
+#recipes-page #page-action-bar > #pantry-stock-cycle-action:active,
+#recipes-page #page-action-bar > #pantry-sort-action:active,
+#recipes-page #page-action-bar > #pantry-favorites-action:active,
+#recipes-page #page-action-bar > #pantry-sort-action[aria-pressed="true"],
+#recipes-page #page-action-bar > #pantry-favorites-action[aria-pressed="true"] {
+  z-index: 4;
+  background: color-mix(in srgb, var(--surface-muted, #eef1f4) 82%, var(--text, #111) 18%) !important;
+  transform: none !important;
+}
+
+/* Keep the fixed-width stock segment compact while retaining its full aria-label/title. */
+#page-action-bar #pantry-stock-cycle-action {
+  font-size: 0 !important;
+  letter-spacing: 0 !important;
+}
+
+#page-action-bar #pantry-stock-cycle-action::after {
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+#page-action-bar #pantry-stock-cycle-action[title="Stock: All"]::after { content: "All"; }
+#page-action-bar #pantry-stock-cycle-action[title="Stock: Stocked"]::after { content: "In"; }
+#page-action-bar #pantry-stock-cycle-action[title="Stock: Low"]::after { content: "Low"; }
+#page-action-bar #pantry-stock-cycle-action[title="Stock: Out"]::after { content: "Out"; }
 
 #page-action-bar .pantry-page-action--sort {
   font-size: 0.78rem;
@@ -90,8 +150,12 @@
 @media (max-width: 760px) {
   :root { --topbar-segment-height: 36px; }
   #page-action-bar .page-action-bar__button--icon,
-  #page-action-bar .recipe-page-action {
+  #page-action-bar .recipe-page-action,
+  #recipes-page #page-action-bar > #pantry-stock-cycle-action,
+  #recipes-page #page-action-bar > #pantry-sort-action,
+  #recipes-page #page-action-bar > #pantry-favorites-action {
     width: 38px !important;
     min-width: 38px !important;
+    max-width: 38px !important;
   }
 }
