@@ -1,61 +1,117 @@
-/* Authoritative workspace ownership for dynamic topbar controls. */
+/*
+  Authoritative dynamic topbar ownership.
 
-[data-topbar-suppressed="true"] {
-  display: none !important;
-}
+  The selected primary tab is the only source of truth. Underlying workspace sections
+  may remain mounted for compatibility, so their hidden state must not decide which
+  topbar controls render.
+*/
 
-#recipes-page #page-action-bar[data-workspace-owner="recipes"],
-#recipes-page #page-action-bar[data-workspace-owner="pantry"],
-#recipes-page #page-action-bar[data-workspace-owner="shop"],
-#recipes-page #page-action-bar[data-workspace-owner="family"] {
+/* Recipes */
+#recipes-page:has(#primary-nav [data-view-target="meals"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar {
   display: inline-flex !important;
   align-items: stretch !important;
 }
 
-#recipes-page #page-action-bar[data-workspace-owner="kitchen"],
-#recipes-page #page-action-bar[data-workspace-owner="meal-plan"] {
+#recipes-page:has(#primary-nav [data-view-target="meals"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar > :not(#recipe-action-chip):not(#recipe-family-filter) {
   display: none !important;
 }
 
-html[data-active-workspace="recipes"] #recipe-topbar-search,
-html[data-active-workspace="pantry"] #pantry-topbar-search {
+#recipes-page:has(#primary-nav [data-view-target="meals"]:is(.view-toggle__button--active, [aria-current="page"])) #recipe-action-chip {
+  display: contents !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="meals"]:is(.view-toggle__button--active, [aria-current="page"])) #recipe-family-filter[hidden] {
+  display: none !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="meals"]:is(.view-toggle__button--active, [aria-current="page"])) #recipe-topbar-search {
   display: inline-flex !important;
 }
 
-html:not([data-active-workspace="recipes"]) #recipe-topbar-search,
-html:not([data-active-workspace="pantry"]) #pantry-topbar-search {
+#recipes-page:has(#primary-nav [data-view-target="meals"]:is(.view-toggle__button--active, [aria-current="page"])) #pantry-topbar-search {
   display: none !important;
 }
 
-/* Shop owns only its two controls; stale body/view classes cannot leak them elsewhere. */
-html:not([data-active-workspace="shop"]) #page-action-bar .shop-page-action {
+/* Pantry */
+#recipes-page:has(#primary-nav [data-view-target="pantry"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar {
+  display: inline-flex !important;
+  align-items: stretch !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="pantry"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar > * {
   display: none !important;
 }
 
-html[data-active-workspace="shop"] #page-action-bar .shop-page-action {
+#recipes-page:has(#primary-nav [data-view-target="pantry"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar > #pantry-restock-button,
+#recipes-page:has(#primary-nav [data-view-target="pantry"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar > #pantry-lists-action,
+#recipes-page:has(#primary-nav [data-view-target="pantry"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar > #pantry-stock-cycle-action {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="pantry"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar > #pantry-sort-action,
+#recipes-page:has(#primary-nav [data-view-target="pantry"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar > #pantry-favorites-action,
+#recipes-page:has(#primary-nav [data-view-target="pantry"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar > #pantry-tags-action {
   display: inline-grid !important;
   place-items: center !important;
 }
 
-/* Pantry controls stay visible immediately when Pantry owns the bar. */
-html[data-active-workspace="pantry"] #page-action-bar #pantry-restock-button,
-html[data-active-workspace="pantry"] #page-action-bar #pantry-lists-action,
-html[data-active-workspace="pantry"] #page-action-bar #pantry-stock-cycle-action,
-html[data-active-workspace="pantry"] #page-action-bar #pantry-sort-action,
-html[data-active-workspace="pantry"] #page-action-bar #pantry-favorites-action,
-html[data-active-workspace="pantry"] #page-action-bar #pantry-tags-action {
+#recipes-page:has(#primary-nav [data-view-target="pantry"]:is(.view-toggle__button--active, [aria-current="page"])) #pantry-topbar-search {
   display: inline-flex !important;
 }
 
-html:not([data-active-workspace="pantry"]) #page-action-bar [data-topbar-owner="pantry"] {
+#recipes-page:has(#primary-nav [data-view-target="pantry"]:is(.view-toggle__button--active, [aria-current="page"])) #recipe-topbar-search {
   display: none !important;
 }
 
-html:not([data-active-workspace="family"]) #page-action-bar #family-manage-action {
+/* Shop */
+#recipes-page:has(#primary-nav [data-shop-tab="true"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar {
+  display: inline-flex !important;
+  align-items: stretch !important;
+}
+
+#recipes-page:has(#primary-nav [data-shop-tab="true"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar > * {
   display: none !important;
 }
 
-html:not([data-active-workspace="recipes"]) #page-action-bar #recipe-action-chip,
-html:not([data-active-workspace="recipes"]) #page-action-bar #recipe-family-filter {
+#recipes-page:has(#primary-nav [data-shop-tab="true"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar > #shop-recipe-references-action,
+#recipes-page:has(#primary-nav [data-shop-tab="true"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar > #shop-group-by-action {
+  display: inline-grid !important;
+  place-items: center !important;
+}
+
+#recipes-page:has(#primary-nav [data-shop-tab="true"]:is(.view-toggle__button--active, [aria-current="page"])) :is(#recipe-topbar-search, #pantry-topbar-search) {
+  display: none !important;
+}
+
+/* Family */
+#recipes-page:has(#primary-nav [data-view-target="family"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar {
+  display: inline-flex !important;
+  align-items: stretch !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="family"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar > * {
+  display: none !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="family"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar > #family-manage-action {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="family"]:is(.view-toggle__button--active, [aria-current="page"])) :is(#recipe-topbar-search, #pantry-topbar-search) {
+  display: none !important;
+}
+
+/* Kitchen and Meal Plan currently own no dynamic topbar actions. */
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar,
+#recipes-page:has(#primary-nav [data-view-target="meal-plan"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar {
+  display: none !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) :is(#recipe-topbar-search, #pantry-topbar-search),
+#recipes-page:has(#primary-nav [data-view-target="meal-plan"]:is(.view-toggle__button--active, [aria-current="page"])) :is(#recipe-topbar-search, #pantry-topbar-search) {
   display: none !important;
 }
