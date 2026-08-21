@@ -49,4 +49,12 @@ assert.equal(
   true,
 );
 
+const indexed = new Set(recipes.map((recipe) => recipe.id));
+assert.equal(integration.hasUnindexedRecipes(recipes, indexed), false);
+assert.equal(
+  integration.hasUnindexedRecipes([...recipes, { id: 'ingredient-spotlight-late' }], indexed),
+  true,
+  'Late runtime-generated recipes should trigger a recipe-match index refresh.',
+);
+
 console.log('Family Dislikes pre-pagination filtering tests passed.');
