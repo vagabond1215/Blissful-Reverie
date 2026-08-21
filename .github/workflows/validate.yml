@@ -16,3 +16,15 @@ jobs:
         with:
           node-version: 20
       - run: npm test
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - name: Run topbar browser acceptance
+        run: |
+          python3 -m http.server 4173 > /tmp/blissful-topbar-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+          node tests/browser-topbar-ownership.js
