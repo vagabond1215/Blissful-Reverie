@@ -25,6 +25,14 @@
     }, []);
   };
 
+  const hasUnindexedRecipes = (recipes, indexedRecipeIds) => {
+    const indexed = indexedRecipeIds instanceof Set ? indexedRecipeIds : new Set();
+    return (Array.isArray(recipes) ? recipes : []).some((recipe) => {
+      const id = String(recipe?.id || '').trim();
+      return Boolean(id) && !indexed.has(id);
+    });
+  };
+
   const recipeConflictsWithTokens = ({ recipe, tokens, recipeIngredientMatches, ingredientBySlug } = {}) => {
     if (!recipe?.id) return false;
     const slugs = recipeIngredientMatches instanceof Map
@@ -57,7 +65,13 @@
     }));
   };
 
-  const api = { normalizeToken, normalizeTokens, recipeConflictsWithTokens, filterRecipesForActiveDislikes };
+  const api = {
+    normalizeToken,
+    normalizeTokens,
+    hasUnindexedRecipes,
+    recipeConflictsWithTokens,
+    filterRecipesForActiveDislikes,
+  };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   global.BlissfulFamilyPagination = Object.assign({}, global.BlissfulFamilyPagination || {}, api);
   if (typeof document === 'undefined') return;
@@ -66,18 +80,26 @@
   const ingredients = Array.isArray(global.BLISSFUL_INGREDIENTS) ? global.BLISSFUL_INGREDIENTS : [];
   const ingredientBySlug = new Map(ingredients.filter((item) => item?.slug).map((item) => [item.slug, item]));
   let recipeIngredientMatches = new Map();
+  let indexedRecipeIds = new Set();
   let installed = false;
   let rerenderScheduled = false;
   let attempts = 0;
 
   const buildRecipeMatches = () => {
     const matching = global.BlissfulMatching || {};
-    if (typeof matching.createIngredientMatcherIndex !== 'function' || typeof matching.mapRecipesToIngredientMatches !== 'function') return;
+    if (typeof matching.createIngredientMatcherIndex !== 'function' || typeof matching.mapRecipesToIngredientMatches !== 'function') return false;
     try {
       const index = matching.createIngredientMatcherIndex(ingredients);
       const mapped = matching.mapRecipesToIngredientMatches(recipes, index);
-      if (mapped?.recipeIngredientMatches instanceof Map) recipeIngredientMatches = mapped.recipeIngredientMatches;
-    } catch (error) {}
+      if (!(mapped?.recipeIngredientMatches instanceof Map)) return false;
+      recipeIngredientMatches = mapped.recipeIngredientMatches;
+      indexedRecipeIds = new Set(
+        recipes.map((recipe) => String(recipe?.id || '').trim()).filter(Boolean),
+      );
+      return true;
+    } catch (error) {
+      return false;
+    }
   };
 
   const readState = () => {
@@ -119,6 +141,7 @@
     buildRecipeMatches();
     const original = pagination.paginateItems.bind(pagination);
     pagination.paginateItems = (items, page, pageSize) => {
+      if (hasUnindexedRecipes(items, indexedRecipeIds)) buildRecipeMatches();
       const allowed = filterRecipesForActiveDislikes({
         recipes: items,
         memberIds: getActiveMemberIds(),
