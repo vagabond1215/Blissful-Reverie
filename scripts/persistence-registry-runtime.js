@@ -14,6 +14,7 @@
     { key: 'blissful-shopping-settings', encoding: 'json', validate: isRecord },
     { key: 'blissful-shopping-item-profiles', encoding: 'json', validate: isRecord },
     { key: 'blissful-shopping-recipe-references', encoding: 'raw', validate: (value) => ['show', 'hide', 'true', 'false'].includes(value) },
+    { key: 'blissful-shop-active', encoding: 'raw', validate: (value) => value === 'true' || value === 'false' },
     { key: 'blissful-pantry-usage', encoding: 'json', validate: isRecord },
     { key: 'blissful-pantry-stock-history', encoding: 'json', validate: isRecord },
     { key: 'blissful-inventory-unit-profiles', encoding: 'json', validate: isRecord },
