@@ -43,6 +43,22 @@
   let kitchenLabelAttempts = 0;
   let chromeScheduled = false;
 
+  const ensureShopListOutlineAssets = () => {
+    if (!document.querySelector('link[href="styles/shop-list-outline.css"]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'styles/shop-list-outline.css';
+      document.head.appendChild(link);
+    }
+    if (!document.querySelector('script[src="scripts/shop-list-outline.js"]')) {
+      const script = document.createElement('script');
+      script.src = 'scripts/shop-list-outline.js';
+      script.defer = true;
+      script.async = false;
+      (document.body || document.head).appendChild(script);
+    }
+  };
+
   const restore = () => {
     let active = false;
     try { active = parseShopActive(global.localStorage?.getItem?.(STORAGE_KEY)); } catch (error) {}
@@ -285,6 +301,7 @@
   }
 
   const start = () => {
+    ensureShopListOutlineAssets();
     syncCanonicalKitchenLabels();
     scheduleShopChrome();
     document.addEventListener('click', (event) => {
