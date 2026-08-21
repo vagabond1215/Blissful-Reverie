@@ -152,6 +152,11 @@
     ensureScript('scripts/pantry-workspace-actions.js');
   };
 
+  const ensureShopKitchenWorkspaceAssets = () => {
+    ensureStylesheet('styles/shop-kitchen-workspace.css');
+    ensureScript('scripts/shop-kitchen-workspace.js');
+  };
+
   const ensureResponsiveHardeningStylesheet = () => {
     ensureStylesheet('styles/responsive-hardening.css');
   };
@@ -218,6 +223,7 @@
     ensureUiPolishAssets();
     ensureShoppingReadinessRefinementAssets();
     ensurePantryWorkspaceAssets();
+    ensureShopKitchenWorkspaceAssets();
     ensureResponsiveHardeningStylesheet();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();
