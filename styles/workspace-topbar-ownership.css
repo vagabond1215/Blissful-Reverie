@@ -6,6 +6,32 @@
   topbar controls render.
 */
 
+/*
+  The original Pantry action rail was absolutely centered. Once the rail became shared
+  by every workspace that geometry could overlap the primary tabs (notably Family).
+  Keep the shared rail in normal flex order after the full primary navigation instead.
+*/
+#recipes-page #page-action-bar.page-action-bar {
+  position: static !important;
+  inset: auto !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  z-index: auto !important;
+  scrollbar-width: none !important;
+}
+
+#recipes-page #page-action-bar.page-action-bar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 /* Recipes */
 #recipes-page:has(#primary-nav [data-view-target="meals"]:is(.view-toggle__button--active, [aria-current="page"])) #page-action-bar {
   display: inline-flex !important;
