@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const persistence = require('../scripts/shop-view-persistence.js');
 const outline = require('../scripts/shop-list-outline.js');
+const storeMode = require('../scripts/shop-store-mode.js');
 
 const values = new Map();
 const storage = {
@@ -21,6 +22,18 @@ assert.equal(persistence.normalizeGroupBy('store'), 'store');
 assert.equal(persistence.normalizeGroupBy('anything-else'), 'category');
 assert.equal(persistence.nextGroupBy('category'), 'store');
 assert.equal(persistence.nextGroupBy('store'), 'category');
+assert.equal(persistence.isStoreGroupingEnabled('category'), false);
+assert.equal(persistence.isStoreGroupingEnabled('store'), true);
+
+const categorized = storeMode.groupItemsByCategory([
+  { name: 'Zucchini', category: 'Vegetable' },
+  { name: 'Cumin', category: 'Spice' },
+  { name: 'Carrot', category: 'Vegetable' },
+  { name: 'Paprika', category: 'Spice' },
+]);
+assert.deepEqual(categorized.map((group) => group.category), ['Spice', 'Vegetable']);
+assert.deepEqual(categorized[0].items.map((item) => item.name), ['Cumin', 'Paprika']);
+assert.deepEqual(categorized[1].items.map((item) => item.name), ['Carrot', 'Zucchini']);
 
 assert.equal(outline.normalizeMeasureUnit('tablespoons'), 'tbsp');
 assert.equal(outline.normalizeMeasureUnit('cups'), 'cup');
