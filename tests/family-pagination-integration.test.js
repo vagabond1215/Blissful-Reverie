@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const integration = require('../scripts/family-pagination-integration.js');
-const safety = require('../scripts/family-dislikes-preferences-safety.js');
+const dislikes = require('../scripts/family-dislikes.js');
 
 const recipes = [
   { id: 'chicken-soup' },
@@ -45,29 +45,52 @@ assert.deepEqual(
 );
 assert.deepEqual(integration.resolveActiveMemberIds([true], []), []);
 
-const repairedStartup = safety.preserveMountedIndependentDislikes({
-  initialState: state,
-  currentState: { version: 1, members: {} },
+const freshRecipesLoad = dislikes.pruneRemovedMemberDislikes({
+  state,
   familyMembers: [{ id: 'sam' }, { id: 'lee' }],
+  fallbackMemberIds: [],
 });
-assert.deepEqual(repairedStartup.restoredIds, ['sam', 'lee']);
-assert.deepEqual(repairedStartup.state.members, state.members);
+assert.deepEqual(
+  freshRecipesLoad.removedIds,
+  [],
+  'Persisted dislikes must survive a fresh Recipes load when Family cards have not rendered yet.',
+);
+assert.deepEqual(freshRecipesLoad.state.members, state.members);
+assert.deepEqual(
+  integration.filterRecipesForActiveDislikes({
+    recipes,
+    memberIds: ['sam'],
+    state: freshRecipesLoad.state,
+    recipeIngredientMatches,
+    ingredientBySlug,
+  }).map((recipe) => recipe.id),
+  ['chicken-soup', 'apple-oats'],
+  'The surviving persisted dislike must continue filtering Recipes before pagination.',
+);
 
-const intentionalClear = safety.preserveMountedIndependentDislikes({
-  initialState: state,
-  currentState: { version: 1, members: { sam: [], lee: state.members.lee } },
-  familyMembers: [{ id: 'sam' }, { id: 'lee' }],
-});
-assert.deepEqual(intentionalClear.restoredIds, [], 'An explicit empty dislike list must not be mistaken for startup data loss.');
-assert.deepEqual(intentionalClear.state.members.sam, []);
-
-const removedMember = safety.preserveMountedIndependentDislikes({
-  initialState: state,
-  currentState: { version: 1, members: {} },
+const removedMember = dislikes.pruneRemovedMemberDislikes({
+  state,
   familyMembers: [{ id: 'lee' }],
+  fallbackMemberIds: ['sam', 'lee'],
 });
-assert.deepEqual(removedMember.restoredIds, ['lee']);
-assert.equal(Object.prototype.hasOwnProperty.call(removedMember.state.members, 'sam'), false, 'A member removed from app state should not be restored.');
+assert.deepEqual(removedMember.removedIds, ['sam']);
+assert.equal(
+  Object.prototype.hasOwnProperty.call(removedMember.state.members, 'sam'),
+  false,
+  'A member removed from persisted app state should still have stale dislike data cleaned up.',
+);
+assert.deepEqual(removedMember.state.members.lee, state.members.lee);
+
+const noMemberEvidenceYet = dislikes.pruneRemovedMemberDislikes({
+  state,
+  familyMembers: null,
+  fallbackMemberIds: [],
+});
+assert.deepEqual(
+  noMemberEvidenceYet.state.members,
+  state.members,
+  'Cleanup should be non-destructive until either persisted members or rendered Family cards provide authoritative evidence.',
+);
 
 assert.deepEqual(
   integration.filterRecipesForActiveDislikes({ recipes, memberIds: [], state, recipeIngredientMatches, ingredientBySlug }).map((recipe) => recipe.id),
