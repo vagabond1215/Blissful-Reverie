@@ -2,7 +2,6 @@
   const STORAGE_KEY = 'blissful-shop-active';
   const RECIPE_REFERENCE_STORAGE_KEY = 'blissful-shopping-recipe-references';
   const SHOPPING_SETTINGS_STORAGE_KEY = 'blissful-shopping-settings';
-  const GROUP_BY_MODES = ['category', 'store'];
 
   const parseShopActive = (value) => String(value || '') === 'true';
   const writeShopActive = (storage, active) => {
@@ -169,7 +168,7 @@
       button = document.createElement('button');
       button.type = 'button';
       button.id = id;
-      button.className = `page-action-bar__button page-action-bar__button--icon shop-page-action ${className}`;
+      button.className = `page-action-bar__button page-action-bar__button--icon recipe-page-action shop-page-action ${className}`;
       button.addEventListener('click', onClick);
       bar.appendChild(button);
     } else if (button.parentElement !== bar) {
@@ -238,6 +237,13 @@
     [referenceButton, groupingButton].forEach((button) => {
       if (button instanceof HTMLButtonElement && button.hidden === active) button.hidden = !active;
     });
+    if (referenceButton instanceof HTMLButtonElement) {
+      referenceButton.style.setProperty('margin-left', '0', 'important');
+      referenceButton.style.setProperty('border-radius', '999px 0 0 999px', 'important');
+    }
+    if (groupingButton instanceof HTMLButtonElement) {
+      groupingButton.style.setProperty('border-radius', '0 999px 999px 0', 'important');
+    }
 
     if (referenceButton instanceof HTMLButtonElement) {
       const visible = readReferenceVisibility();
