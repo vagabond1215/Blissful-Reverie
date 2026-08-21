@@ -2,9 +2,10 @@ const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 
 const BASE_URL = process.env.BLISSFUL_BROWSER_URL || 'http://127.0.0.1:4173';
+let browser;
 
 (async () => {
-  const browser = await chromium.launch({ headless: true });
+  browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
   const pageErrors = [];
@@ -67,7 +68,9 @@ const BASE_URL = process.env.BLISSFUL_BROWSER_URL || 'http://127.0.0.1:4173';
 
   console.log('Browser Family Dislikes fresh-load acceptance passed:', result);
   await browser.close();
-})().catch((error) => {
+  browser = null;
+})().catch(async (error) => {
   console.error(error);
+  try { await browser?.close(); } catch (closeError) {}
   process.exitCode = 1;
 });
