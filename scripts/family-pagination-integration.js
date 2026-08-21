@@ -168,6 +168,7 @@
     };
     pagination.__familyDislikesIntegrated = true;
     installed = true;
+    requestRecipeRerender();
     return true;
   };
 
