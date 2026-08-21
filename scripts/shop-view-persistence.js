@@ -15,6 +15,7 @@
 
   const normalizeGroupBy = (value) => value === 'store' ? 'store' : 'category';
   const nextGroupBy = (value) => normalizeGroupBy(value) === 'category' ? 'store' : 'category';
+  const isStoreGroupingEnabled = (value) => normalizeGroupBy(value) === 'store';
 
   const canonicalizeKitchenEquipmentLabels = (workspace) => {
     const groups = workspace?.GROUP_DEFINITIONS;
@@ -33,6 +34,7 @@
     writeShopActive,
     normalizeGroupBy,
     nextGroupBy,
+    isStoreGroupingEnabled,
     canonicalizeKitchenEquipmentLabels,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
@@ -43,20 +45,28 @@
   let kitchenLabelAttempts = 0;
   let chromeScheduled = false;
 
-  const ensureShopListOutlineAssets = () => {
-    if (!document.querySelector('link[href="styles/shop-list-outline.css"]')) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'styles/shop-list-outline.css';
-      document.head.appendChild(link);
-    }
-    if (!document.querySelector('script[src="scripts/shop-list-outline.js"]')) {
-      const script = document.createElement('script');
-      script.src = 'scripts/shop-list-outline.js';
-      script.defer = true;
-      script.async = false;
-      (document.body || document.head).appendChild(script);
-    }
+  const ensureStylesheet = (href) => {
+    if (document.querySelector(`link[href="${href}"]`)) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  };
+
+  const ensureScript = (src) => {
+    if (document.querySelector(`script[src="${src}"]`)) return;
+    const script = document.createElement('script');
+    script.src = src;
+    script.defer = true;
+    script.async = false;
+    (document.body || document.head).appendChild(script);
+  };
+
+  const ensureShopAssets = () => {
+    ensureStylesheet('styles/shop-list-outline.css');
+    ensureStylesheet('styles/shop-store-mode.css');
+    ensureScript('scripts/shop-list-outline.js');
+    ensureScript('scripts/shop-store-mode.js');
   };
 
   const restore = () => {
@@ -123,12 +133,14 @@
     }
   };
 
+  const getShopPanel = () => document.querySelector('#shop-shopping-host .productivity-shopping');
+
   const readReferenceVisibility = () => {
-    const panel = document.querySelector('#shop-shopping-host .productivity-shopping, .productivity-shopping');
+    const panel = getShopPanel();
     if (panel instanceof HTMLElement && panel.dataset.recipeReferences) {
       return panel.dataset.recipeReferences !== 'hidden';
     }
-    const input = document.querySelector('.productivity-shopping__reference-input');
+    const input = panel?.querySelector?.('.productivity-shopping__reference-input');
     if (input instanceof HTMLInputElement) return input.checked;
     try {
       const stored = global.localStorage?.getItem?.(RECIPE_REFERENCE_STORAGE_KEY);
@@ -142,18 +154,17 @@
     try {
       global.localStorage?.setItem?.(RECIPE_REFERENCE_STORAGE_KEY, visible ? 'show' : 'hide');
     } catch (error) {}
-    document.querySelectorAll('.productivity-shopping').forEach((panel) => {
-      if (!(panel instanceof HTMLElement)) return;
-      panel.dataset.recipeReferences = visible ? 'shown' : 'hidden';
-      panel.querySelectorAll('.productivity-shopping__item-note').forEach((note) => {
-        if (note instanceof HTMLElement) note.hidden = !visible;
-      });
+    const panel = getShopPanel();
+    if (!(panel instanceof HTMLElement)) return;
+    panel.dataset.recipeReferences = visible ? 'shown' : 'hidden';
+    panel.querySelectorAll('.productivity-shopping__item-note').forEach((note) => {
+      if (note instanceof HTMLElement) note.hidden = !visible;
     });
   };
 
   const toggleRecipeReferences = () => {
     const next = !readReferenceVisibility();
-    const input = document.querySelector('.productivity-shopping__reference-input');
+    const input = getShopPanel()?.querySelector?.('.productivity-shopping__reference-input');
     if (input instanceof HTMLInputElement) {
       input.checked = next;
       input.dispatchEvent(new Event('change', { bubbles: true }));
@@ -163,10 +174,10 @@
     scheduleShopChrome();
   };
 
-  const toggleShoppingGroupBy = () => {
+  const toggleStoreGrouping = () => {
     const current = normalizeGroupBy(readShoppingSettings().groupBy);
     const next = nextGroupBy(current);
-    const input = document.querySelector(`.shopping-management__grouping input[value="${next}"]`);
+    const input = getShopPanel()?.querySelector?.(`.shopping-management__grouping input[value="${next}"]`);
     if (input instanceof HTMLInputElement) {
       input.checked = true;
       input.dispatchEvent(new Event('change', { bubbles: true }));
@@ -184,12 +195,13 @@
       button = document.createElement('button');
       button.type = 'button';
       button.id = id;
-      button.className = `page-action-bar__button page-action-bar__button--icon recipe-page-action shop-page-action ${className}`;
+      button.className = `page-action-bar__button page-action-bar__button--icon shop-page-action ${className}`;
       button.addEventListener('click', onClick);
       bar.appendChild(button);
     } else if (button.parentElement !== bar) {
       bar.appendChild(button);
     }
+    button.classList.remove('recipe-page-action');
     return button;
   };
 
@@ -197,14 +209,6 @@
     <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8">
       <path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z" stroke-linecap="round" stroke-linejoin="round"></path>
       <circle cx="12" cy="12" r="2.5"></circle>
-    </svg>`;
-
-  const categoryIcon = `
-    <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8">
-      <rect x="3" y="4" width="7" height="6" rx="1.2"></rect>
-      <rect x="14" y="4" width="7" height="6" rx="1.2"></rect>
-      <rect x="3" y="14" width="7" height="6" rx="1.2"></rect>
-      <rect x="14" y="14" width="7" height="6" rx="1.2"></rect>
     </svg>`;
 
   const storeIcon = `
@@ -215,12 +219,11 @@
     </svg>`;
 
   const hideLegacyShopControls = () => {
-    document.querySelectorAll(
-      '#shop-shopping-host .productivity-shopping__reference-control, #shop-shopping-host .shopping-management__grouping',
-    ).forEach((control) => {
+    const panel = getShopPanel();
+    panel?.querySelectorAll?.('.productivity-shopping__reference-control, .shopping-management__grouping').forEach((control) => {
       if (!(control instanceof HTMLElement)) return;
-      if (!control.hidden) control.hidden = true;
-      if (control.getAttribute('aria-hidden') !== 'true') control.setAttribute('aria-hidden', 'true');
+      control.hidden = true;
+      control.setAttribute('aria-hidden', 'true');
     });
   };
 
@@ -233,61 +236,49 @@
     removeShopHeader();
     hideLegacyShopControls();
 
-    const bar = document.getElementById('page-action-bar');
     const referenceButton = ensureShopActionButton(
       'shop-recipe-references-action',
       'shop-page-action--references',
       toggleRecipeReferences,
     );
-    const groupingButton = ensureShopActionButton(
+    const storeButton = ensureShopActionButton(
       'shop-group-by-action',
-      'shop-page-action--grouping',
-      toggleShoppingGroupBy,
+      'shop-page-action--store',
+      toggleStoreGrouping,
     );
 
-    if (bar instanceof HTMLElement) {
-      if (active) bar.style.setProperty('display', 'inline-flex', 'important');
-      else bar.style.removeProperty('display');
-    }
-
-    [referenceButton, groupingButton].forEach((button) => {
-      if (button instanceof HTMLButtonElement && button.hidden === active) button.hidden = !active;
+    [referenceButton, storeButton].forEach((button) => {
+      if (button instanceof HTMLButtonElement) button.hidden = !active;
     });
-    if (referenceButton instanceof HTMLButtonElement) {
-      referenceButton.style.setProperty('margin-left', '0', 'important');
-      referenceButton.style.setProperty('border-radius', '999px 0 0 999px', 'important');
-    }
-    if (groupingButton instanceof HTMLButtonElement) {
-      groupingButton.style.setProperty('border-radius', '0 999px 999px 0', 'important');
-    }
 
     if (referenceButton instanceof HTMLButtonElement) {
-      const visible = readReferenceVisibility();
       if (referenceButton.dataset.iconReady !== 'true') {
         referenceButton.innerHTML = referenceIcon;
         referenceButton.dataset.iconReady = 'true';
       }
+      const visible = readReferenceVisibility();
       referenceButton.setAttribute('aria-pressed', visible ? 'true' : 'false');
       referenceButton.setAttribute(
         'aria-label',
-        visible ? 'Recipe names shown. Click to hide recipe names.' : 'Recipe names hidden. Click to show recipe names.',
+        visible ? 'Source recipe names shown. Click to hide them.' : 'Source recipe names hidden. Click to show them.',
       );
-      referenceButton.title = visible ? 'Recipe names: Shown' : 'Recipe names: Hidden';
+      referenceButton.title = visible ? 'Source recipes: Shown' : 'Source recipes: Hidden';
     }
 
-    if (groupingButton instanceof HTMLButtonElement) {
-      const groupBy = normalizeGroupBy(readShoppingSettings().groupBy);
-      const next = nextGroupBy(groupBy);
-      if (groupingButton.dataset.groupBy !== groupBy) {
-        groupingButton.dataset.groupBy = groupBy;
-        groupingButton.innerHTML = groupBy === 'store' ? storeIcon : categoryIcon;
+    if (storeButton instanceof HTMLButtonElement) {
+      if (storeButton.dataset.iconReady !== 'true') {
+        storeButton.innerHTML = storeIcon;
+        storeButton.dataset.iconReady = 'true';
       }
-      groupingButton.setAttribute('aria-pressed', groupBy === 'store' ? 'true' : 'false');
-      groupingButton.setAttribute(
+      const enabled = isStoreGroupingEnabled(readShoppingSettings().groupBy);
+      storeButton.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+      storeButton.setAttribute(
         'aria-label',
-        `Shopping list grouped by ${groupBy}. Click to group by ${next}.`,
+        enabled
+          ? 'Store grouping on. Click to return to one category list.'
+          : 'Store grouping off. Click to split the list by store while keeping categories within each store.',
       );
-      groupingButton.title = `Group by: ${groupBy === 'store' ? 'Store' : 'Category'}`;
+      storeButton.title = enabled ? 'Store grouping: On' : 'Store grouping: Off';
     }
   };
 
@@ -301,7 +292,7 @@
   }
 
   const start = () => {
-    ensureShopListOutlineAssets();
+    ensureShopAssets();
     syncCanonicalKitchenLabels();
     scheduleShopChrome();
     document.addEventListener('click', (event) => {
