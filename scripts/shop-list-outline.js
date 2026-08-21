@@ -259,6 +259,10 @@
   };
 
   const setRowMeasure = (row, measures) => {
+    const setText = (node, value) => {
+      const next = String(value || '');
+      if (node.textContent !== next) node.textContent = next;
+    };
     if (!(row instanceof HTMLElement)) return;
     let quantity = row.querySelector('.shop-list-item__quantity');
     let unit = row.querySelector('.shop-list-item__unit');
@@ -278,26 +282,26 @@
 
     const normalized = Array.isArray(measures) ? measures.filter(Boolean) : [];
     if (normalized.length === 1) {
-      quantity.textContent = normalized[0].quantityLabel || '';
-      unit.textContent = normalized[0].unitLabel || '';
+      setText(quantity, normalized[0].quantityLabel || '');
+      setText(unit, normalized[0].unitLabel || '');
       unit.dataset.combined = 'false';
       quantity.hidden = false;
       unit.hidden = false;
       return;
     }
     if (normalized.length > 1) {
-      quantity.textContent = '';
-      unit.textContent = normalized
+      setText(quantity, '');
+      setText(unit, normalized
         .map((measure) => [measure.quantityLabel, measure.unitLabel].filter(Boolean).join(' '))
         .filter(Boolean)
-        .join(' + ');
+        .join(' + '));
       unit.dataset.combined = 'true';
       quantity.hidden = true;
       unit.hidden = false;
       return;
     }
-    quantity.textContent = '—';
-    unit.textContent = '';
+    setText(quantity, '—');
+    setText(unit, '');
     unit.dataset.combined = 'false';
     quantity.hidden = false;
     unit.hidden = false;
