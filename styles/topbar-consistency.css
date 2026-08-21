@@ -49,11 +49,19 @@
   padding: 0 !important;
 }
 
+/* Every Pantry segment after Restock shares one separator line with its predecessor. */
+#recipes-page #page-action-bar > #pantry-lists-action,
+#recipes-page #page-action-bar > #pantry-stock-cycle-action,
+#recipes-page #page-action-bar > #pantry-sort-action,
+#recipes-page #page-action-bar > #pantry-favorites-action,
+#recipes-page #page-action-bar > #pantry-tags-action {
+  margin-left: -1px !important;
+}
+
 /*
   Pantry's stock/sort/favorites controls are dynamic middle segments. Keep them on
-  the same fixed geometry as the standardized icon actions, overlap adjacent borders
-  by one pixel, and explicitly own pointer interaction so later topbar chrome cannot
-  sit invisibly above them.
+  the same fixed geometry as the standardized icon actions and explicitly own pointer
+  interaction so later topbar chrome cannot sit invisibly above them.
 */
 #recipes-page #page-action-bar > #pantry-stock-cycle-action,
 #recipes-page #page-action-bar > #pantry-sort-action,
@@ -63,7 +71,6 @@
   width: 40px !important;
   min-width: 40px !important;
   max-width: 40px !important;
-  margin-left: -1px !important;
   padding: 0 !important;
   border: 1px solid var(--border, #cbd0d7) !important;
   border-radius: 0 !important;
