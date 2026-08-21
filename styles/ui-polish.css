@@ -87,8 +87,8 @@ html.recipes-view-active #page-action-bar::-webkit-scrollbar {
 
 /*
   The family filter keeps two legacy wrappers after moving into the shared rail.
-  Flatten both wrappers so the member buttons become true segments of the same rail;
-  otherwise the inner list retains its old 0.35rem gap (the visible purple stripes in DevTools).
+  The inner role=group list owns the old 0.35rem gap, so normalize that exact box
+  to the same 38px segmented geometry while preserving its accessibility semantics.
 */
 html.recipes-view-active #page-action-bar #recipe-family-filter.recipe-family-filter--page-actions,
 html.recipes-view-active #page-action-bar #recipe-family-filter.recipe-family-filter--page-actions .recipe-family-filter__list {
@@ -99,7 +99,13 @@ html.recipes-view-active #page-action-bar #recipe-family-filter.recipe-family-fi
 }
 
 html.recipes-view-active #page-action-bar #recipe-family-filter.recipe-family-filter--page-actions .recipe-family-filter__list {
-  display: contents !important;
+  display: inline-flex !important;
+  align-items: stretch !important;
+  flex: 0 0 auto !important;
+  height: var(--topbar-segment-height, 38px) !important;
+  min-height: var(--topbar-segment-height, 38px) !important;
+  max-height: var(--topbar-segment-height, 38px) !important;
+  overflow: visible !important;
 }
 
 html.recipes-view-active #page-action-bar .recipe-page-action,
