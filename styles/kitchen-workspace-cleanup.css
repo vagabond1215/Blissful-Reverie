@@ -1,0 +1,25 @@
+/* Kitchen is a straightforward equipment checklist: use the full workspace and skip redundant chrome. */
+
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #app-layout.layout {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #filter-panel.filter-panel {
+  display: none !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-view.kitchen-view {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin-inline: 0 !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-view > .pantry-view__header,
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-view > .kitchen-view__intro {
+  display: none !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-list.kitchen-list {
+  margin-top: 0 !important;
+}
