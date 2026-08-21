@@ -156,6 +156,7 @@
   const ensureShopKitchenWorkspaceAssets = () => {
     ensureStylesheet('styles/shop-kitchen-workspace.css');
     ensureScript('scripts/shop-kitchen-workspace.js');
+    ensureScript('scripts/kitchen-topbar-search.js');
     ensureScript('scripts/shop-view-persistence.js');
   };
 
