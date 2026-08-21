@@ -8,6 +8,11 @@
     const target = normalizeRecipeName(label);
     return (Array.isArray(recipes) ? recipes : []).find((recipe) => normalizeRecipeName(recipe?.name) === target) || null;
   };
+  const getRecipeById = (recipes, recipeId) => {
+    const target = String(recipeId || '').trim();
+    if (!target) return null;
+    return (Array.isArray(recipes) ? recipes : []).find((recipe) => String(recipe?.id || '').trim() === target) || null;
+  };
   const buildPreviewModel = (recipe) => ({
     id: String(recipe?.id || '').trim(),
     name: String(recipe?.name || 'Recipe').trim(),
@@ -24,13 +29,18 @@
     nutrition: recipe?.nutritionPerServing && typeof recipe.nutritionPerServing === 'object' ? { ...recipe.nutritionPerServing } : null,
   });
 
-  const api = { normalizeRecipeName, getRecipeIdFromPreviewButton, getRecipeForChipLabel, buildPreviewModel };
+  const api = {
+    normalizeRecipeName,
+    getRecipeIdFromPreviewButton,
+    getRecipeForChipLabel,
+    getRecipeById,
+    buildPreviewModel,
+  };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   global.BlissfulDiscoveryPreviewActions = Object.assign({}, global.BlissfulDiscoveryPreviewActions || {}, api);
   if (typeof document === 'undefined') return;
 
   const recipes = Array.isArray(global.BLISSFUL_RECIPES) ? global.BLISSFUL_RECIPES : [];
-  const recipeById = new Map(recipes.filter((recipe) => recipe?.id).map((recipe) => [String(recipe.id), recipe]));
   let previewReturnFocus = null;
 
   const formatQuantity = (quantity, unit) => {
@@ -208,7 +218,7 @@
   };
 
   const planRecipe = async (recipeId) => {
-    const recipe = recipeById.get(String(recipeId || ''));
+    const recipe = getRecipeById(recipes, recipeId);
     if (!recipe) return;
     const scrollX = Number(global.scrollX) || 0;
     const scrollY = Number(global.scrollY) || 0;
