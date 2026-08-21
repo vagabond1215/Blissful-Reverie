@@ -1,5 +1,6 @@
 ;(function (global) {
   const STORAGE_KEY = 'blissful-family-dislikes';
+  const APP_STATE_KEY = 'blissful-app-state';
   const isRecord = (value) => value && typeof value === 'object' && !Array.isArray(value);
   const normalizeText = (value) => String(value || '').trim().toLowerCase();
   const slugify = (value) => normalizeText(value).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -38,6 +39,33 @@
       });
     }
     return { version: 1, members };
+  };
+
+  const getFamilyMemberIds = (familyMembers) => (Array.isArray(familyMembers) ? familyMembers : [])
+    .map((member) => String(member?.id || '').trim())
+    .filter(Boolean);
+
+  const pruneRemovedMemberDislikes = ({ state, familyMembers, fallbackMemberIds } = {}) => {
+    const normalized = normalizeState(state);
+    const hasPersistedMemberList = Array.isArray(familyMembers);
+    const validIds = new Set(
+      hasPersistedMemberList
+        ? getFamilyMemberIds(familyMembers)
+        : (Array.isArray(fallbackMemberIds) ? fallbackMemberIds : [])
+          .map((id) => String(id || '').trim())
+          .filter(Boolean),
+    );
+    if (!hasPersistedMemberList && !validIds.size) {
+      return { state: normalized, removedIds: [] };
+    }
+    const members = { ...normalized.members };
+    const removedIds = [];
+    Object.keys(members).forEach((id) => {
+      if (validIds.has(id)) return;
+      delete members[id];
+      removedIds.push(id);
+    });
+    return { state: { version: 1, members }, removedIds };
   };
 
   const buildDislikeCatalog = (ingredients) => {
@@ -95,6 +123,8 @@
     normalizeToken,
     normalizeTokenList,
     normalizeState,
+    getFamilyMemberIds,
+    pruneRemovedMemberDislikes,
     buildDislikeCatalog,
     recipeConflictsWithTokens,
   };
@@ -118,6 +148,14 @@
       return normalizeState(JSON.parse(global.localStorage?.getItem?.(STORAGE_KEY) || 'null'));
     } catch (error) {
       return normalizeState(null);
+    }
+  };
+  const readPersistedFamilyMembers = () => {
+    try {
+      const parsed = JSON.parse(global.localStorage?.getItem?.(APP_STATE_KEY) || 'null');
+      return Array.isArray(parsed?.familyMembers) ? parsed.familyMembers : null;
+    } catch (error) {
+      return null;
     }
   };
   const writeState = (state) => {
@@ -329,13 +367,16 @@
   }
 
   const getActiveRecipeFamilyMemberIds = () => {
-    const cards = getFamilyCards();
+    const persistedMembers = readPersistedFamilyMembers();
+    const memberIds = Array.isArray(persistedMembers)
+      ? getFamilyMemberIds(persistedMembers)
+      : getFamilyCards().map((card) => String(card.dataset.familyId || '').trim()).filter(Boolean);
     const buttons = Array.from(document.querySelectorAll('#recipe-family-filter .recipe-family-filter__button'));
     const ids = [];
     buttons.forEach((button, index) => {
       if (!(button instanceof HTMLButtonElement) || button.getAttribute('aria-pressed') !== 'true') return;
-      const card = cards[index];
-      if (card?.dataset.familyId) ids.push(card.dataset.familyId);
+      const memberId = memberIds[index];
+      if (memberId) ids.push(memberId);
     });
     return ids;
   };
@@ -398,16 +439,14 @@
   };
 
   const cleanupRemovedMembers = () => {
-    const ids = new Set(getFamilyCards().map((card) => card.dataset.familyId));
-    const state = readState();
-    let changed = false;
-    Object.keys(state.members).forEach((id) => {
-      if (!ids.has(id)) {
-        delete state.members[id];
-        changed = true;
-      }
+    const persistedMembers = readPersistedFamilyMembers();
+    const fallbackMemberIds = getFamilyCards().map((card) => String(card.dataset.familyId || '').trim()).filter(Boolean);
+    const cleaned = pruneRemovedMemberDislikes({
+      state: readState(),
+      familyMembers: persistedMembers,
+      fallbackMemberIds,
     });
-    if (changed) writeState(state);
+    if (cleaned.removedIds.length) writeState(cleaned.state);
   };
 
   const sync = () => {
