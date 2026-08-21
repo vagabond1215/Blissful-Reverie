@@ -116,6 +116,18 @@ assert(topbarCss.includes('--topbar-segment-height: 38px'));
 assert(topbarCss.includes('#pantry-sort-filter'));
 assert(topbarCss.includes('display: none !important'));
 assert(topbarCss.includes('box-shadow: none !important'));
+assert(topbarCss.includes('#recipes-page #page-action-bar > #pantry-stock-cycle-action'));
+assert(topbarCss.includes('#recipes-page #page-action-bar > #pantry-sort-action'));
+assert(topbarCss.includes('#recipes-page #page-action-bar > #pantry-favorites-action'));
+assert(topbarCss.includes('width: 40px !important;'));
+assert(topbarCss.includes('max-width: 40px !important;'));
+assert(topbarCss.includes('margin-left: -1px !important;'));
+assert(topbarCss.includes('pointer-events: auto !important;'));
+assert(topbarCss.includes('touch-action: manipulation;'));
+assert(topbarCss.includes('#pantry-stock-cycle-action:hover'));
+assert(topbarCss.includes('#pantry-sort-action:active'));
+assert(topbarCss.includes('#pantry-favorites-action[aria-pressed="true"]'));
+assert(topbarCss.includes('#pantry-stock-cycle-action[title="Stock: Stocked"]::after { content: "In"; }'));
 
 const uiPolishCss = read('styles/ui-polish.css');
 assert(uiPolishCss.includes('gap: 0 !important;'));
