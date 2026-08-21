@@ -5,6 +5,81 @@
   the document or place thousands of pixels of filter UI before primary content.
 */
 
+@media (max-width: 920px) {
+  html,
+  body,
+  #recipes-page,
+  #app-layout {
+    max-inline-size: 100% !important;
+  }
+
+  html,
+  body {
+    overflow-x: clip !important;
+  }
+
+  html #recipes-page .topbar,
+  html .topbar {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+    inset-inline: 0 !important;
+  }
+
+  html #recipes-page .topbar__row,
+  html .topbar__row {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+  }
+
+  html #recipes-page .topbar__row > *,
+  html .topbar__row > * {
+    min-width: 0;
+  }
+
+  html #recipes-page .nav-chip--tabs {
+    flex: 1 1 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-inline: contain;
+  }
+
+  html #recipes-page .nav-chip--tabs .tabs-list {
+    display: flex !important;
+    width: max-content !important;
+    min-width: max-content !important;
+    max-width: none !important;
+  }
+
+  html #recipes-page .nav-chip--tabs .tab {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+
+  html.recipes-view-active #recipes-page .recipe-topbar-search:not([hidden]),
+  html.pantry-workspace-active #recipes-page .pantry-topbar-search:not([hidden]) {
+    display: inline-flex !important;
+    flex: 1 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    order: 20 !important;
+    justify-content: flex-end !important;
+  }
+
+  html.recipes-view-active #recipes-page .recipe-topbar-search input,
+  html.pantry-workspace-active #recipes-page .pantry-topbar-search #filter-search {
+    width: min(360px, calc(100% - 46px)) !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
 @media (max-width: 720px) {
   html,
   body,
@@ -31,7 +106,7 @@
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap !important;
   }
 
   html #recipes-page .topbar__row > *,
@@ -65,16 +140,6 @@
   html #recipes-page .nav-chip--settings,
   html #recipes-page .settings-panel.nav-chip__settings {
     flex: 0 0 auto !important;
-  }
-
-  /* Topbar search chrome is too wide for phones; keep recipe search in the filter tray. */
-  html.recipes-view-active #recipes-page .recipe-topbar-search,
-  html.pantry-workspace-active #recipes-page .pantry-topbar-search {
-    display: none !important;
-  }
-
-  html.recipes-view-active #filter-panel .input-group--search {
-    display: block !important;
   }
 
   html #app-layout.layout {
