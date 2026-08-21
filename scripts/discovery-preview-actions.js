@@ -1,5 +1,19 @@
 ;(function (global) {
   const normalizeRecipeName = (value) => String(value || '').trim().toLowerCase();
+  const normalizePageNumber = (value) => Math.max(1, Number.parseInt(String(value || ''), 10) || 1);
+  const advanceToPage = ({ targetPage, getCurrentPage, clickNext } = {}) => {
+    const target = normalizePageNumber(targetPage);
+    let current = normalizePageNumber(typeof getCurrentPage === 'function' ? getCurrentPage() : 1);
+    let attempts = 0;
+    while (current < target && attempts < target + 2) {
+      const before = current;
+      if (typeof clickNext !== 'function' || clickNext() === false) break;
+      current = normalizePageNumber(typeof getCurrentPage === 'function' ? getCurrentPage() : current);
+      attempts += 1;
+      if (current <= before) break;
+    }
+    return current;
+  };
   const getRecipeIdFromPreviewButton = (button) => {
     const card = button?.closest?.('.meal-card--preview[data-recipe-id]');
     return String(card?.dataset?.recipeId || '').trim();
@@ -31,6 +45,8 @@
 
   const api = {
     normalizeRecipeName,
+    normalizePageNumber,
+    advanceToPage,
     getRecipeIdFromPreviewButton,
     getRecipeForChipLabel,
     getRecipeById,
@@ -202,19 +218,30 @@
     const search = document.getElementById('filter-search');
     if (!(search instanceof HTMLInputElement)) return Promise.resolve(null);
     const previous = search.value;
+    const previousPage = normalizePageNumber(document.getElementById('meal-grid')?.dataset?.page);
     search.value = recipe.name || '';
     search.dispatchEvent(new Event('input', { bubbles: true }));
     return new Promise((resolve) => {
       global.requestAnimationFrame(() => global.requestAnimationFrame(() => {
-        resolve({ button: findLiveScheduleButton(recipe.id), search, previous });
+        resolve({ button: findLiveScheduleButton(recipe.id), search, previous, previousPage });
       }));
     });
   };
 
-  const restoreSearch = ({ search, previous } = {}) => {
+  const restoreSearch = ({ search, previous, previousPage } = {}) => {
     if (!(search instanceof HTMLInputElement)) return;
     search.value = String(previous || '');
     search.dispatchEvent(new Event('input', { bubbles: true }));
+    advanceToPage({
+      targetPage: previousPage,
+      getCurrentPage: () => document.getElementById('meal-grid')?.dataset?.page,
+      clickNext: () => {
+        const next = document.querySelector('#recipe-pagination [data-recipe-page-action="next"]');
+        if (!(next instanceof HTMLButtonElement) || next.disabled) return false;
+        next.click();
+        return true;
+      },
+    });
   };
 
   const planRecipe = async (recipeId) => {
