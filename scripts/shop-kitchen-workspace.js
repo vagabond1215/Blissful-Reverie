@@ -113,6 +113,21 @@
   ]);
 
   const normalizeLabel = (value) => String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const groupMatchesSearch = (group, query) => {
+    const normalizedQuery = normalizeLabel(query);
+    if (!normalizedQuery) return true;
+    const haystack = [
+      group?.label,
+      ...(Array.isArray(group?.aliases) ? group.aliases : []),
+      ...(Array.isArray(group?.variants) ? group.variants.map((variant) => variant?.label) : []),
+    ]
+      .map(normalizeLabel)
+      .filter(Boolean)
+      .join(' ');
+    return haystack.includes(normalizedQuery);
+  };
+  const shouldRenderGroup = (group, query, hasOriginals = false) => Boolean(hasOriginals) || groupMatchesSearch(group, query);
+
   const toInventorySet = (value) => new Set(
     Array.from(value instanceof Set ? value : Array.isArray(value) ? value : [])
       .map((entry) => String(entry || '').trim())
@@ -169,6 +184,8 @@
   const api = {
     GROUP_DEFINITIONS,
     normalizeLabel,
+    groupMatchesSearch,
+    shouldRenderGroup,
     toInventorySet,
     getGroupSelection,
     setGroupOwned,
@@ -367,19 +384,43 @@
     return row;
   };
 
+  const getKitchenRowLabel = (row) => row.querySelector('.kitchen-list__name')?.textContent
+    || row.querySelector('.kitchen-equipment-group__name')?.textContent
+    || '';
+
+  const insertKitchenGroupRow = (list, row, label) => {
+    const target = normalizeLabel(label);
+    const before = Array.from(list.children).find((child) => {
+      if (!(child instanceof HTMLElement) || child.classList.contains('kitchen-list__empty')) return false;
+      const current = normalizeLabel(getKitchenRowLabel(child));
+      return Boolean(current) && current.localeCompare(target) > 0;
+    });
+    if (before) list.insertBefore(row, before);
+    else list.appendChild(row);
+  };
+
   const enhanceKitchenGroups = () => {
     const list = document.getElementById('kitchen-list');
     if (!(list instanceof HTMLElement)) return;
+    const query = normalizeLabel(readAppState().kitchenFilters?.search || '');
     GROUP_DEFINITIONS.forEach((group) => {
       if (list.querySelector(`:scope > [data-kitchen-group="${group.key}"]`)) return;
       const originals = matchingKitchenItems(list, group);
-      if (!originals.length) return;
-      const legacyIds = originals
-        .map((item) => item.querySelector('input[data-kitchen-id]')?.dataset.kitchenId || '')
-        .filter(Boolean);
+      if (!shouldRenderGroup(group, query, originals.length > 0)) return;
+      const legacyIds = Array.from(new Set([
+        group.key,
+        ...originals
+          .map((item) => item.querySelector('input[data-kitchen-id]')?.dataset.kitchenId || '')
+          .filter(Boolean),
+      ]));
       const row = makeGroupRow(group, legacyIds);
-      originals[0].insertAdjacentElement('beforebegin', row);
-      originals.forEach((item) => item.remove());
+      if (originals.length) {
+        originals[0].insertAdjacentElement('beforebegin', row);
+        originals.forEach((item) => item.remove());
+      } else {
+        list.querySelector(':scope > .kitchen-list__empty')?.remove();
+        insertKitchenGroupRow(list, row, group.label);
+      }
     });
     updateKitchenCount(list);
   };
