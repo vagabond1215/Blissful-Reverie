@@ -24,6 +24,7 @@ const makeStorage = (initial = {}, failOnceAt = '') => {
   'blissful-pantry-lists',
   'blissful-inventory-unit-profiles',
   'blissful-shopping-recipe-references',
+  'blissful-shop-active',
   'blissful-inventory-legacy-unit-preferences-v1',
 ].forEach((key) => assert(registry.keys.includes(key), `${key} must be registered for backup.`));
 assert.equal(new Set(registry.keys).size, registry.keys.length, 'Persistence keys must be unique.');
@@ -34,11 +35,13 @@ const source = makeStorage({
   'blissful-pantry-lists': JSON.stringify({ version: 1, activeListId: 'instacart', lists: [] }),
   'blissful-inventory-unit-profiles': JSON.stringify({ rice: { stockUnit: 'cup' } }),
   'blissful-pantry-favorites-only': 'true',
+  'blissful-shop-active': 'true',
   'blissful-measurement': 'metric',
   'unregistered-user-data': 'do-not-export',
 });
 const backup = tools.createBackup(source);
 assert.equal(backup.data['blissful-pantry-favorites-only'], 'true');
+assert.equal(backup.data['blissful-shop-active'], 'true');
 assert.equal(backup.data['blissful-measurement'], 'metric');
 assert.equal(backup.data['unregistered-user-data'], undefined);
 
@@ -58,6 +61,7 @@ assert.deepEqual(JSON.parse(restored.getItem('blissful-pantry-lists')), {
 assert.deepEqual(JSON.parse(restored.getItem('blissful-inventory-unit-profiles')), {
   rice: { stockUnit: 'cup' },
 });
+assert.equal(restored.getItem('blissful-shop-active'), 'true');
 
 const beforeInvalid = restored.snapshot();
 const invalid = {
