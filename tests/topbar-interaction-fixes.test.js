@@ -117,6 +117,13 @@ assert(topbarCss.includes('#pantry-sort-filter'));
 assert(topbarCss.includes('display: none !important'));
 assert(topbarCss.includes('box-shadow: none !important'));
 
+const uiPolishCss = read('styles/ui-polish.css');
+assert(uiPolishCss.includes('gap: 0 !important;'));
+assert(uiPolishCss.includes('#recipe-family-filter.recipe-family-filter--page-actions'));
+assert(uiPolishCss.includes('transform: none !important;'));
+assert(uiPolishCss.includes('.recipe-family-page-action:hover'));
+assert(uiPolishCss.includes('z-index: 1;'));
+
 const shopKitchenCss = read('styles/shop-kitchen-workspace.css');
 assert(shopKitchenCss.includes('#kitchen-topbar-search'));
 assert(shopKitchenCss.includes('#kitchen-topbar-search input'));
