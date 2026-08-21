@@ -1,0 +1,234 @@
+/* Shop workspace, stable topbar ordering, and grouped Kitchen equipment. */
+
+#recipes-page .topbar__row > .nav-chip--settings {
+  order: 0 !important;
+}
+
+#recipes-page .topbar__row > #primary-nav,
+#recipes-page .topbar__row > .nav-chip--tabs {
+  order: 1 !important;
+  margin-inline-start: 0 !important;
+}
+
+#recipes-page .topbar__row > .nav-chip--filters,
+#recipes-page .topbar__row > .nav-chip--actions,
+#recipes-page .topbar__row > #page-action-bar,
+#recipes-page .topbar__row > :not(.nav-chip--settings):not(#primary-nav):not(.nav-chip--tabs) {
+  order: 2;
+}
+
+#recipes-page .topbar,
+#recipes-page .topbar__row {
+  min-block-size: var(--dock-height, 4.25rem) !important;
+}
+
+#recipes-page .nav-chip__settings-icon {
+  inline-size: 1.5rem !important;
+  block-size: 1.5rem !important;
+  color: var(--main, var(--text, #2b2522)) !important;
+  opacity: 1 !important;
+}
+
+#recipes-page .nav-chip__settings-icon path {
+  fill: currentColor !important;
+}
+
+#recipes-page .nav-chip__settings-icon .gear-hole {
+  fill: var(--surface, var(--dock-surface, #fffcf7)) !important;
+}
+
+#recipes-page .settings-panel__summary.settings-btn {
+  border-color: color-mix(in srgb, var(--main, #6d3b58) 32%, var(--border, #d8d0c4)) !important;
+  background: var(--surface, var(--dock-surface, #fffcf7)) !important;
+  box-shadow: 0 1px 4px rgb(43 37 34 / 14%) !important;
+}
+
+#recipes-page .settings-panel__summary.settings-btn:hover,
+#recipes-page .settings-panel[open] .settings-panel__summary.settings-btn {
+  border-color: color-mix(in srgb, var(--main, #6d3b58) 62%, var(--border, #d8d0c4)) !important;
+}
+
+.shop-view[hidden] {
+  display: none !important;
+}
+
+body.shop-view-active #app-layout > :not(#shop-view) {
+  display: none !important;
+}
+
+body.shop-view-active #recipe-family-filter,
+body.shop-view-active #recipe-action-chip,
+body.shop-view-active #page-action-bar {
+  display: none !important;
+}
+
+#shop-view {
+  grid-column: 1 / -1;
+  width: min(100%, 72rem);
+  min-width: 0;
+  margin: 0 auto;
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.shop-view__header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border, #d8d0c4);
+}
+
+.shop-view__header h2 {
+  margin: 0;
+  color: var(--text, #2b2522);
+  font-size: clamp(1.35rem, 2vw, 1.7rem);
+}
+
+.shop-view__header p {
+  margin: 0.2rem 0 0;
+  color: var(--text-muted, #756a63);
+}
+
+.shop-view__host {
+  min-width: 0;
+}
+
+.shop-view__host > .productivity-shopping {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+.shop-view__empty {
+  margin: 0;
+  padding: 1.2rem;
+  border: 1px dashed var(--border, #d8d0c4);
+  border-radius: 0.9rem;
+  background: var(--surface-muted, #f4eee6);
+  color: var(--text-muted, #756a63);
+}
+
+.kitchen-equipment-group {
+  list-style: none;
+  margin: 0;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border, #d8d0c4) 72%, transparent);
+}
+
+.kitchen-equipment-group__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2.5rem;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.kitchen-equipment-group__label,
+.kitchen-equipment-group__child {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  color: var(--text, #2b2522);
+}
+
+.kitchen-equipment-group__label {
+  min-height: 2.65rem;
+  padding: 0.3rem 0.4rem;
+  font-weight: 760;
+}
+
+.kitchen-equipment-group__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.kitchen-equipment-group__status {
+  flex: 0 0 auto;
+  min-width: 2.4rem;
+  color: var(--text-muted, #756a63);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.kitchen-equipment-group__toggle {
+  display: grid;
+  place-items: center;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+  background: transparent;
+  color: var(--main, #6d3b58);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.kitchen-equipment-group__toggle:hover,
+.kitchen-equipment-group__toggle:focus-visible {
+  background: var(--surface-muted, #f4eee6);
+  border-color: var(--border, #d8d0c4);
+}
+
+.kitchen-equipment-group__toggle[aria-expanded='true'] {
+  transform: rotate(180deg);
+}
+
+.kitchen-equipment-group__children {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.1rem 0.45rem 0.55rem 2rem;
+}
+
+.kitchen-equipment-group__children[hidden] {
+  display: none !important;
+}
+
+.kitchen-equipment-group__child {
+  min-height: 2.25rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.55rem;
+  color: var(--text, #2b2522);
+  font-size: 0.9rem;
+  font-weight: 520;
+}
+
+.kitchen-equipment-group__child:hover {
+  background: color-mix(in srgb, var(--surface-muted, #f4eee6) 75%, transparent);
+}
+
+.kitchen-equipment-group .kitchen-list__checkbox {
+  flex: 0 0 auto;
+  accent-color: var(--main, #6d3b58);
+}
+
+@media (max-width: 720px) {
+  #recipes-page .topbar,
+  #recipes-page .topbar__row {
+    min-block-size: 3.75rem !important;
+  }
+
+  #recipes-page .nav-chip__settings-icon {
+    inline-size: 1.35rem !important;
+    block-size: 1.35rem !important;
+  }
+
+  #shop-view {
+    padding: 0.7rem;
+  }
+
+  .shop-view__header {
+    align-items: start;
+  }
+
+  .kitchen-equipment-group__children {
+    padding-inline-start: 1.55rem;
+  }
+}
