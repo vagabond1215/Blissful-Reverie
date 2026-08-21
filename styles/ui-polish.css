@@ -145,6 +145,16 @@ html.recipes-view-active #page-action-bar #reset-filters.page-action-bar__segmen
   border-radius: 0 999px 999px 0 !important;
 }
 
+/*
+  Family buttons live one wrapper deeper than the core recipe actions. Give the
+  actual final family button the right endcap explicitly so wrapper geometry or
+  stale endcap classes cannot square off the outer corners.
+*/
+html.recipes-view-active #page-action-bar #recipe-family-filter.recipe-family-filter--page-actions .recipe-family-filter__list > .recipe-family-page-action:last-child {
+  border-top-right-radius: 999px !important;
+  border-bottom-right-radius: 999px !important;
+}
+
 html.recipes-view-active #page-action-bar .page-action-bar__segment-first.page-action-bar__segment-last {
   border-radius: 999px !important;
 }
