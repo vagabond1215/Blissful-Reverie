@@ -11,6 +11,7 @@ const pantry = require('../scripts/pantry-topbar-controls.js');
 const familyManage = require('../scripts/family-manage-fix.js');
 const dislikes = require('../scripts/family-dislikes.js');
 const dislikesFix = require('../scripts/family-dislikes-click-fix.js');
+const recipeActions = require('../scripts/recipe-page-actions.js');
 
 assert.equal(pantry.normalizeStockFilter('all'), 'all');
 assert.equal(pantry.normalizeStockFilter('bad'), 'all');
@@ -21,6 +22,10 @@ assert.equal(pantry.nextStockFilter('out'), 'all');
 assert.equal(pantry.normalizeSortMode('commonality'), 'alphabetical');
 assert.equal(pantry.toggleSortMode('alphabetical'), 'frequent');
 assert.equal(pantry.toggleSortMode('frequent'), 'alphabetical');
+
+assert.equal(recipeActions.isRecipesViewOwned({ viewHidden: false, shopActive: false }), true);
+assert.equal(recipeActions.isRecipesViewOwned({ viewHidden: false, shopActive: true }), false);
+assert.equal(recipeActions.isRecipesViewOwned({ viewHidden: true, shopActive: false }), false);
 
 const familyState = {
   activeView: 'family',
@@ -63,6 +68,7 @@ assert(loader.indexOf('ensureWorkspaceFlowAssets();') > loader.indexOf('ensureRe
 const recipeScript = read('scripts/recipe-page-actions.js');
 assert(recipeScript.includes("document.getElementById('meal-view')"));
 assert(!recipeScript.includes("document.getElementById('meals-view')"));
+assert(recipeScript.includes("document.body.classList.contains('shop-view-active')"));
 assert(recipeScript.includes("bar.appendChild(chip)"));
 assert(recipeScript.includes("document.getElementById('recipe-family-filter')"));
 assert(recipeScript.includes("'recipe-family-page-action'"));
@@ -98,6 +104,11 @@ assert(topbarCss.includes('--topbar-segment-height: 38px'));
 assert(topbarCss.includes('#pantry-sort-filter'));
 assert(topbarCss.includes('display: none !important'));
 assert(topbarCss.includes('box-shadow: none !important'));
+
+const shopTopbarCss = read('styles/shop-store-mode.css');
+assert(shopTopbarCss.includes('body:not(.shop-view-active) #page-action-bar .shop-page-action'));
+assert(shopTopbarCss.includes('body.shop-view-active #page-action-bar > :not(.shop-page-action)'));
+assert(shopTopbarCss.includes('body.shop-view-active #recipe-topbar-search'));
 
 const flowCss = read('styles/workspace-flow-fix.css');
 assert(flowCss.includes('html.recipes-view-active #page-action-bar.page-action-bar'));
