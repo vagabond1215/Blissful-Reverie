@@ -16,3 +16,10 @@ jobs:
         with:
           node-version: 20
       - run: npm test
+      - name: Package browser smoke snapshot
+        run: tar -czf browser-smoke-snapshot.tgz index.html favicon.svg data scripts styles
+      - uses: actions/upload-artifact@v4
+        with:
+          name: browser-smoke-snapshot
+          path: browser-smoke-snapshot.tgz
+          retention-days: 1
