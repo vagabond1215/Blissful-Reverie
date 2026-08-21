@@ -101,6 +101,27 @@
     });
   };
 
+  const restoreClickedCoreTab = (event) => {
+    const tab = event.target instanceof Element
+      ? event.target.closest('#primary-nav .view-toggle__button:not([data-shop-tab="true"])')
+      : null;
+    if (!(tab instanceof HTMLButtonElement)) return;
+    const nav = tab.closest('#primary-nav');
+    if (!(nav instanceof HTMLElement)) return;
+
+    // Shop is an overlay over the core router. When Shop was opened from the same
+    // core view the user clicks next, the router sees no state change and skips its
+    // normal render. Shop has already cleared every core tab's active chrome, so
+    // restore the clicked tab synchronously before the bubble-phase router runs.
+    nav.querySelectorAll('.view-toggle__button').forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) return;
+      const selected = button === tab;
+      button.classList.toggle('view-toggle__button--active', selected);
+      if (selected) button.setAttribute('aria-current', 'page');
+      else button.removeAttribute('aria-current');
+    });
+  };
+
   const schedule = () => {
     if (scheduled) return;
     scheduled = true;
@@ -112,6 +133,7 @@
 
   const start = () => {
     sync();
+    document.addEventListener('click', restoreClickedCoreTab, true);
     const observer = new MutationObserver((records) => {
       if (records.some((record) => record.type === 'childList' && record.addedNodes.length)) schedule();
     });
