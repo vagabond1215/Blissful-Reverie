@@ -85,18 +85,30 @@ html.recipes-view-active #page-action-bar::-webkit-scrollbar {
   height: 0 !important;
 }
 
-/* The family filter keeps its legacy nav-chip class after moving into the shared rail. Neutralize its old flex gap. */
-html.recipes-view-active #page-action-bar #recipe-family-filter.recipe-family-filter--page-actions {
+/*
+  The family filter keeps two legacy wrappers after moving into the shared rail.
+  Flatten both wrappers so the member buttons become true segments of the same rail;
+  otherwise the inner list retains its old 0.35rem gap (the visible purple stripes in DevTools).
+*/
+html.recipes-view-active #page-action-bar #recipe-family-filter.recipe-family-filter--page-actions,
+html.recipes-view-active #page-action-bar #recipe-family-filter.recipe-family-filter--page-actions .recipe-family-filter__list {
   gap: 0 !important;
   column-gap: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
 }
 
+html.recipes-view-active #page-action-bar #recipe-family-filter.recipe-family-filter--page-actions .recipe-family-filter__list {
+  display: contents !important;
+}
+
 html.recipes-view-active #page-action-bar .recipe-page-action,
 html.recipes-view-active #page-action-bar .recipe-family-page-action {
   width: 38px !important;
   min-width: 38px !important;
+  height: var(--topbar-segment-height, 38px) !important;
+  min-height: var(--topbar-segment-height, 38px) !important;
+  max-height: var(--topbar-segment-height, 38px) !important;
   flex: 0 0 38px !important;
   margin-left: -1px !important;
   border-radius: 0 !important;
