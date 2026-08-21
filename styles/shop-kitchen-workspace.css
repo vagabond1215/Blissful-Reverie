@@ -57,6 +57,40 @@
   border-color: color-mix(in srgb, var(--main, #6d3b58) 62%, var(--border, #d8d0c4)) !important;
 }
 
+/* Kitchen follows the same right-side topbar search pattern as the other searchable workspaces. */
+#kitchen-topbar-search {
+  display: none !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-topbar-search:not([hidden]) {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 1 330px;
+  min-width: min(330px, 30vw);
+  max-width: 330px;
+  margin-inline-start: auto;
+}
+
+#kitchen-topbar-search input {
+  width: min(270px, 24vw);
+  min-width: 170px;
+  height: var(--topbar-segment-height, 38px);
+  min-height: var(--topbar-segment-height, 38px);
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid var(--border, #cbd0d7);
+  border-radius: 999px;
+  background: var(--surface, #fff);
+  color: var(--text, #111);
+  box-sizing: border-box;
+  font: inherit;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #filter-panel .input-group--search:has(#filter-search) {
+  display: none !important;
+}
+
 .shop-view[hidden] {
   display: none !important;
 }
@@ -145,7 +179,7 @@ body.shop-view-active #page-action-bar {
 
 .kitchen-equipment-group__label {
   min-height: 2.65rem;
-  padding: 0.3rem 0.4rem;
+  padding: 0.3rem 0;
   font-weight: 760;
 }
 
@@ -216,6 +250,22 @@ body.shop-view-active #page-action-bar {
 .kitchen-equipment-group .kitchen-list__checkbox {
   flex: 0 0 auto;
   accent-color: var(--main, #6d3b58);
+}
+
+@media (max-width: 920px) {
+  #recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-topbar-search:not([hidden]) {
+    flex: 1 0 100%;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    order: 20 !important;
+  }
+
+  #kitchen-topbar-search input {
+    width: min(360px, 100%);
+    max-width: 100%;
+    min-width: 0;
+  }
 }
 
 @media (max-width: 720px) {
