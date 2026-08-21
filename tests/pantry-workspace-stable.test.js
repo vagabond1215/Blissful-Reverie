@@ -28,7 +28,8 @@ assert.deepEqual(refine.getCheckedValues([
   { checked: true, value: 'Vegetable' },
 ]), ['Pasta', 'Vegetable']);
 
-const butterConversions = itemSettings.buildConversionRows(inventoryUnits.DEFAULT_PROFILES['dairy-butter-salted']);
+const butterProfile = inventoryUnits.DEFAULT_PROFILES['dairy-butter-salted'];
+const butterConversions = itemSettings.buildConversionRows(butterProfile);
 const tablespoonConversion = butterConversions.find((entry) => entry.unit === 'tbsp');
 assert(tablespoonConversion, 'Butter settings should expose tablespoon conversion.');
 assert(Math.abs(tablespoonConversion.quantity - 8) < 1e-8, 'One butter stick should convert to eight tablespoons.');
@@ -36,6 +37,9 @@ assert.deepEqual(itemSettings.processesForSlug('output-a', [
   { id: 'one', output: { slug: 'output-a' } },
   { id: 'two', output: { slug: 'output-b' } },
 ]), [{ id: 'one', output: { slug: 'output-a' } }]);
+const butterStockUnits = inventoryRuntime.getStockUnitOptions('dairy-butter-salted', butterProfile);
+assert(butterStockUnits.length > 0, 'Row runtime should expose validated stock-unit choices.');
+assert(butterStockUnits.every((unit) => unit.group !== 'package'), 'Pantry row units must exclude purchase/package units.');
 
 const runtimeValues = new Map([
   ['blissful-app-state', JSON.stringify({
@@ -80,10 +84,13 @@ assert(actions.includes('scripts/inventory-unit-legacy-preferences.js'));
 assert(!actions.includes('scripts/pantry-package-unit-runtime.js'));
 assert(!actions.includes('scripts/pantry-package-unit-migration.js'));
 assert(actions.includes('scripts/pantry-inventory-units-row-runtime.js'));
+assert(!actions.includes("'scripts/pantry-inventory-units-runtime.js'"));
 assert(actions.includes('scripts/shopping-inventory-units-sync.js'));
 assert(!actions.includes('scripts/ingredient-process-runtime.js'));
 assert(actions.includes('scripts/pantry-item-settings.js'));
+assert(actions.includes('scripts/pantry-item-settings-focus-trap.js'));
 assert(actions.indexOf('scripts/pantry-item-settings.js') > actions.indexOf('scripts/pantry-inventory-units-row-runtime.js'));
+assert(actions.indexOf('scripts/pantry-item-settings-focus-trap.js') > actions.indexOf('scripts/pantry-item-settings.js'));
 assert(actions.includes('scripts/recipe-inventory-runtime.js'));
 const inventoryRuntimeSource = read('scripts/pantry-inventory-units-row-runtime.js');
 assert(inventoryRuntimeSource.includes("unit?.group !== 'package'"));
@@ -97,6 +104,9 @@ assert(!itemSettingsSource.includes("packageText.textContent = 'Buy as'"));
 assert(itemSettingsSource.includes("heading.textContent = 'Make this ingredient'"));
 assert(itemSettingsSource.includes('core.executeProcess'));
 assert(!itemSettingsSource.includes('core.addPurchase'));
+const focusTrapSource = read('scripts/pantry-item-settings-focus-trap.js');
+assert(focusTrapSource.includes("event.key !== 'Tab'"));
+assert(focusTrapSource.includes('event.shiftKey'));
 const legacyPreferences = read('scripts/inventory-unit-legacy-preferences.js');
 assert(legacyPreferences.includes('blissful-pantry-unit-preferences'));
 assert(legacyPreferences.includes('migratePreferenceMap'));
