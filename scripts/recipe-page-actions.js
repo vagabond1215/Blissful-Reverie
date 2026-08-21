@@ -1,7 +1,8 @@
 ;(function (global) {
   const normalizeCount = (value) => Math.max(0, Number.parseInt(String(value ?? 0), 10) || 0);
   const formatResultCount = (value) => normalizeCount(value).toLocaleString();
-  const api = { normalizeCount, formatResultCount };
+  const isRecipesViewOwned = ({ viewHidden = true, shopActive = false } = {}) => !viewHidden && !shopActive;
+  const api = { normalizeCount, formatResultCount, isRecipesViewOwned };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   global.BlissfulRecipePageActions = Object.assign({}, global.BlissfulRecipePageActions || {}, api);
   if (typeof document === 'undefined') return;
@@ -10,7 +11,10 @@
 
   const isRecipesActive = () => {
     const view = document.getElementById('meal-view');
-    return view instanceof HTMLElement && !view.hidden;
+    return isRecipesViewOwned({
+      viewHidden: !(view instanceof HTMLElement) || view.hidden,
+      shopActive: document.body.classList.contains('shop-view-active'),
+    });
   };
 
   const ensurePageActionBar = () => {
