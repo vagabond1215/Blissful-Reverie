@@ -106,9 +106,24 @@ assert(topbarCss.includes('display: none !important'));
 assert(topbarCss.includes('box-shadow: none !important'));
 
 const shopTopbarCss = read('styles/shop-store-mode.css');
-assert(shopTopbarCss.includes('body:not(.shop-view-active) #page-action-bar .shop-page-action'));
-assert(shopTopbarCss.includes('body.shop-view-active #page-action-bar > :not(.shop-page-action)'));
-assert(shopTopbarCss.includes('body.shop-view-active #recipe-topbar-search'));
+assert(shopTopbarCss.includes('@import url("./workspace-topbar-ownership.css")'));
+assert(!shopTopbarCss.includes('body.shop-view-active #page-action-bar > :not(.shop-page-action)'));
+assert(!shopTopbarCss.includes('body:not(.shop-view-active) #page-action-bar .shop-page-action'));
+
+const ownershipCss = read('styles/workspace-topbar-ownership.css');
+assert(ownershipCss.includes('#primary-nav [data-view-target="meals"]'));
+assert(ownershipCss.includes('#primary-nav [data-view-target="pantry"]'));
+assert(ownershipCss.includes('#primary-nav [data-shop-tab="true"]'));
+assert(ownershipCss.includes('#primary-nav [data-view-target="family"]'));
+assert(ownershipCss.includes('#primary-nav [data-view-target="kitchen"]'));
+assert(ownershipCss.includes('#primary-nav [data-view-target="meal-plan"]'));
+assert(ownershipCss.includes('#page-action-bar > #pantry-restock-button'));
+assert(ownershipCss.includes('#page-action-bar > #shop-recipe-references-action'));
+assert(ownershipCss.includes('#page-action-bar > #family-manage-action'));
+assert(ownershipCss.includes('#recipe-topbar-search'));
+assert(ownershipCss.includes('#pantry-topbar-search'));
+assert(ownershipCss.includes('display: none !important'));
+assert(ownershipCss.includes('display: inline-flex !important'));
 
 const flowCss = read('styles/workspace-flow-fix.css');
 assert(flowCss.includes('html.recipes-view-active #page-action-bar.page-action-bar'));
