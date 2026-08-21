@@ -68,4 +68,13 @@ const bakingSheetMatches = catalogMatches(sheetGroup);
 assert(bakingSheetMatches.includes('Baking Sheet'));
 assert(bakingSheetMatches.includes('Sheet Pan'));
 
+const appCss = fs.readFileSync(path.resolve(__dirname, '../styles/app.css'), 'utf8');
+const kitchenCleanupCss = fs.readFileSync(path.resolve(__dirname, '../styles/kitchen-workspace-cleanup.css'), 'utf8');
+assert(appCss.includes("@import url('./kitchen-workspace-cleanup.css');"));
+assert(kitchenCleanupCss.includes('#filter-panel.filter-panel'));
+assert(kitchenCleanupCss.includes('grid-template-columns: minmax(0, 1fr) !important;'));
+assert(kitchenCleanupCss.includes('#kitchen-view > .pantry-view__header'));
+assert(kitchenCleanupCss.includes('#kitchen-view > .kitchen-view__intro'));
+assert(kitchenCleanupCss.includes('grid-column: 1 / -1 !important;'));
+
 console.log('Shop and grouped Kitchen workspace tests passed.');
