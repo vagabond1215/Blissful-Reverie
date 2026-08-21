@@ -70,6 +70,8 @@ html.recipes-view-active #page-action-bar.page-action-bar {
   display: inline-flex !important;
   align-items: stretch !important;
   flex-wrap: nowrap !important;
+  gap: 0 !important;
+  column-gap: 0 !important;
   border-radius: 999px !important;
   background: transparent !important;
   box-shadow: none !important;
@@ -83,6 +85,14 @@ html.recipes-view-active #page-action-bar::-webkit-scrollbar {
   height: 0 !important;
 }
 
+/* The family filter keeps its legacy nav-chip class after moving into the shared rail. Neutralize its old flex gap. */
+html.recipes-view-active #page-action-bar #recipe-family-filter.recipe-family-filter--page-actions {
+  gap: 0 !important;
+  column-gap: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 html.recipes-view-active #page-action-bar .recipe-page-action,
 html.recipes-view-active #page-action-bar .recipe-family-page-action {
   width: 38px !important;
@@ -91,6 +101,20 @@ html.recipes-view-active #page-action-bar .recipe-family-page-action {
   margin-left: -1px !important;
   border-radius: 0 !important;
   box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Legacy icon/filter hover rules lift buttons by 1px; inside the clipped rail that hides the top border. */
+html.recipes-view-active #page-action-bar .recipe-page-action:hover,
+html.recipes-view-active #page-action-bar .recipe-page-action:focus-visible,
+html.recipes-view-active #page-action-bar .recipe-page-action[aria-pressed='true'],
+html.recipes-view-active #page-action-bar .recipe-family-page-action:hover,
+html.recipes-view-active #page-action-bar .recipe-family-page-action:focus-visible,
+html.recipes-view-active #page-action-bar .recipe-family-page-action[aria-pressed='true'],
+html.recipes-view-active #page-action-bar .recipe-family-filter__button--active {
+  position: relative;
+  z-index: 1;
+  transform: none !important;
 }
 
 html.recipes-view-active #page-action-bar .page-action-bar__segment-first {
