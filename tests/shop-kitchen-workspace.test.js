@@ -1,4 +1,7 @@
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
 const workspace = require('../scripts/shop-kitchen-workspace.js');
 
 const spoons = {
@@ -29,9 +32,40 @@ const none = workspace.setGroupOwned(all, spoons, false);
 assert.equal(workspace.getGroupSelection(none, spoons).selectedCount, 0);
 assert.equal(none.has('measuring-spoons'), false);
 
+workspace.GROUP_DEFINITIONS.forEach((group) => {
+  assert.equal(
+    workspace.shouldRenderGroup(group, '', false),
+    true,
+    `${group.label} should be available as first-class Kitchen inventory even without a recipe-derived generic row.`,
+  );
+});
+assert.equal(workspace.groupMatchesSearch(spoons, 'measuring spoons'), true);
+assert.equal(workspace.groupMatchesSearch(spoons, '1/4 tsp'), true);
+assert.equal(workspace.groupMatchesSearch(spoons, 'blender'), false);
+assert.equal(workspace.shouldRenderGroup(spoons, 'blender', false), false);
+
 const sheetGroup = workspace.GROUP_DEFINITIONS.find((group) => group.key === 'baking-sheets');
 assert(sheetGroup.variants.some((variant) => variant.label.includes('9 × 13 in')));
 assert(sheetGroup.variants.some((variant) => variant.label.includes('13 × 18 in')));
 assert.equal(workspace.normalizeLabel('  Measuring   Cups '), 'measuring cups');
+
+const recipeSource = fs.readFileSync(path.resolve(__dirname, '../data/recipes.js'), 'utf8');
+const sandbox = { window: {} };
+vm.runInNewContext(recipeSource, sandbox, { filename: 'data/recipes.js' });
+const equipmentLabels = new Set(
+  (Array.isArray(sandbox.window.BLISSFUL_RECIPES) ? sandbox.window.BLISSFUL_RECIPES : [])
+    .flatMap((recipe) => Array.isArray(recipe?.equipment) ? recipe.equipment : [])
+    .map((label) => String(label || '').trim())
+    .filter(Boolean),
+);
+const catalogMatches = (group) => {
+  const aliases = new Set([group.label, ...(group.aliases || [])].map(workspace.normalizeLabel));
+  return Array.from(equipmentLabels).filter((label) => aliases.has(workspace.normalizeLabel(label)));
+};
+const measuringCups = workspace.GROUP_DEFINITIONS.find((group) => group.key === 'measuring-cups');
+assert(catalogMatches(measuringCups).includes('Measuring Cups'));
+const bakingSheetMatches = catalogMatches(sheetGroup);
+assert(bakingSheetMatches.includes('Baking Sheet'));
+assert(bakingSheetMatches.includes('Sheet Pan'));
 
 console.log('Shop and grouped Kitchen workspace tests passed.');
