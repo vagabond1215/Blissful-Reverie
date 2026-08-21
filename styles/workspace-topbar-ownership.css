@@ -1,0 +1,61 @@
+/* Authoritative workspace ownership for dynamic topbar controls. */
+
+[data-topbar-suppressed="true"] {
+  display: none !important;
+}
+
+#recipes-page #page-action-bar[data-workspace-owner="recipes"],
+#recipes-page #page-action-bar[data-workspace-owner="pantry"],
+#recipes-page #page-action-bar[data-workspace-owner="shop"],
+#recipes-page #page-action-bar[data-workspace-owner="family"] {
+  display: inline-flex !important;
+  align-items: stretch !important;
+}
+
+#recipes-page #page-action-bar[data-workspace-owner="kitchen"],
+#recipes-page #page-action-bar[data-workspace-owner="meal-plan"] {
+  display: none !important;
+}
+
+html[data-active-workspace="recipes"] #recipe-topbar-search,
+html[data-active-workspace="pantry"] #pantry-topbar-search {
+  display: inline-flex !important;
+}
+
+html:not([data-active-workspace="recipes"]) #recipe-topbar-search,
+html:not([data-active-workspace="pantry"]) #pantry-topbar-search {
+  display: none !important;
+}
+
+/* Shop owns only its two controls; stale body/view classes cannot leak them elsewhere. */
+html:not([data-active-workspace="shop"]) #page-action-bar .shop-page-action {
+  display: none !important;
+}
+
+html[data-active-workspace="shop"] #page-action-bar .shop-page-action {
+  display: inline-grid !important;
+  place-items: center !important;
+}
+
+/* Pantry controls stay visible immediately when Pantry owns the bar. */
+html[data-active-workspace="pantry"] #page-action-bar #pantry-restock-button,
+html[data-active-workspace="pantry"] #page-action-bar #pantry-lists-action,
+html[data-active-workspace="pantry"] #page-action-bar #pantry-stock-cycle-action,
+html[data-active-workspace="pantry"] #page-action-bar #pantry-sort-action,
+html[data-active-workspace="pantry"] #page-action-bar #pantry-favorites-action,
+html[data-active-workspace="pantry"] #page-action-bar #pantry-tags-action {
+  display: inline-flex !important;
+}
+
+html:not([data-active-workspace="pantry"]) #page-action-bar [data-topbar-owner="pantry"] {
+  display: none !important;
+}
+
+html:not([data-active-workspace="family"]) #page-action-bar #family-manage-action {
+  display: none !important;
+}
+
+html:not([data-active-workspace="recipes"]) #page-action-bar #recipe-action-chip,
+html:not([data-active-workspace="recipes"]) #page-action-bar #recipe-family-filter {
+  display: none !important;
+}
