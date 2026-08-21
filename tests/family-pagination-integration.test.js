@@ -28,6 +28,23 @@ const state = {
 };
 
 assert.deepEqual(
+  integration.resolveActiveMemberIds(
+    [true, false],
+    [{ id: 'sam', name: 'Sam' }, { id: 'lee', name: 'Lee' }],
+  ),
+  ['sam'],
+  'Recipe Family buttons should resolve directly from persisted member order without requiring Family-view cards.',
+);
+assert.deepEqual(
+  integration.resolveActiveMemberIds(
+    [true, true],
+    [{ id: 'sam' }, { id: 'lee' }],
+  ),
+  ['sam', 'lee'],
+);
+assert.deepEqual(integration.resolveActiveMemberIds([true], []), []);
+
+assert.deepEqual(
   integration.filterRecipesForActiveDislikes({ recipes, memberIds: [], state, recipeIngredientMatches, ingredientBySlug }).map((recipe) => recipe.id),
   ['chicken-soup', 'tomato-pasta', 'apple-oats'],
 );
