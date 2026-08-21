@@ -119,7 +119,9 @@ assert(topbarCss.includes('box-shadow: none !important'));
 
 const uiPolishCss = read('styles/ui-polish.css');
 assert(uiPolishCss.includes('gap: 0 !important;'));
-assert(uiPolishCss.includes('#recipe-family-filter.recipe-family-filter--page-actions'));
+assert(uiPolishCss.includes('#recipe-family-filter.recipe-family-filter--page-actions .recipe-family-filter__list'));
+assert(uiPolishCss.includes('display: inline-flex !important;'));
+assert(uiPolishCss.includes('height: var(--topbar-segment-height, 38px) !important;'));
 assert(uiPolishCss.includes('transform: none !important;'));
 assert(uiPolishCss.includes('.recipe-family-page-action:hover'));
 assert(uiPolishCss.includes('z-index: 1;'));
