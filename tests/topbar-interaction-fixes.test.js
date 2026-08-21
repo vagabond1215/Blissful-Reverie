@@ -12,6 +12,7 @@ const familyManage = require('../scripts/family-manage-fix.js');
 const dislikes = require('../scripts/family-dislikes.js');
 const dislikesFix = require('../scripts/family-dislikes-click-fix.js');
 const recipeActions = require('../scripts/recipe-page-actions.js');
+const kitchenSearch = require('../scripts/kitchen-topbar-search.js');
 
 assert.equal(pantry.normalizeStockFilter('all'), 'all');
 assert.equal(pantry.normalizeStockFilter('bad'), 'all');
@@ -26,6 +27,9 @@ assert.equal(pantry.toggleSortMode('frequent'), 'alphabetical');
 assert.equal(recipeActions.isRecipesViewOwned({ viewHidden: false, shopActive: false }), true);
 assert.equal(recipeActions.isRecipesViewOwned({ viewHidden: false, shopActive: true }), false);
 assert.equal(recipeActions.isRecipesViewOwned({ viewHidden: true, shopActive: false }), false);
+assert.equal(kitchenSearch.isKitchenTabSelected({ active: true, ariaCurrent: '' }), true);
+assert.equal(kitchenSearch.isKitchenTabSelected({ active: false, ariaCurrent: 'page' }), true);
+assert.equal(kitchenSearch.isKitchenTabSelected({ active: false, ariaCurrent: '' }), false);
 
 const familyState = {
   activeView: 'family',
@@ -63,6 +67,7 @@ assert(loader.includes('scripts/pantry-topbar-controls.js'));
 assert(loader.includes('scripts/family-manage-fix.js'));
 assert(loader.includes('scripts/family-dislikes-click-fix.js'));
 assert(loader.includes('styles/workspace-flow-fix.css'));
+assert(loader.includes('scripts/kitchen-topbar-search.js'));
 assert(loader.indexOf('ensureWorkspaceFlowAssets();') > loader.indexOf('ensureRestockAssets();'));
 
 const recipeScript = read('scripts/recipe-page-actions.js');
@@ -74,6 +79,13 @@ assert(recipeScript.includes("document.getElementById('recipe-family-filter')"))
 assert(recipeScript.includes("'recipe-family-page-action'"));
 assert(recipeScript.includes('syncActionEndcaps()'));
 assert(recipeScript.includes("input.id = 'recipe-topbar-search-input'"));
+
+const kitchenSearchScript = read('scripts/kitchen-topbar-search.js');
+assert(kitchenSearchScript.includes("document.getElementById('filter-search')"));
+assert(kitchenSearchScript.includes("input.id = 'kitchen-topbar-search-input'"));
+assert(kitchenSearchScript.includes("input.setAttribute('aria-label', 'Search kitchen equipment')"));
+assert(kitchenSearchScript.includes("source.dispatchEvent(new Event('input', { bubbles: true }))"));
+assert(kitchenSearchScript.includes("#primary-nav [data-view-target=\"kitchen\"]"));
 
 const pantryScript = read('scripts/pantry-topbar-controls.js');
 assert(pantryScript.includes("'pantry-stock-cycle-action'"));
@@ -104,6 +116,13 @@ assert(topbarCss.includes('--topbar-segment-height: 38px'));
 assert(topbarCss.includes('#pantry-sort-filter'));
 assert(topbarCss.includes('display: none !important'));
 assert(topbarCss.includes('box-shadow: none !important'));
+
+const shopKitchenCss = read('styles/shop-kitchen-workspace.css');
+assert(shopKitchenCss.includes('#kitchen-topbar-search'));
+assert(shopKitchenCss.includes('#kitchen-topbar-search input'));
+assert(shopKitchenCss.includes('#filter-panel .input-group--search:has(#filter-search)'));
+assert(shopKitchenCss.includes('margin-inline-start: auto'));
+assert(shopKitchenCss.includes('.kitchen-equipment-group__label {\n  min-height: 2.65rem;\n  padding: 0.3rem 0;'));
 
 const shopTopbarCss = read('styles/shop-store-mode.css');
 assert(shopTopbarCss.includes('@import url("./workspace-topbar-ownership.css")'));
