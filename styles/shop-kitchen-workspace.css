@@ -180,6 +180,7 @@ body.shop-view-active #page-action-bar {
 .kitchen-equipment-group__label {
   min-height: 2.65rem;
   padding: 0.3rem 0;
+  gap: 0.75rem;
   font-weight: 760;
 }
 
