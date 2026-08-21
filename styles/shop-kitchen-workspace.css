@@ -215,6 +215,15 @@ body.shop-view-active #page-action-bar {
     min-block-size: 3.75rem !important;
   }
 
+  #recipes-page .nav-chip--settings,
+  #recipes-page .settings-panel.nav-chip__settings,
+  #recipes-page .settings-panel__summary.settings-btn {
+    inline-size: 42px !important;
+    block-size: 42px !important;
+    min-inline-size: 42px !important;
+    min-block-size: 42px !important;
+  }
+
   #recipes-page .nav-chip__settings-icon {
     inline-size: 1.35rem !important;
     block-size: 1.35rem !important;
