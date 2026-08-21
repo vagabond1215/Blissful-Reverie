@@ -17,7 +17,6 @@
     add.type = 'button';
     add.className = 'pantry-workspace__add-item';
     add.textContent = '+  Add Item';
-    add.addEventListener('click', () => document.getElementById('pantry-restock-button')?.click());
     const more = document.createElement('button');
     more.type = 'button';
     more.id = 'pantry-workspace-overflow';
@@ -35,6 +34,10 @@
   };
   const start = () => {
     new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
+    document.addEventListener('click', (event) => {
+      if (!(event.target instanceof Element) || !event.target.closest('.pantry-workspace__add-item')) return;
+      document.getElementById('pantry-restock-button')?.click();
+    });
     schedule();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });

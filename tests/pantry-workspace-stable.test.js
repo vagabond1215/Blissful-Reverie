@@ -71,6 +71,7 @@ assert(filters.includes('input.click()'));
 assert(filters.includes('node.textContent !== next'));
 const header = read('scripts/pantry-workspace-header.js');
 assert(header.includes("classList.toggle('pantry-workspace-active'"));
+assert(header.includes("closest('.pantry-workspace__add-item')"));
 assert(header.includes("pantry-restock-button')?.click()"));
 assert(header.includes("more.id = 'pantry-workspace-overflow'"));
 const actions = read('scripts/pantry-workspace-actions.js');

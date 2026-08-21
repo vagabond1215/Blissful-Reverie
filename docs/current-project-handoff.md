@@ -121,8 +121,17 @@ Measured desktop browser state after a hard refresh:
 - Light recipe card colors measured `rgb(255, 252, 247)` / `rgb(43, 37, 34)`; dark cards and item settings measured `rgb(33, 27, 29)` / `rgb(247, 238, 231)`.
 - Pantry item settings trapped Tab/Shift+Tab, closed with Escape, restored trigger focus, and created process UI only inside the open dialog.
 
+The final 1440/375 light/dark matrix was completed on the integrated branch:
+
+- At 375 × 812, Recipes measured 360 CSS px document width against a 375 px viewport in both themes, with a 325 px bounded filter tray, 24 mounted cards, 0 initial detail bodies, and about 16,520–17,205 CSS px document height.
+- At 375 px, Pantry measured 375 CSS px document width; its topbar search was not rendered offscreen. Lists, Restock, Pantry Item Settings, and Manage Family panels measured 355–368 px wide and remained inside the viewport.
+- Light surfaces measured warm cream/card values with charcoal text; dark cards and dialogs measured `rgb(33, 27, 29)` / `rgb(247, 238, 231)`.
+- A full session that had already mounted the 554-row Pantry retained about 26,468–27,511 total DOM elements while Recipes still mounted only its 24-card page and no initial detail bodies. This remains substantially below the prior six-figure DOM baseline.
+- Recipes, Pantry, Lists, Restock, Kitchen, Meal Plan, Family/Manage Family, Pantry Item Settings, and Settings/Backup opened and remained legible across the matrix. No browser console errors or warnings were recorded.
+- The matrix exposed a re-render lifecycle defect in the Pantry `+ Add Item` control. Its Restock activation is now delegated from the stable document owner, so pointer activation survives header re-rendering.
+
 ## Immediate next step
 
-Complete the remaining browser matrix from `docs/browser-smoke-test-checklist.md`, especially both 375 px light/dark passes and Lists, Restock, Kitchen, Meal Plan, Family/Manage Family, and Settings/Backup. Record `scrollWidth` versus 375 px, mobile document height, focus-ring visibility, and console status. Browser automation was interrupted after the desktop core checks above, so those remaining cells must not be treated as accepted yet.
+Publish the integration branch as a draft PR, require its `Validate` check to pass, and review the combined diff before marking it ready. Re-run the browser smoke matrix after any review-driven UI change.
 
 Generated `Ingredient Spotlight` / `Spotlight Skillet` entries still share the runtime recipe catalog path. Separating generated ideas from the trusted curated catalog remains a follow-up because that change affects planning, matching, and shopping behavior beyond this render-scale integration.
