@@ -1,33 +1,13 @@
-/* Shop-only topbar ownership and nested store/category hierarchy. */
+@import url("./workspace-topbar-ownership.css");
 
-#page-action-bar .shop-page-action[hidden],
-body:not(.shop-view-active) #page-action-bar .shop-page-action {
-  display: none !important;
-}
+/* Shop store/category hierarchy and Shop-owned action geometry. */
 
-body.shop-view-active #page-action-bar {
-  display: inline-flex !important;
-  align-items: stretch !important;
-}
-
-body.shop-view-active #page-action-bar > :not(.shop-page-action),
-body.shop-view-active #recipe-topbar-search,
-body.shop-view-active #recipe-action-chip,
-body.shop-view-active #recipe-family-filter {
-  display: none !important;
-}
-
-body.shop-view-active #page-action-bar .shop-page-action:not([hidden]) {
-  display: inline-grid !important;
-  place-items: center !important;
-}
-
-body.shop-view-active #page-action-bar #shop-recipe-references-action {
+#page-action-bar #shop-recipe-references-action {
   margin-left: 0 !important;
   border-radius: 999px 0 0 999px !important;
 }
 
-body.shop-view-active #page-action-bar #shop-group-by-action {
+#page-action-bar #shop-group-by-action {
   margin-left: -1px !important;
   border-radius: 0 999px 999px 0 !important;
 }
