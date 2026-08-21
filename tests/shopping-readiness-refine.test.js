@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const rootDir = path.resolve(__dirname, '..');
-const read = (relativePath) => fs.readFileSync(path.join(rootDir, relativePath), 'utf8');
+const read = (relativePath) => fs.readFileSync(path.join(rootDir, relativePath), 'utf8').replace(/\r\n?/g, '\n');
 const productivityUi = require('../scripts/productivity-ui.js');
 const recipeActions = require('../scripts/recipe-page-actions.js');
 const shoppingRefine = require('../scripts/meal-plan-shopping-refine.js');
@@ -149,10 +149,14 @@ assert(dislikeScript.includes("button.setAttribute('aria-pressed'"));
 assert(dislikeScript.includes('toggleTokenInState'));
 
 const previewScript = read('scripts/discovery-preview-actions.js');
-assert(previewScript.includes("#recipe-preview-dialog .meal-card--preview .meal-card__schedule-button"));
-assert(previewScript.includes("button.style.setProperty('pointer-events', 'auto', 'important')"));
+assert(previewScript.includes('buildPreviewModel'));
+assert(previewScript.includes('.productivity-dashboard__recipe-chip'));
+assert(previewScript.includes('data.discoveryPreviewPlan'));
+assert(previewScript.includes('renderRecipeIntoCurrentPage'));
 assert(previewScript.includes('liveButton.click()'));
 assert(previewScript.includes('global.scrollTo(scrollX, scrollY)'));
+assert(!previewScript.includes('cloneNode(true)'));
+assert(!previewScript.includes('findLiveMealCard'));
 
 const densityScript = read('scripts/pantry-density-fix.js');
 assert(densityScript.includes("card.style.setProperty('grid-template-rows', '26px auto', 'important')"));
@@ -165,6 +169,7 @@ assert(loader.includes('styles/recipe-card-layout.css'));
 assert(loader.includes('scripts/meal-plan-shopping-refine.js'));
 assert(loader.includes('scripts/discovery-preview-actions.js'));
 assert(loader.includes('scripts/pantry-density-fix.js'));
+assert(loader.includes('scripts/family-pagination-integration.js'));
 
 const refineCss = read('styles/shopping-readiness-refine.css');
 assert(refineCss.includes('padding: 0 3px !important'));
@@ -176,6 +181,7 @@ assert(!refineCss.includes('.recipe-readiness-action'));
 const layoutCss = read('styles/recipe-card-layout.css');
 assert(layoutCss.includes('grid-template-columns: 8.75rem minmax(0, 1fr)'));
 assert(layoutCss.includes('@media (min-width: 641px) and (max-width: 920px)'));
+assert(layoutCss.includes('.meal-card__detail-body'));
 assert(layoutCss.includes(':has(> .ingredient-list)'));
 assert(layoutCss.includes(':has(> .instruction-list)'));
 
