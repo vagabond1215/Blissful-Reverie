@@ -20,11 +20,12 @@
     "test:recipe-family-actions": "node tests/recipe-family-actions.test.js",
     "test:recipe-pagination": "node tests/recipe-pagination.test.js",
     "test:topbar-interactions": "node tests/topbar-interaction-fixes.test.js",
+    "test:shop-kitchen-workspace": "node tests/shop-kitchen-workspace.test.js",
     "test:ui-shopping-polish": "node tests/ui-shopping-polish.test.js",
     "test:shopping-readiness": "node tests/shopping-readiness-refine.test.js",
     "test:inventory-units": "node tests/inventory-units-processes.test.js",
     "test:pantry-workspace": "node tests/pantry-workspace-stable.test.js",
-    "test": "npm run validate:data && npm run test:validation && npm run test:catalog-admission && npm run test:matching && npm run test:pantry && npm run test:productivity && npm run test:backup && npm run test:persistence-registry && npm run test:wiring && npm run test:restock-nav && npm run test:pantry-ui && npm run test:pantry-lists && npm run test:family-ui && npm run test:recipe-family-actions && npm run test:recipe-pagination && npm run test:topbar-interactions && npm run test:ui-shopping-polish && npm run test:shopping-readiness && npm run test:inventory-units && npm run test:pantry-workspace"
+    "test": "npm run validate:data && npm run test:validation && npm run test:catalog-admission && npm run test:matching && npm run test:pantry && npm run test:productivity && npm run test:backup && npm run test:persistence-registry && npm run test:wiring && npm run test:restock-nav && npm run test:pantry-ui && npm run test:pantry-lists && npm run test:family-ui && npm run test:recipe-family-actions && npm run test:recipe-pagination && npm run test:topbar-interactions && npm run test:shop-kitchen-workspace && npm run test:ui-shopping-polish && npm run test:shopping-readiness && npm run test:inventory-units && npm run test:pantry-workspace"
   },
   "engines": {
     "node": ">=18"
