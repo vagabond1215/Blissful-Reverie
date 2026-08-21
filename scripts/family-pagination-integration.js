@@ -1,5 +1,6 @@
 ;(function (global) {
   const STORAGE_KEY = 'blissful-family-dislikes';
+  const APP_STATE_KEY = 'blissful-app-state';
   const normalizeText = (value) => String(value || '').trim().toLowerCase();
   const slugify = (value) => normalizeText(value).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   const isRecord = (value) => value && typeof value === 'object' && !Array.isArray(value);
@@ -31,6 +32,16 @@
       const id = String(recipe?.id || '').trim();
       return Boolean(id) && !indexed.has(id);
     });
+  };
+
+  const resolveActiveMemberIds = (pressedStates, familyMembers) => {
+    const members = Array.isArray(familyMembers) ? familyMembers : [];
+    return (Array.isArray(pressedStates) ? pressedStates : []).reduce((ids, pressed, index) => {
+      if (!pressed) return ids;
+      const id = String(members[index]?.id || '').trim();
+      if (id) ids.push(id);
+      return ids;
+    }, []);
   };
 
   const recipeConflictsWithTokens = ({ recipe, tokens, recipeIngredientMatches, ingredientBySlug } = {}) => {
@@ -69,6 +80,7 @@
     normalizeToken,
     normalizeTokens,
     hasUnindexedRecipes,
+    resolveActiveMemberIds,
     recipeConflictsWithTokens,
     filterRecipesForActiveDislikes,
   };
@@ -102,7 +114,7 @@
     }
   };
 
-  const readState = () => {
+  const readDislikeState = () => {
     try {
       const parsed = JSON.parse(global.localStorage?.getItem?.(STORAGE_KEY) || '{}');
       return isRecord(parsed) ? parsed : {};
@@ -111,16 +123,19 @@
     }
   };
 
+  const readFamilyMembers = () => {
+    try {
+      const parsed = JSON.parse(global.localStorage?.getItem?.(APP_STATE_KEY) || '{}');
+      return Array.isArray(parsed?.familyMembers) ? parsed.familyMembers : [];
+    } catch (error) {
+      return [];
+    }
+  };
+
   const getActiveMemberIds = () => {
-    const cards = Array.from(document.querySelectorAll('#family-member-list .family-member-card'))
-      .filter((card) => card instanceof HTMLElement && card.dataset.familyId);
-    return Array.from(document.querySelectorAll('#recipe-family-filter .recipe-family-filter__button'))
-      .reduce((ids, button, index) => {
-        if (!(button instanceof HTMLButtonElement) || button.getAttribute('aria-pressed') !== 'true') return ids;
-        const id = String(cards[index]?.dataset.familyId || '').trim();
-        if (id) ids.push(id);
-        return ids;
-      }, []);
+    const pressedStates = Array.from(document.querySelectorAll('#recipe-family-filter .recipe-family-filter__button'))
+      .map((button) => button instanceof HTMLButtonElement && button.getAttribute('aria-pressed') === 'true');
+    return resolveActiveMemberIds(pressedStates, readFamilyMembers());
   };
 
   const requestRecipeRerender = () => {
@@ -145,7 +160,7 @@
       const allowed = filterRecipesForActiveDislikes({
         recipes: items,
         memberIds: getActiveMemberIds(),
-        state: readState(),
+        state: readDislikeState(),
         recipeIngredientMatches,
         ingredientBySlug,
       });
@@ -173,7 +188,7 @@
       }
     }, true);
     global.addEventListener('storage', (event) => {
-      if (event.key === STORAGE_KEY) requestRecipeRerender();
+      if (event.key === STORAGE_KEY || event.key === APP_STATE_KEY) requestRecipeRerender();
     });
   };
 
