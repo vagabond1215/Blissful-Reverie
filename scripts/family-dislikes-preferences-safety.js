@@ -33,57 +33,71 @@
   global.BlissfulFamilyDislikesSafety = Object.assign({}, global.BlissfulFamilyDislikesSafety || {}, api);
   if (typeof document === 'undefined') return;
 
-  const readJson = (key, fallback) => {
+  const parseRecord = (raw, fallback = {}) => {
     try {
-      const raw = global.localStorage?.getItem?.(key);
-      if (!raw) return fallback;
-      const parsed = JSON.parse(raw);
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
       return isRecord(parsed) ? parsed : fallback;
     } catch (error) {
       return fallback;
     }
   };
 
-  /*
-    family-dislikes.js historically cleaned saved member entries by inspecting only
-    rendered Family cards. On a fresh Recipes load the Family view has not rendered
-    those cards yet, so every saved dislike could be mistaken for a removed member.
-    Snapshot the pre-runtime state here and repair only properties that disappear
-    while the corresponding member still exists in the persisted app state. An
-    intentional clear remains an explicit empty array and is therefore preserved.
-  */
-  const startupDislikes = readJson(DISLIKE_STORAGE_KEY, { version: 1, members: {} });
-  let startupRestoreAttempts = 0;
-  let startupRestoreComplete = false;
+  const guardCleanupValue = (storage, key, value, getItem) => {
+    if (String(key) !== DISLIKE_STORAGE_KEY) return value;
+    const stack = String(new Error().stack || '');
+    if (!stack.includes('cleanupRemovedMembers')) return value;
 
-  const restoreStartupDislikes = () => {
-    if (startupRestoreComplete) return;
-    const appState = readJson(APP_STATE_STORAGE_KEY, {});
-    const currentState = readJson(DISLIKE_STORAGE_KEY, { version: 1, members: {} });
+    const previousState = parseRecord(getItem.call(storage, DISLIKE_STORAGE_KEY), { version: 1, members: {} });
+    const nextState = parseRecord(String(value || ''), { version: 1, members: {} });
+    const appState = parseRecord(getItem.call(storage, APP_STATE_STORAGE_KEY), {});
     const repaired = preserveMountedIndependentDislikes({
-      initialState: startupDislikes,
-      currentState,
+      initialState: previousState,
+      currentState: nextState,
       familyMembers: appState.familyMembers,
     });
-    if (repaired.restoredIds.length) {
-      try { global.localStorage?.setItem?.(DISLIKE_STORAGE_KEY, JSON.stringify(repaired.state)); } catch (error) {}
-      repaired.restoredIds.forEach((memberId) => {
-        global.dispatchEvent?.(new CustomEvent('blissful-family-dislikes-change', { detail: { memberId } }));
-      });
-    }
-    startupRestoreComplete = true;
+    return repaired.restoredIds.length ? JSON.stringify(repaired.state) : value;
   };
 
-  const waitForDislikeRuntime = () => {
-    if (startupRestoreComplete) return;
-    if (!global.BlissfulFamilyDislikes && startupRestoreAttempts < 90) {
-      startupRestoreAttempts += 1;
-      global.requestAnimationFrame(waitForDislikeRuntime);
+  const installCleanupStorageGuard = () => {
+    const storage = global.localStorage;
+    if (!storage || typeof storage.setItem !== 'function' || typeof storage.getItem !== 'function') return;
+
+    if (global.Storage?.prototype && storage instanceof global.Storage) {
+      const proto = global.Storage.prototype;
+      if (proto.__blissfulFamilyDislikeCleanupGuard) return;
+      const originalSetItem = proto.setItem;
+      const originalGetItem = proto.getItem;
+      Object.defineProperty(proto, '__blissfulFamilyDislikeCleanupGuard', {
+        value: true,
+        configurable: true,
+      });
+      proto.setItem = function setItemWithFamilyDislikeGuard(key, value) {
+        const guarded = this === global.localStorage
+          ? guardCleanupValue(this, key, value, originalGetItem)
+          : value;
+        return originalSetItem.call(this, key, guarded);
+      };
       return;
     }
-    /* Run after the runtime's own startup animation-frame cleanup. */
-    global.requestAnimationFrame(() => global.requestAnimationFrame(restoreStartupDislikes));
+
+    if (storage.__blissfulFamilyDislikeCleanupGuard) return;
+    const originalSetItem = storage.setItem.bind(storage);
+    const originalGetItem = storage.getItem.bind(storage);
+    try {
+      Object.defineProperty(storage, '__blissfulFamilyDislikeCleanupGuard', {
+        value: true,
+        configurable: true,
+      });
+      storage.setItem = (key, value) => originalSetItem(
+        key,
+        guardCleanupValue(storage, key, value, { call: (_storage, requestedKey) => originalGetItem(requestedKey) }),
+      );
+    } catch (error) {
+      // If an unusual Storage implementation cannot be patched, leave it untouched.
+    }
   };
+
+  installCleanupStorageGuard();
 
   const legacyByMember = new Map();
   const isDislikeSummary = (value) => /^dislikes\s*:/i.test(String(value || '').trim());
@@ -122,7 +136,6 @@
 
   const start = () => {
     rememberLegacyNotes();
-    waitForDislikeRuntime();
     document.addEventListener('input', protectLegacyNotes, true);
     document.addEventListener('change', protectLegacyNotes, true);
     const observer = new MutationObserver(() => rememberLegacyNotes());
