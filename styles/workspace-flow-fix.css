@@ -1,5 +1,10 @@
 /* Flat document-flow workspaces and responsive page-action grouping. */
 
+/* Reserve the document scrollbar gutter so the centered topbar does not shift between short and long workspaces. */
+html {
+  scrollbar-gutter: stable;
+}
+
 /* Recipes: keep all page-specific controls in one fluid middle rail. */
 html.recipes-view-active #page-action-bar.page-action-bar {
   position: static !important;
@@ -167,23 +172,6 @@ html.recipes-view-active .recipe-topbar-search {
   display: none;
   width: 0;
   height: 0;
-}
-
-/* On Pantry and Family, keep scrolling functional while removing visual scrollbar chrome. */
-html:has(#pantry-view:not([hidden])),
-html:has(#family-view:not([hidden])),
-body:has(#pantry-view:not([hidden])),
-body:has(#family-view:not([hidden])) {
-  scrollbar-width: none;
-}
-
-html:has(#pantry-view:not([hidden]))::-webkit-scrollbar,
-html:has(#family-view:not([hidden]))::-webkit-scrollbar,
-body:has(#pantry-view:not([hidden]))::-webkit-scrollbar,
-body:has(#family-view:not([hidden]))::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  display: none;
 }
 
 @media (max-width: 1180px) {
