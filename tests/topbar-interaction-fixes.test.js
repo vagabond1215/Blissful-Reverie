@@ -110,6 +110,13 @@ assert(shopTopbarCss.includes('@import url("./workspace-topbar-ownership.css")')
 assert(!shopTopbarCss.includes('body.shop-view-active #page-action-bar > :not(.shop-page-action)'));
 assert(!shopTopbarCss.includes('body:not(.shop-view-active) #page-action-bar .shop-page-action'));
 
+const shopStoreScript = read('scripts/shop-store-mode.js');
+assert(shopStoreScript.includes('const restoreClickedCoreTab = (event) =>'));
+assert(shopStoreScript.includes('#primary-nav .view-toggle__button:not([data-shop-tab="true"])'));
+assert(shopStoreScript.includes("button.classList.toggle('view-toggle__button--active', selected)"));
+assert(shopStoreScript.includes("button.setAttribute('aria-current', 'page')"));
+assert(shopStoreScript.includes("document.addEventListener('click', restoreClickedCoreTab, true)"));
+
 const ownershipCss = read('styles/workspace-topbar-ownership.css');
 assert(ownershipCss.includes('#primary-nav [data-view-target="meals"]'));
 assert(ownershipCss.includes('#primary-nav [data-view-target="pantry"]'));
@@ -122,6 +129,8 @@ assert(ownershipCss.includes('#page-action-bar > #shop-recipe-references-action'
 assert(ownershipCss.includes('#page-action-bar > #family-manage-action'));
 assert(ownershipCss.includes('#recipe-topbar-search'));
 assert(ownershipCss.includes('#pantry-topbar-search'));
+assert(ownershipCss.includes('position: static !important'));
+assert(ownershipCss.includes('transform: none !important'));
 assert(ownershipCss.includes('display: none !important'));
 assert(ownershipCss.includes('display: inline-flex !important'));
 
