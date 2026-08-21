@@ -115,6 +115,7 @@
     ensureScript('scripts/family-dislikes-preferences-safety.js');
     ensureScript('scripts/family-dislikes.js');
     ensureScript('scripts/family-dislikes-click-fix.js');
+    ensureScript('scripts/family-pagination-integration.js');
   };
 
   const ensureTopbarInteractionAssets = () => {
@@ -223,8 +224,8 @@
     ensureUiPolishAssets();
     ensureShoppingReadinessRefinementAssets();
     ensurePantryWorkspaceAssets();
-    ensureShopKitchenWorkspaceAssets();
     ensureResponsiveHardeningStylesheet();
+    ensureShopKitchenWorkspaceAssets();
     if (simplifySettings()) {
       ensureVisualResetStylesheets();
       return;
