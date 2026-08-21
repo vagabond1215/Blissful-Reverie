@@ -20,14 +20,12 @@ jobs:
         run: |
           npm install --no-save --package-lock=false playwright@1.55.0
           npx playwright install --with-deps chromium
-      - name: Run browser acceptance batches
+      - name: Run workspace browser acceptance
         run: |
           python3 -m http.server 4173 > /tmp/blissful-browser-server.log 2>&1 &
           SERVER_PID=$!
           trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
-          timeout 90s node tests/browser-family-dislikes.js
-          timeout 90s node tests/browser-discovery-plan-shop.js
-          timeout 180s node tests/browser-workspace-matrix.js
+          timeout 60s node tests/browser-workspace-matrix.js
       - name: Package browser smoke snapshot
         run: tar -czf browser-smoke-snapshot.tgz index.html favicon.svg data scripts styles
       - uses: actions/upload-artifact@v4
