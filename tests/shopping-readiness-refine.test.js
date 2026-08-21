@@ -151,7 +151,7 @@ assert(dislikeScript.includes('toggleTokenInState'));
 const previewScript = read('scripts/discovery-preview-actions.js');
 assert(previewScript.includes('buildPreviewModel'));
 assert(previewScript.includes('.productivity-dashboard__recipe-chip'));
-assert(previewScript.includes('data.discoveryPreviewPlan'));
+assert(previewScript.includes('plan.dataset.discoveryPreviewPlan'));
 assert(previewScript.includes('renderRecipeIntoCurrentPage'));
 assert(previewScript.includes('liveButton.click()'));
 assert(previewScript.includes('global.scrollTo(scrollX, scrollY)'));
