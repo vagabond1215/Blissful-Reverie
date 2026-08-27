@@ -108,6 +108,29 @@ test('mapRecipesToIngredientMatches keeps the most specific overlapping ingredie
   assert(matches.has('meat-beef-ground-85'));
 });
 
+test('mapRecipesToIngredientMatches prefers explicit tokens over ambiguous display text', () => {
+  const ingredients = [
+    { slug: 'baking-egg', name: 'Egg' },
+    { slug: 'pasta-egg-noodles', name: 'Egg Noodles' },
+    { slug: 'dairy-butter-unsalted', name: 'Butter (Unsalted)' },
+  ];
+  const recipes = [
+    {
+      id: 'tokenized',
+      ingredients: [
+        { token: 'baking-egg', item: 'egg' },
+        { token: 'recipe-ingredient-butter-garnish', item: 'unsalted butter' },
+      ],
+    },
+  ];
+  const index = matching.createIngredientMatcherIndex(ingredients);
+  const { recipeIngredientMatches } = matching.mapRecipesToIngredientMatches(recipes, index);
+  const matches = recipeIngredientMatches.get('tokenized');
+  assert.deepEqual(Array.from(matches), ['baking-egg']);
+  assert(!matches.has('pasta-egg-noodles'));
+  assert(!matches.has('dairy-butter-unsalted'), 'Unknown explicit tokens must not fall back to display-text parsing.');
+});
+
 test('mapRecipesToIngredientMatches maps matches and usage flags', () => {
   const ingredients = [
     { slug: 'veg-sweet-potato', name: 'Sweet Potato', category: 'Vegetable' },
