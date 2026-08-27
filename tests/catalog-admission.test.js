@@ -73,11 +73,11 @@ const validRecipe = admission.validateCuratedRecipe({
   name: 'Test Grain Bowl',
   baseServings: 2,
   ingredients: [
-    { item: 'test grain', quantity: 1, unit: 'cup' },
-    { item: 'salted butter', quantity: 2, unit: 'tablespoons' },
+    { token: 'grain-test', item: 'test grain', quantity: 1, unit: 'cup' },
+    { token: 'dairy-butter-salted', item: 'salted butter', quantity: 2, unit: 'tablespoons' },
   ],
   instructions: ['Cook the grain and finish with butter.'],
-  equipment: ['Saucepan'],
+  equipment: [{ token: 'saucepan' }],
   tags: [],
   allergens: ['dairy'],
 }, { ingredients, matching });
@@ -89,7 +89,7 @@ const invalidRecipe = admission.validateCuratedRecipe({
   name: 'Bad Recipe',
   baseServings: 2,
   ingredients: [
-    { item: 'mystery powder', quantity: 1, unit: 'scoopfuls' },
+    { token: 'mystery-powder', item: 'mystery powder', quantity: 1, unit: 'scoopfuls' },
   ],
   instructions: ['Mix.'],
   equipment: [],
@@ -97,7 +97,7 @@ const invalidRecipe = admission.validateCuratedRecipe({
   allergens: [],
 }, { ingredients, matching });
 assert(invalidRecipe.errors.some((error) => error.includes("unit 'scoopfuls' is not recognized")));
-assert(invalidRecipe.errors.some((error) => error.includes("'mystery powder' does not resolve to a canonical ingredient")));
+assert(invalidRecipe.errors.some((error) => error.includes("token 'mystery-powder' does not resolve to a canonical ingredient")));
 
 const customMinimal = admission.validateCustomIngredient({
   id: 'local-grandmas-chili-crisp',
@@ -175,7 +175,7 @@ const newRecipe = {
   id: 'catalog-admission-test-grain',
   name: 'Catalog Admission Test Grain',
   baseServings: 2,
-  ingredients: [{ item: 'test grain', quantity: 1, unit: 'cup' }],
+  ingredients: [{ token: 'grain-test', item: 'test grain', quantity: 1, unit: 'cup' }],
   instructions: ['Cook the grain.'],
   equipment: [],
   tags: [],
