@@ -320,7 +320,17 @@
   };
 
   const mapRecipeEntryToSlug = (entry, ingredients, matching) => {
-    if (!entry || typeof matching?.createIngredientMatcherIndex !== 'function' || typeof matching?.mapRecipesToIngredientMatches !== 'function') return '';
+    if (!entry) return '';
+    const explicitToken = typeof entry.token === 'string' ? entry.token.trim() : '';
+    if (explicitToken) {
+      const known = new Set(
+        (Array.isArray(ingredients) ? ingredients : [])
+          .map((ingredient) => String(ingredient?.slug || '').trim())
+          .filter(Boolean),
+      );
+      return known.has(explicitToken) ? explicitToken : '';
+    }
+    if (typeof matching?.createIngredientMatcherIndex !== 'function' || typeof matching?.mapRecipesToIngredientMatches !== 'function') return '';
     const index = matching.createIngredientMatcherIndex(Array.isArray(ingredients) ? ingredients : []);
     const synthetic = [{ id: '__inventory-entry__', ingredients: [entry] }];
     const result = matching.mapRecipesToIngredientMatches(synthetic, index);
