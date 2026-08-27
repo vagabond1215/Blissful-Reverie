@@ -160,7 +160,9 @@ assert.deepEqual(starter.pantryFilters, {
   tags: [],
   allergens: [],
 });
-assert.deepEqual(starter.kitchenInventory, ['Skillet']);
+assert.deepEqual(starter.mealFilters.categories, []);
+assert.deepEqual(starter.kitchenFilters, { search: '', categories: [] });
+assert.deepEqual(starter.kitchenInventory, ['skillet']);
 
 const dashboard = tools.summarizeDashboard({
   recipes: [
