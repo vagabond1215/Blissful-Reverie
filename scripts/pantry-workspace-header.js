@@ -4,8 +4,15 @@
   const sync = () => {
     queued = false;
     const view = document.getElementById('pantry-view');
+    const kitchenView = document.getElementById('kitchen-view');
+    const mealView = document.getElementById('meal-view');
     const active = view instanceof HTMLElement && !view.hidden;
+    const standardFilterWorkspaceActive =
+      active
+      || (kitchenView instanceof HTMLElement && !kitchenView.hidden)
+      || (mealView instanceof HTMLElement && !mealView.hidden);
     document.documentElement.classList.toggle('pantry-workspace-active', active);
+    document.documentElement.classList.toggle('standard-filter-workspace-active', standardFilterWorkspaceActive);
     if (!active) return;
     const header = document.querySelector('#pantry-view > .pantry-view__header');
     if (!(header instanceof HTMLElement)) return;
