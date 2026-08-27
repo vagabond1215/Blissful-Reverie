@@ -183,6 +183,11 @@ const unresolvedTokenConsumption = units.consumeRecipe({
   matching: global.BlissfulMatching,
   profiles: {},
 });
-assert.equal(unresolvedTokenConsumption.ok, false, 'Explicit recipe-only tokens must not fall back to parsing display text.');
+assert.equal(unresolvedTokenConsumption.ok, true);
+assert.deepEqual(
+  unresolvedTokenConsumption.inventory['dairy-butter-unsalted'],
+  { quantity: 4, unit: 'stick' },
+  'Explicit recipe-only tokens must not fall back to parsing display text.',
+);
 
 console.log(`Inventory unit and crafting tests passed for ${processes.length} processes and ${effectiveIngredients.length} effective ingredients.`);
