@@ -1127,11 +1127,12 @@
       : definition.name;
     const heroLower = String(heroName || '').toLowerCase();
 
-    const ingredientsList = resolvedCourses.map((course) => {
-      const names = course.ingredients.map((ingredient) => getIngredientDisplayName(ingredient));
-      const details = names.length ? `${course.label}: ${names.join(', ')}` : course.label;
-      return { item: details };
-    });
+    const ingredientsList = resolvedCourses.flatMap((course) =>
+      course.ingredients.map((ingredient) => ({
+        token: ingredient.slug,
+        item: `${course.label}: ${getIngredientDisplayName(ingredient)}`,
+      })),
+    );
 
     const instructions = [
       `Organize mise en place for the ${heroLower} centerpiece and supporting courses.`,
@@ -1222,11 +1223,9 @@
     const accompanimentNames = accompaniments.map((ingredient) => getIngredientDisplayName(ingredient));
 
     const ingredientsList = allIngredients.map((ingredient) => ({
+      token: ingredient.slug,
       item: getIngredientDisplayName(ingredient),
     }));
-    if (accompanimentNames.length) {
-      ingredientsList.push({ item: `To serve: ${accompanimentNames.join(', ')}` });
-    }
 
     const marinadeHighlights = supportingNames.slice(0, 2);
     const finishingHighlights = supportingNames.slice(2);
