@@ -44,37 +44,57 @@ assert.equal(workspace.groupMatchesSearch(spoons, '1/4 tsp'), true);
 assert.equal(workspace.groupMatchesSearch(spoons, 'blender'), false);
 assert.equal(workspace.shouldRenderGroup(spoons, 'blender', false), false);
 
-const sheetGroup = workspace.GROUP_DEFINITIONS.find((group) => group.key === 'baking-sheets');
+const sheetGroup = workspace.GROUP_DEFINITIONS.find((group) => group.key === 'baking-sheet');
+assert(sheetGroup, 'Canonical Baking Sheet group should exist.');
 assert(sheetGroup.variants.some((variant) => variant.label.includes('9 × 13 in')));
 assert(sheetGroup.variants.some((variant) => variant.label.includes('13 × 18 in')));
+assert(sheetGroup.legacyIds.includes('baking-sheets'));
 assert.equal(workspace.normalizeLabel('  Measuring   Cups '), 'measuring cups');
+
+const equipmentCatalog = require('../data/equipment.js');
+const equipmentModel = require('../scripts/equipment-model.js');
+const equipmentIndex = equipmentModel.createIndex(equipmentCatalog);
+const bakingSheet = equipmentIndex.byToken.get('baking-sheet');
+assert.equal(bakingSheet.category, 'Bakeware');
+assert(bakingSheet.aliases.includes('Sheet Pan'));
+assert.equal(equipmentIndex.byToken.get('air-fryer').category, 'Small Appliances');
+assert.equal(equipmentIndex.byToken.get('skillet').category, 'Cookware');
+assert.equal(equipmentIndex.byToken.get('tongs').category, 'Utensils & Tools');
 
 const recipeSource = fs.readFileSync(path.resolve(__dirname, '../data/recipes.js'), 'utf8');
 const sandbox = { window: {} };
 vm.runInNewContext(recipeSource, sandbox, { filename: 'data/recipes.js' });
-const equipmentLabels = new Set(
-  (Array.isArray(sandbox.window.BLISSFUL_RECIPES) ? sandbox.window.BLISSFUL_RECIPES : [])
-    .flatMap((recipe) => Array.isArray(recipe?.equipment) ? recipe.equipment : [])
-    .map((label) => String(label || '').trim())
-    .filter(Boolean),
-);
-const catalogMatches = (group) => {
-  const aliases = new Set([group.label, ...(group.aliases || [])].map(workspace.normalizeLabel));
-  return Array.from(equipmentLabels).filter((label) => aliases.has(workspace.normalizeLabel(label)));
-};
-const measuringCups = workspace.GROUP_DEFINITIONS.find((group) => group.key === 'measuring-cups');
-assert(catalogMatches(measuringCups).includes('Measuring Cups'));
-const bakingSheetMatches = catalogMatches(sheetGroup);
-assert(bakingSheetMatches.includes('Baking Sheet'));
-assert(bakingSheetMatches.includes('Sheet Pan'));
+const catalogRecipes = Array.isArray(sandbox.window.BLISSFUL_RECIPES) ? sandbox.window.BLISSFUL_RECIPES : [];
+assert(catalogRecipes.length > 0);
+catalogRecipes.forEach((recipe) => {
+  (recipe.equipment || []).forEach((requirement) => {
+    const tokens = equipmentModel.getRequirementTokens(requirement, equipmentIndex);
+    const expected = typeof requirement?.token === 'string'
+      ? 1
+      : Array.isArray(requirement?.anyOf)
+        ? requirement.anyOf.length
+        : 0;
+    assert(expected > 0, `${recipe.id} should use token-based equipment requirements.`);
+    assert.equal(tokens.length, expected, `${recipe.id} should resolve every equipment token.`);
+  });
+});
+const bakingAlternative = catalogRecipes
+  .flatMap((recipe) => recipe.equipment || [])
+  .find((requirement) => Array.isArray(requirement?.anyOf)
+    && requirement.anyOf.includes('baking-sheet')
+    && requirement.anyOf.includes('pizza-stone'));
+assert(bakingAlternative, 'Baking Sheet or Pizza Stone should be represented as explicit alternatives.');
+assert.equal(equipmentModel.formatRequirement(bakingAlternative, equipmentIndex), 'Baking Sheet or Pizza Stone');
 
 const appCss = fs.readFileSync(path.resolve(__dirname, '../styles/app.css'), 'utf8');
+const sharedRailCss = fs.readFileSync(path.resolve(__dirname, '../styles/standard-filter-rail.css'), 'utf8');
 const kitchenCleanupCss = fs.readFileSync(path.resolve(__dirname, '../styles/kitchen-workspace-cleanup.css'), 'utf8');
+assert(appCss.includes("@import url('./standard-filter-rail.css');"));
 assert(appCss.includes("@import url('./kitchen-workspace-cleanup.css');"));
-assert(kitchenCleanupCss.includes('#filter-panel.filter-panel'));
-assert(kitchenCleanupCss.includes('grid-template-columns: minmax(0, 1fr) !important;'));
+assert(sharedRailCss.includes('html.standard-filter-workspace-active #app-layout.layout'));
+assert(sharedRailCss.includes('grid-template-columns: minmax(235px, 308px) minmax(0, 1fr)'));
+assert(sharedRailCss.includes('#filter-panel.filter-panel'));
 assert(kitchenCleanupCss.includes('#kitchen-view > .pantry-view__header'));
-assert(kitchenCleanupCss.includes('#kitchen-view > .kitchen-view__intro'));
-assert(kitchenCleanupCss.includes('grid-column: 1 / -1 !important;'));
+assert(!kitchenCleanupCss.includes('#filter-panel.filter-panel'), 'Kitchen cleanup must not hide the shared category rail.');
 
 console.log('Shop and grouped Kitchen workspace tests passed.');
