@@ -7,12 +7,16 @@ const rootDir = path.resolve(__dirname, '..');
 global.window = global;
 require(path.join(rootDir, 'data', 'ingredients.js'));
 require(path.join(rootDir, 'data', 'recipes.js'));
+require(path.join(rootDir, 'data', 'equipment.js'));
 require(path.join(rootDir, 'scripts', 'ingredient-matching.js'));
+require(path.join(rootDir, 'scripts', 'equipment-model.js'));
 
 const ingredients = Array.isArray(global.BLISSFUL_INGREDIENTS) ? global.BLISSFUL_INGREDIENTS : [];
 const recipes = Array.isArray(global.BLISSFUL_RECIPES) ? global.BLISSFUL_RECIPES : [];
+const equipment = Array.isArray(global.BLISSFUL_EQUIPMENT) ? global.BLISSFUL_EQUIPMENT : [];
 const matching = global.BlissfulMatching || {};
-const { errors, warnings } = validateData({ ingredients, recipes, matching });
+const equipmentModel = global.BlissfulEquipmentModel || {};
+const { errors, warnings } = validateData({ ingredients, recipes, matching, equipment, equipmentModel });
 
 if (warnings.length) {
   console.warn(`Data validation warnings (${warnings.length}):`);
