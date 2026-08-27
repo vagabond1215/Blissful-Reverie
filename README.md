@@ -49,8 +49,10 @@ npm run test:wiring
 ## Architecture
 
 - `index.html` defines the application shell and loads scripts in dependency order.
-- `data/ingredients.js` and `data/recipes.js` expose the static catalogs as browser globals.
-- `scripts/ingredient-matching.js` maps recipe ingredient text to canonical ingredient slugs.
+- `data/ingredients.js`, `data/equipment.js`, and `data/recipes.js` expose the static catalogs as browser globals.
+- Canonical ingredient `slug` values are ingredient tokens. Recipe ingredient entries carry an explicit `token` reference instead of relying on display-text parsing.
+- `scripts/equipment-model.js` owns canonical equipment tokens, categories, aliases, variants, and explicit alternative requirements.
+- `scripts/ingredient-matching.js` resolves explicit ingredient tokens first and retains text matching only for legacy/unmigrated runtime input.
 - `scripts/productivity-tools.js` contains testable pantry, shopping-list, backup, dashboard, source-label, and starter-state helpers.
 - `scripts/productivity-ui.js` renders badges, the pantry dashboard, and the smart shopping list from live state supplied by `scripts/app.js`.
 - `scripts/productivity-onboarding.js` handles first-run setup and applies saved starter state without a normal reload.
@@ -78,8 +80,12 @@ Recipe entries require:
 - a unique `name`
 - positive `baseServings`
 - non-empty `ingredients` and `instructions`
-- `equipment`, `tags`, and canonical `allergens` arrays
+- an explicit lowercase kebab-case `token` on every ingredient line; canonical Pantry references use the ingredient's stable `slug`, while intentionally non-Pantry preparation lines use a stable `recipe-ingredient-*` token
+- equipment requirements expressed as `{ token: "..." }` or explicit alternatives such as `{ anyOf: ["baking-sheet", "pizza-stone"] }`
+- `tags` and canonical `allergens` arrays
 - non-negative calories, protein, carbohydrates, and fat per serving
+
+Equipment catalog entries require a stable `token`, display `name`, and `category`. Aliases and variants are metadata on that canonical identity; recipe logic must not infer identity by parsing the display name.
 
 The app also creates ingredient-coverage and collection recipes at runtime. Source badges distinguish curated recipes, generated templates, and ingredient ideas.
 
