@@ -8,8 +8,10 @@ const read = (relativePath) => fs.readFileSync(path.join(rootDir, relativePath),
 const indexHtml = read('index.html');
 const expectedScripts = [
   'data/ingredients.js',
+  'data/equipment.js',
   'data/recipes.js',
   'scripts/ingredient-matching.js',
+  'scripts/equipment-model.js',
   'scripts/productivity-tools.js',
   'scripts/productivity-settings.js',
   'scripts/productivity-backup.js',
@@ -234,6 +236,10 @@ assert(restockStyles.includes('@media (max-width: 760px)'));
 
 const app = read('scripts/app.js');
 assert(app.includes('card.dataset.recipeId = recipe.id'));
+assert(app.includes("elements.ingredientSummary.textContent"));
+assert(app.includes("populateCheckboxGroup('kitchen', elements.ingredientOptions, equipmentCategoryOptions, 'categories')"));
+assert(app.includes('getRecipeEquipmentTokens(recipe)'));
+assert(read('styles/app.css').includes("@import url('./standard-filter-rail.css');"));
 assert(app.includes('productivityUi.render({'));
 assert(app.includes('plannedRecipes'));
 assert(app.includes('applyStarterState'));
