@@ -116,6 +116,7 @@
     {
       "token": "dutch-oven",
       "name": "Dutch Oven",
+      "legacyTokens": ["dutch-ovens"],
       "category": "Cookware",
       "variants": [
         {
@@ -156,6 +157,7 @@
     {
       "token": "saucepan",
       "name": "Saucepan",
+      "legacyTokens": ["saucepans"],
       "category": "Cookware",
       "variants": [
         {
@@ -175,6 +177,7 @@
     {
       "token": "skillet",
       "name": "Skillet",
+      "legacyTokens": ["skillets"],
       "category": "Cookware",
       "aliases": [
         "Frying Pan"
@@ -197,6 +200,7 @@
     {
       "token": "stock-pot",
       "name": "Stock Pot",
+      "legacyTokens": ["stock-pots", "stockpot"],
       "category": "Cookware",
       "aliases": [
         "Stockpot"
