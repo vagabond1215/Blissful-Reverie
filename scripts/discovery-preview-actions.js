@@ -1,4 +1,12 @@
 ;(function (global) {
+  const equipmentModel = global.BlissfulEquipmentModel
+    || (typeof require === 'function' ? require('./equipment-model.js') : {});
+  const equipmentCatalog = Array.isArray(global.BLISSFUL_EQUIPMENT)
+    ? global.BLISSFUL_EQUIPMENT
+    : (typeof require === 'function' ? require('../data/equipment.js') : []);
+  const equipmentIndex = typeof equipmentModel.createIndex === 'function'
+    ? equipmentModel.createIndex(equipmentCatalog)
+    : null;
   const normalizeRecipeName = (value) => String(value || '').trim().toLowerCase();
   const normalizePageNumber = (value) => Math.max(1, Number.parseInt(String(value || ''), 10) || 1);
   const advanceToPage = ({ targetPage, getCurrentPage, clickNext } = {}) => {
@@ -33,12 +41,19 @@
     description: String(recipe?.description || '').trim(),
     tags: Array.isArray(recipe?.tags) ? recipe.tags.map((tag) => String(tag || '').trim()).filter(Boolean) : [],
     ingredients: Array.isArray(recipe?.ingredients) ? recipe.ingredients.map((ingredient) => ({
+      token: String(ingredient?.token || '').trim(),
       quantity: ingredient?.quantity,
       unit: String(ingredient?.unit || '').trim(),
       item: String(ingredient?.item || '').trim(),
     })) : [],
     instructions: Array.isArray(recipe?.instructions) ? recipe.instructions.map((step) => String(step || '').trim()).filter(Boolean) : [],
-    equipment: Array.isArray(recipe?.equipment) ? recipe.equipment.map((item) => String(item || '').trim()).filter(Boolean) : [],
+    equipment: Array.isArray(recipe?.equipment)
+      ? recipe.equipment
+          .map((item) => typeof equipmentModel.formatRequirement === 'function'
+            ? equipmentModel.formatRequirement(item, equipmentIndex)
+            : '')
+          .filter(Boolean)
+      : [],
     allergens: Array.isArray(recipe?.allergens) ? recipe.allergens.map((item) => String(item || '').trim()).filter(Boolean) : [],
     nutrition: recipe?.nutritionPerServing && typeof recipe.nutritionPerServing === 'object' ? { ...recipe.nutritionPerServing } : null,
   });
