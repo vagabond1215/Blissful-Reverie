@@ -160,7 +160,7 @@ assert.equal(failedSmoke.inventory['seafood-salmon-smoked'], undefined);
 const syntheticButterRecipe = {
   id: 'unit-test-butter-recipe',
   baseServings: 4,
-  ingredients: [{ item: 'unsalted butter, melted', quantity: 4, unit: 'tablespoons' }],
+  ingredients: [{ token: 'dairy-butter-unsalted', item: 'butter, melted', quantity: 4, unit: 'tablespoons' }],
 };
 const butterConsumption = units.consumeRecipe({
   inventory: { 'dairy-butter-unsalted': { quantity: 4, unit: 'stick' } },
@@ -171,5 +171,18 @@ const butterConsumption = units.consumeRecipe({
 });
 assert.equal(butterConsumption.ok, true);
 assert.deepEqual(butterConsumption.inventory['dairy-butter-unsalted'], { quantity: 3.5, unit: 'stick' });
+
+const unresolvedTokenConsumption = units.consumeRecipe({
+  inventory: { 'dairy-butter-unsalted': { quantity: 4, unit: 'stick' } },
+  recipe: {
+    id: 'unit-test-unknown-token',
+    baseServings: 1,
+    ingredients: [{ token: 'recipe-ingredient-butter-garnish', item: 'unsalted butter', quantity: 1, unit: 'tbsp' }],
+  },
+  ingredients: effectiveIngredients,
+  matching: global.BlissfulMatching,
+  profiles: {},
+});
+assert.equal(unresolvedTokenConsumption.ok, false, 'Explicit recipe-only tokens must not fall back to parsing display text.');
 
 console.log(`Inventory unit and crafting tests passed for ${processes.length} processes and ${effectiveIngredients.length} effective ingredients.`);
