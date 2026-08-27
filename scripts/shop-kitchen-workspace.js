@@ -1,116 +1,23 @@
 ;(function (global) {
   const APP_STATE_KEY = 'blissful-app-state';
 
-  const GROUP_DEFINITIONS = Object.freeze([
-    {
-      key: 'measuring-spoons',
-      label: 'Measuring Spoons',
-      aliases: ['measuring spoon', 'measuring spoons'],
-      variants: [
-        { id: 'measuring-spoons-1-4-tsp', label: '1/4 tsp' },
-        { id: 'measuring-spoons-1-2-tsp', label: '1/2 tsp' },
-        { id: 'measuring-spoons-1-tsp', label: '1 tsp' },
-        { id: 'measuring-spoons-1-tbsp', label: '1 tbsp' },
-      ],
-    },
-    {
-      key: 'measuring-cups',
-      label: 'Measuring Cups',
-      aliases: ['measuring cup', 'measuring cups', 'dry measuring cup', 'dry measuring cups'],
-      variants: [
-        { id: 'measuring-cups-1-4-cup', label: '1/4 cup' },
-        { id: 'measuring-cups-1-3-cup', label: '1/3 cup' },
-        { id: 'measuring-cups-1-2-cup', label: '1/2 cup' },
-        { id: 'measuring-cups-1-cup', label: '1 cup' },
-      ],
-    },
-    {
-      key: 'liquid-measuring-cups',
-      label: 'Liquid Measuring Cups',
-      aliases: ['liquid measuring cup', 'liquid measuring cups'],
-      variants: [
-        { id: 'liquid-measuring-cups-1-cup', label: '1 cup' },
-        { id: 'liquid-measuring-cups-2-cup', label: '2 cup' },
-        { id: 'liquid-measuring-cups-4-cup', label: '4 cup' },
-      ],
-    },
-    {
-      key: 'baking-sheets',
-      label: 'Baking Sheets',
-      aliases: ['baking sheet', 'baking sheets', 'sheet pan', 'sheet pans', 'rimmed baking sheet'],
-      variants: [
-        { id: 'baking-sheets-quarter', label: 'Quarter sheet · 9 × 13 in' },
-        { id: 'baking-sheets-half', label: 'Half sheet · 13 × 18 in' },
-      ],
-    },
-    {
-      key: 'skillets',
-      label: 'Skillets',
-      aliases: ['skillet', 'skillets', 'frying pan', 'frying pans'],
-      variants: [
-        { id: 'skillets-8-in', label: '8 in' },
-        { id: 'skillets-10-in', label: '10 in' },
-        { id: 'skillets-12-in', label: '12 in' },
-      ],
-    },
-    {
-      key: 'saucepans',
-      label: 'Saucepans',
-      aliases: ['saucepan', 'saucepans', 'sauce pan', 'sauce pans'],
-      variants: [
-        { id: 'saucepans-1-qt', label: '1 qt' },
-        { id: 'saucepans-2-qt', label: '2 qt' },
-        { id: 'saucepans-3-qt', label: '3 qt' },
-      ],
-    },
-    {
-      key: 'mixing-bowls',
-      label: 'Mixing Bowls',
-      aliases: ['mixing bowl', 'mixing bowls'],
-      variants: [
-        { id: 'mixing-bowls-small', label: 'Small · about 1.5 qt' },
-        { id: 'mixing-bowls-medium', label: 'Medium · about 3 qt' },
-        { id: 'mixing-bowls-large', label: 'Large · about 5 qt' },
-      ],
-    },
-    {
-      key: 'cake-pans',
-      label: 'Cake Pans',
-      aliases: ['cake pan', 'cake pans', 'round cake pan', 'round cake pans'],
-      variants: [
-        { id: 'cake-pans-8-in-round', label: '8 in round' },
-        { id: 'cake-pans-9-in-round', label: '9 in round' },
-        { id: 'cake-pans-9x13', label: '9 × 13 in rectangular' },
-      ],
-    },
-    {
-      key: 'loaf-pans',
-      label: 'Loaf Pans',
-      aliases: ['loaf pan', 'loaf pans'],
-      variants: [
-        { id: 'loaf-pans-8-5x4-5', label: '8.5 × 4.5 in' },
-        { id: 'loaf-pans-9x5', label: '9 × 5 in' },
-      ],
-    },
-    {
-      key: 'dutch-ovens',
-      label: 'Dutch Ovens',
-      aliases: ['dutch oven', 'dutch ovens'],
-      variants: [
-        { id: 'dutch-ovens-5-qt', label: '5 qt' },
-        { id: 'dutch-ovens-7-qt', label: '7 qt' },
-      ],
-    },
-    {
-      key: 'stock-pots',
-      label: 'Stock Pots',
-      aliases: ['stock pot', 'stock pots', 'stockpot', 'stockpots'],
-      variants: [
-        { id: 'stock-pots-8-qt', label: '8 qt' },
-        { id: 'stock-pots-12-qt', label: '12 qt' },
-      ],
-    },
-  ]);
+  const equipmentCatalog = Array.isArray(global.BLISSFUL_EQUIPMENT)
+    ? global.BLISSFUL_EQUIPMENT
+    : (typeof require === 'function' ? require('../data/equipment.js') : []);
+  const GROUP_DEFINITIONS = Object.freeze(
+    equipmentCatalog
+      .filter((item) => Array.isArray(item?.variants) && item.variants.length)
+      .map((item) => Object.freeze({
+        key: String(item.token || '').trim(),
+        label: String(item.name || item.token || '').trim(),
+        aliases: Array.isArray(item.aliases) ? item.aliases.slice() : [],
+        legacyIds: Array.from(new Set([
+          String(item.token || '').trim(),
+          ...(Array.isArray(item.legacyTokens) ? item.legacyTokens : []),
+        ].filter(Boolean))),
+        variants: item.variants.map((variant) => ({ ...variant })),
+      })),
+  );
 
   const normalizeLabel = (value) => String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
   const groupMatchesSearch = (group, query) => {
@@ -314,10 +221,11 @@
   }
 
   const matchingKitchenItems = (list, group) => {
-    const aliases = new Set([group.label, ...(group.aliases || [])].map(normalizeLabel));
+    const token = String(group?.key || '').trim();
+    if (!token) return [];
     return Array.from(list.querySelectorAll(':scope > .kitchen-list__item')).filter((item) => {
-      const label = item.querySelector('.kitchen-list__name')?.textContent || '';
-      return aliases.has(normalizeLabel(label));
+      const input = item.querySelector('input[data-kitchen-id]');
+      return input instanceof HTMLInputElement && input.dataset.kitchenId === token;
     });
   };
 
@@ -406,21 +314,16 @@
     GROUP_DEFINITIONS.forEach((group) => {
       if (list.querySelector(`:scope > [data-kitchen-group="${group.key}"]`)) return;
       const originals = matchingKitchenItems(list, group);
-      if (!shouldRenderGroup(group, query, originals.length > 0)) return;
+      if (!originals.length || !groupMatchesSearch(group, query)) return;
       const legacyIds = Array.from(new Set([
-        group.key,
+        ...groupLegacyIds(group),
         ...originals
           .map((item) => item.querySelector('input[data-kitchen-id]')?.dataset.kitchenId || '')
           .filter(Boolean),
       ]));
       const row = makeGroupRow(group, legacyIds);
-      if (originals.length) {
-        originals[0].insertAdjacentElement('beforebegin', row);
-        originals.forEach((item) => item.remove());
-      } else {
-        list.querySelector(':scope > .kitchen-list__empty')?.remove();
-        insertKitchenGroupRow(list, row, group.label);
-      }
+      originals[0].insertAdjacentElement('beforebegin', row);
+      originals.forEach((item) => item.remove());
     });
     updateKitchenCount(list);
   };
