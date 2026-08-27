@@ -53,7 +53,23 @@ const canonicalAllergens = new Set([
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-const validateData = ({ ingredients = [], recipes = [], matching = {} } = {}) => {
+const isEquipmentRequirement = (requirement, equipmentIndex, equipmentModel) => {
+  if (!requirement || typeof requirement !== 'object' || Array.isArray(requirement)) return false;
+  const tokens = typeof equipmentModel?.getRequirementTokens === 'function'
+    ? equipmentModel.getRequirementTokens(requirement, equipmentIndex)
+    : [];
+  if (typeof requirement.token === 'string') return tokens.length === 1;
+  if (Array.isArray(requirement.anyOf)) return requirement.anyOf.length >= 2 && tokens.length === requirement.anyOf.length;
+  return false;
+};
+
+const validateData = ({
+  ingredients = [],
+  recipes = [],
+  matching = {},
+  equipment = [],
+  equipmentModel = {},
+} = {}) => {
   const errors = [];
   const warnings = [];
   const fail = (message) => errors.push(message);
@@ -106,6 +122,13 @@ const validateData = ({ ingredients = [], recipes = [], matching = {} } = {}) =>
     }
   });
 
+  const equipmentIndex = typeof equipmentModel?.createIndex === 'function'
+    ? equipmentModel.createIndex(equipment)
+    : null;
+  if (Array.isArray(equipment) && equipment.length && typeof equipmentModel?.validateCatalog === 'function') {
+    equipmentModel.validateCatalog(equipment).forEach((message) => fail(message));
+  }
+
   const recipeIds = new Set();
   const recipeNames = new Map();
 
@@ -147,6 +170,11 @@ const validateData = ({ ingredients = [], recipes = [], matching = {} } = {}) =>
         if (typeof entry.item !== 'string' || !entry.item.trim()) {
           fail(`${entryRef} must include a non-empty item.`);
         }
+        if (typeof entry.token !== 'string' || !slugPattern.test(entry.token)) {
+          fail(`${entryRef} must include a stable lowercase kebab-case token.`);
+        } else if (!ingredientSlugs.has(entry.token) && !entry.token.startsWith('recipe-ingredient-')) {
+          fail(`${entryRef} references unknown ingredient token '${entry.token}'.`);
+        }
         if (entry.quantity !== undefined && entry.quantity !== null && entry.quantity !== '') {
           const quantity = Number(entry.quantity);
           if (!Number.isFinite(quantity) || quantity < 0) {
@@ -163,6 +191,13 @@ const validateData = ({ ingredients = [], recipes = [], matching = {} } = {}) =>
     }
     if (!Array.isArray(recipe.equipment)) {
       fail(`${ref} equipment must be an array.`);
+    } else if (Array.isArray(equipment) && equipment.length) {
+      recipe.equipment.forEach((requirement, equipmentIndexNumber) => {
+        const equipmentRef = `${ref}.equipment[${equipmentIndexNumber}]`;
+        if (!isEquipmentRequirement(requirement, equipmentIndex, equipmentModel)) {
+          fail(`${equipmentRef} must reference canonical equipment token(s).`);
+        }
+      });
     }
     if (!Array.isArray(recipe.tags)) {
       fail(`${ref} tags must be an array.`);
