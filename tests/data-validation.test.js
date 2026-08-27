@@ -25,7 +25,7 @@ const createRecipe = (overrides = {}) => ({
   id: 'test-recipe',
   name: 'Test Recipe',
   baseServings: 2,
-  ingredients: [{ item: 'test grain', quantity: 1, unit: 'cup' }],
+  ingredients: [{ token: 'grain-test', item: 'test grain', quantity: 1, unit: 'cup' }],
   instructions: ['Cook the test grain.'],
   equipment: [],
   tags: [],
@@ -62,7 +62,7 @@ const invalidSchema = validateData({
   recipes: [
     createRecipe({
       allergens: ['seafood'],
-      ingredients: [{ item: 'test grain', quantity: -1, unit: 'cup' }],
+      ingredients: [{ token: 'grain-test', item: 'test grain', quantity: -1, unit: 'cup' }],
     }),
   ],
   matching,
