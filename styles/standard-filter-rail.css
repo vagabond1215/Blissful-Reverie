@@ -1,0 +1,181 @@
+/* Shared Pantry-style category rail for Recipes, Kitchen, and Pantry. */
+
+html.standard-filter-workspace-active #app-layout.layout {
+  grid-template-columns: minmax(235px, 308px) minmax(0, 1fr) !important;
+  gap: 16px !important;
+  align-items: start;
+}
+
+html.standard-filter-workspace-active #filter-panel.filter-panel {
+  display: flex !important;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+html.standard-filter-workspace-active #filter-panel > .input-group--search {
+  display: none !important;
+}
+
+html.standard-filter-workspace-active #filter-panel > .filter-section[hidden] {
+  display: none !important;
+}
+
+html.standard-filter-workspace-active .pantry-workspace__filter-card {
+  margin: 0 !important;
+  padding: 0 14px 10px !important;
+  border: 1px solid var(--border, #d7dce2) !important;
+  border-radius: 10px !important;
+  background: var(--surface, #fff) !important;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 3%) !important;
+  overflow: visible !important;
+}
+
+html.standard-filter-workspace-active .pantry-workspace__filter-card > summary {
+  min-height: 44px;
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none;
+  color: var(--text, #16191d);
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+html.standard-filter-workspace-active .pantry-workspace__filter-card > summary::-webkit-details-marker {
+  display: none;
+}
+
+html.standard-filter-workspace-active .pantry-workspace__filter-card > summary::after {
+  content: '⌃';
+  margin-left: auto;
+  color: var(--text-muted, #59616b);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+html.standard-filter-workspace-active .pantry-workspace__filter-card:not([open]) > summary::after {
+  content: '⌄';
+}
+
+html.standard-filter-workspace-active .pantry-workspace__all-button {
+  order: 2;
+  min-width: 50px;
+  min-height: 30px;
+  margin-left: auto;
+  padding: 0 12px;
+  border: 1px solid var(--border, #d2d7de);
+  border-radius: 7px;
+  background: var(--surface, #fff);
+  color: var(--text, #171a1e);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+html.standard-filter-workspace-active #ingredient-summary::after {
+  margin-left: 4px;
+}
+
+html.standard-filter-workspace-active .pantry-workspace__filter-card .filter-section__content {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html.standard-filter-workspace-active .pantry-workspace__filter-card .checkbox-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+html.standard-filter-workspace-active .pantry-workspace__filter-option.checkbox-option {
+  min-height: 31px;
+  width: 100%;
+  display: grid !important;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--text, #20242a);
+  font-size: 0.77rem;
+  font-weight: 500;
+  line-height: 1.15;
+  text-align: left;
+  box-shadow: none !important;
+}
+
+html.standard-filter-workspace-active .pantry-workspace__filter-option > input[type='checkbox'] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--main, #0b2b55);
+}
+
+html.standard-filter-workspace-active .pantry-workspace__filter-option > .filter-toggle__icon {
+  width: 15px;
+  height: 15px;
+  display: grid;
+  place-items: center;
+}
+
+html.standard-filter-workspace-active .pantry-workspace__filter-option > span:not(.pantry-workspace__filter-count) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.standard-filter-workspace-active .pantry-workspace__filter-count {
+  justify-self: end;
+  color: var(--text-muted, #77808b);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+html.standard-filter-workspace-active .pantry-workspace__show-more {
+  display: block;
+  margin: 6px auto 0;
+  padding: 2px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--main, #173d73);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  html.standard-filter-workspace-active #app-layout.layout {
+    grid-template-columns: 220px minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  html.standard-filter-workspace-active #app-layout.layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html.standard-filter-workspace-active #filter-panel.filter-panel {
+    display: none !important;
+  }
+}
