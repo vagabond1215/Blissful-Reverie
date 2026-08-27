@@ -1,25 +1,77 @@
-/* Kitchen is a straightforward equipment checklist: use the full workspace and skip redundant chrome. */
-
-#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #app-layout.layout {
-  grid-template-columns: minmax(0, 1fr) !important;
-}
-
-#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #filter-panel.filter-panel {
-  display: none !important;
-}
+/* Kitchen uses the same left category rail / right results workspace as Pantry. */
 
 #recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-view.kitchen-view {
-  grid-column: 1 / -1 !important;
+  display: block !important;
+  min-width: 0;
   width: 100% !important;
   max-width: none !important;
   margin-inline: 0 !important;
+  padding: 0 !important;
+  border: 1px solid var(--border, #d7dce2) !important;
+  border-radius: 11px !important;
+  background: var(--surface, #fff) !important;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 3%) !important;
+  overflow: visible !important;
 }
 
-#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-view > .pantry-view__header,
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-view > .pantry-view__header {
+  min-height: 70px;
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  margin: 0 !important;
+  padding: 0 18px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--border-subtle, #e3e7eb) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-view > .pantry-view__header h2 {
+  margin: 0 !important;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-view > .pantry-view__header > div:first-child > p,
 #recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-view > .kitchen-view__intro {
   display: none !important;
 }
 
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-view .kitchen-view__summary {
+  margin-left: auto;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-count {
+  min-height: 31px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--border, #d6dbe1);
+  border-radius: 7px;
+  background: var(--surface-muted, #f2f4f6);
+  color: var(--text-muted, #4e5660);
+  font-size: 0.76rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-view .kitchen-view__summary > p {
+  display: none !important;
+}
+
+#recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-count::after {
+  content: ' selected';
+}
+
 #recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-list.kitchen-list {
   margin-top: 0 !important;
+  padding: 0 14px 10px !important;
+}
+
+@media (max-width: 720px) {
+  #recipes-page:has(#primary-nav [data-view-target="kitchen"]:is(.view-toggle__button--active, [aria-current="page"])) #kitchen-view > .pantry-view__header {
+    min-height: 58px;
+    padding-inline: 10px !important;
+  }
 }
