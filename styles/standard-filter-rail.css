@@ -175,7 +175,23 @@ html.standard-filter-workspace-active .pantry-workspace__show-more {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
-  html.standard-filter-workspace-active #filter-panel.filter-panel {
+  /* Pantry already owns a compact mobile treatment; Recipes and Kitchen retain
+     a bounded, single-column filter tray so category filtering stays reachable. */
+  html.standard-filter-workspace-active.pantry-workspace-active #filter-panel.filter-panel {
     display: none !important;
+  }
+
+  html.standard-filter-workspace-active:not(.pantry-workspace-active) #filter-panel.filter-panel {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: min(44dvh, 26rem) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  html.standard-filter-workspace-active:not(.pantry-workspace-active) .pantry-workspace__filter-card {
+    width: 100%;
   }
 }
