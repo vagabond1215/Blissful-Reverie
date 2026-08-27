@@ -2,6 +2,24 @@
 ;(function () {
   const recipes = Array.isArray(window.BLISSFUL_RECIPES) ? window.BLISSFUL_RECIPES : [];
   const ingredients = Array.isArray(window.BLISSFUL_INGREDIENTS) ? window.BLISSFUL_INGREDIENTS : [];
+  const equipmentCatalog = Array.isArray(window.BLISSFUL_EQUIPMENT) ? window.BLISSFUL_EQUIPMENT : [];
+  const equipmentModel = window.BlissfulEquipmentModel || {};
+  const equipmentIndex =
+    typeof equipmentModel.createIndex === 'function'
+      ? equipmentModel.createIndex(equipmentCatalog)
+      : { catalog: equipmentCatalog, byToken: new Map(), legacyToToken: new Map(), variantIds: new Set() };
+  const getEquipmentRequirementTokens = (requirement) =>
+    typeof equipmentModel.getRequirementTokens === 'function'
+      ? equipmentModel.getRequirementTokens(requirement, equipmentIndex)
+      : [];
+  const formatEquipmentRequirement = (requirement) =>
+    typeof equipmentModel.formatRequirement === 'function'
+      ? equipmentModel.formatRequirement(requirement, equipmentIndex)
+      : '';
+  const getRecipeEquipmentTokens = (recipe) =>
+    typeof equipmentModel.collectRecipeTokens === 'function'
+      ? equipmentModel.collectRecipeTokens(recipe, equipmentIndex)
+      : new Set();
 
   const assignLayerAttributes = (node, depth = 1) => {
     if (!node || node.nodeType !== Node.ELEMENT_NODE) {
@@ -440,15 +458,15 @@
   const defaultEquipmentForIngredient = (ingredient) => {
     const category = ingredient ? ingredient.category : '';
     if (category === 'Beverage') {
-      return ['Pitcher', 'Mixing Spoon', 'Citrus Juicer'];
+      return [{ token: 'pitcher' }, { token: 'mixing-spoon' }, { token: 'citrus-juicer' }];
     }
     if (category === 'Baking' || category === 'Baked Goods & Doughs') {
-      return ['Mixing Bowls', 'Baking Sheet', 'Parchment Paper'];
+      return [{ token: 'mixing-bowls' }, { token: 'baking-sheet' }, { token: 'parchment-paper' }];
     }
     if (category === 'Meat' || category === 'Seafood') {
-      return ['Skillet', 'Tongs', 'Instant-Read Thermometer'];
+      return [{ token: 'skillet' }, { token: 'tongs' }, { token: 'instant-read-thermometer' }];
     }
-    return ['Skillet', "Chef's Knife", 'Cutting Board'];
+    return [{ token: 'skillet' }, { token: 'chef-knife' }, { token: 'cutting-board' }];
   };
 
   const ensureUniqueRecipeId = (baseId, lookup) => {
@@ -479,10 +497,10 @@
     deriveDietTagsForIngredient(ingredient).forEach((tag) => tags.add(tag));
 
     const ingredientsList = [
-      { item: displayName },
-      { item: 'olive oil (or preferred cooking fat)' },
-      { item: 'fresh herbs or spices of choice' },
-      { item: 'kosher salt and black pepper' },
+      { token: ingredient.slug, item: displayName },
+      { token: 'oil-olive', item: 'olive oil (or preferred cooking fat)' },
+      { token: 'recipe-ingredient-fresh-herbs-or-spices-of-choice', item: 'fresh herbs or spices of choice' },
+      { token: 'recipe-ingredient-kosher-salt-and-black-pepper', item: 'kosher salt and black pepper' },
     ];
 
     const instructions = [
@@ -594,11 +612,11 @@
     ).toLowerCase()} with vibrant seasonal produce.`;
 
     const ingredientsList = [
-      { item: getIngredientDisplayName(primaryIngredient) },
-      ...supporting.map((ingredient) => ({ item: getIngredientDisplayName(ingredient) })),
-      { item: 'olive oil' },
-      { item: 'lemon juice' },
-      { item: 'fresh herbs of choice' },
+      { token: primaryIngredient.slug, item: getIngredientDisplayName(primaryIngredient) },
+      ...supporting.map((ingredient) => ({ token: ingredient.slug, item: getIngredientDisplayName(ingredient) })),
+      { token: 'oil-olive', item: 'olive oil' },
+      { token: 'fruit-lemon', item: 'lemon juice' },
+      { token: 'recipe-ingredient-fresh-herbs-of-choice', item: 'fresh herbs of choice' },
     ];
 
     const instructions = [
@@ -636,7 +654,7 @@
       baseServings: 4,
       ingredients: ingredientsList,
       instructions,
-      equipment: ['Sheet Pan', 'Mixing Bowls', "Chef's Knife"],
+      equipment: [{ token: 'baking-sheet' }, { token: 'mixing-bowls' }, { token: 'chef-knife' }],
       tags: Array.from(baseTags),
       nutritionPerServing,
       allergens,
@@ -983,12 +1001,12 @@
     deriveDietTagsForIngredient(selected).forEach((tag) => tags.add(tag));
 
     const ingredientsList = [
-      { item: displayName },
-      { item: 'olive oil' },
-      { item: 'garlic cloves, minced' },
-      { item: 'fresh herbs such as rosemary or thyme' },
-      { item: 'lemon zest' },
-      { item: 'kosher salt and cracked black pepper' },
+      { token: selected.slug, item: displayName },
+      { token: 'oil-olive', item: 'olive oil' },
+      { token: 'veg-garlic', item: 'garlic cloves, minced' },
+      { token: 'recipe-ingredient-fresh-herbs-such-as-rosemary-or-thyme', item: 'fresh herbs such as rosemary or thyme' },
+      { token: 'fruit-lemon', item: 'lemon zest' },
+      { token: 'recipe-ingredient-kosher-salt-and-cracked-black-pepper', item: 'kosher salt and cracked black pepper' },
     ];
 
     const instructions = [
@@ -1009,7 +1027,7 @@
       baseServings: 4,
       ingredients: ingredientsList,
       instructions,
-      equipment: ['Skillet', 'Tongs', 'Instant-Read Thermometer'],
+      equipment: [{ token: 'skillet' }, { token: 'tongs' }, { token: 'instant-read-thermometer' }],
       tags: Array.from(tags),
       nutritionPerServing,
       allergens,
@@ -1169,7 +1187,7 @@
       baseServings: definition.baseServings || 6,
       ingredients: ingredientsList,
       instructions,
-      equipment: ['Serving Platters', 'Mixing Bowls', "Chef's Knife"],
+      equipment: [{ token: 'serving-platter' }, { token: 'mixing-bowls' }, { token: 'chef-knife' }],
       tags: Array.from(tags),
       nutritionPerServing: nutrition,
       allergens,
@@ -1263,7 +1281,7 @@
       baseServings: definition.baseServings || 4,
       ingredients: ingredientsList,
       instructions,
-      equipment: ['Skillet', 'Dutch Oven', 'Serving Platter'],
+      equipment: [{ token: 'skillet' }, { token: 'dutch-oven' }, { token: 'serving-platter' }],
       tags: Array.from(tags),
       nutritionPerServing: nutrition,
       allergens,
@@ -2264,6 +2282,7 @@
 
   const getDefaultMealFilters = () => ({
     search: '',
+    categories: [],
     ingredients: [],
     ingredientsExcluded: [],
     tags: [],
@@ -2287,6 +2306,7 @@
 
   const getDefaultKitchenFilters = () => ({
     search: '',
+    categories: [],
   });
 
   const toUniqueStringArray = (value) => {
@@ -2475,16 +2495,23 @@
       toUniqueStringArray(value.equipment),
       toUniqueStringArray(value.equipmentExcluded),
     );
+    const normalizedEquipment = typeof equipmentModel.normalizeFilterValues === 'function'
+      ? {
+          include: equipmentModel.normalizeFilterValues(equipmentSelections.include, equipmentIndex),
+          exclude: equipmentModel.normalizeFilterValues(equipmentSelections.exclude, equipmentIndex),
+        }
+      : equipmentSelections;
     return {
       search: typeof value.search === 'string' ? value.search : defaults.search,
+      categories: toUniqueStringArray(value.categories),
       ingredients: ingredientSelections.include,
       ingredientsExcluded: ingredientSelections.exclude,
       tags: tagSelections.include,
       tagsExcluded: tagSelections.exclude,
       allergies: allergySelections.include,
       allergiesExcluded: allergySelections.exclude,
-      equipment: equipmentSelections.include,
-      equipmentExcluded: equipmentSelections.exclude,
+      equipment: normalizedEquipment.include,
+      equipmentExcluded: normalizedEquipment.exclude,
       favoritesOnly: Boolean(value.favoritesOnly),
       familyMembers: sanitizeMealFilterFamilyMembers(value.familyMembers, members),
       pantryOnly: Boolean(value.pantryOnly),
@@ -2512,10 +2539,14 @@
     }
     return {
       search: typeof value.search === 'string' ? value.search : defaults.search,
+      categories: toUniqueStringArray(value.categories),
     };
   };
 
   const sanitizeKitchenInventory = (value) => {
+    if (typeof equipmentModel.normalizeInventory === 'function') {
+      return equipmentModel.normalizeInventory(value, equipmentIndex);
+    }
     const owned = new Set();
     const addEntry = (entry) => {
       if (typeof entry !== 'string') return;
@@ -2945,41 +2976,31 @@
     favoritePantryItems: new Set(favoritePantrySlugs),
   };
 
-  const equipmentOptions = Array.from(
-    new Set(
-      recipes.flatMap((recipe) => Array.isArray(recipe.equipment) ? recipe.equipment : []),
-    ),
-  ).sort((a, b) => a.localeCompare(b));
-
-  const equipmentEntries = new Map();
+  const equipmentOptions = equipmentCatalog.map((item) => item.token).filter(Boolean);
+  const equipmentCategoryOptions = Array.from(
+    new Set(equipmentCatalog.map((item) => String(item?.category || '').trim()).filter(Boolean)),
+  );
+  const equipmentUsageCounts = new Map(equipmentOptions.map((token) => [token, 0]));
   recipes.forEach((recipe) => {
-    const recipeEquipment = Array.isArray(recipe.equipment) ? recipe.equipment : [];
-    recipeEquipment.forEach((raw) => {
-      const normalized = String(raw || '')
-        .replace(/\s+/g, ' ')
-        .trim();
-      if (!normalized) {
-        return;
-      }
-      const key = normalized.toLowerCase();
-      const displayName = toTitleCase(normalized);
-      const entry = equipmentEntries.get(key);
-      if (entry) {
-        entry.count += 1;
-      } else {
-        equipmentEntries.set(key, {
-          id: slugify(normalized),
-          name: displayName,
-          count: 1,
-          searchText: `${displayName.toLowerCase()} ${slugify(normalized).replace(/-/g, ' ')}`,
-        });
-      }
+    getRecipeEquipmentTokens(recipe).forEach((token) => {
+      equipmentUsageCounts.set(token, (equipmentUsageCounts.get(token) || 0) + 1);
     });
   });
-
-  const kitchenItems = Array.from(equipmentEntries.values()).sort((a, b) =>
-    a.name.localeCompare(b.name),
-  );
+  const kitchenItems = equipmentCatalog
+    .map((item) => ({
+      id: item.token,
+      token: item.token,
+      name: item.name,
+      category: item.category,
+      count: equipmentUsageCounts.get(item.token) || 0,
+      searchText: [
+        item.name,
+        item.category,
+        ...(Array.isArray(item.aliases) ? item.aliases : []),
+        ...(Array.isArray(item.variants) ? item.variants.map((variant) => variant?.label) : []),
+      ].map((value) => String(value || '').toLowerCase()).join(' '),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const TAG_SYNONYM_DEFINITIONS = [
     { canonical: 'Autumn / Fall', tags: ['Autumn', 'Fall'] },
@@ -3204,7 +3225,7 @@
   };
 
   const excludedTags = new Set();
-  equipmentOptions.forEach((item) => excludedTags.add(item));
+  equipmentCatalog.forEach((item) => excludedTags.add(item.name));
   const tagOptions = rawTagOptions.filter((tag) => !excludedTags.has(tag));
   const mealTagGroups = createTagGroups(tagOptions);
 
@@ -3698,6 +3719,7 @@
 
   const checkboxRegistry = {
     meals: {
+      categories: new Map(),
       ingredients: new Map(),
       tags: new Map(),
       allergies: new Map(),
@@ -3708,7 +3730,9 @@
       tags: new Map(),
       allergens: new Map(),
     },
-    kitchen: {},
+    kitchen: {
+      categories: new Map(),
+    },
   };
 
   const tagGroupSummaryRegistry = {
@@ -4925,6 +4949,7 @@
       activeView: AVAILABLE_VIEWS.includes(state.activeView) ? state.activeView : 'meals',
       mealFilters: {
         search: typeof mealFilters.search === 'string' ? mealFilters.search : '',
+        categories: toUniqueStringArray(mealFilters.categories),
         ingredients: toUniqueStringArray(mealFilters.ingredients),
         ingredientsExcluded: toUniqueStringArray(mealFilters.ingredientsExcluded),
         tags: toUniqueStringArray(mealFilters.tags),
@@ -5751,7 +5776,11 @@
     const registry = checkboxRegistry[view]?.[field];
     if (!registry) return;
     const filters =
-      view === 'meals' ? ensureMealFilters() : state.pantryFilters || getDefaultPantryFilters();
+      view === 'meals'
+        ? ensureMealFilters()
+        : view === 'kitchen'
+          ? ensureKitchenFilters()
+          : state.pantryFilters || getDefaultPantryFilters();
     const triStateConfig = view === 'meals' ? getTriStateConfig(field) : null;
     if (triStateConfig) {
       if (!Array.isArray(filters[triStateConfig.include])) {
@@ -6183,22 +6212,17 @@
     }
 
     if (elements.ingredientSummary) {
-      if (isMealsView) {
-        elements.ingredientSummary.textContent = 'Ingredients';
-      } else if (isPantryView) {
-        elements.ingredientSummary.textContent = 'Categories';
-      } else {
-        elements.ingredientSummary.textContent = '';
-      }
+      elements.ingredientSummary.textContent =
+        isMealsView || isPantryView || isKitchenView ? 'Categories' : '';
     }
     if (elements.tagSummary) {
       elements.tagSummary.textContent = isKitchenView ? '' : 'Tags';
     }
     if (elements.allergySummary) {
       if (isMealsView) {
-        elements.allergySummary.textContent = 'Allergies to Avoid';
+        elements.allergySummary.textContent = 'Allergens';
       } else if (isPantryView) {
-        elements.allergySummary.textContent = 'Allergen Tags';
+        elements.allergySummary.textContent = 'Allergens';
       } else {
         elements.allergySummary.textContent = '';
       }
@@ -6212,7 +6236,7 @@
     }
 
     if (elements.ingredientSection) {
-      elements.ingredientSection.hidden = !isMealsView && !isPantryView;
+      elements.ingredientSection.hidden = !isMealsView && !isPantryView && !isKitchenView;
     }
     if (elements.tagSection) {
       elements.tagSection.hidden = !isMealsView && !isPantryView;
@@ -6234,12 +6258,18 @@
     }
 
     if (isMealsView) {
-      populateIngredientFilters(elements.ingredientOptions, ingredientFilterGroups);
+      if (elements.ingredientOptions) {
+        elements.ingredientOptions.classList.remove('ingredient-groups');
+        elements.ingredientOptions.classList.add('checkbox-grid');
+      }
+      populateCheckboxGroup('meals', elements.ingredientOptions, ingredientCategoryOptions, 'categories');
       populateGroupedTagOptions('meals', elements.tagOptions, mealTagGroups, 'tags');
       populateCheckboxGroup('meals', elements.allergyOptions, allergyOptions, 'allergies', {
         labelFormatter: formatAllergenLabel,
       });
-      populateCheckboxGroup('meals', elements.equipmentOptions, equipmentOptions, 'equipment');
+      populateCheckboxGroup('meals', elements.equipmentOptions, equipmentOptions, 'equipment', {
+        labelFormatter: (token) => equipmentIndex.byToken.get(token)?.name || token,
+      });
     } else if (isPantryView) {
       if (elements.ingredientOptions) {
         elements.ingredientOptions.classList.remove('ingredient-groups');
@@ -6262,6 +6292,15 @@
       if (elements.equipmentOptions) {
         elements.equipmentOptions.innerHTML = '';
       }
+    } else if (isKitchenView) {
+      if (elements.ingredientOptions) {
+        elements.ingredientOptions.classList.remove('ingredient-groups');
+        elements.ingredientOptions.classList.add('checkbox-grid');
+      }
+      populateCheckboxGroup('kitchen', elements.ingredientOptions, equipmentCategoryOptions, 'categories');
+      if (elements.tagOptions) elements.tagOptions.innerHTML = '';
+      if (elements.allergyOptions) elements.allergyOptions.innerHTML = '';
+      if (elements.equipmentOptions) elements.equipmentOptions.innerHTML = '';
     } else {
       if (elements.ingredientOptions) {
         elements.ingredientOptions.innerHTML = '';
@@ -7531,20 +7570,14 @@
       return false;
     }
     const { allergies: familyAllergies, diets: familyDiets } = getRecipeFamilyFilterSelections();
-    const ingredientSelections = getTriStateSets(filters, 'ingredients');
-    if (ingredientSelections.include.size) {
+    const selectedCategories = new Set(Array.isArray(filters.categories) ? filters.categories : []);
+    if (selectedCategories.size) {
       const matchedIngredients = recipeIngredientMatches.get(recipe.id) || new Set();
-      const hasAllSelected = Array.from(ingredientSelections.include).every((slug) => matchedIngredients.has(slug));
-      if (!hasAllSelected) {
-        return false;
-      }
-    }
-    if (ingredientSelections.exclude.size) {
-      const matchedIngredients = recipeIngredientMatches.get(recipe.id) || new Set();
-      const hasExcluded = Array.from(ingredientSelections.exclude).some((slug) => matchedIngredients.has(slug));
-      if (hasExcluded) {
-        return false;
-      }
+      const hasSelectedCategory = Array.from(matchedIngredients).some((slug) => {
+        const category = ingredientBySlug.get(slug)?.category;
+        return category && selectedCategories.has(category);
+      });
+      if (!hasSelectedCategory) return false;
     }
     const tagSelections = getTriStateSets(filters, 'tags');
     if (familyDiets instanceof Set) {
@@ -7596,15 +7629,15 @@
       return false;
     }
     const equipmentSelections = getTriStateSets(filters, 'equipment');
-    const recipeEquipment = Array.isArray(recipe.equipment) ? recipe.equipment : [];
+    const recipeEquipment = getRecipeEquipmentTokens(recipe);
     if (equipmentSelections.include.size) {
-      const hasAllEquipment = Array.from(equipmentSelections.include).every((item) => recipeEquipment.includes(item));
+      const hasAllEquipment = Array.from(equipmentSelections.include).every((item) => recipeEquipment.has(item));
       if (!hasAllEquipment) {
         return false;
       }
     }
     if (equipmentSelections.exclude.size) {
-      const hasExcludedEquipment = Array.from(equipmentSelections.exclude).some((item) => recipeEquipment.includes(item));
+      const hasExcludedEquipment = Array.from(equipmentSelections.exclude).some((item) => recipeEquipment.has(item));
       if (hasExcludedEquipment) {
         return false;
       }
@@ -7740,7 +7773,7 @@
     equipmentList.className = 'inline-list';
     (recipe.equipment || []).forEach((item) => {
       const listItem = document.createElement('li');
-      listItem.textContent = item;
+      listItem.textContent = formatEquipmentRequirement(item);
       equipmentList.appendChild(listItem);
     });
     equipmentBlock.appendChild(equipmentList);
@@ -8246,10 +8279,10 @@
     }
     const filters = ensureKitchenFilters();
     const query = filters.search.trim().toLowerCase();
+    const selectedCategories = new Set(Array.isArray(filters.categories) ? filters.categories : []);
     const filteredItems = kitchenItems.filter((item) => {
-      if (!query) {
-        return true;
-      }
+      if (selectedCategories.size && !selectedCategories.has(item.category)) return false;
+      if (!query) return true;
       return item.searchText.includes(query);
     });
 
