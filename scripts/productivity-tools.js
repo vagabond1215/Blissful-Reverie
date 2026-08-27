@@ -8,6 +8,14 @@
   const MEASUREMENT_STORAGE_KEY = 'blissful-measurement';
   const persistenceRegistry = global.BlissfulPersistenceRegistry
     || (typeof require === 'function' ? require('./persistence-registry-runtime.js') : null);
+  const equipmentModel = global.BlissfulEquipmentModel
+    || (typeof require === 'function' ? require('./equipment-model.js') : null);
+  const equipmentCatalog = Array.isArray(global.BLISSFUL_EQUIPMENT)
+    ? global.BLISSFUL_EQUIPMENT
+    : (typeof require === 'function' ? require('../data/equipment.js') : []);
+  const equipmentIndex = typeof equipmentModel?.createIndex === 'function'
+    ? equipmentModel.createIndex(equipmentCatalog)
+    : null;
 
   const BACKUP_VERSION = 1;
   const CORE_BACKUP_KEYS = [
@@ -414,6 +422,9 @@
     const normalizedAllergies = uniqueText(allergies);
     const normalizedDiets = uniqueText(diets);
     const normalizedPantrySlugs = uniqueText(pantrySlugs);
+    const normalizedKitchenItems = equipmentIndex && typeof equipmentModel?.normalizeInventory === 'function'
+      ? Array.from(equipmentModel.normalizeInventory(kitchenItems, equipmentIndex))
+      : uniqueText(kitchenItems);
 
     return {
       activeView: 'meals',
@@ -452,7 +463,7 @@
       pantryInventory: Object.fromEntries(
         normalizedPantrySlugs.map((slug) => [slug, { quantity: '1', unit: 'each' }]),
       ),
-      kitchenInventory: uniqueText(kitchenItems),
+      kitchenInventory: normalizedKitchenItems,
       familyMembers: [
         {
           id: 'member_default',
