@@ -348,12 +348,13 @@
       || hasArrayEntries(state.mealPlanMemberFilter)
       || (typeof state.mealPlanMacroSelection === 'string' && state.mealPlanMacroSelection !== 'overall')
       || (typeof filters.search === 'string' && filters.search.trim() !== '')
-      || ['ingredients', 'ingredientsExcluded', 'tags', 'tagsExcluded', 'allergies', 'allergiesExcluded', 'equipment', 'equipmentExcluded', 'familyMembers']
+      || ['categories', 'ingredients', 'ingredientsExcluded', 'tags', 'tagsExcluded', 'allergies', 'allergiesExcluded', 'equipment', 'equipmentExcluded', 'familyMembers']
         .some((key) => hasArrayEntries(filters[key]))
       || Boolean(filters.favoritesOnly || filters.pantryOnly || filters.substitutionsAllowed)
       || (typeof pantryFilters.search === 'string' && pantryFilters.search.trim() !== '')
       || ['categories', 'tags', 'allergens'].some((key) => hasArrayEntries(pantryFilters[key]))
       || (typeof state.kitchenFilters?.search === 'string' && state.kitchenFilters.search.trim() !== '')
+      || hasArrayEntries(state.kitchenFilters?.categories)
       || hasCustomFamily
     );
   };
@@ -418,6 +419,7 @@
       activeView: 'meals',
       mealFilters: {
         search: '',
+        categories: [],
         ingredients: [],
         ingredientsExcluded: [],
         tags: normalizedDiets,
@@ -439,6 +441,7 @@
       },
       kitchenFilters: {
         search: '',
+        categories: [],
       },
       mealPlanViewMode: 'month',
       mealPlanMemberFilter: [],
