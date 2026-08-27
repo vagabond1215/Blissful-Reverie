@@ -229,6 +229,8 @@
   const entryMatchesSlug = (entry, slug, index) => {
     const matching = global.BlissfulMatching || {};
     if (!entry || !slug || !(index?.matchers instanceof Map)) return false;
+    const explicitToken = typeof entry.token === 'string' ? entry.token.trim() : '';
+    if (explicitToken) return explicitToken === slug;
     if (
       typeof matching.sanitizeComparisonText !== 'function'
       || typeof matching.buildTokenSet !== 'function'
