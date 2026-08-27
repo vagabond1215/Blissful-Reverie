@@ -7,9 +7,9 @@ const recipes = [
     name: 'Tomato Pasta',
     description: 'Fast pantry pasta.',
     tags: ['Weeknight'],
-    ingredients: [{ quantity: 8, unit: 'oz', item: 'Pasta' }],
+    ingredients: [{ token: 'pasta-spaghetti', quantity: 8, unit: 'oz', item: 'Pasta' }],
     instructions: ['Boil pasta.', 'Add sauce.'],
-    equipment: ['Saucepan'],
+    equipment: [{ token: 'saucepan' }],
     allergens: ['gluten'],
     nutritionPerServing: { calories: 420 },
   },
@@ -31,6 +31,7 @@ assert.equal(
 
 const model = preview.buildPreviewModel(recipes[0]);
 assert.equal(model.id, 'tomato-pasta');
+assert.equal(model.ingredients[0].token, 'pasta-spaghetti');
 assert.equal(model.ingredients[0].item, 'Pasta');
 assert.deepEqual(model.instructions, ['Boil pasta.', 'Add sauce.']);
 assert.deepEqual(model.equipment, ['Saucepan']);
