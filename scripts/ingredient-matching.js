@@ -591,6 +591,7 @@
   };
 
   const prepareEntry = (rawEntry) => ({
+    token: typeof rawEntry?.token === 'string' ? rawEntry.token.trim() : '',
     text: sanitizeComparisonText(rawEntry ? rawEntry.item : ''),
     tokens: buildTokenSet(rawEntry ? rawEntry.item : ''),
   });
@@ -600,7 +601,12 @@
     if (!entries.length) return matchedSlugs;
 
     entries.forEach((entry) => {
-      if (!entry || !(entry.tokens instanceof Set)) return;
+      if (!entry) return;
+      if (entry.token) {
+        if (index.matchers.has(entry.token)) matchedSlugs.add(entry.token);
+        return;
+      }
+      if (!(entry.tokens instanceof Set)) return;
       const candidateSlugs = new Set(index.slugsWithoutTokens);
       entry.tokens.forEach((token) => {
         const slugsForToken = index.tokenIndex.get(token);
