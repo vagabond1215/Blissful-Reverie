@@ -1,6 +1,14 @@
 ;(function (global) {
   const units = global.BlissfulInventoryUnits
     || (typeof require === 'function' ? require('./inventory-units-core.js') : {});
+  const equipmentModel = global.BlissfulEquipmentModel
+    || (typeof require === 'function' ? require('./equipment-model.js') : {});
+  const equipmentCatalog = Array.isArray(global.BLISSFUL_EQUIPMENT)
+    ? global.BLISSFUL_EQUIPMENT
+    : (typeof require === 'function' ? require('../data/equipment.js') : []);
+  const equipmentIndex = typeof equipmentModel.createIndex === 'function'
+    ? equipmentModel.createIndex(equipmentCatalog)
+    : null;
 
   const ADMISSION_VERSION = 1;
   const LEGACY_BASELINE_COUNTS = Object.freeze({ ingredients: 554, recipes: 314 });
@@ -117,7 +125,25 @@
     if (!finitePositive(recipe.baseServings)) add(errors, 'baseServings must be positive.');
     if (!Array.isArray(recipe.ingredients) || !recipe.ingredients.length) add(errors, 'at least one ingredient is required.');
     if (!Array.isArray(recipe.instructions) || !recipe.instructions.length) add(errors, 'at least one instruction is required.');
-    if (!Array.isArray(recipe.equipment)) add(errors, 'equipment must be an array.');
+    if (!Array.isArray(recipe.equipment)) {
+      add(errors, 'equipment must be an array.');
+    } else if (equipmentIndex && typeof equipmentModel.getRequirementTokens === 'function') {
+      recipe.equipment.forEach((requirement, index) => {
+        if (!requirement || typeof requirement !== 'object' || Array.isArray(requirement)) {
+          add(errors, `equipment ${index + 1} must use canonical token references.`);
+          return;
+        }
+        const tokens = equipmentModel.getRequirementTokens(requirement, equipmentIndex);
+        const expected = typeof requirement.token === 'string'
+          ? 1
+          : Array.isArray(requirement.anyOf)
+            ? requirement.anyOf.length
+            : 0;
+        if (!expected || tokens.length !== expected) {
+          add(errors, `equipment ${index + 1} contains an unknown equipment token.`);
+        }
+      });
+    }
     if (!Array.isArray(recipe.tags)) add(errors, 'tags must be an array.');
     if (!Array.isArray(recipe.allergens)) add(errors, 'allergens must be an array.');
 
@@ -135,6 +161,8 @@
         return;
       }
       if (!clean(entry.item)) add(errors, `${ref} must include an item name.`);
+      const token = clean(entry.token);
+      if (!slugPattern.test(token)) add(errors, `${ref} must include a lowercase kebab-case token.`);
 
       const hasQuantity = entry.quantity !== undefined && entry.quantity !== null && entry.quantity !== '';
       if (hasQuantity) {
@@ -148,9 +176,11 @@
       }
       if (entry.unit !== undefined && typeof entry.unit !== 'string') add(errors, `${ref} unit must be a string when provided.`);
 
-      if (clean(entry.item) && Array.isArray(ingredients) && ingredients.length) {
-        const slug = matchRecipeEntry(entry, ingredients, matching);
-        if (!slug) add(errors, `${ref} '${entry.item}' does not resolve to a canonical ingredient.`);
+      if (token && Array.isArray(ingredients) && ingredients.length) {
+        const ingredientTokens = new Set(ingredients.map((ingredient) => clean(ingredient?.slug)).filter(Boolean));
+        if (!ingredientTokens.has(token)) {
+          add(errors, `${ref} token '${token}' does not resolve to a canonical ingredient.`);
+        }
       }
     });
 
