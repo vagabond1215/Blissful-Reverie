@@ -42,14 +42,15 @@ A new curated recipe is admitted only when all hard checks pass:
 - unique id and case-insensitive recipe name
 - positive `baseServings`
 - at least one ingredient and at least one instruction
-- every ingredient line has a non-empty item name, non-negative quantity, and string unit when provided
+- every ingredient line has a non-empty item name, stable lowercase kebab-case `token`, non-negative quantity, and string unit when provided
+- every net-new curated ingredient-line token resolves directly to a canonical ingredient slug; identity is not admitted from display-text inference
 - every quantified unit must be recognized by the inventory unit parser, or be explicitly treated as an unquantified/free-form preparation line
-- every ingredient line must resolve to at least one canonical ingredient after specificity matching
+- every equipment requirement references canonical equipment tokens from `data/equipment.js` using `{ token }` or an explicit `{ anyOf: [...] }` alternative set
 - equipment, tags, allergens, and nutrition fields satisfy the canonical schema
 - allergen values use the canonical allergen vocabulary
 - full catalog validation and tests must remain green
 
-Canonical matching is an admission requirement because shopping, Pantry consumption, crafting, and restock calculations depend on ingredient identity.
+Canonical token identity is an admission requirement because shopping, Pantry consumption, crafting, and restock calculations depend on deterministic ingredient/equipment identity. Text matching remains a legacy compatibility path, not the authority for newly admitted catalog data.
 
 ## User-created/custom ingredients
 
