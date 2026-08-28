@@ -6212,7 +6212,7 @@
 
     if (elements.ingredientSummary) {
       elements.ingredientSummary.textContent =
-        isMealsView || isPantryView || isKitchenView ? 'Categories' : '';
+        isMealsView ? 'Ingredients' : (isPantryView || isKitchenView ? 'Categories' : '');
     }
     if (elements.tagSummary) {
       elements.tagSummary.textContent = isKitchenView ? '' : 'Tags';
