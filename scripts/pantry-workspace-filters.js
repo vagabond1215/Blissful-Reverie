@@ -16,7 +16,7 @@
 
   const CONFIGS = {
     meals: [
-      ['categories', 'ingredient-section', 'ingredient-options', 'ingredient-summary', 'Categories'],
+      ['categories', 'ingredient-section', 'ingredient-options', 'ingredient-summary', 'Ingredients'],
       ['tags', 'tag-section', 'tag-options', 'tag-summary', 'Tags'],
       ['allergens', 'allergy-section', 'allergy-options', 'allergy-summary', 'Allergens'],
       ['equipment', 'equipment-section', 'equipment-options', 'equipment-summary', 'Equipment'],
