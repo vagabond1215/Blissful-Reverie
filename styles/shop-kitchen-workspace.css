@@ -156,8 +156,21 @@ body.shop-view-active #page-action-bar {
 .kitchen-equipment-group {
   list-style: none;
   margin: 0;
-  padding: 0.2rem 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--border, #d8d0c4) 72%, transparent);
+  padding: 0;
+  border: 0;
+  background: color-mix(in srgb, var(--surface-muted, #f4eee6) 68%, transparent);
+}
+
+#kitchen-list > .kitchen-list__item + .kitchen-list__item {
+  border-top: 0;
+}
+
+#kitchen-list > :is(.kitchen-list__item, .kitchen-equipment-group) {
+  border-top: 1px solid color-mix(in srgb, var(--border, #d8d0c4) 72%, transparent);
+}
+
+#kitchen-list > :is(.kitchen-list__item, .kitchen-equipment-group):first-child {
+  border-top: 0;
 }
 
 .kitchen-equipment-group__head {
@@ -178,8 +191,8 @@ body.shop-view-active #page-action-bar {
 }
 
 .kitchen-equipment-group__label {
-  min-height: 2.65rem;
-  padding: 0.3rem 0;
+  min-height: 0;
+  padding: 0.9rem 0;
   gap: 0.75rem;
   font-weight: 760;
 }
