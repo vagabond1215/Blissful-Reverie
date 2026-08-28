@@ -37,6 +37,15 @@ html.standard-filter-workspace-active .pantry-workspace__filter-card {
   overflow: visible !important;
 }
 
+/* Recipes and Kitchen use the Pantry rail geometry without card chrome. */
+html.standard-filter-workspace-active:not(.pantry-workspace-active) .pantry-workspace__filter-card {
+  padding: 0 4px 10px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
 html.standard-filter-workspace-active .pantry-workspace__filter-card > summary {
   min-height: 44px;
   display: flex !important;
@@ -45,9 +54,17 @@ html.standard-filter-workspace-active .pantry-workspace__filter-card > summary {
   margin: 0 !important;
   padding: 0 !important;
   list-style: none;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
   color: var(--text, #16191d);
   font-size: 0.95rem;
   font-weight: 750;
+}
+
+html.standard-filter-workspace-active .pantry-workspace__filter-card > summary::marker {
+  content: '';
 }
 
 html.standard-filter-workspace-active .pantry-workspace__filter-card > summary::-webkit-details-marker {
@@ -55,15 +72,22 @@ html.standard-filter-workspace-active .pantry-workspace__filter-card > summary::
 }
 
 html.standard-filter-workspace-active .pantry-workspace__filter-card > summary::after {
-  content: '⌃';
+  content: '';
+  order: 3;
+  flex: 0 0 0.52rem;
+  width: 0.52rem;
+  height: 0.52rem;
   margin-left: auto;
+  border: 0 !important;
+  border-right: 1.5px solid currentColor !important;
+  border-bottom: 1.5px solid currentColor !important;
   color: var(--text-muted, #59616b);
-  font-size: 0.82rem;
-  font-weight: 700;
+  transform: rotate(45deg) !important;
+  transition: transform 120ms ease;
 }
 
-html.standard-filter-workspace-active .pantry-workspace__filter-card:not([open]) > summary::after {
-  content: '⌄';
+html.standard-filter-workspace-active .pantry-workspace__filter-card[open] > summary::after {
+  transform: rotate(-135deg) !important;
 }
 
 html.standard-filter-workspace-active .pantry-workspace__all-button {
